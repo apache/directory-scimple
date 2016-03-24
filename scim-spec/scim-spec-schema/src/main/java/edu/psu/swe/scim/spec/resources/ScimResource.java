@@ -1,5 +1,8 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import edu.psu.swe.scim.spec.schema.BaseResource;
 import edu.psu.swe.scim.spec.schema.Meta;
+import edu.psu.swe.scim.spec.validator.Urn;
 
 /**
  * This class defines the attributes shared by all SCIM resources.  It also
@@ -30,6 +34,10 @@ public abstract class ScimResource extends BaseResource {
   
   @XmlElement
   String externalId;
+  
+  
+  private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
+
 
   /**
    * @return the meta
