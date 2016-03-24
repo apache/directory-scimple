@@ -3,6 +3,7 @@ package edu.psu.swe.scim.spec.protocol;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -114,6 +115,23 @@ public interface UserResource {
       @ApiResponse(code=501, message="Not Implemented")
     })
   default Response findUsers(SearchRequest request){
+    return Response.status(Status.NOT_IMPLEMENTED).build();
+  }
+  
+  /**
+   * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.5.1">Scim spec, update user</a>
+   * @return
+   */
+  @PUT
+  @Consumes("application/scim+json")
+  @Produces("application/scim+json")
+  @ApiOperation(value="Update a user", response=ScimUser.class, code=200)
+  @ApiResponses(value={
+      @ApiResponse(code=400, message="Bad Request"),
+      @ApiResponse(code=500, message="Internal Server Error"),
+      @ApiResponse(code=501, message="Not Implemented")
+    })
+  default Response updateUser(ScimUser user) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }
