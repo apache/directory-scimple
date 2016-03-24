@@ -7,6 +7,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+//@formatter:off
 /**
  * From SCIM Protocol Specification, section 3, page 9
  * 
@@ -23,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
  * @author shawn
  *
  */
+//@formatter:on
 
 @Path("Users")
 public interface UserResource {
@@ -42,7 +44,12 @@ public interface UserResource {
    * @return
    */
   @GET
-  default Response queryForUsers(@QueryParam("attributes") String attributes, @QueryParam("filter") String filter) {
+  default Response queryForUsers(@QueryParam("attributes") String attributes, 
+                                 @QueryParam("filter") String filter,
+                                 @QueryParam("sortBy") String sortBy,
+                                 @QueryParam("sortOrder") String sortOrder,
+                                 @QueryParam("startIndex") Integer startIndex,
+                                 @QueryParam("count") Integer count) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   
