@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.jaxrs.PATCH;
 
 //@formatter:off
 /**
@@ -132,6 +133,11 @@ public interface UserResource {
       @ApiResponse(code=501, message="Not Implemented")
     })
   default Response updateUser(ScimUser user) {
+    return Response.status(Status.NOT_IMPLEMENTED).build();
+  }
+  
+  @PATCH
+  default public Response patchUsers() {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

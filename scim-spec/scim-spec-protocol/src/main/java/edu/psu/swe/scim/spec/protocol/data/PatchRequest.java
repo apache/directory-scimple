@@ -15,19 +15,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class ListResponse extends BaseResource {
-
-  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
-
-  @XmlElement
-  int totalResults;
+public class PatchRequest extends BaseResource {
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
+  
+  public PatchRequest() {
+    
+  }
   
   @XmlElement
-  int startIndex;
-  
-  @XmlElement
-  int itemsPerPage;
-
-  @XmlElement(name = "Resources")
-  List<Object> resources;
+  List<PatchOperation> patchOperationList;
 }
