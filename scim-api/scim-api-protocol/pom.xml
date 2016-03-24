@@ -7,4 +7,10 @@
   </parent>
   <artifactId>scim-api-protocol</artifactId>
   <name>SCIM - API - Protocol</name>
+  <dependencies>
+  	<dependency>
+  		<groupId>javax</groupId>
+  		<artifactId>javaee-api</artifactId>
+  	</dependency>
+  </dependencies>
 </project>
