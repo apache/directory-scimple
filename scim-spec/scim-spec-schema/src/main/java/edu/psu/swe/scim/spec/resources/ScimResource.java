@@ -28,6 +28,7 @@ public abstract class ScimResource extends BaseResource {
   @NotNull
   Meta meta;
   
+  @Urn
   @XmlElement
   @Size(min = 1, max = 65535)
   String id;

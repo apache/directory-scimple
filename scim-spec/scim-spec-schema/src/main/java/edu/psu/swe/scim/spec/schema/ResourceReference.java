@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import lombok.Data;
 
 @Data
-@XmlType
+@XmlType(propOrder = {"value","ref","display"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class ResourceReference {
 

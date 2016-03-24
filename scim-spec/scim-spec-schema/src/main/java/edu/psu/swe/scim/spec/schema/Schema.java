@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import edu.psu.swe.scim.spec.validator.Urn;
+
 /**
  * Defines the structure of the SCIM schemas as defined by section 7 of the SCIM
  * schema specification. See
@@ -22,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Schema {
 
+  @Urn
   @NotNull
   @Size(min = 1, max = 65535)
   @XmlElement
