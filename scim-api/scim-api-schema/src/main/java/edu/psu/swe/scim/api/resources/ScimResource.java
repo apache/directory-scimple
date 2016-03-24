@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.api.schema;
+package edu.psu.swe.scim.api.resources;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -6,6 +6,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import edu.psu.swe.scim.api.schema.BaseResource;
+import edu.psu.swe.scim.api.schema.Meta;
 
 /**
  * This class defines the attributes shared by all SCIM resources.  It also
