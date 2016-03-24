@@ -92,5 +92,6 @@
   
   <modules>
   	<module>scim-api</module>
+  	<module>scim-tools</module>
   </modules>
 </project>
