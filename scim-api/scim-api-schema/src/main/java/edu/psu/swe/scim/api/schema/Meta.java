@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import lombok.Data;
+
 /**
  * Defines the structure of the meta attribute for all SCIM resources as defined
  * by section 3.1 of the SCIM schema specification. See
@@ -18,6 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "meta")
 @XmlAccessorType(XmlAccessType.NONE)
+@Data
 public class Meta {
   
   @XmlElement
@@ -37,75 +40,5 @@ public class Meta {
   
   @XmlElement
   String version;
-
-  /**
-   * @return the resourceType
-   */
-  public String getResourceType() {
-    return resourceType;
-  }
-
-  /**
-   * @param resourceType the resourceType to set
-   */
-  public void setResourceType(String resourceType) {
-    this.resourceType = resourceType;
-  }
-
-  /**
-   * @return the created
-   */
-  public Date getCreated() {
-    return created;
-  }
-
-  /**
-   * @param created the created to set
-   */
-  public void setCreated(Date created) {
-    this.created = created;
-  }
-
-  /**
-   * @return the lastModified
-   */
-  public Date getLastModified() {
-    return lastModified;
-  }
-
-  /**
-   * @param lastModified the lastModified to set
-   */
-  public void setLastModified(Date lastModified) {
-    this.lastModified = lastModified;
-  }
-
-  /**
-   * @return the location
-   */
-  public String getLocation() {
-    return location;
-  }
-
-  /**
-   * @param location the location to set
-   */
-  public void setLocation(String location) {
-    this.location = location;
-  }
-
-  /**
-   * @return the version
-   */
-  public String getVersion() {
-    return version;
-  }
-
-  /**
-   * @param version the version to set
-   */
-  public void setVersion(String version) {
-    this.version = version;
-  }
 
 }

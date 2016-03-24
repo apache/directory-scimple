@@ -1,7 +1,5 @@
 package edu.psu.swe.scim.api.schema;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,11 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class Resource {
-  
-  @XmlElement
-  @Size(min = 1)
-  List<Schema> schemas;
+public abstract class ScimResource extends BaseResource {
   
   @XmlElement
   @NotNull
@@ -33,20 +27,6 @@ public abstract class Resource {
   
   @XmlElement
   String externalId;
-
-  /**
-   * @return the schemas
-   */
-  public List<Schema> getSchemas() {
-    return schemas;
-  }
-
-  /**
-   * @param schemas the schemas to set
-   */
-  public void setSchemas(List<Schema> schemas) {
-    this.schemas = schemas;
-  }
 
   /**
    * @return the meta
