@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.spec.protocol;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -9,6 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,7 +66,7 @@ public interface UserResource {
    */
   @GET
   @Produces("application/scim+json")
-  @ApiOperation(value="Find users by a combination of query parameters", response=ScimUser.class, code=200)
+  @ApiOperation(value="Find users by a combination of query parameters", response=ScimUser.class, responseContainer="List", code=200)
   @ApiResponses(value={
                   @ApiResponse(code=400, message="Bad Request"),
                   @ApiResponse(code=404, message="Not found"),
@@ -85,6 +87,8 @@ public interface UserResource {
    * @return
    */
   @POST
+  @Consumes("application/scim+json")
+  @Produces("application/scim+json")
   @ApiOperation(value="Create a user", response=ScimUser.class, code=201)
   @ApiResponses(value={
       @ApiResponse(code=400, message="Bad Request"),
@@ -96,4 +100,20 @@ public interface UserResource {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   
+  /**
+   * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.4.3">Scim spec, query with post</a>
+   * @return
+   */
+  @POST
+  @Path("/.search")
+  @Produces("application/scim+json")
+  @ApiOperation(value="Search for users", response=ScimUser.class, responseContainer="List", code=200)
+  @ApiResponses(value={
+      @ApiResponse(code=400, message="Bad Request"),
+      @ApiResponse(code=500, message="Internal Server Error"),
+      @ApiResponse(code=501, message="Not Implemented")
+    })
+  default Response findUsers(SearchRequest request){
+    return Response.status(Status.NOT_IMPLEMENTED).build();
+  }
 }
