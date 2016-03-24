@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import edu.psu.swe.scim.spec.schema.ResourceReference;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -43,66 +44,66 @@ public class ScimUser extends ScimResource {
   public static final String SCHEMAURI = "urn:ietf:params:scim:schemas:core:2.0:User";
 
   @XmlElement(name = "active")
-  private boolean active_ = true;
+  boolean active = true;
   
 //  @XmlElement(name = "addresses")
-//  private List<ScimAddress> addresses_;
+//  List<ScimAddress> addresses;
   
   @XmlElement(name = "displayName")
-  private String displayName_;
+  String displayName;
   
 //  @XmlElement(name = "emails")
-//  private List<ScimEmail> emails_;
+//  List<ScimEmail> emails;
   
 //  @XmlElement(name = "entitlements")
-//  private List<ScimEntitlement> entitlements_;
+//  List<ScimEntitlement> entitlements;
   
   @XmlElement(name = "groups")
-  private List<ScimGroup> groups_;
+  List<ResourceReference> groups;
   
 //  @XmlElement(name = "ims")
-//  private List<ScimIm> ims_;
+//  List<ScimIm> ims;
   
   @XmlElement(name = "locale")
-  private String locale_;
+  String locale;
   
-//  @XmlElement(name = "name")
-//  private ScimName name_;
+  @XmlElement(name = "name")
+  Name name;
   
   @XmlElement(name = "nickName")
-  private String nickName_;
+  String nickName;
   
   @XmlElement(name = "password")
-  private String password_;
+  String password;
   
 //  @XmlElement(name = "phoneNumbers")
-//  private List<ScimPhoneNumber> phoneNumbers_;
+//  List<ScimPhoneNumber> phoneNumbers;
   
 //  @XmlElement(name = "photos")
-//  private List<ScimPhoto> photos_;
+//  List<ScimPhoto> photos;
 
   @XmlElement(name = "profileUrl")
-  private String profileUrl_;
+  String profileUrl;
   
   @XmlElement(name = "preferredLanguage")
-  private String preferredLanguage_;
+  String preferredLanguage;
   
 //  @XmlElement(name = "roles")
-//  private List<ScimRole> roles_;
+//  List<ScimRole> roles;
   
   @XmlElement(name = "timezone")
-  private String timezone_;
+  String timezone;
   
   @XmlElement(name = "title")
-  private String title_;
+  String title;
   
   @XmlElement(name = "userName")
-  private String userName_;
+  String userName;
   
   @XmlElement(name = "userType")
-  private String userType_;
+  String userType;
   
 //  @XmlElement(name = "x509Certificates")
-//  private List<ScimX509Certificate> x509Certificates_;
+//  List<ScimX509Certificate> x509Certificates;
 
 }
