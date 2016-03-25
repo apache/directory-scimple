@@ -17,10 +17,10 @@
 
   <modules>
     <module>scim-client</module>
-    <module>scim-providers</module>
     <module>scim-server</module>
     <module>scim-spec</module>
     <module>scim-tools</module>
+    <module>scim-compliance</module>
   </modules>
   
 	<dependencyManagement>

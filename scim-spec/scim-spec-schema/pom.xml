@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>scim-spec-schema</artifactId>
-  <name>SCIM - Specification - SCHEMA</name>
+  <name>SCIM - Specification - Schema</name>
   
   <dependencies>
     <dependency>
