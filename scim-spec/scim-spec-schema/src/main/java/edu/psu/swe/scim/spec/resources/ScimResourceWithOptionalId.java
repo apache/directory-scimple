@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import edu.psu.swe.scim.spec.schema.Meta;
 import edu.psu.swe.scim.spec.validator.Urn;
 
@@ -23,21 +24,12 @@ import edu.psu.swe.scim.spec.validator.Urn;
  * @author smoyer1
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class ScimResource extends BaseResource {
-
-  @XmlElement
-  @NotNull
-  Meta meta;
+public abstract class ScimResourceWithOptionalId extends ScimResource {
   
   @XmlElement
-  @Size(min = 1, max = 65535)
   String id;
   
-  @XmlElement
-  String externalId;
-  
-  private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
-
 }

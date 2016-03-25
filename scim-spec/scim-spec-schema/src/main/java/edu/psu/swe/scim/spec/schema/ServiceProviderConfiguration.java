@@ -6,9 +6,11 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
+
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class ServiceProviderConfiguration extends BaseResource {
+public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
   

@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import edu.psu.swe.scim.spec.schema.BaseResource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import edu.psu.swe.scim.spec.resources.BaseResource;
 
 /**
  * See Section 3.4.3 Querying Resources Using HTTP POST
