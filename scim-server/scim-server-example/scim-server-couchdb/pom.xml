@@ -7,9 +7,13 @@
   </parent>
   <artifactId>scim-server-couchdb</artifactId>
   <name>SCIM - Server - CouchDB</name>
-  
+  <packaging>war</packaging>
+
   <dependencies>
-    
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+    </dependency>
   </dependencies>
-  
+
 </project>

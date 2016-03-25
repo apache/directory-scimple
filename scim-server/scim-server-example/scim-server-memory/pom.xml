@@ -7,9 +7,13 @@
   </parent>
   <artifactId>scim-server-memory</artifactId>
   <name>SCIM - Server - Memory</name>
-  
+  <packaging>war</packaging>
+
   <dependencies>
-    
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+    </dependency>
   </dependencies>
-  
+
 </project>
