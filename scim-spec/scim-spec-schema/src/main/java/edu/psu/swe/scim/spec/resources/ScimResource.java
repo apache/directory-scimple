@@ -25,13 +25,8 @@ import edu.psu.swe.scim.spec.validator.Urn;
 @Data
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class ScimResource {
-  
-  @XmlElement(name="schemas")
-  @Size(min = 1)
-  @Urn
-  List<String> schemaUrnList;
-  
+public abstract class ScimResource extends BaseResource {
+
   @XmlElement
   @NotNull
   Meta meta;
@@ -43,14 +38,6 @@ public abstract class ScimResource {
   @XmlElement
   String externalId;
   
-  
   private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
 
-  public void addSchema(String urn) {
-    if (schemaUrnList == null){
-      schemaUrnList = new ArrayList<>();
-    }
-    
-    schemaUrnList.add(urn);
-  }
 }

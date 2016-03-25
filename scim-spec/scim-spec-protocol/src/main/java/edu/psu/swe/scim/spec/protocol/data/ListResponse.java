@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import edu.psu.swe.scim.spec.schema.BaseResource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import edu.psu.swe.scim.spec.resources.BaseResource;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
