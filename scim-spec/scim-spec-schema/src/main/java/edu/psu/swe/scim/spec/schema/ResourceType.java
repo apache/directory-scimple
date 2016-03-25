@@ -39,12 +39,14 @@ public class ResourceType extends ScimResourceWithOptionalId {
   }
 
   @XmlElement
+  @Size(min = 1)
   String name;
 
   @XmlElement
   String description;
 
   @XmlElement
+  @Size(min = 1)
   String endpoint;
 
   @XmlElement(name = "schema")
