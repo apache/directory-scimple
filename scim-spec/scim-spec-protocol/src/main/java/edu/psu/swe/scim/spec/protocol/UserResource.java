@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.spec.protocol;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -137,7 +138,29 @@ public interface UserResource {
   }
   
   @PATCH
+  @Consumes("application/scim+json")
+  @Produces("application/scim+json")
+  @ApiOperation(value="Patch a portion of the backing store", code=204)
+  @ApiResponses(value={
+      @ApiResponse(code=400, message="Bad Request"),
+      @ApiResponse(code=404, message="Not found"),
+      @ApiResponse(code=500, message="Internal Server Error"),
+      @ApiResponse(code=501, message="Not Implemented")
+    })
   default public Response patchUsers() {
+    return Response.status(Status.NOT_IMPLEMENTED).build();
+  }
+  
+  @DELETE
+  @Path("{id}")
+  @ApiOperation(value="Delete a user from the backing store", code=204)
+  @ApiResponses(value={
+      @ApiResponse(code=400, message="Bad Request"),
+      @ApiResponse(code=404, message="Not found"),
+      @ApiResponse(code=500, message="Internal Server Error"),
+      @ApiResponse(code=501, message="Not Implemented")
+    })
+  default public Response deleteUser(@ApiParam(value="id", required=true) @PathParam("id") String id){
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }
