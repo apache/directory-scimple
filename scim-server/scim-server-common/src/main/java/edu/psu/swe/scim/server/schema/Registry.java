@@ -13,10 +13,6 @@ import javax.annotation.PostConstruct;
 import javax.ejb.PostActivate;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
