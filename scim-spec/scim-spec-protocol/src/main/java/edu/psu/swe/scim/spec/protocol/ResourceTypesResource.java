@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.protocol;
 
+import io.swagger.annotations.Api;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -33,6 +35,7 @@ import javax.ws.rs.core.Response.Status;
  */
 
 @Path("ResourceTypes")
+@Api("Configuration")
 public interface ResourceTypesResource {
 
   @GET
