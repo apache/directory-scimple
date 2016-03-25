@@ -16,6 +16,7 @@ import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,12 +51,12 @@ public class SchemaTest {
    */
   @Test
   @Parameters({
-      "schemas/user-schema.json",
-      "schemas/group-schema.json",
-      "schemas/resource-type-schema.json",
+      "schemas/urn:ietf:params:scim:schemas:core:2.0:User.json",
+      "schemas/urn:ietf:params:scim:schemas:core:2.0:Group.json",
+      "schemas/urn:ietf:params:scim:schemas:core:2.0:ResourceType.json",
       "schemas/schema-schema.json",
-      "schemas/service-provider-configuration-schema.json",
-      "schemas/enterprise-user-schema.json"
+      "schemas/urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig.json",
+      "schemas/urn:ietf:params:scim:schemas:extension:enterprise:2.0:User.json"
   })
   public void testUnmarshallingProvidedSchemas(String schemaFileName) {
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -97,41 +98,49 @@ public class SchemaTest {
     }
   }
 
+  @Ignore
   @Test
   public void testGetId() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testSetId() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testGetName() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testSetName() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testGetDescription() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testSetDescription() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testGetAttributes() {
     fail("Not yet implemented");
   }
 
+  @Ignore
   @Test
   public void testSetAttributes() {
     fail("Not yet implemented");

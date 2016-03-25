@@ -7,4 +7,15 @@
   </parent>
   <artifactId>scim-tools-common</artifactId>
   <name>SCIM - Tools - Common</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>pl.pragmatists</groupId>
+      <artifactId>JUnitParams</artifactId>
+    </dependency>
+  </dependencies>
 </project>
