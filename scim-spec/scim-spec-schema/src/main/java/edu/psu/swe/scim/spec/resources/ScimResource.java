@@ -1,6 +1,8 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -10,7 +12,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import edu.psu.swe.scim.spec.schema.BaseResource;
+import lombok.Data;
 import edu.psu.swe.scim.spec.schema.Meta;
 import edu.psu.swe.scim.spec.validator.Urn;
 
@@ -20,15 +22,20 @@ import edu.psu.swe.scim.spec.validator.Urn;
  * 
  * @author smoyer1
  */
+@Data
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class ScimResource extends BaseResource {
+public abstract class ScimResource {
+  
+  @XmlElement(name="schemas")
+  @Size(min = 1)
+  @Urn
+  List<String> schemaUrnList;
   
   @XmlElement
   @NotNull
   Meta meta;
   
-  @Urn
   @XmlElement
   @Size(min = 1, max = 65535)
   String id;
@@ -39,47 +46,11 @@ public abstract class ScimResource extends BaseResource {
   
   private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
 
-
-  /**
-   * @return the meta
-   */
-  public Meta getMeta() {
-    return meta;
+  public void addSchema(String urn) {
+    if (schemaUrnList == null){
+      schemaUrnList = new ArrayList<>();
+    }
+    
+    schemaUrnList.add(urn);
   }
-
-  /**
-   * @param meta the meta to set
-   */
-  public void setMeta(Meta meta) {
-    this.meta = meta;
-  }
-
-  /**
-   * @return the id
-   */
-  public String getId() {
-    return id;
-  }
-
-  /**
-   * @param id the id to set
-   */
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * @return the externalId
-   */
-  public String getExternalId() {
-    return externalId;
-  }
-
-  /**
-   * @param externalId the externalId to set
-   */
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
-  }
-
 }
