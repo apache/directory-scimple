@@ -19,4 +19,9 @@ public class BulkResponse {
   @XmlElement(name = "Operations")
   List<BulkOperation> operations;
 
+  @XmlElement(name="status", nillable=true)
+  String status;
+  
+  @XmlElement(name="response", nillable=true)
+  ErrorResponse errorResponse;
 }
