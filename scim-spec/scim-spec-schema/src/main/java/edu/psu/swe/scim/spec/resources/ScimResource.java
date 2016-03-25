@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import edu.psu.swe.scim.spec.schema.Meta;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * This class defines the attributes shared by all SCIM resources.  It also
@@ -19,6 +20,7 @@ import lombok.Data;
  * @author smoyer1
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResource extends BaseResource {
 

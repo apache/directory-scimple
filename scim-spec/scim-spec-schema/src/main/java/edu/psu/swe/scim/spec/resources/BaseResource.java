@@ -11,6 +11,13 @@ import javax.xml.bind.annotation.XmlElement;
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 
+/**
+ * All the different variations of SCIM responses require that the object
+ * contains a list of the schemas it conforms to.
+ * 
+ * @author crh5255
+ *
+ */
 @Data
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class BaseResource {
