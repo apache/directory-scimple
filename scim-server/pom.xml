@@ -10,8 +10,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>scim-server-common</module>
-  	<module>scim-server-rdbms</module>
-  	<module>scim-server-couchdb</module>
-  	<module>scim-server-memory</module>
+  	<module>scim-server-example</module>
   </modules>
 </project>
