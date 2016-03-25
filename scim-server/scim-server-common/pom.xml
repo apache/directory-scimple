@@ -7,11 +7,18 @@
   </parent>
   <artifactId>scim-server</artifactId>
   <name>SCIM - Server</name>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>scim-server-common</module>
-  	<module>scim-server-rdbms</module>
-  	<module>scim-server-couchdb</module>
-  	<module>scim-server-memory</module>
-  </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>scim-spec-protocol</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <packaging>war</packaging>
 </project>
