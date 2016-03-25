@@ -8,9 +8,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import edu.psu.swe.scim.spec.protocol.adapters.SchemaToStringListAdapter;
+import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 
 /**
@@ -24,17 +23,17 @@ import lombok.Data;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class BaseResource {
   
-  @XmlElement
+  @XmlElement(name="schemas")
   @Size(min = 1)
-  @XmlJavaTypeAdapter(SchemaToStringListAdapter.class)
-  List<Schema> schemas;
+  @Urn
+  List<String> schemaUrnList;
   
-  public void addSchema(Schema schema) {
-    if (schemas == null){
-      schemas = new ArrayList<>();
+  public void addSchema(String urn) {
+    if (schemaUrnList == null){
+      schemaUrnList = new ArrayList<>();
     }
     
-    schemas.add(schema);
+    schemaUrnList.add(urn);
   }
   
 }
