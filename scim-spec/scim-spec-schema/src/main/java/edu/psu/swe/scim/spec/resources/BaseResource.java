@@ -7,14 +7,13 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
 
-import lombok.Data;
 import edu.psu.swe.scim.spec.validator.Urn;
+import lombok.Data;
+
 @Data
-@XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-public class BaseResource {
+public abstract class BaseResource {
 
   @XmlElement(name="schemas")
   @Size(min = 1)
