@@ -21,6 +21,7 @@
     <module>scim-spec</module>
     <module>scim-tools</module>
     <module>scim-compliance</module>
+    <module>scim-common</module>
   </modules>
   
 	<dependencyManagement>
