@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
-import edu.psu.swe.scim.server.provider.UserProvider;
 import edu.psu.swe.scim.spec.protocol.UserResource;
 import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
@@ -25,13 +25,13 @@ public class UserResourceImpl implements UserResource {
 	
 	@Override
 	public Response getById(String id, String attributes) {
-        UserProvider provider = null;
+        Provider<ScimUser> provider = null;
         
 		if ((provider = providerRegistry.getUserProfider()) == null){
 		  return UserResource.super.getById(id, attributes);
 		}
 		
-		ScimUser user = provider.getUser(id);
+		ScimUser user = provider.get(id);
 		
 		//TODO - Handle attributes
 		
@@ -55,13 +55,13 @@ public class UserResourceImpl implements UserResource {
 	@Override
 	public Response create(ScimUser resource) {
         
-		UserProvider provider = null;
+		Provider<ScimUser> provider = null;
         
 		if ((provider = providerRegistry.getUserProfider()) == null){
 			return UserResource.super.create(resource);
 		}
 		
-		ScimUser user = provider.createUser(resource);
+		ScimUser user = provider.create(resource);
 		
 		return Response.status(Status.CREATED).entity(user).build();
 	}
@@ -75,13 +75,13 @@ public class UserResourceImpl implements UserResource {
 	@Override
 	public Response update(ScimUser resource) {
         
-		UserProvider provider = null;
+		Provider<ScimUser> provider = null;
         
 		if ((provider = providerRegistry.getUserProfider()) == null){
 		  return UserResource.super.update(resource);
 		}
 		
-		ScimUser user = provider.updateUser(resource);
+		ScimUser user = provider.update(resource);
 		
 		return Response.ok(user).build();
 	}
