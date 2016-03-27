@@ -3,12 +3,12 @@ package edu.psu.swe.scim.server.provider;
 import java.util.List;
 
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
-import edu.psu.swe.scim.spec.resources.ScimGroup;
+import edu.psu.swe.scim.spec.resources.ScimUser;
 
 public interface UserProvider {
-  public void createGroup(ScimGroup scimGroup);
-  public void updateGroup(ScimGroup scimGroup);
-  public void getGroup(String id);
-  public void deleteGroup(String id);
-  public List<ScimGroup> findGroups(SearchRequest request);
+  public void createUser(ScimUser scimGroup);
+  public void updateUser(ScimUser scimGroup);
+  public void getUser(String id);
+  public void deleteUser(String id);
+  public List<ScimUser> findGroups(SearchRequest request);
 }
