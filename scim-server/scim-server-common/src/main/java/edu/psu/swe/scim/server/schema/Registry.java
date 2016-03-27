@@ -36,7 +36,7 @@ public class Registry {
     return urnMap.get(urn);
   }
   
-  public List<String> getAllSchemas(){
+  public List<String> getAllSchemaUrns(){
     return new ArrayList<String>(urnMap.values());
   }
   

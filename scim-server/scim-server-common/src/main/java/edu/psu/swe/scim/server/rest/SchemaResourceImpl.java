@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.server.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,9 +24,16 @@ public class SchemaResourceImpl implements SchemaResource {
     }
     
     ListResponse response = new ListResponse();
-    List<String> schemas = registry.getAllSchemas();
+    List<String> schemas = registry.getAllSchemaUrns();
     
-    return Response.status(Status.NOT_IMPLEMENTED).build();
+    response.setItemsPerPage(schemas.size());
+    response.setStartIndex(0);
+    response.setTotalResults(schemas.size());
+    
+    List<Object> objectList = new ArrayList<>(schemas);
+    response.setResources(objectList);
+    
+    return Response.ok(response).build();
   }
 
   @Override
