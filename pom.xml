@@ -21,6 +21,7 @@
     <module>scim-spec</module>
     <module>scim-tools</module>
     <module>scim-compliance</module>
+    <module>scim-common</module>
   </modules>
   
 	<dependencyManagement>
@@ -96,6 +97,26 @@
 				<artifactId>slf4j-simple</artifactId>
 				<version>1.7.12</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>edu.psu.swe.scim</groupId>
+				<artifactId>scim-spec-protocol</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>edu.psu.swe.scim</groupId>
+				<artifactId>scim-spec-schema</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>edu.psu.swe.scim</groupId>
+				<artifactId>scim-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>edu.psu.swe.scim</groupId>
+				<artifactId>scim-tools-common</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
