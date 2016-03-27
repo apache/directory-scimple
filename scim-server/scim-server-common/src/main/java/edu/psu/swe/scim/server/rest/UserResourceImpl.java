@@ -54,8 +54,16 @@ public class UserResourceImpl implements UserResource {
 
 	@Override
 	public Response create(ScimUser resource) {
-		// TODO Auto-generated method stub
-		return UserResource.super.create(resource);
+        
+		UserProvider provider = null;
+        
+		if ((provider = providerRegistry.getUserProfider()) == null){
+			return UserResource.super.create(resource);
+		}
+		
+		ScimUser user = provider.createUser(resource);
+		
+		return Response.status(Status.CREATED).entity(user).build();
 	}
 
 	@Override
@@ -66,8 +74,16 @@ public class UserResourceImpl implements UserResource {
 
 	@Override
 	public Response update(ScimUser resource) {
-		// TODO Auto-generated method stub
-		return UserResource.super.update(resource);
+        
+		UserProvider provider = null;
+        
+		if ((provider = providerRegistry.getUserProfider()) == null){
+		  return UserResource.super.update(resource);
+		}
+		
+		ScimUser user = provider.updateUser(resource);
+		
+		return Response.ok(user).build();
 	}
 
 	@Override
