@@ -3,9 +3,14 @@
  */
 package edu.psu.swe.scim.server.rest;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
+import edu.psu.swe.scim.server.provider.ProviderRegistry;
+import edu.psu.swe.scim.server.provider.UserProvider;
 import edu.psu.swe.scim.spec.protocol.UserResource;
+import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 
@@ -15,10 +20,29 @@ import edu.psu.swe.scim.spec.resources.ScimUser;
  */
 public class UserResourceImpl implements UserResource {
 
+	@Inject
+	ProviderRegistry providerRegistry;
+	
 	@Override
 	public Response getById(String id, String attributes) {
-		// TODO Auto-generated method stub
-		return UserResource.super.getById(id, attributes);
+        UserProvider provider = null;
+        
+		if ((provider = providerRegistry.getUserProfider()) == null){
+		  return UserResource.super.getById(id, attributes);
+		}
+		
+		ScimUser user = provider.getUser(id);
+		
+		//TODO - Handle attributes
+		
+		if (user == null){
+			ErrorResponse er = new ErrorResponse();
+			er.setStatus("404");
+			er.setDetail("User " + id + " not found");
+			return Response.status(Status.NOT_FOUND).entity(er).build();
+		}
+		
+		return Response.ok().entity(user).build();
 	}
 
 	@Override
