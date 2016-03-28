@@ -12,5 +12,5 @@ import lombok.Data;
 @Data
 public class ProviderRegistry {
   private Provider<ScimGroup> groupProvider = null;
-  private Provider<ScimUser> userProfider = null;
+  private Provider<ScimUser> userProvider = null;
 }

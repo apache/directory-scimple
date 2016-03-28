@@ -27,7 +27,7 @@ public class UserResourceImpl implements UserResource {
 	public Response getById(String id, String attributes) {
         Provider<ScimUser> provider = null;
         
-		if ((provider = providerRegistry.getUserProfider()) == null){
+		if ((provider = providerRegistry.getUserProvider()) == null){
 		  return UserResource.super.getById(id, attributes);
 		}
 		
@@ -57,7 +57,7 @@ public class UserResourceImpl implements UserResource {
         
 		Provider<ScimUser> provider = null;
         
-		if ((provider = providerRegistry.getUserProfider()) == null){
+		if ((provider = providerRegistry.getUserProvider()) == null){
 			return UserResource.super.create(resource);
 		}
 		
@@ -77,7 +77,7 @@ public class UserResourceImpl implements UserResource {
         
 		Provider<ScimUser> provider = null;
         
-		if ((provider = providerRegistry.getUserProfider()) == null){
+		if ((provider = providerRegistry.getUserProvider()) == null){
 		  return UserResource.super.update(resource);
 		}
 		
