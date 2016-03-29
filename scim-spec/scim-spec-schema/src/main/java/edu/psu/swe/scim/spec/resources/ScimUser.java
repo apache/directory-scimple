@@ -80,7 +80,7 @@ public class ScimUser extends ScimResource {
   List<PhoneNumber> phoneNumbers;
   
   @XmlElement(name = "photos")
-  List<ScimPhoto> photos;
+  List<Photo> photos;
 
   @XmlElement(name = "profileUrl")
   String profileUrl;
