@@ -52,17 +52,17 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "displayName")
   String displayName;
   
-//  @XmlElement(name = "emails")
-//  List<ScimEmail> emails;
+  @XmlElement(name = "emails")
+  List<Email> emails;
   
-//  @XmlElement(name = "entitlements")
-//  List<ScimEntitlement> entitlements;
+    @XmlElement(name = "entitlements")
+  List<Entitlement> entitlements;
   
   @XmlElement(name = "groups")
   List<ResourceReference> groups;
   
-//  @XmlElement(name = "ims")
-//  List<ScimIm> ims;
+  @XmlElement(name = "ims")
+  List<Im> ims;
   
   @XmlElement(name = "locale")
   String locale;
@@ -103,7 +103,6 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "userType")
   String userType;
   
-//  @XmlElement(name = "x509Certificates")
-//  List<ScimX509Certificate> x509Certificates;
-
+  @XmlElement(name = "x509Certificates")
+  List<X509Certificate> x509Certificates;
 }
