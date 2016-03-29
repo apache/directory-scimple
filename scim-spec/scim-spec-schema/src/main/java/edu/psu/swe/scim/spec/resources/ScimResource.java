@@ -37,5 +37,9 @@ public abstract class ScimResource extends BaseResource {
   
   // TODO - Figure out JAXB equivalent of JsonAnyGetter and JsonAnySetter (XmlElementAny?)
   private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
+  
+  public void addExtension(String urn, ScimExtension extension) {
+    extensions.put(urn, extension);
+  }
 
 }
