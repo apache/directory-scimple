@@ -8,10 +8,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public abstract class SimpleTypedMultiValuedAttribute<T extends ScimType> extends TypedMultiValuedAttribute<T> {
+@EqualsAndHashCode(callSuper=true)
+public abstract class SimpleTypedMultiValuedAttribute extends TypedMultiValuedAttribute {
   
   @XmlElement(name = "value")
   private String value;

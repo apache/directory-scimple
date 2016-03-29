@@ -10,8 +10,8 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=true)
-public abstract class TypedMultiValuedAttribute<T extends ScimType> extends MultiValuedAttribute {
+public abstract class TypedMultiValuedAttribute extends MultiValuedAttribute {
 
   @XmlElement(name = "type")
-  private T type;
+  private String type;
 }

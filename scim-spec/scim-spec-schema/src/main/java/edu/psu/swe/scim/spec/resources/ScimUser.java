@@ -46,8 +46,8 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "active")
   boolean active = true;
   
-//  @XmlElement(name = "addresses")
-//  List<ScimAddress> addresses;
+  @XmlElement(name = "addresses")
+  List<Address> addresses;
   
   @XmlElement(name = "displayName")
   String displayName;
