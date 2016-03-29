@@ -76,8 +76,8 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "password")
   String password;
   
-//  @XmlElement(name = "phoneNumbers")
-//  List<ScimPhoneNumber> phoneNumbers;
+  @XmlElement(name = "phoneNumbers")
+  List<PhoneNumber> phoneNumbers;
   
 //  @XmlElement(name = "photos")
 //  List<ScimPhoto> photos;
