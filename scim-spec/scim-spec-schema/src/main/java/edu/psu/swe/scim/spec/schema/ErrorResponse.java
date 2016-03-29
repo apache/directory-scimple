@@ -21,6 +21,12 @@ public class ErrorResponse extends BaseResource {
     super.addSchema(URN);
   }
   
+  public ErrorResponse(String status, String detail) {
+    super.addSchema(URN);
+    this.status = status;
+    this.detail = detail;
+  }
+  
   @XmlElement(nillable=true)
   private String detail;
   
