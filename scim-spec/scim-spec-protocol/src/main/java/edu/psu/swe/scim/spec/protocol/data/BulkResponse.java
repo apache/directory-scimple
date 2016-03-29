@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import lombok.Data;
 
 @Data

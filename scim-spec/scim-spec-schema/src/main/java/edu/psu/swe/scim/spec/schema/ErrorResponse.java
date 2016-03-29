@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.spec.protocol.data;
+package edu.psu.swe.scim.spec.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
