@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.server.rest;
 
-public class ResourceTypesResourceImpl {
+import edu.psu.swe.scim.spec.protocol.ResourceTypesResource;
+
+public class ResourceTypesResourceImpl implements ResourceTypesResource {
 
 }

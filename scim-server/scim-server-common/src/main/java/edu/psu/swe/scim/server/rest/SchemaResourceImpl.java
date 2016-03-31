@@ -3,6 +3,7 @@ package edu.psu.swe.scim.server.rest;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -11,6 +12,7 @@ import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.SchemaResource;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 
+@Stateless
 public class SchemaResourceImpl implements SchemaResource {
   
   @Inject
@@ -23,17 +25,17 @@ public class SchemaResourceImpl implements SchemaResource {
       return Response.status(Status.FORBIDDEN).build();
     }
     
-    ListResponse response = new ListResponse();
+    ListResponse listResponse = new ListResponse();
     List<String> schemas = registry.getAllSchemaUrns();
     
-    response.setItemsPerPage(schemas.size());
-    response.setStartIndex(0);
-    response.setTotalResults(schemas.size());
+    listResponse.setItemsPerPage(schemas.size());
+    listResponse.setStartIndex(0);
+    listResponse.setTotalResults(schemas.size());
     
     List<Object> objectList = new ArrayList<>(schemas);
-    response.setResources(objectList);
+    listResponse.setResources(objectList);
     
-    return Response.ok(response).build();
+    return Response.ok(listResponse).build();
   }
 
   @Override
