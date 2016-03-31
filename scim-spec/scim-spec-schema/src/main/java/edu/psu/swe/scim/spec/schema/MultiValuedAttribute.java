@@ -14,15 +14,15 @@ import lombok.Data;
 @Data
 public abstract class MultiValuedAttribute {
 
-  @XmlElement(name = "display")
+  @XmlElement(name = "display", nillable=true)
   private String display;
-
-  @XmlElement(name = "operation")
-  private String operation;
 
   @XmlElement(name = "primary")
   private boolean primary = false;
 
+  @XmlElement(name="$ref", nillable=true)
+  private String reference;
+  
   public static final String MULTIPLE_PRIMARIES_ERROR = "Multiple entries were flagged as primary.  Only on primary is allowed per attribute";
 
   /**
