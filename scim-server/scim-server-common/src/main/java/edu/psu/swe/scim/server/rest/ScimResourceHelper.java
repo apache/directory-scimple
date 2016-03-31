@@ -10,12 +10,19 @@ public class ScimResourceHelper {
   }
   
   public static Set<Class<?>> getScimClassesToLoad(){
-    Set<Class<?>> clazzez_ = new HashSet<>();
+    Set<Class<?>> clazzez = new HashSet<>();
     
      //Required scim classes.
-    clazzez_.add(SchemaResourceImpl.class);
+    clazzez.add(BulkResourceImpl.class);
+    clazzez.add(GroupResourceImpl.class);
+    clazzez.add(ResourceTypesResourceImpl.class);
+    clazzez.add(SchemaResourceImpl.class);
+    clazzez.add(SearchResourceImpl.class);
+    clazzez.add(SelfResourceImpl.class);
+    clazzez.add(ServiceProviderConfigResourceImpl.class);
+    clazzez.add(UserResourceImpl.class);
     
-    return clazzez_;
+    return clazzez;
   }
   
 }
