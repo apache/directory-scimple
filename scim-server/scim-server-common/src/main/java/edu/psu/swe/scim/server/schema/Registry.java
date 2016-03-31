@@ -47,7 +47,7 @@ public class Registry {
     JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
     objectMapper.registerModule(jaxbAnnotationModule);
 
-    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector();
+    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
     objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
 
     String schemaDoc = objectMapper.writeValueAsString(schema);
@@ -63,7 +63,7 @@ public class Registry {
     JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
     objectMapper.registerModule(jaxbAnnotationModule);
 
-    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector();
+    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
     objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
 
     // Unmarshall the JSON document to a Schema and its associated object graph.
