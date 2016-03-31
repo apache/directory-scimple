@@ -21,4 +21,8 @@ public abstract class ScimResourceWithOptionalId extends ScimResource {
   @XmlElement
   String id;
   
+  public ScimResourceWithOptionalId(String urn) {
+    super(urn);
+  }
+  
 }

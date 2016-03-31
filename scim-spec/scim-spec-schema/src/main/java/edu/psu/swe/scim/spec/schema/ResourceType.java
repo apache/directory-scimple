@@ -55,4 +55,8 @@ public class ResourceType extends ScimResourceWithOptionalId {
   String schemaUrn;
 
   List<SchemaExtentionConfiguration> schemaExtensions;
+  
+  public ResourceType() {
+    super(SCHEMA_URI);
+  }
 }

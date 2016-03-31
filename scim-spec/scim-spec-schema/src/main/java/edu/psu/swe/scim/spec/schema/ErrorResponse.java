@@ -14,22 +14,22 @@ import lombok.EqualsAndHashCode;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class ErrorResponse extends BaseResource {
-  
-  public static String URN = "urn:ietf:params:scim:api:messages:2.0:Error";
-  
+
+  public static String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:Error";
+
+  @XmlElement(nillable = true)
+  private String detail;
+
+  @XmlElement
+  private String status;
+
   public ErrorResponse() {
-    super.addSchema(URN);
+    super(SCHEMA_URI);
   }
-  
+
   public ErrorResponse(String status, String detail) {
-    super.addSchema(URN);
+    super(SCHEMA_URI);
     this.status = status;
     this.detail = detail;
   }
-  
-  @XmlElement(nillable=true)
-  private String detail;
-  
-  @XmlElement
-  private String status;
 }

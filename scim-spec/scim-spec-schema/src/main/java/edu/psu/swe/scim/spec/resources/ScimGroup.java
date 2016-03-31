@@ -22,4 +22,7 @@ public class ScimGroup extends ScimResource {
   
   List<ResourceReference> members;
 
+  public ScimGroup() {
+    super(SCHEMA_URI);
+  }
 }

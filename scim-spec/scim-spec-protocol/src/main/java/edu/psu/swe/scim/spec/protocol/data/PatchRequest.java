@@ -19,7 +19,7 @@ public class PatchRequest extends BaseResource {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
   
   public PatchRequest() {
-    
+    super(SCHEMA_URI);
   }
   
   @XmlElement

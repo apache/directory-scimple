@@ -19,6 +19,10 @@ public class ListResponse extends BaseResource {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
 
+  public ListResponse() {
+    super(SCHEMA_URI);
+  }
+  
   @XmlElement
   int totalResults;
   

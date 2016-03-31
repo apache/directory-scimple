@@ -41,7 +41,7 @@ import edu.psu.swe.scim.spec.schema.ResourceReference;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ScimUser extends ScimResource {
 
-  public static final String SCHEMAURI = "urn:ietf:params:scim:schemas:core:2.0:User";
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
 
   @XmlElement(name = "active")
   boolean active = true;
@@ -105,4 +105,8 @@ public class ScimUser extends ScimResource {
   
   @XmlElement(name = "x509Certificates")
   List<X509Certificate> x509Certificates;
+  
+  public ScimUser() {
+    super(SCHEMA_URI);
+  }
 }
