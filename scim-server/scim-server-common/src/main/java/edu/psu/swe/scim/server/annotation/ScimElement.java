@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface ScimElement {
   
-  String name();
+  String name() default "";
   boolean required() default false;
   String [] canonicalValues() default "";
   boolean caseExact() default false;
