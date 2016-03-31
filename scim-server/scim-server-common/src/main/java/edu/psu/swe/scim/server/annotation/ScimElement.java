@@ -8,8 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface ScimElement {
+  
+  String name();
   boolean required() default false;
-  String [] canonicalValues();
+  String [] canonicalValues() default "";
   boolean caseExact() default false;
   String mutability() default "readWrite";
   String returned() default "default";
