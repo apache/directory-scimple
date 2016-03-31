@@ -4,11 +4,13 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
+import edu.psu.swe.scim.spec.schema.AuthenticationSchema.Type;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -36,20 +38,28 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
     int maxResults;
   }
 
+  @XmlElement
   String documentationUrl;
 
+  @XmlElement
   SupportedConfiguration patch;
 
+  @XmlElement
   BulkConfiguration bulk;
 
+  @XmlElement
   FilterConfiguration filter;
 
+  @XmlElement
   SupportedConfiguration changePassword;
 
+  @XmlElement
   SupportedConfiguration sort;
 
+  @XmlElement
   SupportedConfiguration etag;
   
+  @XmlElement
   List<AuthenticationSchema> authenticationSchemes;
   
   public ServiceProviderConfiguration() {
