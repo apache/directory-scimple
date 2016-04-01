@@ -11,6 +11,4 @@ public interface Provider<T> {
   T get(String id);
   void delete(String id);
   List<T> find(SearchRequest request);
-  
-  ResourceType getResourceType();
 }
