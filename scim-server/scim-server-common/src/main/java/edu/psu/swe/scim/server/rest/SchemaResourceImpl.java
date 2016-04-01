@@ -32,7 +32,7 @@ public class SchemaResourceImpl implements SchemaResource {
     Collection<Schema> schemas = registry.getAllSchemas();
     
     listResponse.setItemsPerPage(schemas.size());
-    listResponse.setStartIndex(0);
+    listResponse.setStartIndex(1);
     listResponse.setTotalResults(schemas.size());
     
     List<Object> objectList = new ArrayList<>(schemas);

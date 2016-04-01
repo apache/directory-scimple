@@ -31,7 +31,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     
     ListResponse listResponse = new ListResponse();
     listResponse.setItemsPerPage(resourceTypes.size());
-    listResponse.setStartIndex(0);
+    listResponse.setStartIndex(1);
     listResponse.setTotalResults(resourceTypes.size());
     
     List<Object> objectList = new ArrayList<>(resourceTypes);
@@ -41,8 +41,8 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
   }
 
   @Override
-  public Response getResourceType(String id) {
-    ResourceType resourceType = registry.getResourceType(id);
+  public Response getResourceType(String name) {
+    ResourceType resourceType = registry.getResourceType(name);
     if (resourceType == null){
       return Response.status(Status.NOT_FOUND).build();  
     }

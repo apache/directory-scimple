@@ -1,9 +1,11 @@
 package edu.psu.swe.scim.memory.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
@@ -43,8 +45,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
 
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
-    // TODO Auto-generated method stub
-    return null;
+    return Arrays.asList(LuckyNumberExtension.class);
   }
 
 }
