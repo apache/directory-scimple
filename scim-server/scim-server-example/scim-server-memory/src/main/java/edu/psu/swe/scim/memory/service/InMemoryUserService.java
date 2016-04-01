@@ -41,16 +41,4 @@ public class InMemoryUserService implements Provider<ScimUser> {
     return null;
   }
 
-  @Override
-  public ResourceType getResourceType() {
-    ResourceType resourceType = new ResourceType();
-    resourceType.setId("User");
-    resourceType.setName("User");
-    resourceType.setEndpoint("/Users");
-    resourceType.setDescription("User Account");
-    resourceType.setSchemaUrn(ScimUser.SCHEMA_URI);
-    
-    return resourceType;
-  }
-
 }
