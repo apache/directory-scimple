@@ -91,6 +91,10 @@ public class Registry {
     }
   }
   
+  public void addResourceType(ResourceType resourceType) {
+    resourceTypeMap.put(resourceType.getSchemaUrn(), resourceType);
+  }
+  
   public void addResourceType(Class<? extends ScimResource> resourceTypeClass) {
     addResourceType(resourceTypeClass, Collections.emptyList());
   }

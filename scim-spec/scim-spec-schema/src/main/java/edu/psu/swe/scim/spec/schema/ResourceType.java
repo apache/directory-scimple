@@ -28,7 +28,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
 
   @Data
-  public class SchemaExtentionConfiguration {
+  public static class SchemaExtentionConfiguration {
 
     @XmlElement(name = "schema")
     @Urn
