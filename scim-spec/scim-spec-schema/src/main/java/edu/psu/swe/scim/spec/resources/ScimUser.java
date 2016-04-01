@@ -8,36 +8,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.schema.ResourceReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import edu.psu.swe.scim.spec.schema.ResourceReference;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ScimResourceType(name="User", schemaList={ScimUser.SCHEMA_URI})
 @XmlRootElement(name = "User")
-@XmlType(name = "User", propOrder = {
-    "userName",
-    "name",
-    "displayName",
-    "nickName",
-    "profileUrl",
-    "title",
-    "userType",
-    "preferredLanguage",
-    "locale",
-    "timezone",
-    "active",
-    "password",
-    "emails",
-    "phoneNumbers",
-    "ims",
-    "photos",
-    "addresses",
-    "groups",
-    "entitlements",
-    "roles",
-    "x509Certificates"
-})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ScimUser extends ScimResource {
 

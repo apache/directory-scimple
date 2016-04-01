@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.server.annotation;
+package edu.psu.swe.scim.spec.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ import edu.psu.swe.scim.spec.schema.Schema.Attribute.Uniqueness;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface ScimElement {
+public @interface ScimAttribute {
   
   String name() default "";
   boolean required() default false;
