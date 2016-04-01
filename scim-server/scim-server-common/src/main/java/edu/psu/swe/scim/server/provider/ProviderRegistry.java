@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.server.provider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class ProviderRegistry {
   @Inject
   Registry registry;
   
-  public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap;
+  public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
   
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException {
     generateResourceType(clazz, provider);

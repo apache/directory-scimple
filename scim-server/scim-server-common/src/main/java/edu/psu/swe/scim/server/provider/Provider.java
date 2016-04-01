@@ -14,5 +14,4 @@ public interface Provider<T> {
   List<T> find(SearchRequest request);
   
   List<Class<? extends ScimExtension>> getExtensionList();
-  ResourceType getResourceType();
 }

@@ -36,7 +36,7 @@ public class Registry {
 
   private Map<String, Schema> schemaMap = new HashMap<>();
   
-  private Map<String, ResourceType> resourceTypeMap = new HashMap();
+  private Map<String, ResourceType> resourceTypeMap = new HashMap<>();
   
   private ObjectMapper objectMapper;
 
@@ -66,6 +66,14 @@ public class Registry {
     }
   }
 
+  public ResourceType getResourceType(String id) {
+    return resourceTypeMap.get(id);
+  }
+  
+  public Collection<ResourceType> getAllResourceTypes() {
+    return Collections.unmodifiableCollection(resourceTypeMap.values());
+  }
+  
   @PostConstruct
   @PostActivate
   private void loadSchemaMap() {
