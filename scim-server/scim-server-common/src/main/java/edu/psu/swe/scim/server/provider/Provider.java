@@ -4,7 +4,6 @@ import java.util.List;
 
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
-import edu.psu.swe.scim.spec.schema.ResourceType;
 
 public interface Provider<T> {
   T create(T resource);

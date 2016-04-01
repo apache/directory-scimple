@@ -6,8 +6,8 @@ import java.util.Map;
 
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimUser;
-import edu.psu.swe.scim.spec.schema.ResourceType;
 
 public class InMemoryUserService implements Provider<ScimUser> {
 
@@ -37,6 +37,12 @@ public class InMemoryUserService implements Provider<ScimUser> {
 
   @Override
   public List<ScimUser> find(SearchRequest request) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<Class<? extends ScimExtension>> getExtensionList() {
     // TODO Auto-generated method stub
     return null;
   }
