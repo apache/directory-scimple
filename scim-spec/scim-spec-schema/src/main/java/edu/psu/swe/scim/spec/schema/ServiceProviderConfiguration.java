@@ -52,20 +52,20 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   }
   
   @Data
-  public class SupportedConfiguration {
+  public static class SupportedConfiguration {
     boolean supported;
   }
 
   @Data
   @EqualsAndHashCode(callSuper = true)
-  public class BulkConfiguration extends SupportedConfiguration {
+  public static class BulkConfiguration extends SupportedConfiguration {
     int maxOperations;
     int maxPayloadSize;
   }
 
   @Data
   @EqualsAndHashCode(callSuper = true)
-  public class FilterConfiguration extends SupportedConfiguration {
+  public static class FilterConfiguration extends SupportedConfiguration {
     int maxResults;
   }
 
