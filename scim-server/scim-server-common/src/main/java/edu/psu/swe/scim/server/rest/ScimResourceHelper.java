@@ -22,6 +22,8 @@ public class ScimResourceHelper {
     clazzez.add(ServiceProviderConfigResourceImpl.class);
     clazzez.add(UserResourceImpl.class);
     
+    clazzez.add(ObjectMapperContextResolver.class);
+    
     return clazzez;
   }
   
