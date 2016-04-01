@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import lombok.Data;
+import lombok.Getter;
 
 @Data
 public class ScimSpecSchema {
   
+  @Getter
   static Set<String> schemaNames = new HashSet<>();
   
   static {

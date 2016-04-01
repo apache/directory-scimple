@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
+import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.resources.ScimExtension;
+import edu.psu.swe.scim.spec.resources.ScimResource;
+import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.ScimSpecSchema;
 
@@ -30,6 +35,8 @@ import edu.psu.swe.scim.spec.schema.ScimSpecSchema;
 public class Registry {
 
   private Map<String, Schema> schemaMap = new HashMap<>();
+  
+  private Map<String, ResourceType> resourceTypeMap = new HashMap();
   
   private ObjectMapper objectMapper;
 
@@ -70,7 +77,7 @@ public class Registry {
     AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
     objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
 
-    for (String s : ScimSpecSchema.getSchemaNameSet()) {
+    for (String s : ScimSpecSchema.getSchemaNames()) {
       String schemaFile = "/schemas/" + s + ".json";
       log.debug("Attempting to load schema file: " + schemaFile);
       
@@ -83,4 +90,32 @@ public class Registry {
       }
     }
   }
+  
+  public void addResourceType(Class<? extends ScimResource> resourceTypeClass) {
+    addResourceType(resourceTypeClass, Collections.emptyList());
+  }
+  public void addResourceType(Class<? extends ScimResource> resourceTypeClass, List<Class<? extends ScimExtension>> extensions) {
+    ResourceType resourceType = createResourceType(resourceTypeClass);
+    for (Class<? extends ScimExtension> extensionClass : extensions) {
+      ScimExtension extension;
+//      resourceType.addExtension(extension.getUrn(), extension);
+
+    }
+//    resourceType.setExten
+  }
+  
+  private ResourceType createResourceType(Class<? extends ScimResource> resourceTypeClass) {
+    ScimResourceType annotation = resourceTypeClass.getAnnotation(ScimResourceType.class);
+    
+    if (annotation == null) {
+      log.error(resourceTypeClass + " must be annotated with the @ScimResourceType annotation.");
+      return null;
+    }
+    
+    ResourceType resourceType = new ResourceType(annotation);
+    return resourceType;
+  }
+  
+//  private ScimExtension createResourceType(Class<? extends ScimResource> resourceTypeClass) {
+
 }
