@@ -5,12 +5,13 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
-import edu.psu.swe.scim.spec.schema.AuthenticationSchema.Type;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,6 +21,36 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
 
+  @Data
+  @XmlType
+  @XmlAccessorType(XmlAccessType.NONE)
+  public static class AuthenticationSchema {
+
+    public enum Type {
+      @XmlEnumValue("oauth") OAUTH,
+      @XmlEnumValue("oauth2") OAUTH2,
+      @XmlEnumValue("oauthbearertoken") OAUTH_BEARER,
+      @XmlEnumValue("httpbasic") HTTP_BASIC,
+      @XmlEnumValue("httpdigest") HTTP_DIGEST;
+    }
+   
+    @XmlElement
+    Type type;
+    
+    @XmlElement
+    String name;
+    
+    @XmlElement
+    String description;
+    
+    @XmlElement
+    String specUri;
+    
+    @XmlElement
+    String documentationUri;
+    
+  }
+  
   @Data
   public class SupportedConfiguration {
     boolean supported;
