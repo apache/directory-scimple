@@ -38,7 +38,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     for (ResourceType resourceType : resourceTypes) {
       Meta meta = new Meta();
       meta.setLocation(uriInfo.getAbsolutePathBuilder().path(resourceType.getName()).build().toString());
-      meta.setResourceType("ResourceType");
+      meta.setResourceType(resourceType.getResourceType());
       
       resourceType.setMeta(meta);
     }
@@ -63,7 +63,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     
     Meta meta = new Meta();
     meta.setLocation(uriInfo.getAbsolutePath().toString());
-    meta.setResourceType("ResourceType");
+    meta.setResourceType(resourceType.getResourceType());
     
     resourceType.setMeta(meta);
     

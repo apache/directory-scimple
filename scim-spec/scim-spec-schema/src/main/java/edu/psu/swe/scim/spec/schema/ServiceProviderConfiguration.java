@@ -19,6 +19,7 @@ import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
+  public static final String RESOURCE_NAME = "ServiceProviderConfig";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
 
   @Data
@@ -27,30 +28,31 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   public static class AuthenticationSchema {
 
     public enum Type {
-      @XmlEnumValue("oauth") OAUTH,
-      @XmlEnumValue("oauth2") OAUTH2,
-      @XmlEnumValue("oauthbearertoken") OAUTH_BEARER,
-      @XmlEnumValue("httpbasic") HTTP_BASIC,
-      @XmlEnumValue("httpdigest") HTTP_DIGEST;
+      @XmlEnumValue("oauth")
+      OAUTH, @XmlEnumValue("oauth2")
+      OAUTH2, @XmlEnumValue("oauthbearertoken")
+      OAUTH_BEARER, @XmlEnumValue("httpbasic")
+      HTTP_BASIC, @XmlEnumValue("httpdigest")
+      HTTP_DIGEST;
     }
-   
+
     @XmlElement
     Type type;
-    
+
     @XmlElement
     String name;
-    
+
     @XmlElement
     String description;
-    
+
     @XmlElement
     String specUri;
-    
+
     @XmlElement
     String documentationUri;
-    
+
   }
-  
+
   @Data
   public static class SupportedConfiguration {
     boolean supported;
@@ -89,12 +91,17 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
   @XmlElement
   SupportedConfiguration etag;
-  
+
   @XmlElement
   List<AuthenticationSchema> authenticationSchemes;
-  
+
   public ServiceProviderConfiguration() {
     super(SCHEMA_URI);
+  }
+
+  @Override
+  public String getResourceType() {
+    return RESOURCE_NAME;
   }
 
 }

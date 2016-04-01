@@ -24,7 +24,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
 public class ResourceType extends ScimResourceWithOptionalId {
-
+  
+  public static final String RESOURCE_NAME = "ResourceType";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
 
   @Data
@@ -68,4 +69,11 @@ public class ResourceType extends ScimResourceWithOptionalId {
     this.schemaUrn = annotation.schema();
     this.endpoint = annotation.endpoint();
   }
+
+  @Override
+  public String getResourceType() {
+    return RESOURCE_NAME;
+  }
+  
+  
 }
