@@ -15,7 +15,6 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 

@@ -1,7 +1,12 @@
 package edu.psu.swe.scim.server.provider;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +23,8 @@ import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
+import edu.psu.swe.scim.spec.schema.Schema.Attribute;
+import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
 
 @Singleton
@@ -85,15 +92,63 @@ public class ProviderRegistry {
   
   
   private List<Schema> generateSchemas(Class<? extends ScimResource> base, List<Class<? extends ScimExtension>> extensionList) throws InvalidProviderException {
-    ScimAttribute [] baseAttributes = base.getAnnotationsByType(ScimAttribute.class);
+        
+    Field [] baseFieldList = base.getFields();
     
-    if (baseAttributes.length == 0) {
-      throw new InvalidProviderException("Missing annotation: cannot have a schema with no ScimAttribute values");
-    }
+    Schema baseSchema = new Schema();
+    
+    baseSchema.setAttributes(addAttributes(baseFieldList));
+   
     
     return null;
   }
    
+  private List<Attribute> addAttributes(Field [] fieldList) {
+    List<Attribute> attributeList = new ArrayList<>();
+    
+    for (Field f : fieldList) {
+    	ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
+    	
+    	if (sa == null) {
+    		continue;
+    	}
+    	
+    	Attribute attribute = new Attribute();
+        attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
+        attribute.setCaseExact(sa.caseExact());
+        attribute.setDescription(sa.description());
+        
+        if (Collection.class.isAssignableFrom(f.getType()) || f.getType().isArray()) {
+          attribute.setMultiValued(true);
+        } else {
+          attribute.setMultiValued(false);
+        }
+        
+        attribute.setMutability(sa.mutability());
+        attribute.setName(sa.name());
+        attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
+        attribute.setRequired(sa.required());
+        attribute.setReturned(sa.returned());
+        attribute.setType(sa.type());
+        attribute.setUniqueness(sa.uniqueness());
+        
+    	if (sa.type().equals(Type.COMPLEX)) {
+    	  if (!attribute.isMultiValued()) {
+    		attribute.setSubAttributes(addAttributes(f.getType().getFields()));
+    	  } else if (f.getType().isArray()){
+    		 Class<?> componentType = f.getType().getComponentType();
+    		 attribute.setSubAttributes(addAttributes(componentType.getFields()));
+    	  } else {
+    	     ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
+    	     Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+    	     attribute.setSubAttributes(addAttributes(attributeContainedClass.getFields()));
+    	  }
+    	}
+    	attributeList.add(attribute);
+    }
+    
+    return attributeList;
+  }
 //  private Provider<ScimGroup> groupProvider = null;
 //  private Provider<ScimUser> userProvider = null;
 }

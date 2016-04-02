@@ -22,6 +22,7 @@ public @interface ScimAttribute {
   Mutability mutability() default Mutability.READ_WRITE;
   Returned returned() default Returned.DEFAULT;
   Uniqueness uniqueness() default Uniqueness.NONE;
-  Type [] referenceTypes() default Type.STRING;
+  String [] referenceTypes() default "";
+  Type type() default Type.STRING;
   String description() default "";
 }
