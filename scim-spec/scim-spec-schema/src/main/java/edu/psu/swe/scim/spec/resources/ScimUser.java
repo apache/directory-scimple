@@ -29,7 +29,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "active")
   boolean active = true;
 
-  @ScimAttribute(canonicalValues = { "home", "work", "other" }, referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(canonicalValues = { "home", "work", "other" }, type = Type.COMPLEX)
   @XmlElement(name = "addresses")
   List<Address> addresses;
 
@@ -37,19 +37,19 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "displayName")
   String displayName;
 
-  @ScimAttribute(canonicalValues = { "home", "work", "other" }, referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(canonicalValues = { "home", "work", "other" }, type = Type.COMPLEX)
   @XmlElement(name = "emails")
   List<Email> emails;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "entitlements")
   List<Entitlement> entitlements;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "groups")
   List<ResourceReference> groups;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "ims")
   List<Im> ims;
 
@@ -57,7 +57,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "locale")
   String locale;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "name")
   Name name;
 
@@ -69,11 +69,11 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "password")
   String password;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "phoneNumbers")
   List<PhoneNumber> phoneNumbers;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "photos")
   List<Photo> photos;
 
@@ -85,7 +85,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "preferredLanguage")
   String preferredLanguage;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "roles")
   List<Role> roles;
 
@@ -105,7 +105,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "userType")
   String userType;
 
-  @ScimAttribute(referenceTypes = { Type.COMPLEX })
+  @ScimAttribute(type = Type.COMPLEX)
   @XmlElement(name = "x509Certificates")
   List<X509Certificate> x509Certificates;
 

@@ -23,7 +23,7 @@ public class LuckyNumberExtension implements ScimExtension {
   
   public static final String  SCHEMA_URN = "urn:mem:params:scim:schemas:extension:LuckyNumberExtension";
 
-  @ScimAttribute(referenceTypes=Type.INTEGER, returned=Returned.DEFAULT, required=true)
+  @ScimAttribute(type=Type.INTEGER, returned=Returned.DEFAULT, required=true)
   @XmlElement
   private long luckyNumber;
   
