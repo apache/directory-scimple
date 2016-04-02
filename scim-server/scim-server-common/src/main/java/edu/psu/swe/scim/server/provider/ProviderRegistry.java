@@ -11,11 +11,13 @@ import javax.inject.Inject;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.schema.Registry;
+import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
+import edu.psu.swe.scim.spec.schema.Schema;
 import lombok.Data;
 
 @Singleton
@@ -29,16 +31,18 @@ public class ProviderRegistry {
   public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
   
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException {
-    generateResourceType(clazz, provider);
+    ResourceType resourceType = generateResourceType(clazz, provider);
+    generateSchemas(clazz, provider.getExtensionList());
+    registry.addResourceType(resourceType);
     providerMap.put(clazz, provider);
   }
-  
+
   @SuppressWarnings("unchecked")
   public <T extends ScimResource> Provider<T> getProvider(Class<T> clazz) {
     return (Provider<T>) providerMap.get(clazz);
   }
   
-  private void generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException {
+  private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException {
 
     ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
     
@@ -74,8 +78,20 @@ public class ProviderRegistry {
       }
       
       resourceType.setSchemaExtensions(extensionSchemaList);
-      registry.addResourceType(resourceType);
     }
+    
+    return resourceType;
+  }
+  
+  
+  private List<Schema> generateSchemas(Class<? extends ScimResource> base, List<Class<? extends ScimExtension>> extensionList) throws InvalidProviderException {
+    ScimAttribute [] baseAttributes = base.getAnnotationsByType(ScimAttribute.class);
+    
+    if (baseAttributes.length == 0) {
+      throw new InvalidProviderException("Missing annotation: cannot have a schema with no ScimAttribute values");
+    }
+    
+    return null;
   }
    
 //  private Provider<ScimGroup> groupProvider = null;

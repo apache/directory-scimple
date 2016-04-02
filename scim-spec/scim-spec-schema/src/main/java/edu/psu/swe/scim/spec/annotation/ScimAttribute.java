@@ -23,4 +23,5 @@ public @interface ScimAttribute {
   Returned returned() default Returned.DEFAULT;
   Uniqueness uniqueness() default Uniqueness.NONE;
   Type [] referenceTypes() default Type.STRING;
+  String description() default "";
 }
