@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 
@@ -31,6 +32,10 @@ import lombok.Data;
 @Data
 public class Schema {
 
+  public static final String RESOURCE_NAME = "Schema";
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:Schema";
+
+  
   /**
    * Defines the structure of attributes included in SCIM schemas as defined by
    * section 7 of the SCIM schema specification. See

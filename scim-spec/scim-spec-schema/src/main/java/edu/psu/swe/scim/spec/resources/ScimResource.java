@@ -45,5 +45,7 @@ public abstract class ScimResource extends BaseResource {
   public void addExtension(String urn, ScimExtension extension) {
     extensions.put(urn, extension);
   }
+  
+  public abstract String getResourceType();
 
 }

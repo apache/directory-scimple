@@ -49,8 +49,8 @@ public interface ResourceTypesResource {
   }
 
   @GET
-  @Path("{id}")
-  default public Response getResourceType(@PathParam("id") String id) {
+  @Path("{name}")
+  default public Response getResourceType(@PathParam("name") String name) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

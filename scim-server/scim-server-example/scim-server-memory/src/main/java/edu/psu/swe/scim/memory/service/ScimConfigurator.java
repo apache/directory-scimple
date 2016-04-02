@@ -23,9 +23,6 @@ public class ScimConfigurator implements ServletContextListener {
   @Inject
   private ProviderRegistry providerRegistry;
 
-  @Inject
-  private Registry registry;
-  
   @Inject 
   private Provider<ScimUser> userProvider;
   

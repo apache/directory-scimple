@@ -7,12 +7,16 @@ import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.SchemaResource;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
+import edu.psu.swe.scim.spec.schema.Meta;
+import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
 
 @Stateless
@@ -20,6 +24,9 @@ public class SchemaResourceImpl implements SchemaResource {
   
   @Inject
   Registry registry;
+  
+  @Context 
+  private UriInfo uriInfo;
   
   @Override
   public Response getAllSchemas(String filter) {
@@ -31,8 +38,16 @@ public class SchemaResourceImpl implements SchemaResource {
     ListResponse listResponse = new ListResponse();
     Collection<Schema> schemas = registry.getAllSchemas();
     
+    for (Schema schema : schemas) {
+      Meta meta = new Meta();
+      meta.setLocation(uriInfo.getAbsolutePathBuilder().path(schema.getId()).build().toString());
+      meta.setResourceType(Schema.RESOURCE_NAME);
+      
+      schema.setMeta(meta);
+    }
+    
     listResponse.setItemsPerPage(schemas.size());
-    listResponse.setStartIndex(0);
+    listResponse.setStartIndex(1);
     listResponse.setTotalResults(schemas.size());
     
     List<Object> objectList = new ArrayList<>(schemas);
@@ -48,6 +63,12 @@ public class SchemaResourceImpl implements SchemaResource {
     if (schema == null){
       return Response.status(Status.NOT_FOUND).build();  
     }
+    
+    Meta meta = new Meta();
+    meta.setLocation(uriInfo.getAbsolutePath().toString());
+    meta.setResourceType(Schema.RESOURCE_NAME);
+    
+    schema.setMeta(meta);
     
     return Response.ok(schema).build();
     

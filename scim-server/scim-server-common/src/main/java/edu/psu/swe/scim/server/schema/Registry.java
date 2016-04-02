@@ -66,8 +66,8 @@ public class Registry {
     }
   }
 
-  public ResourceType getResourceType(String id) {
-    return resourceTypeMap.get(id);
+  public ResourceType getResourceType(String name) {
+    return resourceTypeMap.get(name);
   }
   
   public Collection<ResourceType> getAllResourceTypes() {
@@ -100,7 +100,7 @@ public class Registry {
   }
   
   public void addResourceType(ResourceType resourceType) {
-    resourceTypeMap.put(resourceType.getSchemaUrn(), resourceType);
+    resourceTypeMap.put(resourceType.getName(), resourceType);
   }
   
   public void addResourceType(Class<? extends ScimResource> resourceTypeClass) {
