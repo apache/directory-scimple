@@ -83,7 +83,4 @@ public abstract class BaseResourceTypeResourceImpl<T> implements BaseResourceTyp
     // TODO Auto-generated method stub
     return BaseResourceTypeResource.super.delete(id);
   }
-
-  
-  
 }
