@@ -7,12 +7,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.schema.Registry;
@@ -37,9 +40,18 @@ public class ProviderRegistry {
   
   public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
   
-  public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException {
+  public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
     ResourceType resourceType = generateResourceType(clazz, provider);
-    generateSchemas(clazz, provider.getExtensionList());
+    registry.addSchema(generateSchema(clazz));
+    
+    List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
+    
+    Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
+    
+    while(iter.hasNext()) {
+      registry.addSchema(generateSchema(iter.next()));
+    }
+    
     registry.addResourceType(resourceType);
     providerMap.put(clazz, provider);
   }
@@ -91,18 +103,21 @@ public class ProviderRegistry {
   }
   
   
-  private List<Schema> generateSchemas(Class<? extends ScimResource> base, List<Class<? extends ScimExtension>> extensionList) throws InvalidProviderException {
-        
-    Field [] baseFieldList = base.getFields();
+  private Schema generateSchema(Class<?> clazz) {
     
-    Schema baseSchema = new Schema();
+    Field [] fieldList = clazz.getFields();
+    ScimResourceType srt = clazz.getAnnotation(ScimResourceType.class);
     
-    baseSchema.setAttributes(addAttributes(baseFieldList));
-   
+    Schema schema = new Schema();
     
-    return null;
+    schema.setAttributes(addAttributes(fieldList));
+    schema.setId(srt.id());
+    schema.setDescription(srt.desription());
+    schema.setName(srt.name());
+    
+    return schema;
   }
-   
+
   private List<Attribute> addAttributes(Field [] fieldList) {
     List<Attribute> attributeList = new ArrayList<>();
     
