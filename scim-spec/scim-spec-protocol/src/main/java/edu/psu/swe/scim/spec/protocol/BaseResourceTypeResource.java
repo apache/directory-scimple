@@ -38,8 +38,8 @@ public interface BaseResourceTypeResource<T> {
                   @ApiResponse(code=500, message="Internal Server Error"),
                   @ApiResponse(code=501, message="Not Implemented")
                 })
-  default Response getById(@ApiParam(value="id", required=true) @PathParam("id") String id, 
-                           @ApiParam(value="attributes", required=false) @QueryParam("attributes") String attributes) {
+    default Response getById(@ApiParam(value="id", required=true) @PathParam("id") String id, 
+                             @ApiParam(value="attributes", required=false) @QueryParam("attributes") String attributes) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   

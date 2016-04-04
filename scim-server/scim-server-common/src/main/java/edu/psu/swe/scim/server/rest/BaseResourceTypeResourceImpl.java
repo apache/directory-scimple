@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.server.rest;
 
+import java.net.URI;
+
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -8,9 +10,10 @@ import javax.ws.rs.core.UriInfo;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 
-public abstract class BaseResourceTypeResourceImpl<T> implements BaseResourceTypeResource<T> {
+public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
   public abstract Provider<T> getProvider();
   
@@ -25,7 +28,7 @@ public abstract class BaseResourceTypeResourceImpl<T> implements BaseResourceTyp
       return BaseResourceTypeResource.super.getById(id, attributes);
     }
 
-    T resource = provider.get(id);
+    ScimResource resource = provider.get(id);
 
     // TODO - Handle attributes
 
@@ -36,7 +39,10 @@ public abstract class BaseResourceTypeResourceImpl<T> implements BaseResourceTyp
       return Response.status(Status.NOT_FOUND).entity(er).build();
     }
 
-    return Response.ok().entity(resource).build();
+    URI uri = uriInfo.getAbsolutePath();
+    String  uriString = uri.toASCIIString() + "/" + resource.getId();
+    
+    return Response.ok().entity(resource).header("Location", uriString).build();
   }
 
   @Override

@@ -15,8 +15,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
@@ -38,24 +36,27 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 public class ProviderRegistry {
-  
+
   @Inject
   Registry registry;
-  
+
   public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
-  
+
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
     ResourceType resourceType = generateResourceType(clazz, provider);
+    
+    log.info("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
-    
+
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
-    
+
     Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
-    
-    while(iter.hasNext()) {
+
+    while (iter.hasNext()) {
+      log.info("Calling addSchema on an extension");
       registry.addSchema(generateSchema(iter.next()));
     }
-    
+
     registry.addResourceType(resourceType);
     providerMap.put(clazz, provider);
   }
@@ -64,63 +65,63 @@ public class ProviderRegistry {
   public <T extends ScimResource> Provider<T> getProvider(Class<T> clazz) {
     return (Provider<T>) providerMap.get(clazz);
   }
-  
+
   private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException {
 
     ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
-    
+
     if (scimResourceType == null) {
       throw new InvalidProviderException("Missing annotation: ScimResourceType must be at the top of scim resource classes");
     }
-    
+
     ResourceType resourceType = new ResourceType();
     resourceType.setDescription(scimResourceType.desription());
     resourceType.setId(scimResourceType.id());
     resourceType.setName(scimResourceType.name());
     resourceType.setEndpoint(scimResourceType.endpoint());
     resourceType.setSchemaUrn(scimResourceType.schema());
-    
+
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
-    
+
     if (extensionList != null) {
-    
+
       List<ResourceType.SchemaExtentionConfiguration> extensionSchemaList = new ArrayList<>();
-      
+
       for (Class<? extends ScimExtension> se : extensionList) {
-        
+
         ScimExtensionType extensionType = se.getAnnotation(ScimExtensionType.class);
-        
+
         if (extensionList == null) {
           throw new InvalidProviderException("Missing annotation: ScimExtensionType must be at the top of scim extension classes");
         }
-        
+
         ResourceType.SchemaExtentionConfiguration ext = new ResourceType.SchemaExtentionConfiguration();
         ext.setRequired(extensionType.required());
         ext.setSchemaUrn(extensionType.id());
         extensionSchemaList.add(ext);
       }
-      
+
       resourceType.setSchemaExtensions(extensionSchemaList);
     }
-    
+
     return resourceType;
   }
-  
-  
+
   private Schema generateSchema(Class<?> clazz) {
-    
-    Field [] fieldList = clazz.getFields();
-    
+
+    Field[] fieldList = clazz.getFields();
+
     Schema schema = new Schema();
-    
+
     ScimResourceType srt = clazz.getAnnotation(ScimResourceType.class);
     ScimExtensionType set = clazz.getAnnotation(ScimExtensionType.class);
-    
+
     if (srt == null && set == null) {
-      //TODO - throw?
+      // TODO - throw?
       log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
     }
-    
+
+    log.info("calling set attributes with " + fieldList.length + " fields");
     schema.setAttributes(addAttributes(fieldList));
 
     if (srt != null) {
@@ -132,56 +133,59 @@ public class ProviderRegistry {
       schema.setDescription(set.description());
       schema.setName(set.name());
     }
-    
+
     return schema;
   }
 
-  private List<Attribute> addAttributes(Field [] fieldList) {
+  private List<Attribute> addAttributes(Field[] fieldList) {
     List<Attribute> attributeList = new ArrayList<>();
-    
+
     for (Field f : fieldList) {
-    	ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
-    	
-    	if (sa == null) {
-    		continue;
-    	}
-    	
-    	Attribute attribute = new Attribute();
-        attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
-        attribute.setCaseExact(sa.caseExact());
-        attribute.setDescription(sa.description());
-        
-        if (Collection.class.isAssignableFrom(f.getType()) || f.getType().isArray()) {
-          attribute.setMultiValued(true);
+      ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
+
+      log.info("Processing field " + f.getName());
+      if (sa == null) {
+        log.warn("Attribute " + f.getName() + " did not have a ScimAttribute annotation");
+        continue;
+      }
+
+      Attribute attribute = new Attribute();
+      attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
+      attribute.setCaseExact(sa.caseExact());
+      attribute.setDescription(sa.description());
+
+      if (Collection.class.isAssignableFrom(f.getType()) || f.getType().isArray()) {
+        attribute.setMultiValued(true);
+      } else {
+        attribute.setMultiValued(false);
+      }
+
+      attribute.setMutability(sa.mutability());
+      attribute.setName(sa.name());
+      attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
+      attribute.setRequired(sa.required());
+      attribute.setReturned(sa.returned());
+      attribute.setType(sa.type());
+      attribute.setUniqueness(sa.uniqueness());
+
+      if (sa.type().equals(Type.COMPLEX)) {
+        if (!attribute.isMultiValued()) {
+          attribute.setSubAttributes(addAttributes(f.getType().getFields()));
+        } else if (f.getType().isArray()) {
+          Class<?> componentType = f.getType().getComponentType();
+          attribute.setSubAttributes(addAttributes(componentType.getFields()));
         } else {
-          attribute.setMultiValued(false);
+          ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
+          Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+          attribute.setSubAttributes(addAttributes(attributeContainedClass.getFields()));
         }
-        
-        attribute.setMutability(sa.mutability());
-        attribute.setName(sa.name());
-        attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
-        attribute.setRequired(sa.required());
-        attribute.setReturned(sa.returned());
-        attribute.setType(sa.type());
-        attribute.setUniqueness(sa.uniqueness());
-        
-    	if (sa.type().equals(Type.COMPLEX)) {
-    	  if (!attribute.isMultiValued()) {
-    		attribute.setSubAttributes(addAttributes(f.getType().getFields()));
-    	  } else if (f.getType().isArray()){
-    		 Class<?> componentType = f.getType().getComponentType();
-    		 attribute.setSubAttributes(addAttributes(componentType.getFields()));
-    	  } else {
-    	     ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
-    	     Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-    	     attribute.setSubAttributes(addAttributes(attributeContainedClass.getFields()));
-    	  }
-    	}
-    	attributeList.add(attribute);
+      }
+      attributeList.add(attribute);
     }
-    
+
+    log.info("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }
-//  private Provider<ScimGroup> groupProvider = null;
-//  private Provider<ScimUser> userProvider = null;
+  // private Provider<ScimGroup> groupProvider = null;
+  // private Provider<ScimUser> userProvider = null;
 }
