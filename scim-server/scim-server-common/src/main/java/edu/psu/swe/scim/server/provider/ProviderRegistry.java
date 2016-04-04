@@ -25,7 +25,6 @@ import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
-import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
@@ -166,8 +165,13 @@ public class ProviderRegistry {
         attribute.setMultiValued(false);
       }
 
+      if (sa.name() == null || sa.name().isEmpty()) {
+        attribute.setName(f.getName());
+      } else {
+        attribute.setName(sa.name());
+      }
+      
       attribute.setMutability(sa.mutability());
-      attribute.setName(sa.name());
       attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
       attribute.setRequired(sa.required());
       attribute.setReturned(sa.returned());

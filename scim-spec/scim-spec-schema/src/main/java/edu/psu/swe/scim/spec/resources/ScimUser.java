@@ -27,7 +27,7 @@ public class ScimUser extends ScimResource {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
   
   private
-  @ScimAttribute(description="A Boolean value indicating the User's administrative status.")
+  @ScimAttribute(description="A Boolean value indicating the User's administrative status.", type=Type.BOOLEAN)
   @XmlElement(name = "active")
   boolean active = true;
 
@@ -79,7 +79,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "photos")
   List<Photo> photos;
 
-  @ScimAttribute(description="A fully qualified URL to a page representing the User's online profile")
+  @ScimAttribute(description="A fully qualified URL to a page representing the User's online profile", referenceTypes={"external"})
   @XmlElement(name = "profileUrl")
   String profileUrl;
 
@@ -87,7 +87,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "preferredLanguage")
   String preferredLanguage;
 
-  @ScimAttribute(type = Type.COMPLEX)
+  @ScimAttribute(type = Type.COMPLEX, description="A list of roles for the User that collectively represent who the User is; e.g., 'Student', 'Faculty'.")
   @XmlElement(name = "roles")
   List<Role> roles;
 
@@ -107,7 +107,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "userType")
   String userType;
 
-  @ScimAttribute(type = Type.COMPLEX)
+  @ScimAttribute(type = Type.COMPLEX, description="A list of certificates issued to the User.")
   @XmlElement(name = "x509Certificates")
   List<X509Certificate> x509Certificates;
 

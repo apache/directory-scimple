@@ -1,7 +1,5 @@
 package edu.psu.swe.scim.server.schema;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,25 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.PostActivate;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
-import edu.psu.swe.scim.spec.schema.ScimSpecSchema;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Startup
@@ -53,6 +44,7 @@ public class Registry {
   }
 
   public void addSchema(Schema schema) throws JsonProcessingException {
+    log.info("Adding schema " + schema.getId() + " into the registry");
     schemaMap.put(schema.getId(), schema);
   }
 
@@ -74,31 +66,6 @@ public class Registry {
     return Collections.unmodifiableCollection(resourceTypeMap.values());
   }
   
-//  @PostConstruct
-//  @PostActivate
-//  private void loadSchemaMap() {
-//    objectMapper = new ObjectMapper();
-//
-//    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-//    objectMapper.registerModule(jaxbAnnotationModule);
-//
-//    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-//    objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
-//
-//    for (String s : ScimSpecSchema.getSchemaNames()) {
-//      String schemaFile = "/schemas/" + s + ".json";
-//      log.debug("Attempting to load schema file: " + schemaFile);
-//      
-//      try (InputStream is = Schema.class.getClassLoader().getResourceAsStream(schemaFile)) {
-//        Schema schema = objectMapper.readValue(is, Schema.class);
-//        schemaMap.put(schema.getId(), schema);
-//      } catch (IOException e) {
-//        log.error("Unable to load schema from: " + schemaFile, e);
-//        continue;
-//      }
-//    }
-//  }
-  
   public void addResourceType(ResourceType resourceType) {
     resourceTypeMap.put(resourceType.getName(), resourceType);
   }
@@ -106,6 +73,7 @@ public class Registry {
   public void addResourceType(Class<? extends ScimResource> resourceTypeClass) {
     addResourceType(resourceTypeClass, Collections.emptyList());
   }
+  
   public void addResourceType(Class<? extends ScimResource> resourceTypeClass, List<Class<? extends ScimExtension>> extensions) {
     ResourceType resourceType = createResourceType(resourceTypeClass);
     for (Class<? extends ScimExtension> extensionClass : extensions) {
