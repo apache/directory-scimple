@@ -15,6 +15,8 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
@@ -29,10 +31,12 @@ import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Startup
 @Data
+@Slf4j
 public class ProviderRegistry {
   
   @Inject
@@ -106,14 +110,28 @@ public class ProviderRegistry {
   private Schema generateSchema(Class<?> clazz) {
     
     Field [] fieldList = clazz.getFields();
-    ScimResourceType srt = clazz.getAnnotation(ScimResourceType.class);
     
     Schema schema = new Schema();
     
+    ScimResourceType srt = clazz.getAnnotation(ScimResourceType.class);
+    ScimExtensionType set = clazz.getAnnotation(ScimExtensionType.class);
+    
+    if (srt == null && set == null) {
+      //TODO - throw?
+      log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
+    }
+    
     schema.setAttributes(addAttributes(fieldList));
-    schema.setId(srt.id());
-    schema.setDescription(srt.desription());
-    schema.setName(srt.name());
+
+    if (srt != null) {
+      schema.setId(srt.id());
+      schema.setDescription(srt.desription());
+      schema.setName(srt.name());
+    } else {
+      schema.setId(set.id());
+      schema.setDescription(set.description());
+      schema.setName(set.name());
+    }
     
     return schema;
   }

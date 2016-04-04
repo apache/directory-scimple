@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -45,6 +46,7 @@ import javax.ws.rs.core.Response.Status;
 public interface SchemaResource {
 
   @GET
+  @Produces("application/scim+json")
   default public Response getAllSchemas(@QueryParam("filter") String filter) {
 
     if (filter != null) {
@@ -55,6 +57,7 @@ public interface SchemaResource {
   }
 
   @GET
+  @Produces("application/scim+json")
   @Path("{uri}")
   default public Response getSchema(@PathParam("uri") String uri) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
