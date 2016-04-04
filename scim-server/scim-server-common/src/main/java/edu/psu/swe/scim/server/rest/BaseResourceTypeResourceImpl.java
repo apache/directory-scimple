@@ -2,7 +2,7 @@ package edu.psu.swe.scim.server.rest;
 
 import java.net.URI;
 
-import javax.inject.Inject;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -17,7 +17,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   public abstract Provider<T> getProvider();
   
-  @Inject 
+  @Context
   UriInfo uriInfo;
   
   @Override
