@@ -1,7 +1,9 @@
 package edu.psu.swe.scim.server.rest;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
@@ -11,6 +13,9 @@ import edu.psu.swe.scim.spec.schema.ErrorResponse;
 public abstract class BaseResourceTypeResourceImpl<T> implements BaseResourceTypeResource<T> {
 
   public abstract Provider<T> getProvider();
+  
+  @Inject 
+  UriInfo uriInfo;
   
   @Override
   public Response getById(String id, String attributes) {

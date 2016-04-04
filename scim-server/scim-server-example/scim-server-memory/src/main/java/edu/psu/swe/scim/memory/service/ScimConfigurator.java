@@ -8,6 +8,8 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
@@ -30,7 +32,7 @@ public class ScimConfigurator implements ServletContextListener {
   public void contextInitialized(ServletContextEvent sce) {
     try {
       providerRegistry.registerProvider(ScimUser.class, userProvider);
-    } catch (InvalidProviderException e) {
+    } catch (InvalidProviderException | JsonProcessingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
