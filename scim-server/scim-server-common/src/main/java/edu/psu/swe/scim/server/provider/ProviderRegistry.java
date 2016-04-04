@@ -11,17 +11,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
@@ -44,7 +48,7 @@ public class ProviderRegistry {
 
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
     ResourceType resourceType = generateResourceType(clazz, provider);
-    
+
     log.info("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
 
@@ -109,7 +113,9 @@ public class ProviderRegistry {
 
   private Schema generateSchema(Class<?> clazz) {
 
-    Field[] fieldList = clazz.getFields();
+    //List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
+    
+    Field [] fieldList = clazz.getDeclaredFields();
 
     Schema schema = new Schema();
 
@@ -170,14 +176,17 @@ public class ProviderRegistry {
 
       if (sa.type().equals(Type.COMPLEX)) {
         if (!attribute.isMultiValued()) {
-          attribute.setSubAttributes(addAttributes(f.getType().getFields()));
+          //attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(), BaseResource.class)));
+          attribute.setSubAttributes(addAttributes(f.getType().getDeclaredFields()));
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
-          attribute.setSubAttributes(addAttributes(componentType.getFields()));
+          //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
+          attribute.setSubAttributes(addAttributes(componentType.getDeclaredFields()));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-          attribute.setSubAttributes(addAttributes(attributeContainedClass.getFields()));
+          //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
+          attribute.setSubAttributes(addAttributes(attributeContainedClass.getDeclaredFields()));
         }
       }
       attributeList.add(attribute);
@@ -186,6 +195,17 @@ public class ProviderRegistry {
     log.info("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }
+
+  public static List<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
+    List<Field> currentClassFields = Lists.newArrayList(startClass.getDeclaredFields());
+    Class<?> parentClass = startClass.getSuperclass();
+    if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+      List<Field> parentClassFields = (List<Field>) getFieldsUpTo(parentClass, exclusiveParent);
+      currentClassFields.addAll(parentClassFields);
+    }
+    return currentClassFields;
+  }
+  
   // private Provider<ScimGroup> groupProvider = null;
   // private Provider<ScimUser> userProvider = null;
 }

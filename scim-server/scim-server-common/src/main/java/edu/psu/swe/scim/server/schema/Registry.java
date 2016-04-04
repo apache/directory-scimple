@@ -74,30 +74,30 @@ public class Registry {
     return Collections.unmodifiableCollection(resourceTypeMap.values());
   }
   
-  @PostConstruct
-  @PostActivate
-  private void loadSchemaMap() {
-    objectMapper = new ObjectMapper();
-
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objectMapper.registerModule(jaxbAnnotationModule);
-
-    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
-
-    for (String s : ScimSpecSchema.getSchemaNames()) {
-      String schemaFile = "/schemas/" + s + ".json";
-      log.debug("Attempting to load schema file: " + schemaFile);
-      
-      try (InputStream is = Schema.class.getClassLoader().getResourceAsStream(schemaFile)) {
-        Schema schema = objectMapper.readValue(is, Schema.class);
-        schemaMap.put(schema.getId(), schema);
-      } catch (IOException e) {
-        log.error("Unable to load schema from: " + schemaFile, e);
-        continue;
-      }
-    }
-  }
+//  @PostConstruct
+//  @PostActivate
+//  private void loadSchemaMap() {
+//    objectMapper = new ObjectMapper();
+//
+//    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
+//    objectMapper.registerModule(jaxbAnnotationModule);
+//
+//    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
+//    objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
+//
+//    for (String s : ScimSpecSchema.getSchemaNames()) {
+//      String schemaFile = "/schemas/" + s + ".json";
+//      log.debug("Attempting to load schema file: " + schemaFile);
+//      
+//      try (InputStream is = Schema.class.getClassLoader().getResourceAsStream(schemaFile)) {
+//        Schema schema = objectMapper.readValue(is, Schema.class);
+//        schemaMap.put(schema.getId(), schema);
+//      } catch (IOException e) {
+//        log.error("Unable to load schema from: " + schemaFile, e);
+//        continue;
+//      }
+//    }
+//  }
   
   public void addResourceType(ResourceType resourceType) {
     resourceTypeMap.put(resourceType.getName(), resourceType);
