@@ -25,7 +25,8 @@ public class ScimUser extends ScimResource {
 
   public static final String RESOURCE_NAME = "User";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
-
+  
+  private
   @ScimAttribute(description="A Boolean value indicating the User's administrative status.")
   @XmlElement(name = "active")
   boolean active = true;
@@ -46,7 +47,7 @@ public class ScimUser extends ScimResource {
   @XmlElement(name = "entitlements")
   List<Entitlement> entitlements;
 
-  @ScimAttribute(type = Type.COMPLEX)
+  @ScimAttribute(type = Type.COMPLEX, description="A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
   @XmlElement(name = "groups")
   List<ResourceReference> groups;
 
