@@ -17,6 +17,8 @@ import edu.psu.swe.scim.spec.resources.ScimUser;
 import edu.psu.swe.scim.spec.schema.AttributeContainer;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
+import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
+import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 
 @Stateless
 public class AttributeUtil {
@@ -32,15 +34,6 @@ public class AttributeUtil {
     }
 
     // TODO return always and specified attributes, exclude never
-
-    for (AttributeReference attributeReference : attributesReferences) {
-      try {
-        findAttribute(attributeReference);
-      } catch (AttributeDoesNotExistException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
 
     return resource;
   }
@@ -67,6 +60,28 @@ public class AttributeUtil {
     return list;
   }
 
+  private List<Attribute> getAttributesOfType(AttributeContainer attributeContainer, Returned returned) {
+    List<Attribute> attributesOfType = new ArrayList<>();
+    for (Attribute attribute : attributeContainer.getAttributes()) {
+      if (returned == attribute.getReturned()) {
+        attributesOfType.add(attribute);
+      }
+      if (attribute.getType() == Type.COMPLEX) {
+        attributesOfType.addAll(getAttributesOfType(attribute, returned));
+      }
+    }
+    return attributesOfType;
+  }
+  
+  private List<Attribute> getAttributes(List<AttributeReference> attributeReferences) throws AttributeDoesNotExistException {
+    List<Attribute> attributes = new ArrayList<>();
+
+    for (AttributeReference attributeReference : attributeReferences) {
+      attributes.add(findAttribute(attributeReference));
+    }
+    return attributes;
+  }
+  
   private Attribute findAttribute(AttributeReference attributeReference) throws AttributeDoesNotExistException {
     String schemaUrn = attributeReference.getUrn();
     String[] attributeNames = attributeReference.getAttributeName();
