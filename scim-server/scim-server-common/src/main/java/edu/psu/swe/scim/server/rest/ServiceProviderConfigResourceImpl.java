@@ -7,8 +7,8 @@ import java.util.List;
 import javax.ejb.Singleton;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import edu.psu.swe.scim.server.configuration.ServerConfiguration;
 import edu.psu.swe.scim.spec.protocol.ServiceProviderConfigResource;
@@ -28,7 +28,7 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
   ServerConfiguration serverConfiguration;
 
   @Override
-  public Response getServiceProviderConfiguration(HttpServletRequest request) {
+  public Response getServiceProviderConfiguration(UriInfo uriInfo) {
     ServiceProviderConfiguration serviceProviderConfiguration = new ServiceProviderConfiguration();
     List<AuthenticationSchema> authenticationSchemas = serverConfiguration.getAuthenticationSchemas();
     BulkConfiguration bulk = serverConfiguration.getBulkConfiguration();
@@ -41,17 +41,13 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
     String externalId = "<EXTERNAL_ID>"; // TODO needed?
     String id = "<ID>"; // TODO needed?
     Meta meta = new Meta();
-    String scheme = request.getScheme();
-    String host = request.getServerName();
-    int port = request.getLocalPort();
-    String portString = port == 80 ? "" : ":" + port;
-    String requestUri = request.getRequestURI();
-    String location = String.format("%s://%s%s%s", scheme, host, portString, requestUri);
+    String location = uriInfo.getAbsolutePath().toString();
     String resourceType = "ServiceProviderConfig";
     String version = "<META_VERSION>";
+    Date now = new Date();
 
-    meta.setCreated(new Date());
-    meta.setLastModified(new Date());
+    meta.setCreated(now);
+    meta.setLastModified(now);
     meta.setLocation(location);
     meta.setResourceType(resourceType);
     meta.setVersion(version);
