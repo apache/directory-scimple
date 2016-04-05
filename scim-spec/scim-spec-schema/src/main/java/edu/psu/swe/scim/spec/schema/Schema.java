@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -24,6 +22,10 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.psu.swe.scim.spec.validator.Urn;
 
 /**
@@ -37,11 +39,13 @@ import edu.psu.swe.scim.spec.validator.Urn;
 @XmlRootElement(name = "schema")
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Schema {
+public class Schema implements AttributeContainer {
 
+  private static final Logger LOG = LoggerFactory.getLogger(Schema.class);
+  
   public static final String RESOURCE_NAME = "Schema";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:Schema";
-
+  
   
   /**
    * Defines the structure of attributes included in SCIM schemas as defined by
@@ -54,7 +58,7 @@ public class Schema {
   @XmlType(name = "attribute")
   @XmlAccessorType(XmlAccessType.NONE)
   @Data
-  public static class Attribute {
+  public static class Attribute implements AttributeContainer {
 
     public enum Mutability {
 
@@ -102,6 +106,10 @@ public class Schema {
     @XmlElement
     List<Attribute> subAttributes;
     
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    Map<String, Attribute> subAttributeNamesMap = new HashMap<>();
+    
     @XmlElement
     boolean multiValued;
     
@@ -128,6 +136,32 @@ public class Schema {
     
     @XmlElement
     List<String> referenceTypes;
+
+    @Override
+    public List<Attribute> getAttributes() {
+      return Collections.unmodifiableList(subAttributes);
+    }
+    
+    public void setSubAttributes(List<Attribute> attributes) {
+      subAttributeNamesMap.clear();
+      
+      for (Attribute attribute : attributes) {
+        String name = attribute.getName();
+        if (name == null) {
+          LOG.warn("Attribute name was null, skipping name indexing");
+          continue;
+        }
+        subAttributeNamesMap.put(name.toLowerCase(), attribute);
+      }
+    }
+    
+    public Attribute getAttribute(String name) {
+      if (name == null) {
+        return null;
+      }
+      return subAttributeNamesMap.get(name.toLowerCase());
+    }
+
   }
   
   @Urn
@@ -162,11 +196,19 @@ public class Schema {
     attributeNamesMap.clear();
     
     for (Attribute attribute : attributes) {
-      attributeNamesMap.put(attribute.getName(), attribute);
+      String name = attribute.getName();
+      if (name == null) {
+        LOG.warn("Attribute name was null, skipping name indexing");
+        continue;
+      }
+      attributeNamesMap.put(name.toLowerCase(), attribute);
     }
   }
   
   public Attribute getAttribute(String name) {
-    return attributeNamesMap.get(name);
+    if (name == null) {
+      return null;
+    }
+    return attributeNamesMap.get(name.toLowerCase());
   }
 }
