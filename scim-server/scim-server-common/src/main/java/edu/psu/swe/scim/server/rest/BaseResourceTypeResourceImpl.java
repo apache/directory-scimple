@@ -3,6 +3,8 @@ package edu.psu.swe.scim.server.rest;
 import java.io.StringWriter;
 import java.net.URI;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -11,13 +13,17 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
 
+@Stateless
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
   private static final String LOCATION_TAG = "Location";
@@ -28,6 +34,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Context
   UriInfo uriInfo;
   
+  @Inject
+  AttributeUtil attributeUtil;
+  
   @Override
   public Response getById(String id, String attributes, String excludedAttributes) {
     Provider<T> provider = null;
@@ -36,7 +45,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
-    if (attributes != null && excludedAttributes != null && !attributes.isEmpty() && !excludedAttributes.isEmpty()) {
+    if (StringUtils.isNotEmpty(attributes) && StringUtils.isNotEmpty(excludedAttributes)) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus("400");
       er.setDetail("Cannot include both attributes and excluded attributes in a single request");
@@ -44,8 +53,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
     
     T resource = provider.get(id);
-
-    // TODO - Handle attributes
 
     if (resource == null) {
       ErrorResponse er = new ErrorResponse();
@@ -72,6 +79,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     meta.setVersion(etag);
     resource.setMeta(meta);
     
+    // Process Attributes 
+    if (StringUtils.isNotEmpty(excludedAttributes)) {
+      resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
+    } else {
+      resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
+    }
+    
     return Response.ok().entity(resource).header(LOCATION_TAG, uriString).header(ETAG_TAG, etag).build();
   }
 
@@ -91,6 +105,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T created = provider.create(resource);
 
+    // Process Attributes 
+    created = attributeUtil.setAttributesForDisplay(resource, "");
+    
     return Response.status(Status.CREATED).entity(created).build();
   }
 
@@ -110,6 +127,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T updated = provider.update(resource);
 
+    // Process Attributes 
+    updated = attributeUtil.setAttributesForDisplay(resource, "");
+    
     return Response.ok(updated).build();
   }
 
