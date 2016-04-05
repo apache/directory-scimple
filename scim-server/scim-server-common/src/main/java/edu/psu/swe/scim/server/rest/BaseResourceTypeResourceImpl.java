@@ -1,20 +1,28 @@
 package edu.psu.swe.scim.server.rest;
 
+import java.io.StringWriter;
 import java.net.URI;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
+import edu.psu.swe.scim.spec.schema.Meta;
 
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
+  private static final String LOCATION_TAG = "Location";
+  private static final String ETAG_TAG = "Etag";
+  
   public abstract Provider<T> getProvider();
   
   @Context
@@ -28,7 +36,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.getById(id, attributes);
     }
 
-    ScimResource resource = provider.get(id);
+    T resource = provider.get(id);
 
     // TODO - Handle attributes
 
@@ -42,7 +50,22 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     URI uri = uriInfo.getAbsolutePath();
     String  uriString = uri.toASCIIString() + "/" + resource.getId();
     
-    return Response.ok().entity(resource).header("Location", uriString).build();
+    Meta meta = resource.getMeta();
+    String etag = null;
+    
+    try {
+      etag = generateEtag(resource);
+    } catch (JAXBException e) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus("500");
+      er.setDetail("Failed to generate the etag");
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    }
+    
+    meta.setVersion(etag);
+    resource.setMeta(meta);
+    
+    return Response.ok().entity(resource).header(LOCATION_TAG, uriString).header(ETAG_TAG, etag).build();
   }
 
   @Override
@@ -93,5 +116,24 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response delete(String id) {
     // TODO Auto-generated method stub
     return BaseResourceTypeResource.super.delete(id);
+  }
+  
+  private String generateEtag(T resource) throws JAXBException {
+    
+    JAXBContext context = null;
+    
+    context = JAXBContext.newInstance(resource.getClass());
+    
+    Marshaller marshaller = context.createMarshaller(); 
+        
+    StringWriter sw = new StringWriter();
+    
+    marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+    resource.setMeta(null);
+    marshaller.marshal(resource, sw);
+    
+    Integer etag = sw.toString().hashCode();
+    return etag.toString();
+    
   }
 }
