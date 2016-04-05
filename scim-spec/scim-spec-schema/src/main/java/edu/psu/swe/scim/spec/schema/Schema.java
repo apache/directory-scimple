@@ -1,7 +1,12 @@
 package edu.psu.swe.scim.spec.schema;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -15,8 +20,11 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import edu.psu.swe.scim.spec.validator.Urn;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import edu.psu.swe.scim.spec.validator.Urn;
 
 /**
  * Defines the structure of the SCIM schemas as defined by section 7 of the SCIM
@@ -139,6 +147,26 @@ public class Schema {
   @XmlElementWrapper(name = "attributes")
   List<Attribute> attributes;
   
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  Map<String, Attribute> attributeNamesMap = new HashMap<>();
+  
   @XmlElement
   Meta meta;
+  
+  public List<Attribute> getAttributes() {
+    return Collections.unmodifiableList(attributes);
+  }
+  
+  public void setAttributes(List<Attribute> attributes) {
+    attributeNamesMap.clear();
+    
+    for (Attribute attribute : attributes) {
+      attributeNamesMap.put(attribute.getName(), attribute);
+    }
+  }
+  
+  public Attribute getAttribute(String name) {
+    return attributeNamesMap.get(name);
+  }
 }
