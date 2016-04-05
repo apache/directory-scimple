@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.spec.schema;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -136,6 +137,8 @@ public class Schema implements AttributeContainer {
     
     @XmlElement
     List<String> referenceTypes;
+    
+    Field field;
 
     @Override
     public List<Attribute> getAttributes() {

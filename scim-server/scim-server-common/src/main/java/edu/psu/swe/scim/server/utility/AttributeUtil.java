@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
+import edu.psu.swe.scim.spec.resources.ScimGroup;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 import edu.psu.swe.scim.spec.schema.AttributeContainer;
@@ -26,14 +27,19 @@ public class AttributeUtil {
   public <T extends ScimResource> T setAttributesForDisplay(T resource, String attributes) {
     List<AttributeReference> attributesReferences = parseAttributeString(attributes);
 
-    if (attributes == null) {
+    if (StringUtils.isEmpty(attributes)) {
       // TODO return always and default, exclude never
     }
 
     // TODO return always and specified attributes, exclude never
 
     for (AttributeReference attributeReference : attributesReferences) {
-      findAttribute(attributeReference);
+      try {
+        findAttribute(attributeReference);
+      } catch (AttributeDoesNotExistException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
 
     return resource;
@@ -42,7 +48,7 @@ public class AttributeUtil {
   public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, String excludedAttributes) {
     List<AttributeReference> attributesReferences = parseAttributeString(excludedAttributes);
 
-    if (excludedAttributes == null) {
+    if (StringUtils.isEmpty(excludedAttributes)) {
       // TODO return always and default, exclude never
     }
 
@@ -76,9 +82,20 @@ public class AttributeUtil {
       return attribute;
     }
 
-    // Handle unqualified attributes
-//    schema = registry.getSchema(urn);
+    // Handle unqualified attributes, look in the core schemas
+    schema = registry.getSchema(ScimUser.SCHEMA_URI);
+    Attribute attribute = findAttributeInSchema(schema, attributeNames);
+    if (attribute != null) {
+      return attribute;
+    }
+    
+    schema = registry.getSchema(ScimGroup.SCHEMA_URI);
+    attribute = findAttributeInSchema(schema, attributeNames);
+    if (attribute != null) {
+      return attribute;
+    }
 
+    throw new AttributeDoesNotExistException(attributeReference.getFullyQualifiedAttributeName());
   }
 
   private Attribute findAttributeInSchema(Schema schema, String[] attributeNames) throws AttributeDoesNotExistException {

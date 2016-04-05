@@ -127,7 +127,7 @@ public class ProviderRegistry {
     }
 
     log.info("calling set attributes with " + fieldList.length + " fields");
-    schema.setAttributes(addAttributes(fieldList));
+    schema.setAttributes(createAttributes(fieldList));
 
     if (srt != null) {
       schema.setId(srt.schema());
@@ -142,7 +142,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private List<Attribute> addAttributes(Field[] fieldList) {
+  private List<Attribute> createAttributes(Field[] fieldList) {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -155,6 +155,7 @@ public class ProviderRegistry {
       }
 
       Attribute attribute = new Attribute();
+      attribute.setField(f);
       
       List<String> cononicalTypes = Arrays.asList(sa.canonicalValues());
       
@@ -201,16 +202,16 @@ public class ProviderRegistry {
       if (sa.type().equals(Type.COMPLEX)) {
         if (!attribute.isMultiValued()) {
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(), BaseResource.class)));
-          attribute.setSubAttributes(addAttributes(f.getType().getDeclaredFields()));
+          attribute.setSubAttributes(createAttributes(f.getType().getDeclaredFields()));
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
-          attribute.setSubAttributes(addAttributes(componentType.getDeclaredFields()));
+          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields()));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
-          attribute.setSubAttributes(addAttributes(attributeContainedClass.getDeclaredFields()));
+          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields()));
         }
       }
       attributeList.add(attribute);
