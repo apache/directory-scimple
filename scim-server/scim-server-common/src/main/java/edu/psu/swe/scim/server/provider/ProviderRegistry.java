@@ -16,7 +16,6 @@ import javax.annotation.Nullable;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;

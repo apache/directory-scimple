@@ -34,7 +34,9 @@ public interface BaseResourceTypeResource<T> {
   @Produces("application/scim+json")
   @ApiOperation(value = "Find by id", response = ScimResource.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response getById(@ApiParam(value = "id", required = true) @PathParam("id") String id, @ApiParam(value = "attributes", required = false) @QueryParam("attributes") String attributes) {
+  default Response getById(@ApiParam(value = "id", required = true) @PathParam("id") String id, 
+                           @ApiParam(value = "attributes", required = false) @QueryParam("attributes") String attributes,
+                           @ApiParam(value = "excludedAttributes", required = false) @QueryParam("excludedAttributes") String excludedAttributes) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -47,7 +49,11 @@ public interface BaseResourceTypeResource<T> {
   @Produces("application/scim+json")
   @ApiOperation(value = "Find by a combination of query parameters", response = ScimResource.class, responseContainer = "List", code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response query(@ApiParam(value = "attributes", required = false) @QueryParam("attributes") String attributes, @ApiParam(value = "filter", required = false) @QueryParam("filter") String filter, @ApiParam(value = "sortBy", required = false) @QueryParam("sortBy") String sortBy, @ApiParam(value = "sortOrder", required = false) @QueryParam("sortOrder") String sortOrder, @ApiParam(value = "startIndex", required = false) @QueryParam("startIndex") Integer startIndex,
+  default Response query(@ApiParam(value = "attributes", required = false) @QueryParam("attributes") String attributes, 
+                         @ApiParam(value = "excludedAttributes", required = false) @QueryParam("attributes") String excludedAttributes,
+                         @ApiParam(value = "filter", required = false) @QueryParam("filter") String filter, 
+                         @ApiParam(value = "sortBy", required = false) @QueryParam("sortBy") String sortBy, 
+                         @ApiParam(value = "sortOrder", required = false) @QueryParam("sortOrder") String sortOrder, @ApiParam(value = "startIndex", required = false) @QueryParam("startIndex") Integer startIndex,
       @ApiParam(value = "count", required = false) @QueryParam("count") Integer count) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }

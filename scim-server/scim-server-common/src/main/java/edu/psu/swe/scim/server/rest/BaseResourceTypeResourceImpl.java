@@ -29,13 +29,20 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   UriInfo uriInfo;
   
   @Override
-  public Response getById(String id, String attributes) {
+  public Response getById(String id, String attributes, String excludedAttributes) {
     Provider<T> provider = null;
 
     if ((provider = getProvider()) == null) {
-      return BaseResourceTypeResource.super.getById(id, attributes);
+      return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
+    if (attributes != null && excludedAttributes != null && !attributes.isEmpty() && !excludedAttributes.isEmpty()) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus("400");
+      er.setDetail("Cannot include both attributes and excluded attributes in a single request");
+      return Response.status(Status.BAD_REQUEST).entity(er).build();
+    }
+    
     T resource = provider.get(id);
 
     // TODO - Handle attributes
@@ -69,9 +76,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response query(String attributes, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count) {
+  public Response query(String attributes, String excludedAttributes, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count) {
     // TODO Auto-generated method stub
-    return BaseResourceTypeResource.super.query(attributes, filter, sortBy, sortOrder, startIndex, count);
+    return BaseResourceTypeResource.super.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
   }
 
   @Override
