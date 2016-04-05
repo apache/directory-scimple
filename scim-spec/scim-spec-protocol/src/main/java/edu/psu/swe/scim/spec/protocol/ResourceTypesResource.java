@@ -1,13 +1,14 @@
 package edu.psu.swe.scim.spec.protocol;
 
-import io.swagger.annotations.Api;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import io.swagger.annotations.Api;
 
 /**
  * From SCIM Protocol Specification, section 4, page 74
@@ -39,6 +40,7 @@ import javax.ws.rs.core.Response.Status;
 public interface ResourceTypesResource {
 
   @GET
+  @Produces("application/scim+json")
   default public Response getAllResourceTypes(@QueryParam("filter") String filter) {
 
     if (filter != null) {
@@ -49,6 +51,7 @@ public interface ResourceTypesResource {
   }
 
   @GET
+  @Produces("application/scim+json")
   @Path("{name}")
   default public Response getResourceType(@PathParam("name") String name) {
     return Response.status(Status.NOT_IMPLEMENTED).build();

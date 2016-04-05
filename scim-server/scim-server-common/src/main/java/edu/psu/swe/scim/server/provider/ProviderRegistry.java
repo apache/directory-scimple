@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
@@ -48,7 +49,7 @@ public class ProviderRegistry {
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
     ResourceType resourceType = generateResourceType(clazz, provider);
 
-    log.info("Calling addSchema on the base");
+    log.debug("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
@@ -56,7 +57,7 @@ public class ProviderRegistry {
     Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
 
     while (iter.hasNext()) {
-      log.info("Calling addSchema on an extension");
+      log.debug("Calling addSchema on an extension");
       registry.addSchema(generateSchema(iter.next()));
     }
 
@@ -148,14 +149,25 @@ public class ProviderRegistry {
     for (Field f : fieldList) {
       ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
 
-      log.info("Processing field " + f.getName());
+      log.debug("Processing field " + f.getName());
       if (sa == null) {
         log.warn("Attribute " + f.getName() + " did not have a ScimAttribute annotation");
         continue;
       }
 
       Attribute attribute = new Attribute();
-      attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
+      
+      List<String> cononicalTypes = Arrays.asList(sa.canonicalValues());
+      
+      //If we just have the default single empty string, set to null
+      if (cononicalTypes.isEmpty() || (cononicalTypes.size() == 1 && cononicalTypes.get(0).isEmpty())) {
+        log.info("### Setting canonical values to null");
+        attribute.setCanonicalValues(null);
+      } else {
+        log.info("### Canonical types has " + cononicalTypes.size() + " entries and the first is " + cononicalTypes.get(0));
+        attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
+      }
+      
       attribute.setCaseExact(sa.caseExact());
       attribute.setDescription(sa.description());
 
@@ -172,7 +184,16 @@ public class ProviderRegistry {
       }
       
       attribute.setMutability(sa.mutability());
-      attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
+      
+      List<String> refType = Arrays.asList(sa.referenceTypes());
+      
+      //If we just have the default single empty string, set to null
+      if (refType.isEmpty() || (refType.size() == 1 && refType.get(0).isEmpty())) {
+        attribute.setReferenceTypes(null);
+      } else {
+        attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
+      }
+      
       attribute.setRequired(sa.required());
       attribute.setReturned(sa.returned());
       attribute.setType(sa.type());
@@ -196,7 +217,7 @@ public class ProviderRegistry {
       attributeList.add(attribute);
     }
 
-    log.info("Returning " + attributeList.size() + " attributes");
+    log.debug("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }
 
