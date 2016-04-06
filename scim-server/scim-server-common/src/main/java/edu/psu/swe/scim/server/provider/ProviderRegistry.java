@@ -110,7 +110,7 @@ public class ProviderRegistry {
     return resourceType;
   }
 
-  private Schema generateSchema(Class<?> clazz) {
+  private Schema generateSchema(Class<?> clazz) throws InvalidProviderException {
 
     //List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
     
@@ -127,7 +127,21 @@ public class ProviderRegistry {
     }
 
     log.info("calling set attributes with " + fieldList.length + " fields");
-    schema.setAttributes(createAttributes(fieldList));
+    List<String> invalidAttributes = new ArrayList<>();
+    schema.setAttributes(createAttributes(fieldList, invalidAttributes));
+    
+    if (!invalidAttributes.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      
+      sb.append("Scim attributes cannot be primitive types unless they are required.  The following values were found that are primitive and not required");
+      
+      for (String s : invalidAttributes) {
+        sb.append(s);
+        sb.append("\n");
+      }
+      
+      throw new InvalidProviderException(sb.toString());
+    }
 
     if (srt != null) {
       schema.setId(srt.schema());
@@ -142,7 +156,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private List<Attribute> createAttributes(Field[] fieldList) {
+  private List<Attribute> createAttributes(Field[] fieldList, List<String> invalidAttributes) {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -154,9 +168,22 @@ public class ProviderRegistry {
         continue;
       }
 
+      String attributeName;
+      
+      if (sa.name() == null || sa.name().isEmpty()) {
+        attributeName = f.getName();
+      } else {
+        attributeName = sa.name();
+      }
+      
+      if (f.getType().isPrimitive() && sa.required() == false) {
+        invalidAttributes.add(attributeName);
+        continue;
+      }
+      
       Attribute attribute = new Attribute();
       attribute.setField(f);
-      
+      attribute.setName(attributeName);
       List<String> cononicalTypes = Arrays.asList(sa.canonicalValues());
       
       //If we just have the default single empty string, set to null
@@ -177,11 +204,7 @@ public class ProviderRegistry {
         attribute.setMultiValued(false);
       }
 
-      if (sa.name() == null || sa.name().isEmpty()) {
-        attribute.setName(f.getName());
-      } else {
-        attribute.setName(sa.name());
-      }
+      
       
       attribute.setMutability(sa.mutability());
       
@@ -202,16 +225,16 @@ public class ProviderRegistry {
       if (sa.type().equals(Type.COMPLEX)) {
         if (!attribute.isMultiValued()) {
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(), BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(f.getType().getDeclaredFields()));
+          attribute.setSubAttributes(createAttributes(f.getType().getDeclaredFields(), invalidAttributes));
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields()));
+          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields(), invalidAttributes));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields()));
+          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields(), invalidAttributes));
         }
       }
       attributeList.add(attribute);

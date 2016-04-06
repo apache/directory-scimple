@@ -74,5 +74,4 @@ public class EnterpriseExtension implements ScimExtension {
   public String getUrn() {
     return URN;
   }
-
 }
