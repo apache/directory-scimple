@@ -1,9 +1,9 @@
 package edu.psu.swe.scim.server.utility;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ejb.Stateless;
@@ -93,11 +93,30 @@ public class AttributeUtil {
       if (attributesToRemove.contains(attribute)) {
         field.setAccessible(true);
         field.set(object, null);
-      } else if (attribute.getType() == Type.COMPLEX) {
+      } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
         String name = field.getName();
         Object subObject = field.get(object);
         Attribute subAttribute = attributeContainer.getAttribute(name);
         removeAttributes(subObject, subAttribute, attributesToRemove);
+      } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
+        String name = field.getName();
+        Object subObject = field.get(object);
+
+        if (Collection.class.isAssignableFrom(subObject.getClass())) {
+          Collection<?> collection = (Collection<?>) subObject;
+          for(Object o : collection) {
+            Attribute subAttribute = attributeContainer.getAttribute(name);
+            removeAttributes(o, subAttribute, attributesToRemove);
+          }
+        } else if (field.getType().isArray()) {
+          Object [] array = (Object []) subObject;
+          
+          for(Object o : array) {
+            Attribute subAttribute = attributeContainer.getAttribute(name);
+            removeAttributes(o, subAttribute, attributesToRemove);
+          }
+        }
+        
       }
     }
   }
