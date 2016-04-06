@@ -205,8 +205,6 @@ public class ProviderRegistry {
         attribute.setMultiValued(false);
       }
 
-      
-      
       attribute.setMutability(sa.mutability());
       
       List<String> refType = Arrays.asList(sa.referenceTypes());
@@ -230,12 +228,12 @@ public class ProviderRegistry {
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields(), invalidAttributes, nameBase + "." + componentType.getName()));
+          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields(), invalidAttributes, nameBase + "." + componentType.getSimpleName()));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields(), invalidAttributes, nameBase + "." + attributeContainedClass.getName()));
+          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields(), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()));
         }
       }
       attributeList.add(attribute);
