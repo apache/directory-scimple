@@ -18,6 +18,9 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 
@@ -26,14 +29,13 @@ import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Startup
@@ -112,9 +114,9 @@ public class ProviderRegistry {
   }
 
   public static Schema generateSchema(Class<?> clazz)  throws InvalidProviderException {
-    //List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
+    List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
     
-    Field [] fieldList = clazz.getDeclaredFields();
+    //Field [] fieldList = clazz.getDeclaredFields();
 
     Schema schema = new Schema();
 
@@ -126,7 +128,7 @@ public class ProviderRegistry {
       log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
     }
 
-    log.info("calling set attributes with " + fieldList.length + " fields");
+    log.info("calling set attributes with " + fieldList.size() + " fields");
     Set<String> invalidAttributes = new HashSet<>();
     schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getSimpleName()));
     
@@ -156,7 +158,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private static List<Attribute> createAttributes(Field[] fieldList, Set<String> invalidAttributes, String nameBase) {
+  private static List<Attribute> createAttributes(List<Field> fieldList, Set<String> invalidAttributes, String nameBase) {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -223,16 +225,16 @@ public class ProviderRegistry {
       if (sa.type().equals(Type.COMPLEX)) {
         if (!attribute.isMultiValued()) {
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(), BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(f.getType().getDeclaredFields(), invalidAttributes, nameBase + "." + f.getName()));
+          attribute.setSubAttributes(createAttributes(Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()));
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields(), invalidAttributes, nameBase + "." + componentType.getSimpleName()));
+          attribute.setSubAttributes(createAttributes(Arrays.asList(componentType.getDeclaredFields()), invalidAttributes, nameBase + "." + componentType.getSimpleName()));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields(), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()));
+          attribute.setSubAttributes(createAttributes(Arrays.asList(attributeContainedClass.getDeclaredFields()), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()));
         }
       }
       attributeList.add(attribute);

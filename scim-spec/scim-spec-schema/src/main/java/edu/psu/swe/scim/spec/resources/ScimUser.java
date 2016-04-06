@@ -26,10 +26,9 @@ public class ScimUser extends ScimResource {
   public static final String RESOURCE_NAME = "User";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
   
-  private
   @ScimAttribute(description="A Boolean value indicating the User's administrative status.", type=Type.BOOLEAN)
   @XmlElement(name = "active")
-  boolean active = true;
+  Boolean active = true;
 
   @ScimAttribute(type = Type.COMPLEX, description="A physical mailing address for this User, as described in (address Element). Canonical Type Values of work, home, and other. The value attribute is a complex type with the following sub-attributes.")
   @XmlElement(name = "addresses")

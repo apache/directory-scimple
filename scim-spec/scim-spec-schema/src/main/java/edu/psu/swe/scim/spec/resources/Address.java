@@ -28,7 +28,7 @@ public class Address {
   
   @XmlElement
   @ScimAttribute(type=Type.BOOLEAN, description="A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred mailing address or primary e-mail address. The primary attribute value 'true' MUST appear no more than once.")
-  boolean primary = false;
+  Boolean primary = false;
   
   @ScimAttribute(description="The two letter ISO 3166-1 alpha-2 country code")
   @XmlElement(nillable=true)

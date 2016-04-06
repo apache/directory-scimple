@@ -94,10 +94,10 @@ public class AttributeUtilTest {
     debugJson(resource);
 
     Assertions.assertThat(resource.getUserName()).isNotNull();
-    Assertions.assertThat(resource.isActive()).isNotNull();
-
     Assertions.assertThat(resource.getId()).isNotNull();
+
     Assertions.assertThat(resource.getPassword()).isNull();
+    Assertions.assertThat(resource.getActive()).isNull();
 
   }
   
