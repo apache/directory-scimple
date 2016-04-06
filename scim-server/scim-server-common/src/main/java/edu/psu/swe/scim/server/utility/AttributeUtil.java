@@ -2,9 +2,9 @@ package edu.psu.swe.scim.server.utility;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -69,35 +69,31 @@ public class AttributeUtil {
   }
 
   private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws IllegalArgumentException, IllegalAccessException {
-    removeAttributesOfType(object, attributeContainer, returned, Collections.emptySet());
+    Function<Attribute, Boolean> function = (attribute) -> returned == attribute.getReturned();
+    processAttributes(object, attributeContainer, function);
   }
 
   private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned, Set<Attribute> attributesToKeep) throws IllegalArgumentException, IllegalAccessException {
-    for (Attribute attribute : attributeContainer.getAttributes()) {
-      Field field = attribute.getField();
-      if (!attributesToKeep.contains(attribute) && returned == attribute.getReturned()) {
-        field.setAccessible(true);
-        field.set(object, null);
-      } else if (attribute.getType() == Type.COMPLEX) {
-        String name = field.getName();
-        Object subObject = field.get(object);
-        Attribute subAttribute = attributeContainer.getAttribute(name);
-        removeAttributesOfType(subObject, subAttribute, returned);
-      }
-    }
+    Function<Attribute, Boolean> function = (attribute) -> !attributesToKeep.contains(attribute) && returned == attribute.getReturned();
+    processAttributes(object, attributeContainer, function);
   }
   
   private void removeAttributes(Object object, AttributeContainer attributeContainer, Set<Attribute> attributesToRemove) throws IllegalArgumentException, IllegalAccessException {
+    Function<Attribute, Boolean> function = (attribute) -> attributesToRemove.contains(attribute);
+    processAttributes(object, attributeContainer, function);
+  }
+  
+  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
     for (Attribute attribute : attributeContainer.getAttributes()) {
       Field field = attribute.getField();
-      if (attributesToRemove.contains(attribute)) {
+      if (function.apply(attribute)) {
         field.setAccessible(true);
         field.set(object, null);
       } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
         String name = field.getName();
         Object subObject = field.get(object);
         Attribute subAttribute = attributeContainer.getAttribute(name);
-        removeAttributes(subObject, subAttribute, attributesToRemove);
+        processAttributes(subObject, subAttribute, function);
       } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
         String name = field.getName();
         Object subObject = field.get(object);
@@ -106,14 +102,14 @@ public class AttributeUtil {
           Collection<?> collection = (Collection<?>) subObject;
           for(Object o : collection) {
             Attribute subAttribute = attributeContainer.getAttribute(name);
-            removeAttributes(o, subAttribute, attributesToRemove);
+            processAttributes(o, subAttribute, function);
           }
         } else if (field.getType().isArray()) {
           Object [] array = (Object []) subObject;
           
           for(Object o : array) {
             Attribute subAttribute = attributeContainer.getAttribute(name);
-            removeAttributes(o, subAttribute, attributesToRemove);
+            processAttributes(o, subAttribute, function);
           }
         }
         
