@@ -27,6 +27,10 @@ public abstract class BaseResource {
   @Urn
   List<String> schemaUrnList;
   
+  public BaseResource(String urn) {
+    addSchema(urn);
+  }
+  
   public void addSchema(String urn) {
     if (schemaUrnList == null){
       schemaUrnList = new ArrayList<>();

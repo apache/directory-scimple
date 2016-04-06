@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
@@ -23,11 +24,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
 public class ResourceType extends ScimResourceWithOptionalId {
-
+  
+  public static final String RESOURCE_NAME = "ResourceType";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
 
   @Data
-  public class SchemaExtentionConfiguration {
+  public static class SchemaExtentionConfiguration {
 
     @XmlElement(name = "schema")
     @Urn
@@ -55,4 +57,23 @@ public class ResourceType extends ScimResourceWithOptionalId {
   String schemaUrn;
 
   List<SchemaExtentionConfiguration> schemaExtensions;
+  
+  public ResourceType() {
+    super(SCHEMA_URI);
+  }
+  
+  public ResourceType(ScimResourceType annotation) {
+    super(SCHEMA_URI);
+    this.name = annotation.name();
+    this.description = annotation.desription();
+    this.schemaUrn = annotation.schema();
+    this.endpoint = annotation.endpoint();
+  }
+
+  @Override
+  public String getResourceType() {
+    return RESOURCE_NAME;
+  }
+  
+  
 }

@@ -18,7 +18,7 @@ import edu.psu.swe.scim.spec.resources.BaseResource;
 public class ListResponse extends BaseResource {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
-
+  
   @XmlElement
   int totalResults;
   
@@ -30,4 +30,8 @@ public class ListResponse extends BaseResource {
 
   @XmlElement(name = "Resources")
   List<Object> resources;
+
+  public ListResponse() {
+    super(SCHEMA_URI);
+  }
 }

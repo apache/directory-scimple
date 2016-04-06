@@ -46,5 +46,9 @@ public class SearchRequest extends BaseResource {
 
   @XmlElement
   int count;
+  
+  public SearchRequest() {
+    super(SCHEMA_URI);
+  }
 
 }

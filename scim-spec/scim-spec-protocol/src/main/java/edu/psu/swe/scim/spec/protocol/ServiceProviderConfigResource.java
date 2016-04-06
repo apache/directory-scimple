@@ -1,12 +1,13 @@
 package edu.psu.swe.scim.spec.protocol;
 
-import io.swagger.annotations.Api;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
+
+import io.swagger.annotations.Api;
 
 //@formatter:off
 /**
@@ -34,7 +35,7 @@ import javax.ws.rs.core.Response.Status;
 public interface ServiceProviderConfigResource {
 
   @GET
-  default public Response getServiceProviderConfiguration() {
+  default public Response getServiceProviderConfiguration(@Context UriInfo context) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   
