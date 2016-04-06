@@ -111,8 +111,7 @@ public class ProviderRegistry {
     return resourceType;
   }
 
-  private Schema generateSchema(Class<?> clazz) throws InvalidProviderException {
-
+  public static Schema generateSchema(Class<?> clazz)  throws InvalidProviderException {
     //List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
     
     Field [] fieldList = clazz.getDeclaredFields();
@@ -157,7 +156,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private List<Attribute> createAttributes(Field[] fieldList, Set<String> invalidAttributes, String nameBase) {
+  private static List<Attribute> createAttributes(Field[] fieldList, Set<String> invalidAttributes, String nameBase) {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {

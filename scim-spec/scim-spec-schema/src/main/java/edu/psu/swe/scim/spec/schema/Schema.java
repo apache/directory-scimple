@@ -156,6 +156,8 @@ public class Schema implements AttributeContainer {
         }
         subAttributeNamesMap.put(name.toLowerCase(), attribute);
       }
+      
+      this.subAttributes = attributes;
     }
     
     public Attribute getAttribute(String name) {
@@ -206,6 +208,8 @@ public class Schema implements AttributeContainer {
       }
       attributeNamesMap.put(name.toLowerCase(), attribute);
     }
+    
+    this.attributes = attributes;
   }
   
   public Attribute getAttribute(String name) {

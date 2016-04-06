@@ -29,15 +29,23 @@ public class AttributeUtil {
   @Inject
   Registry registry;
 
-  public <T extends ScimResource> T setAttributesForDisplay(T resource, String attributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
+  public <T extends ScimResource> T setAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
     String resourceType = resource.getResourceType();
     Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
+    // return always and default, exclude never and requested
+    removeAttributesOfType(resource, schema, Returned.REQUEST);
+    removeAttributesOfType(resource, schema, Returned.NEVER);
+    return resource;
+  }
+  
+  public <T extends ScimResource> T setAttributesForDisplay(T resource, String attributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
     if (StringUtils.isEmpty(attributes)) {
-      // return always and default, exclude never and requested
-      removeAttributesOfType(resource, schema, Returned.REQUEST);
-      removeAttributesOfType(resource, schema, Returned.NEVER);
+      return setAttributesForDisplay(resource);
     } else {
+      String resourceType = resource.getResourceType();
+      Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
+
       // return always and specified attributes, exclude never
       Set<Attribute> attributesToKeep = getAttributes(attributes);
       removeAttributesOfType(resource, schema, Returned.DEFAULT, attributesToKeep);
@@ -49,20 +57,18 @@ public class AttributeUtil {
   }
 
   public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, String excludedAttributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
-    String resourceType = resource.getResourceType();
-    Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
-
+   
     if (StringUtils.isEmpty(excludedAttributes)) {
-      // return always and default, exclude never and requested
-      removeAttributesOfType(resource, schema, Returned.REQUEST);
-      removeAttributesOfType(resource, schema, Returned.NEVER);
+      return setAttributesForDisplay(resource);
     } else {
+      String resourceType = resource.getResourceType();
+      Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
+
       // return always and default, exclude never and specified attributes
       Set<Attribute> attributesToRemove = getAttributes(excludedAttributes);
       removeAttributesOfType(resource, schema, Returned.REQUEST);
       removeAttributesOfType(resource, schema, Returned.NEVER);
       removeAttributes(resource, schema, attributesToRemove);
-      
     }
 
     return resource;
@@ -88,16 +94,24 @@ public class AttributeUtil {
       Field field = attribute.getField();
       if (function.apply(attribute)) {
         field.setAccessible(true);
-        field.set(object, null);
+        if (!field.getType().isPrimitive()) {
+          field.set(object, null);
+        }
       } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
         String name = field.getName();
+        field.setAccessible(true);
         Object subObject = field.get(object);
         Attribute subAttribute = attributeContainer.getAttribute(name);
         processAttributes(subObject, subAttribute, function);
       } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
         String name = field.getName();
+        field.setAccessible(true);
         Object subObject = field.get(object);
 
+        if (subObject == null) {
+          continue;
+        }
+        
         if (Collection.class.isAssignableFrom(subObject.getClass())) {
           Collection<?> collection = (Collection<?>) subObject;
           for(Object o : collection) {
