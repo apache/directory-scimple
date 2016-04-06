@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -127,13 +128,13 @@ public class ProviderRegistry {
     }
 
     log.info("calling set attributes with " + fieldList.length + " fields");
-    List<String> invalidAttributes = new ArrayList<>();
-    schema.setAttributes(createAttributes(fieldList, invalidAttributes));
+    Set<String> invalidAttributes = new HashSet<>();
+    schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getName()));
     
     if (!invalidAttributes.isEmpty()) {
       StringBuilder sb = new StringBuilder();
       
-      sb.append("Scim attributes cannot be primitive types unless they are required.  The following values were found that are primitive and not required");
+      sb.append("Scim attributes cannot be primitive types unless they are required.  The following values were found that are primitive and not required\n\n");
       
       for (String s : invalidAttributes) {
         sb.append(s);
@@ -156,7 +157,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private List<Attribute> createAttributes(Field[] fieldList, List<String> invalidAttributes) {
+  private List<Attribute> createAttributes(Field[] fieldList, Set<String> invalidAttributes, String nameBase) {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -177,7 +178,7 @@ public class ProviderRegistry {
       }
       
       if (f.getType().isPrimitive() && sa.required() == false) {
-        invalidAttributes.add(attributeName);
+        invalidAttributes.add(nameBase + "." +attributeName);
         continue;
       }
       
@@ -225,16 +226,16 @@ public class ProviderRegistry {
       if (sa.type().equals(Type.COMPLEX)) {
         if (!attribute.isMultiValued()) {
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(), BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(f.getType().getDeclaredFields(), invalidAttributes));
+          attribute.setSubAttributes(createAttributes(f.getType().getDeclaredFields(), invalidAttributes, nameBase + "." + f.getName()));
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields(), invalidAttributes));
+          attribute.setSubAttributes(createAttributes(componentType.getDeclaredFields(), invalidAttributes, nameBase + "." + componentType.getName()));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
           //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields(), invalidAttributes));
+          attribute.setSubAttributes(createAttributes(attributeContainedClass.getDeclaredFields(), invalidAttributes, nameBase + "." + attributeContainedClass.getName()));
         }
       }
       attributeList.add(attribute);
