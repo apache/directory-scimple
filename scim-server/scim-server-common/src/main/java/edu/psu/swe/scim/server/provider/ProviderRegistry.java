@@ -129,7 +129,7 @@ public class ProviderRegistry {
 
     log.info("calling set attributes with " + fieldList.length + " fields");
     Set<String> invalidAttributes = new HashSet<>();
-    schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getName()));
+    schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getSimpleName()));
     
     if (!invalidAttributes.isEmpty()) {
       StringBuilder sb = new StringBuilder();
