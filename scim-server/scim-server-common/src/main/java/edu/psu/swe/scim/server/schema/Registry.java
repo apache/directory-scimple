@@ -42,6 +42,16 @@ public class Registry {
   public Collection<Schema> getAllSchemas() {
     return Collections.unmodifiableCollection(schemaMap.values());
   }
+  
+  public Schema getBaseSchemaOfResourceType(String resourceType) {
+    ResourceType rt = resourceTypeMap.get(resourceType);
+    if (rt == null) {
+      return null;
+    }
+    
+    String schemaUrn = rt.getSchemaUrn();
+    return schemaMap.get(schemaUrn);
+  }
 
   public void addSchema(Schema schema) throws JsonProcessingException {
     log.info("Adding schema " + schema.getId() + " into the registry");

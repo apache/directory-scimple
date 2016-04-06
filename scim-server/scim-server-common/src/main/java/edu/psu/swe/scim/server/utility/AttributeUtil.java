@@ -1,7 +1,10 @@
 package edu.psu.swe.scim.server.utility;
 
-import java.util.ArrayList;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -26,67 +29,97 @@ public class AttributeUtil {
   @Inject
   Registry registry;
 
-  public <T extends ScimResource> T setAttributesForDisplay(T resource, String attributes) {
-    List<AttributeReference> attributesReferences = parseAttributeString(attributes);
+  public <T extends ScimResource> T setAttributesForDisplay(T resource, String attributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
+    String resourceType = resource.getResourceType();
+    Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
     if (StringUtils.isEmpty(attributes)) {
-      // TODO return always and default, exclude never
+      // return always and default, exclude never and requested
+      removeAttributesOfType(resource, schema, Returned.REQUEST);
+      removeAttributesOfType(resource, schema, Returned.NEVER);
+    } else {
+      // return always and specified attributes, exclude never
+      Set<Attribute> attributesToKeep = getAttributes(attributes);
+      removeAttributesOfType(resource, schema, Returned.DEFAULT, attributesToKeep);
+      removeAttributesOfType(resource, schema, Returned.REQUEST, attributesToKeep);
+      removeAttributesOfType(resource, schema, Returned.NEVER, attributesToKeep);
     }
-
-    // TODO return always and specified attributes, exclude never
 
     return resource;
   }
 
-  public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, String excludedAttributes) {
-    List<AttributeReference> attributesReferences = parseAttributeString(excludedAttributes);
+  public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, String excludedAttributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
+    String resourceType = resource.getResourceType();
+    Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
     if (StringUtils.isEmpty(excludedAttributes)) {
-      // TODO return always and default, exclude never
+      // return always and default, exclude never and requested
+      removeAttributesOfType(resource, schema, Returned.REQUEST);
+      removeAttributesOfType(resource, schema, Returned.NEVER);
+    } else {
+      // return always and default, exclude never and specified attributes
+      Set<Attribute> attributesToRemove = getAttributes(excludedAttributes);
+      removeAttributesOfType(resource, schema, Returned.REQUEST);
+      removeAttributesOfType(resource, schema, Returned.NEVER);
+      removeAttributes(resource, schema, attributesToRemove);
+      
     }
-
-    // TODO return always and default, exclude never and specified attributes
 
     return resource;
   }
 
-  private static List<AttributeReference> parseAttributeString(String s) {
-    List<AttributeReference> list = new ArrayList<>();
+  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws IllegalArgumentException, IllegalAccessException {
+    removeAttributesOfType(object, attributeContainer, returned, Collections.emptySet());
+  }
+
+  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned, Set<Attribute> attributesToKeep) throws IllegalArgumentException, IllegalAccessException {
+    for (Attribute attribute : attributeContainer.getAttributes()) {
+      Field field = attribute.getField();
+      if (!attributesToKeep.contains(attribute) && returned == attribute.getReturned()) {
+        field.setAccessible(true);
+        field.set(object, null);
+      } else if (attribute.getType() == Type.COMPLEX) {
+        String name = field.getName();
+        Object subObject = field.get(object);
+        Attribute subAttribute = attributeContainer.getAttribute(name);
+        removeAttributesOfType(subObject, subAttribute, returned);
+      }
+    }
+  }
+  
+  private void removeAttributes(Object object, AttributeContainer attributeContainer, Set<Attribute> attributesToRemove) throws IllegalArgumentException, IllegalAccessException {
+    for (Attribute attribute : attributeContainer.getAttributes()) {
+      Field field = attribute.getField();
+      if (attributesToRemove.contains(attribute)) {
+        field.setAccessible(true);
+        field.set(object, null);
+      } else if (attribute.getType() == Type.COMPLEX) {
+        String name = field.getName();
+        Object subObject = field.get(object);
+        Attribute subAttribute = attributeContainer.getAttribute(name);
+        removeAttributes(subObject, subAttribute, attributesToRemove);
+      }
+    }
+  }
+
+  private Set<Attribute> getAttributes(String s) throws AttributeDoesNotExistException {
+    Set<Attribute> attributes = new HashSet<>();
+
     String[] split = StringUtils.split(s, ",");
 
     for (String af : split) {
-      list.add(new AttributeReference(af));
-    }
-    return list;
-  }
-
-  private List<Attribute> getAttributesOfType(AttributeContainer attributeContainer, Returned returned) {
-    List<Attribute> attributesOfType = new ArrayList<>();
-    for (Attribute attribute : attributeContainer.getAttributes()) {
-      if (returned == attribute.getReturned()) {
-        attributesOfType.add(attribute);
-      }
-      if (attribute.getType() == Type.COMPLEX) {
-        attributesOfType.addAll(getAttributesOfType(attribute, returned));
-      }
-    }
-    return attributesOfType;
-  }
-  
-  private List<Attribute> getAttributes(List<AttributeReference> attributeReferences) throws AttributeDoesNotExistException {
-    List<Attribute> attributes = new ArrayList<>();
-
-    for (AttributeReference attributeReference : attributeReferences) {
+      AttributeReference attributeReference = new AttributeReference(af);
       attributes.add(findAttribute(attributeReference));
     }
+
     return attributes;
   }
-  
+
   private Attribute findAttribute(AttributeReference attributeReference) throws AttributeDoesNotExistException {
     String schemaUrn = attributeReference.getUrn();
     String[] attributeNames = attributeReference.getAttributeName();
     Schema schema = null;
-    
+
     if (!StringUtils.isEmpty(schemaUrn)) {
       schema = registry.getSchema(schemaUrn);
 
@@ -103,7 +136,7 @@ public class AttributeUtil {
     if (attribute != null) {
       return attribute;
     }
-    
+
     schema = registry.getSchema(ScimGroup.SCHEMA_URI);
     attribute = findAttributeInSchema(schema, attributeNames);
     if (attribute != null) {
