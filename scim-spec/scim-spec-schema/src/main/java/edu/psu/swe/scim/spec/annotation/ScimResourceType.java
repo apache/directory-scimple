@@ -17,7 +17,7 @@ public @interface ScimResourceType {
   
   String id();
   String name() default "";
-  String desription() default "";
+  String description() default "";
   String endpoint();
   String schema();
 }

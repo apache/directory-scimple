@@ -65,7 +65,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
   public ResourceType(ScimResourceType annotation) {
     super(SCHEMA_URI);
     this.name = annotation.name();
-    this.description = annotation.desription();
+    this.description = annotation.description();
     this.schemaUrn = annotation.schema();
     this.endpoint = annotation.endpoint();
   }

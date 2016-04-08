@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ScimResourceType(id = ScimUser.RESOURCE_NAME, name = ScimUser.RESOURCE_NAME, schema = ScimUser.SCHEMA_URI, desription = "Top level ScimUser", endpoint = "/Users")
+@ScimResourceType(id = ScimUser.RESOURCE_NAME, name = ScimUser.RESOURCE_NAME, schema = ScimUser.SCHEMA_URI, description = "Top level ScimUser", endpoint = "/Users")
 @XmlRootElement(name = ScimUser.RESOURCE_NAME)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ScimUser extends ScimResource {

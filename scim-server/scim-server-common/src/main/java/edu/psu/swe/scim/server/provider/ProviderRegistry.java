@@ -81,7 +81,7 @@ public class ProviderRegistry {
     }
 
     ResourceType resourceType = new ResourceType();
-    resourceType.setDescription(scimResourceType.desription());
+    resourceType.setDescription(scimResourceType.description());
     resourceType.setId(scimResourceType.id());
     resourceType.setName(scimResourceType.name());
     resourceType.setEndpoint(scimResourceType.endpoint());
@@ -147,7 +147,7 @@ public class ProviderRegistry {
 
     if (srt != null) {
       schema.setId(srt.schema());
-      schema.setDescription(srt.desription());
+      schema.setDescription(srt.description());
       schema.setName(srt.name());
     } else {
       schema.setId(set.id());
