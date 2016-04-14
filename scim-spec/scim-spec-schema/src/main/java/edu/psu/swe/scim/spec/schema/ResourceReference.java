@@ -11,7 +11,7 @@ import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import lombok.Data;
 
 @Data
-@XmlType(propOrder = {"value","ref","display"})
+@XmlType(propOrder = {"value","ref","display","type"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class ResourceReference {
 
