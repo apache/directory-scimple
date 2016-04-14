@@ -1,11 +1,7 @@
 package edu.psu.swe.scim.server.rest;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
