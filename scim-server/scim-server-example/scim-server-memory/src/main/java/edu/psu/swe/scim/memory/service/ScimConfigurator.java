@@ -31,7 +31,7 @@ public class ScimConfigurator implements ServletContextListener {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     try {
-      providerRegistry.registerProvider(ScimUser.class, userProvider);
+      providerRegistry.registerProvider(ScimUser.class, ScimUser.SCHEMA_URI, userProvider);
     } catch (InvalidProviderException | JsonProcessingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

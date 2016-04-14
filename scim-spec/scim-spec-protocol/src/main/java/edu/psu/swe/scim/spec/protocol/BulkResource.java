@@ -1,19 +1,20 @@
 package edu.psu.swe.scim.spec.protocol;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
+
+import edu.psu.swe.scim.spec.protocol.data.BulkRequest;
+import edu.psu.swe.scim.spec.protocol.data.BulkResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import edu.psu.swe.scim.spec.protocol.data.BulkResponse;
-import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
-import edu.psu.swe.scim.spec.resources.ScimResource;
 
 //@formatter:off
 /**
@@ -41,13 +42,14 @@ public interface BulkResource {
    */
   @POST
   @Produces("application/scim+json")
+  @Consumes("application/scim+json")
   @ApiOperation(value="Bulk Operations", response=BulkResponse.class, code=200)
   @ApiResponses(value={
       @ApiResponse(code=400, message="Bad Request"),
       @ApiResponse(code=500, message="Internal Server Error"),
       @ApiResponse(code=501, message="Not Implemented")
     })
-  default Response find(SearchRequest request){
+  default Response doBulk(BulkRequest bulkRequest, @Context UriInfo uriInfo) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   

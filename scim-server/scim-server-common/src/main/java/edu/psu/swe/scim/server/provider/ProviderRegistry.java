@@ -48,11 +48,12 @@ public class ProviderRegistry {
 
   public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
 
-  public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
+  public <T extends ScimResource> void registerProvider(Class<T> clazz, String schemaUrn, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
     ResourceType resourceType = generateResourceType(clazz, provider);
 
     log.debug("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
+    registry.addScimResourceSchemaUrn(schemaUrn, clazz);
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
 

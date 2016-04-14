@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 import lombok.Data;
+import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 
 @Data
@@ -21,6 +22,13 @@ public class BulkOperation {
     @XmlEnumValue("DELETE") DELETE;
   }
   
+  @Data
+  @XmlAccessorType(XmlAccessType.NONE)
+  public static class Status {
+    @XmlElement
+    String code;
+  }
+
   @XmlElement
   Method method;
   
@@ -40,8 +48,8 @@ public class BulkOperation {
   String location;
   
   @XmlElement
-  String response;
+  BaseResource response;
   
   @XmlElement
-  String status;
+  Status status;
 }
