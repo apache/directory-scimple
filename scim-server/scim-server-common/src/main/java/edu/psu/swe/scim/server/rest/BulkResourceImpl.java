@@ -59,8 +59,11 @@ public class BulkResourceImpl implements BulkResource {
         log.debug("POST: {}", scimResource);
 
         ScimResource newResource = provider.create(scimResource);
+        String bulkOperationPath = bulkOperation.getPath();
+        String newResourceId = newResource.getId();
+        String newResourceUri = uriInfo.getBaseUriBuilder().path(bulkOperationPath).path(newResourceId).build().toString();
 
-        operationResult.setLocation(uriInfo.getBaseUriBuilder().path(bulkOperation.getPath()).path(newResource.getId()).toString());
+        operationResult.setLocation(newResourceUri);
       } break;
 
       case DELETE: {
