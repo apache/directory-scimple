@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
+import edu.psu.swe.scim.spec.resources.ScimGroup;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 
 @WebListener
