@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
+import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
@@ -48,7 +49,7 @@ public class ProviderRegistry {
 
   public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
 
-  public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException {
+  public <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsException {
     ResourceType resourceType = generateResourceType(clazz, provider);
 
     log.debug("Calling addSchema on the base");
@@ -72,7 +73,7 @@ public class ProviderRegistry {
     return (Provider<T>) providerMap.get(clazz);
   }
 
-  private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException {
+  private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException, UnableToRetrieveExtensionsException {
 
     ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
 

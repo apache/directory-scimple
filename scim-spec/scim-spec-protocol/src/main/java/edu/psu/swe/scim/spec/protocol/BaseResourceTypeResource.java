@@ -28,6 +28,7 @@ public interface BaseResourceTypeResource<T> {
    * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.4.1">Scim spec,
    *      retrieving known resources</a>
    * @return
+   * @throws UnableToRetrieveResourceException 
    */
   @GET
   @Path("{id}")

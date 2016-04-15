@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
+import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
 import edu.psu.swe.scim.server.schema.Registry;
@@ -32,7 +33,7 @@ public class ScimConfigurator implements ServletContextListener {
   public void contextInitialized(ServletContextEvent sce) {
     try {
       providerRegistry.registerProvider(ScimUser.class, userProvider);
-    } catch (InvalidProviderException | JsonProcessingException e) {
+    } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }

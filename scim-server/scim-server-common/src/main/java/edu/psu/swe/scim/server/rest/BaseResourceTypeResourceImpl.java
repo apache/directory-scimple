@@ -18,6 +18,9 @@ import javax.xml.bind.Marshaller;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
+import edu.psu.swe.scim.server.exception.UnableToCreateResourceException;
+import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
+import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
@@ -60,7 +63,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return Response.status(Status.BAD_REQUEST).entity(er).build();
     }
     
-    T resource = provider.get(id);
+    T resource;
+    try {
+      resource = provider.get(id);
+    } catch (UnableToRetrieveResourceException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus("500");
+      er.setDetail(e1.getLocalizedMessage());
+      return Response.status(Status.BAD_REQUEST).entity(er).build();
+    }
 
     if (resource == null) {
       ErrorResponse er = new ErrorResponse();
@@ -113,7 +124,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.create(resource);
     }
 
-    T created = provider.create(resource);
+    T created;
+    try {
+      created = provider.create(resource);
+    } catch (UnableToCreateResourceException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus("500");
+      er.setDetail(e1.getMessage());
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    }
 
     EntityTag etag = null;
     try {
@@ -155,7 +174,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.update(resource);
     }
 
-    T stored = provider.get(resource.getId());
+    T stored;
+    try {
+      stored = provider.get(resource.getId());
+    } catch (UnableToRetrieveResourceException e2) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus("500");
+      er.setDetail(e2.getLocalizedMessage());
+      log.error(e2.getMessage());
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    }
     
     EntityTag backingETag = null;
     try {
@@ -178,7 +206,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return evaluatePreconditionsResponse.entity(er).build();
     }
 
-    T updated = provider.update(resource);
+    T updated;
+    try {
+      updated = provider.update(resource);
+    } catch (UnableToUpdateResourceException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus("500");
+      er.setDetail(e1.getLocalizedMessage());
+      log.warn(e1.getLocalizedMessage());
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    }
 
     // Process Attributes 
     try {
