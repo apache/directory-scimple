@@ -32,8 +32,8 @@ public interface BaseResourceTypeResource<T> {
    */
   @GET
   @Path("{id}")
-  @Produces("application/scim+json")
-  @ApiOperation(value="Find by id", response=ScimResource.class, code=200)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value="Find by id", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, code=200)
   @ApiResponses(value={
                   @ApiResponse(code=400, message="Bad Request"),
                   @ApiResponse(code=404, message="Not found"),
@@ -52,8 +52,8 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @GET
-  @Produces("application/scim+json")
-  @ApiOperation(value="Find by a combination of query parameters", response=ScimResource.class, responseContainer="List", code=200)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value="Find by a combination of query parameters", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, responseContainer="List", code=200)
   @ApiResponses(value={
                   @ApiResponse(code=400, message="Bad Request"),
                   @ApiResponse(code=404, message="Not found"),
@@ -76,9 +76,9 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @POST
-  @Consumes("application/scim+json")
-  @Produces("application/scim+json")
-  @ApiOperation(value = "Create", response = ScimResource.class, code = 201)
+  @Consumes(Constants.SCIM_CONTENT_TYPE)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value = "Create", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 201)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 409, message = ErrorMessageConstants.UNIQUENESS), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response create(T resource) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
@@ -91,8 +91,8 @@ public interface BaseResourceTypeResource<T> {
    */
   @POST
   @Path("/.search")
-  @Produces("application/scim+json")
-  @ApiOperation(value = "Search", response = ScimResource.class, responseContainer = "List", code = 200)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value = "Search", produces=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, responseContainer = "List", code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response find(SearchRequest request) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
@@ -104,18 +104,18 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @PUT
-  @Consumes("application/scim+json")
-  @Produces("application/scim+json")
-  @ApiOperation(value = "Update", response = ScimResource.class, code = 200)
+  @Consumes(Constants.SCIM_CONTENT_TYPE)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value = "Update", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response update(T resource) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
   @PATCH
-  @Consumes("application/scim+json")
-  @Produces("application/scim+json")
-  @ApiOperation(value = "Patch a portion of the backing store", code = 204)
+  @Consumes(Constants.SCIM_CONTENT_TYPE)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value = "Patch a portion of the backing store", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default public Response patch() {
     return Response.status(Status.NOT_IMPLEMENTED).build();

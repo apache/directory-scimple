@@ -44,8 +44,8 @@ public interface SearchResource {
    * @return
    */
   @POST
-  @Produces("application/scim+json")
-  @ApiOperation(value="Search", response=ScimResource.class, responseContainer="List", code=200)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value="Search", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, responseContainer="List", code=200)
   @ApiResponses(value={
       @ApiResponse(code=400, message="Bad Request"),
       @ApiResponse(code=500, message="Internal Server Error"),

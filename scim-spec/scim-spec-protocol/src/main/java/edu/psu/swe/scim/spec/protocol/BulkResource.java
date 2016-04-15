@@ -41,9 +41,9 @@ public interface BulkResource {
    * @return
    */
   @POST
-  @Produces("application/scim+json")
-  @Consumes("application/scim+json")
-  @ApiOperation(value="Bulk Operations", response=BulkResponse.class, code=200)
+  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Consumes(Constants.SCIM_CONTENT_TYPE)
+  @ApiOperation(value="Bulk Operations", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response=BulkResponse.class, code=200)
   @ApiResponses(value={
       @ApiResponse(code=400, message="Bad Request"),
       @ApiResponse(code=500, message="Internal Server Error"),
