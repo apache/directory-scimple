@@ -24,13 +24,17 @@ public class ScimConfigurator implements ServletContextListener {
   @Inject
   private ProviderRegistry providerRegistry;
 
-  @Inject 
+  @Inject
   private Instance<InMemoryUserService> userProviderInstance;
-  
+
+  @Inject
+  private Instance<InMemoryGroupService> groupProviderInstance;
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     try {
-      providerRegistry.registerProvider(ScimUser.class,  userProviderInstance);
+      providerRegistry.registerProvider(ScimUser.class, userProviderInstance);
+      providerRegistry.registerProvider(ScimGroup.class, groupProviderInstance);
     } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsException e) {
       e.printStackTrace();
     }
@@ -40,5 +44,5 @@ public class ScimConfigurator implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent arg0) {
     // NOOP
   }
-  
+
 }
