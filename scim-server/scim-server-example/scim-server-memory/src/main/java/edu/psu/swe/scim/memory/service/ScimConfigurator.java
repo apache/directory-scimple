@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.memory.service;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -12,7 +13,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
-import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 
@@ -25,12 +25,12 @@ public class ScimConfigurator implements ServletContextListener {
   private ProviderRegistry providerRegistry;
 
   @Inject 
-  private Provider<ScimUser> userProvider;
+  private Instance<InMemoryUserService> userProviderInstance;
   
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     try {
-      providerRegistry.registerProvider(ScimUser.class, ScimUser.SCHEMA_URI, userProvider);
+      providerRegistry.registerProvider(ScimUser.class,  userProviderInstance);
     } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsException e) {
       e.printStackTrace();
     }

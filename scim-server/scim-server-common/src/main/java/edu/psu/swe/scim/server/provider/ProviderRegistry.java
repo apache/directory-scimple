@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import lombok.Data;
@@ -47,14 +48,23 @@ public class ProviderRegistry {
   @Inject
   Registry registry;
 
-  public Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
+  private Map<Class<? extends ScimResource>, Instance<? extends Provider<? extends ScimResource>>> providerMap = new HashMap<>();
 
-  public <T extends ScimResource> void registerProvider(Class<T> clazz, String schemaUrn, Provider<T> provider) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsException {
+  public <T extends ScimResource> void registerProvider(Class<T> clazz, Instance<? extends Provider<T>> providerInstance) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsException {
 
+    Provider<T> provider = providerInstance.get();
+    
     ResourceType resourceType = generateResourceType(clazz, provider);
 
     log.debug("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
+    ScimResource newInstance;
+    try {
+      newInstance = clazz.newInstance();
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new InvalidProviderException(e.getMessage());
+    }
+    String schemaUrn = newInstance.getBaseUrn();
     registry.addScimResourceSchemaUrn(schemaUrn, clazz);
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
@@ -67,12 +77,17 @@ public class ProviderRegistry {
     }
 
     registry.addResourceType(resourceType);
-    providerMap.put(clazz, provider);
+    providerMap.put(clazz, providerInstance);
   }
 
   @SuppressWarnings("unchecked")
   public <T extends ScimResource> Provider<T> getProvider(Class<T> clazz) {
-    return (Provider<T>) providerMap.get(clazz);
+    Instance<? extends Provider<? extends ScimResource>> providerInstance = providerMap.get(clazz);
+    if (providerInstance == null) {
+      return null;
+    } 
+    
+    return (Provider<T>) providerInstance.get();
   }
 
   private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException, UnableToRetrieveExtensionsException {

@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
+import javax.enterprise.inject.Instance;
+
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -23,6 +26,9 @@ public class ProviderRegistryTest {
   Registry registry;
   
   @Mock
+  Instance<Provider<ScimUser>> providerInstance;
+  
+  @Mock
   Provider<ScimUser> provider;
   
   ProviderRegistry providerRegistry;
@@ -31,14 +37,17 @@ public class ProviderRegistryTest {
     providerRegistry = new ProviderRegistry();
     registry = new Registry();
     providerRegistry.registry = registry;
-
-//    Mockito.when(provider.getExtensionList()).thenReturn(Collections.singletonList(Enterprise));
-    
+  }
+  
+  @Before
+  public void initialize() {
+    Mockito.when(providerInstance.get()).thenReturn(provider);
+//  Mockito.when(provider.getExtensionList()).thenReturn(Collections.singletonList(Enterprise));
   }
   
   @Test
   public void testAddProvider() throws Exception {
-    providerRegistry.registerProvider(ScimUser.class, ScimUser.SCHEMA_URI, provider);
+    providerRegistry.registerProvider(ScimUser.class, providerInstance);
     
     Schema schema = registry.getSchema(ScimUser.SCHEMA_URI);
     
