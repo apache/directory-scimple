@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -15,6 +17,7 @@ import lombok.Data;
     "honorificPrefix",
     "honorificSuffix"    
 })
+@XmlAccessorType(XmlAccessType.NONE)
 public class Name {
 
   @XmlElement

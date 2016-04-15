@@ -27,6 +27,8 @@ public class Registry {
 
   private Map<String, Schema> schemaMap = new HashMap<>();
   
+  private Map<String, Class<? extends ScimResource>> schemaUrnToScimResourceClass = new HashMap<>();
+
   private Map<String, ResourceType> resourceTypeMap = new HashMap<>();
   
   private ObjectMapper objectMapper;
@@ -68,6 +70,17 @@ public class Registry {
     }
   }
 
+  public <T extends ScimResource> void addScimResourceSchemaUrn(String schemaUrn, Class<T> scimResourceClass) {
+    schemaUrnToScimResourceClass.put(schemaUrn, scimResourceClass);
+  }
+
+  public <T extends ScimResource> Class<T> findScimResourceClass(String schemaUrn) {
+    @SuppressWarnings("unchecked")
+    Class<T> scimResourceClass = (Class<T>) schemaUrnToScimResourceClass.get(schemaUrn);
+
+    return scimResourceClass;
+  }
+
   public ResourceType getResourceType(String name) {
     return resourceTypeMap.get(name);
   }
@@ -105,7 +118,7 @@ public class Registry {
     ResourceType resourceType = new ResourceType(annotation);
     return resourceType;
   }
-  
+
 //  private ScimExtension createResourceType(Class<? extends ScimResource> resourceTypeClass) {
 
 }

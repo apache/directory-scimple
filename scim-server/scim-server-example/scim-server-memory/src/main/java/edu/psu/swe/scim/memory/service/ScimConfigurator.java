@@ -14,8 +14,6 @@ import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
-import edu.psu.swe.scim.server.schema.Registry;
-import edu.psu.swe.scim.spec.resources.ScimGroup;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 
 @WebListener
@@ -34,7 +32,6 @@ public class ScimConfigurator implements ServletContextListener {
     try {
       providerRegistry.registerProvider(ScimUser.class, userProvider);
     } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

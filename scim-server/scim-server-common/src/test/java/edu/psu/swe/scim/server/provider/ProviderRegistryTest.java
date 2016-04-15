@@ -38,7 +38,7 @@ public class ProviderRegistryTest {
   
   @Test
   public void testAddProvider() throws Exception {
-    providerRegistry.registerProvider(ScimUser.class, provider);
+    providerRegistry.registerProvider(ScimUser.class, ScimUser.SCHEMA_URI, provider);
     
     Schema schema = registry.getSchema(ScimUser.SCHEMA_URI);
     
