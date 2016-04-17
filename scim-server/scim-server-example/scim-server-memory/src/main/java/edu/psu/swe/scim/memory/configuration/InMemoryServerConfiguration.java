@@ -12,7 +12,7 @@ import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.AuthenticationS
 
 @Singleton
 @ApplicationScoped
-public class InMemoryServerConfiguration implements ServerConfiguration {
+public class InMemoryServerConfiguration extends ServerConfiguration {
   @Override
   public List<AuthenticationSchema> getAuthenticationSchemas() {
     AuthenticationSchema authenticationSchema = new AuthenticationSchema();

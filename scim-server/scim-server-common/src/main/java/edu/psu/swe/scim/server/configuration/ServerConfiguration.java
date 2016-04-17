@@ -8,7 +8,9 @@ import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.BulkConfigurati
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.FilterConfiguration;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.SupportedConfiguration;
 
-public interface ServerConfiguration {
+//public interface ServerConfiguration {
+public class ServerConfiguration {
+
   static SupportedConfiguration defaultValue() {
     SupportedConfiguration supportedConfiguration = new SupportedConfiguration();
 
@@ -17,19 +19,19 @@ public interface ServerConfiguration {
     return supportedConfiguration;
   }
 
-  default List<AuthenticationSchema> getAuthenticationSchemas() {
+  public List<AuthenticationSchema> getAuthenticationSchemas() {
     List<AuthenticationSchema> authenticationSchemas = Collections.emptyList();
 
     return authenticationSchemas;
   }
 
-  default SupportedConfiguration getChangePasswordConfiguration() {
+  public SupportedConfiguration getChangePasswordConfiguration() {
     SupportedConfiguration supportsChangePassword = defaultValue();
 
     return supportsChangePassword;
   }
 
-  default BulkConfiguration getBulkConfiguration() {
+  public BulkConfiguration getBulkConfiguration() {
     BulkConfiguration bulkConfiguration = new BulkConfiguration();
 
     bulkConfiguration.setSupported(false);
@@ -39,13 +41,13 @@ public interface ServerConfiguration {
     return bulkConfiguration;
   }
 
-  default SupportedConfiguration getEtagConfiguration() {
+  public SupportedConfiguration getEtagConfiguration() {
     SupportedConfiguration supportsEtag = defaultValue();
 
     return supportsEtag;
   }
 
-  default FilterConfiguration getFilterConfiguration() {
+  public FilterConfiguration getFilterConfiguration() {
     FilterConfiguration filterConfiguration = new FilterConfiguration();
 
     filterConfiguration.setSupported(false);
@@ -54,13 +56,13 @@ public interface ServerConfiguration {
     return filterConfiguration;
   }
 
-  default SupportedConfiguration getPatchConfiguration() {
+  public SupportedConfiguration getPatchConfiguration() {
     SupportedConfiguration supportsPatch = defaultValue();
 
     return supportsPatch;
   }
 
-  default SupportedConfiguration getSortConfiguration() {
+  public SupportedConfiguration getSortConfiguration() {
     SupportedConfiguration supportsSort = defaultValue();
 
     return supportsSort;

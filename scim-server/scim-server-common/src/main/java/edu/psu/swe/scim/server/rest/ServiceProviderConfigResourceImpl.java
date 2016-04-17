@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.ejb.Singleton;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -24,9 +23,17 @@ import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.SupportedConfig
 public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigResource {
   private static final List<String> SCHEMA_URN_LIST = Arrays.asList(ServiceProviderConfiguration.SCHEMA_URI);
 
-  @Inject
+  //@Inject
   ServerConfiguration serverConfiguration;
 
+  public ServiceProviderConfigResourceImpl() {
+    serverConfiguration = new ServerConfiguration();  
+  }
+  
+  public void registerServerConfiguration(ServerConfiguration configuration) {
+    serverConfiguration = configuration;  
+  }
+  
   @Override
   public Response getServiceProviderConfiguration(UriInfo uriInfo) {
     ServiceProviderConfiguration serviceProviderConfiguration = new ServiceProviderConfiguration();
