@@ -262,6 +262,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     StringWriter sw = new StringWriter();
     
     Meta meta = resource.getMeta();
+    
+    if (meta == null) {
+      meta = new Meta();
+    }
 
     marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
     resource.setMeta(null);
