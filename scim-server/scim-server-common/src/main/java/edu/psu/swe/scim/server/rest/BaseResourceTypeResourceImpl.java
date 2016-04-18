@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.server.rest;
 
 import java.io.StringWriter;
+import java.net.URI;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -15,6 +16,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
@@ -28,15 +31,10 @@ import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
-import lombok.extern.slf4j.Slf4j;
 
-@Stateless
 @Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
-  private static final String LOCATION_TAG = "Location";
-  private static final String ETAG_TAG = "Etag";
-  
   public abstract Provider<T> getProvider();
   
   @Context
@@ -99,7 +97,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
       }
       
-      return Response.ok().entity(resource).header(LOCATION_TAG, buildLocationTag(resource)).header(ETAG_TAG, etag).build();
+      return Response.ok().entity(resource).location(buildLocationTag(resource)).tag(etag).build();
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus("500");
@@ -146,18 +144,18 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       created = attributeUtil.setAttributesForDisplay(resource, "");
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       if (etag == null) {
-        return Response.status(Status.CREATED).header(LOCATION_TAG, buildLocationTag(resource)).build();
+        return Response.status(Status.CREATED).location(buildLocationTag(resource)).build();
       } else {
-        Response.status(Status.CREATED).header(LOCATION_TAG, buildLocationTag(resource)).header(ETAG_TAG, etag).build();
+        Response.status(Status.CREATED).location(buildLocationTag(resource)).tag(etag).build();
       }
     }
     
     //TODO - Is this the right behavior?
     if (etag == null) {
-      return Response.status(Status.CREATED).header(LOCATION_TAG, buildLocationTag(resource)).entity(created).build();
+      return Response.status(Status.CREATED).location(buildLocationTag(resource)).entity(created).build();
     }
     
-    return Response.status(Status.CREATED).header(LOCATION_TAG, buildLocationTag(resource)).header(ETAG_TAG, etag).entity(created).build();
+    return Response.status(Status.CREATED).location(buildLocationTag(resource)).tag(etag).entity(created).build();
   }
 
   @Override
@@ -233,10 +231,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     
     //TODO - Is this correct or should we support roll back semantics
     if (etag == null) {
-      return Response.ok(updated).header(LOCATION_TAG, buildLocationTag(resource)).build();
+      return Response.ok(updated).location(buildLocationTag(resource)).build();
     }
     
-    return Response.ok(updated).header(LOCATION_TAG, buildLocationTag(resource)).header(ETAG_TAG, etag).build();
+    return Response.ok(updated).location(buildLocationTag(resource)).tag(etag).build();
   }
 
   @Override
@@ -279,7 +277,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return EntityTag.valueOf(etag.toString());
   }
   
-  private String buildLocationTag(T resource) {
-    return uriInfo.getAbsolutePathBuilder().path(resource.getId()).build().toASCIIString();
+  private URI buildLocationTag(T resource) {
+    return uriInfo.getAbsolutePathBuilder().path(resource.getId()).build();
   }
 }
