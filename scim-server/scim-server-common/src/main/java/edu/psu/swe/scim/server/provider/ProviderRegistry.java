@@ -208,10 +208,8 @@ public class ProviderRegistry {
       
       //If we just have the default single empty string, set to null
       if (cononicalTypes.isEmpty() || (cononicalTypes.size() == 1 && cononicalTypes.get(0).isEmpty())) {
-        log.debug("### Setting canonical values to null");
         attribute.setCanonicalValues(null);
       } else {
-        log.debug("### Canonical types has " + cononicalTypes.size() + " entries and the first is " + cononicalTypes.get(0));
         attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
       }
       
