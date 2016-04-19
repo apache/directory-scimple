@@ -26,19 +26,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Stateless
 public class BulkResourceImpl implements BulkResource {
-  private static final Status METHOD_NOT_ALLOWED_STATUS = new Status();
   private static final Status OKAY_STATUS = new Status();
+  private static final Status CREATED_STATUS = new Status();
+  private static final Status NO_CONTENT_STATUS = new Status();
+  private static final Status METHOD_NOT_ALLOWED_STATUS = new Status();
   private static final Status INTERNAL_SERVER_ERROR_STATUS = new Status();
   private static final Status METHOD_NOT_IMPLEMENTED_STATUS = new Status();
-  private static final String METHOD_NOT_ALLOWED = "405";
   private static final String OKAY = "200";
+  private static final String CREATED = "201";
+  private static final String NO_CONTENT = "204";
+  private static final String METHOD_NOT_ALLOWED = "405";
   private static final String INTERNAL_SERVER_ERROR = "500";
   private static final String METHOD_NOT_IMPLEMENTED = "501";
 
   static {
     METHOD_NOT_ALLOWED_STATUS.setCode(METHOD_NOT_ALLOWED);
     OKAY_STATUS.setCode(OKAY);
+    CREATED_STATUS.setCode(CREATED);
+    NO_CONTENT_STATUS.setCode(NO_CONTENT);
     INTERNAL_SERVER_ERROR_STATUS.setCode(INTERNAL_SERVER_ERROR);
+    METHOD_NOT_IMPLEMENTED_STATUS.setCode(METHOD_NOT_IMPLEMENTED);
   }
 
   @Inject
@@ -50,11 +57,17 @@ public class BulkResourceImpl implements BulkResource {
   @Override
   public Response doBulk(BulkRequest request, UriInfo uriInfo) {
     BulkResponse response;
-//    int errorCount = 0;
+    int errorCount = 0;
+    int requestFailOnErrors = request.getFailOnErrors();
+    long maxErrorCount = requestFailOnErrors > 0 ? requestFailOnErrors : Long.MAX_VALUE;
     List<BulkOperation> completedOperations = new ArrayList<>();
 
+    log.info("request.failOnErrors = {} requestFailOnErrors = {} maxErrorCount = {}", request.getFailOnErrors(), requestFailOnErrors, maxErrorCount);
+
+    BULK_OPERATIONS:
     for (BulkOperation bulkOperation : request.getOperations()) {
       BulkOperation operationResult = new BulkOperation();
+
       try {
         ScimResource scimResource = bulkOperation.getData();
         @SuppressWarnings("unchecked")
@@ -73,6 +86,7 @@ public class BulkResourceImpl implements BulkResource {
           String newResourceUri = uriInfo.getBaseUriBuilder().path(bulkOperationPath).path(newResourceId).build().toString();
 
           operationResult.setLocation(newResourceUri);
+          operationResult.setStatus(CREATED_STATUS);
         } break;
 
         case DELETE: {
@@ -81,48 +95,56 @@ public class BulkResourceImpl implements BulkResource {
           String scimResourceId = scimResource.getId();
 
           provider.delete(scimResourceId);
+          operationResult.setStatus(NO_CONTENT_STATUS);
         } break;
 
         case PUT: {
-          log.debug("PUT/PATCH: {}", scimResource);
-
-          ScimResource newResource = provider.update(scimResource);
-
-          operationResult.setLocation(uriInfo.getBaseUriBuilder().path(bulkOperation.getPath()).path(newResource.getId()).toString());
+          log.debug("PUT: {}", scimResource);
+          provider.update(scimResource);
+          operationResult.setStatus(OKAY_STATUS);
         } break;
 
         case PATCH: {
-          ErrorResponse error = new ErrorResponse();
-
-          error.setStatus(METHOD_NOT_IMPLEMENTED);
-          error.setDetail("Method not implemented: PATCH");
-          operationResult.setResponse(error);
-          operationResult.setStatus(METHOD_NOT_IMPLEMENTED_STATUS);
+          log.debug("PATCH: {}", scimResource);
+          createAndSetErrorResponse(operationResult, METHOD_NOT_IMPLEMENTED_STATUS, "Method not implemented: PATCH");
         } break;
 
         default: {
-          ErrorResponse error = new ErrorResponse();
+          BulkOperation.Method method = bulkOperation.getMethod();
+          String detail = "Method not allowed: " + method;
 
-          error.setStatus(METHOD_NOT_ALLOWED);
-          error.setDetail("Method not allowed: " + bulkOperation.getMethod());
-          operationResult.setResponse(error);
-          operationResult.setStatus(METHOD_NOT_ALLOWED_STATUS);
+          log.error("Received unallowed method: {}", method);
+          createAndSetErrorResponse(operationResult, METHOD_NOT_ALLOWED_STATUS, detail);
         } break;
         }
       } catch (UnableToCreateResourceException | UnableToDeleteResourceException | UnableToUpdateResourceException resourceException) {
-        ErrorResponse error = new ErrorResponse();
+        log.error("Failed to do bulk operation", resourceException);
 
-        error.setStatus(INTERNAL_SERVER_ERROR);
-        error.setDetail(resourceException.getLocalizedMessage());
-        operationResult.setResponse(error);
-        operationResult.setStatus(INTERNAL_SERVER_ERROR_STATUS);
+        errorCount += 1;
+        String detail = resourceException.getLocalizedMessage();
+
+        createAndSetErrorResponse(operationResult, INTERNAL_SERVER_ERROR_STATUS, detail);
       }
       completedOperations.add(operationResult);
+
+      if (errorCount >= maxErrorCount) {
+        break BULK_OPERATIONS;
+      }
     }
     response = new BulkResponse();
     response.setOperations(completedOperations);
     response.setStatus(OKAY);
 
     return Response.ok(response).build();
+  }
+
+  private static void createAndSetErrorResponse(BulkOperation operationResult, Status status, String detail) {
+    ErrorResponse error = new ErrorResponse();
+    String code = status.getCode();
+
+    error.setStatus(code);
+    error.setDetail(detail);
+    operationResult.setResponse(error);
+    operationResult.setStatus(status);
   }
 }
