@@ -7,4 +7,10 @@
   </parent>
   <artifactId>scim-compliance-server</artifactId>
   <name>SCIM - Compliance - Server</name>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.restfuse</groupId>
+  		<artifactId>com.eclipsesource.restfuse</artifactId>
+  	</dependency>
+  </dependencies>
 </project>
