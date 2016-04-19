@@ -56,6 +56,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
   @Size(min = 1)
   String schemaUrn;
 
+  @XmlElement
   List<SchemaExtentionConfiguration> schemaExtensions;
   
   public ResourceType() {

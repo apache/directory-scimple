@@ -61,6 +61,7 @@ public class ProviderRegistry {
     ScimResource newInstance;
     try {
       newInstance = clazz.newInstance();
+      log.info("Registering a provider of type " + newInstance.getResourceType());
     } catch (InstantiationException | IllegalAccessException e) {
       throw new InvalidProviderException(e.getMessage());
     }

@@ -22,8 +22,10 @@ import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
+import lombok.extern.slf4j.Slf4j;
 
 @Stateless
+@Slf4j
 public class AttributeUtil {
 
   @Inject
@@ -90,6 +92,15 @@ public class AttributeUtil {
   }
   
   private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
+ 
+    if (attributeContainer == null) {
+      log.error("attribute container == null");
+    } else {
+      if (attributeContainer.getAttributes() == null) {
+        log.error("attribute container returned null for getAttributes");
+      }
+    }
+    
     for (Attribute attribute : attributeContainer.getAttributes()) {
       Field field = attribute.getField();
       if (function.apply(attribute)) {
