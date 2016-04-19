@@ -31,6 +31,7 @@ import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
@@ -47,6 +48,9 @@ public class ProviderRegistry {
 
   @Inject
   Registry registry;
+  
+  @Inject
+  ScimExtensionRegistry scimExtensionRegistry;
 
   private Map<Class<? extends ScimResource>, Instance<? extends Provider<? extends ScimResource>>> providerMap = new HashMap<>();
 
@@ -58,18 +62,30 @@ public class ProviderRegistry {
 
     log.debug("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
-    ScimResource newInstance;
+    ScimResource newScimResourceInstance;
     try {
-      newInstance = clazz.newInstance();
-      log.info("Registering a provider of type " + newInstance.getResourceType());
+      newScimResourceInstance = clazz.newInstance();
+      log.info("Registering a provider of type " + newScimResourceInstance.getResourceType());
     } catch (InstantiationException | IllegalAccessException e) {
       throw new InvalidProviderException(e.getMessage());
     }
-    String schemaUrn = newInstance.getBaseUrn();
+    String schemaUrn = newScimResourceInstance.getBaseUrn();
     registry.addScimResourceSchemaUrn(schemaUrn, clazz);
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
 
+    for (Class<? extends ScimExtension> scimExtension : extensionList) {
+      ScimExtension newScimExtensionInstance;
+      try {
+        newScimExtensionInstance = scimExtension.newInstance();
+        log.info("Registering a extension of type " + newScimExtensionInstance.getUrn());
+      } catch (InstantiationException | IllegalAccessException e) {
+        throw new InvalidProviderException(e.getMessage());
+      }
+      
+      scimExtensionRegistry.registerExtension(clazz, newScimExtensionInstance);
+    }
+    
     Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
 
     while (iter.hasNext()) {

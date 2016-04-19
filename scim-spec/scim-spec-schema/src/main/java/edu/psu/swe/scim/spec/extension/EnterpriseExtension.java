@@ -66,11 +66,6 @@ public class EnterpriseExtension implements ScimExtension {
   private Manager manager;
 
   @Override
-  public Class<? extends ScimResource> getBaseResource() {
-    return ScimUser.class;
-  }
-
-  @Override
   public String getUrn() {
     return URN;
   }

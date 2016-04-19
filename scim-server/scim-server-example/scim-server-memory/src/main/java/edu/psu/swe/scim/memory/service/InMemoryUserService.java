@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
 import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
@@ -17,6 +18,7 @@ import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 
 @Named
+@ApplicationScoped
 public class InMemoryUserService implements Provider<ScimUser> {
 
   private Map<String, ScimUser> users = new HashMap<>();

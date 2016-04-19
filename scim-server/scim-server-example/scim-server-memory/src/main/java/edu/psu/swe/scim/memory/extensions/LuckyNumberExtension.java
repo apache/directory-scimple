@@ -28,11 +28,6 @@ public class LuckyNumberExtension implements ScimExtension {
   private long luckyNumber;
   
   @Override
-  public Class<? extends ScimResource> getBaseResource() {
-    return ScimUser.class;
-  }
-
-  @Override
   public String getUrn() {
     return SCHEMA_URN;
   }
