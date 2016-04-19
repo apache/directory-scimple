@@ -1,14 +1,25 @@
 package edu.psu.swe.scim.server.exception;
 
+import javax.ws.rs.core.Response.Status;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper=true)
 public class UnableToRetrieveExtensionsException extends Exception {
 
   private static final long serialVersionUID = -3872700870424005641L;
 
-  public UnableToRetrieveExtensionsException(String what) {
+  private Status status;
+  
+  public UnableToRetrieveExtensionsException(Status status, String what) {
     super(what);
+    this.status = status;
   }
   
-  public UnableToRetrieveExtensionsException(String what, Throwable why) {
+  public UnableToRetrieveExtensionsException(Status status, String what, Throwable why) {
     super(what, why);
+    this.status = status;
   }
 }
