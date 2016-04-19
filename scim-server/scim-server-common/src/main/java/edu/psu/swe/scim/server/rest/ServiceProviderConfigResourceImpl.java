@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Singleton;
-import javax.enterprise.context.ApplicationScoped;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -18,12 +18,11 @@ import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.BulkConfigurati
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.FilterConfiguration;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.SupportedConfiguration;
 
-@Singleton
-@ApplicationScoped
+@Stateless
 public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigResource {
   private static final List<String> SCHEMA_URN_LIST = Arrays.asList(ServiceProviderConfiguration.SCHEMA_URI);
 
-  //@Inject
+  @Inject
   ServerConfiguration serverConfiguration;
 
   public ServiceProviderConfigResourceImpl() {

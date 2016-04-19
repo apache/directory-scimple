@@ -54,7 +54,7 @@ public class SchemaTest {
       "schemas/urn:ietf:params:scim:schemas:core:2.0:User.json",
       "schemas/urn:ietf:params:scim:schemas:core:2.0:Group.json",
       "schemas/urn:ietf:params:scim:schemas:core:2.0:ResourceType.json",
-      "schemas/schema-schema.json",
+      "schemas/urn:ietf:params:scim:schemas:core:2.0:Schema.json",
       "schemas/urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig.json",
       "schemas/urn:ietf:params:scim:schemas:extension:enterprise:2.0:User.json"
   })

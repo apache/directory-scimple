@@ -1,70 +1,91 @@
 package edu.psu.swe.scim.server.configuration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Setter;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.BulkConfiguration;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.FilterConfiguration;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.SupportedConfiguration;
 
-//public interface ServerConfiguration {
+@Data
+@Named
+@ApplicationScoped
 public class ServerConfiguration {
 
-  static SupportedConfiguration defaultValue() {
-    SupportedConfiguration supportedConfiguration = new SupportedConfiguration();
-
-    supportedConfiguration.setSupported(false);
-
-    return supportedConfiguration;
-  }
-
+  boolean supportsChangePassword = false;
+  
+  @Setter(AccessLevel.NONE)
+  boolean supportsBulk = true;
+  int bulkMaxOperations = 100;
+  int bulkMaxPayloadSize = 1024;  //TODO what should this be?
+  
+  @Setter(AccessLevel.NONE)
+  boolean supportsETag = true;
+  
+  boolean supportsFilter = false;
+  int filterMaxResults = 100;
+  
+  boolean supportsPatch = false;
+  
+  boolean supportsSort = false;
+  
+  @Setter(AccessLevel.NONE)
+  List<AuthenticationSchema> authenticationSchemas = new ArrayList<>();
+  
   public List<AuthenticationSchema> getAuthenticationSchemas() {
-    List<AuthenticationSchema> authenticationSchemas = Collections.emptyList();
-
-    return authenticationSchemas;
+    return Collections.unmodifiableList(authenticationSchemas);
+  }
+  
+  public void addAuthenticationSchema(AuthenticationSchema authenticationSchema) {
+    authenticationSchemas.add(authenticationSchema);
   }
 
   public SupportedConfiguration getChangePasswordConfiguration() {
-    SupportedConfiguration supportsChangePassword = defaultValue();
-
-    return supportsChangePassword;
+    return createSupportedConfiguration(supportsChangePassword);
   }
 
   public BulkConfiguration getBulkConfiguration() {
     BulkConfiguration bulkConfiguration = new BulkConfiguration();
 
-    bulkConfiguration.setSupported(false);
-    bulkConfiguration.setMaxOperations(0);
-    bulkConfiguration.setMaxPayloadSize(0);
+    bulkConfiguration.setSupported(supportsBulk);
+    bulkConfiguration.setMaxOperations(bulkMaxOperations);
+    bulkConfiguration.setMaxPayloadSize(bulkMaxPayloadSize);
 
     return bulkConfiguration;
   }
 
   public SupportedConfiguration getEtagConfiguration() {
-    SupportedConfiguration supportsEtag = defaultValue();
+    return createSupportedConfiguration(supportsETag);
 
-    return supportsEtag;
   }
 
   public FilterConfiguration getFilterConfiguration() {
     FilterConfiguration filterConfiguration = new FilterConfiguration();
-
-    filterConfiguration.setSupported(false);
-    filterConfiguration.setMaxResults(0);
-
+    filterConfiguration.setSupported(supportsFilter);
+    filterConfiguration.setMaxResults(filterMaxResults);
     return filterConfiguration;
   }
 
   public SupportedConfiguration getPatchConfiguration() {
-    SupportedConfiguration supportsPatch = defaultValue();
-
-    return supportsPatch;
+    return createSupportedConfiguration(supportsPatch);
   }
 
   public SupportedConfiguration getSortConfiguration() {
-    SupportedConfiguration supportsSort = defaultValue();
-
-    return supportsSort;
+    return createSupportedConfiguration(supportsSort);
   }
+  
+  private SupportedConfiguration createSupportedConfiguration(boolean supported) {
+    SupportedConfiguration supportedConfiguration = new SupportedConfiguration();
+    supportedConfiguration.setSupported(supported);
+    return supportedConfiguration;
+  }
+
 }
