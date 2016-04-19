@@ -29,9 +29,11 @@ public class BulkResourceImpl implements BulkResource {
   private static final Status METHOD_NOT_ALLOWED_STATUS = new Status();
   private static final Status OKAY_STATUS = new Status();
   private static final Status INTERNAL_SERVER_ERROR_STATUS = new Status();
+  private static final Status METHOD_NOT_IMPLEMENTED_STATUS = new Status();
   private static final String METHOD_NOT_ALLOWED = "405";
   private static final String OKAY = "200";
   private static final String INTERNAL_SERVER_ERROR = "500";
+  private static final String METHOD_NOT_IMPLEMENTED = "501";
 
   static {
     METHOD_NOT_ALLOWED_STATUS.setCode(METHOD_NOT_ALLOWED);
@@ -81,13 +83,21 @@ public class BulkResourceImpl implements BulkResource {
           provider.delete(scimResourceId);
         } break;
 
-        case PATCH:
         case PUT: {
           log.debug("PUT/PATCH: {}", scimResource);
 
           ScimResource newResource = provider.update(scimResource);
 
           operationResult.setLocation(uriInfo.getBaseUriBuilder().path(bulkOperation.getPath()).path(newResource.getId()).toString());
+        } break;
+
+        case PATCH: {
+          ErrorResponse error = new ErrorResponse();
+
+          error.setStatus(METHOD_NOT_IMPLEMENTED);
+          error.setDetail("Method not implemented: PATCH");
+          operationResult.setResponse(error);
+          operationResult.setStatus(METHOD_NOT_IMPLEMENTED_STATUS);
         } break;
 
         default: {
