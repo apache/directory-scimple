@@ -42,7 +42,7 @@ public class ScimResourceDeserializer extends JsonDeserializer<ScimResource> {
       }
     }
     if (scimResourceClass == null) {
-      throw new JsonParseException("Could not find a valid schema in: " + schemas, location);
+      throw new JsonParseException("Could not find a valid schema in: " + schemas + ", valid schemas are: " + registry.getAllSchemaUrns(), location);
     }
     scimResource = objectMapper.readValue(node.toString(), scimResourceClass);
 
