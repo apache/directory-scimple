@@ -184,8 +184,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.find(request);
     }
     
-    Set<AttributeReference> attributes = request.getAttributes();
-    Set<AttributeReference> excludedAttributes = request.getExcludedAttributes();
+    Set<AttributeReference> attributes = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
+    Set<AttributeReference> excludedAttributes = Optional.ofNullable(request.getExcludedAttributes()).orElse(Collections.emptySet());
     if (!attributes.isEmpty() && !excludedAttributes.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
     }
