@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.google.common.base.Equivalence.Wrapper;
 
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
 import edu.psu.swe.scim.server.exception.UnableToCreateResourceException;
@@ -79,8 +81,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
-    Set<AttributeReference> attributeReferences = attributes.getAttributeReferences();
-    Set<AttributeReference> excludedAttributeReferences = excludedAttributes.getAttributeReferences();
+    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
+    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
     
     if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
@@ -118,14 +120,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createAttriubteProcessingErrorResponse(e);
     }
     
-    
   }
 
   @Override
   public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) {
     SearchRequest searchRequest = new SearchRequest();
-    searchRequest.setAttributes(attributes.getAttributeReferences());
-    searchRequest.setExcludedAttributes(excludedAttributes.getAttributeReferences());
+    searchRequest.setAttributes(Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
+    searchRequest.setExcludedAttributes(Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
     searchRequest.setFilter(filter);
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
