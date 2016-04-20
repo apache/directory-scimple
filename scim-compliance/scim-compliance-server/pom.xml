@@ -12,5 +12,18 @@
   		<groupId>com.restfuse</groupId>
   		<artifactId>com.eclipsesource.restfuse</artifactId>
   	</dependency>
+  	<dependency>
+  		<groupId>edu.psu.swe.scim</groupId>
+  		<artifactId>scim-spec-schema</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>edu.psu.swe.scim</groupId>
+  		<artifactId>scim-spec-protocol</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<scope>compile</scope>
+  	</dependency>
   </dependencies>
 </project>
