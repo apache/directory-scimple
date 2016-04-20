@@ -142,6 +142,21 @@ public class AttributeUtil {
     }
   }
 
+  
+  
+  public Set<AttributeReference> getAttributeReferences(String s) {
+    Set<AttributeReference> attributeReferences = new HashSet<>();
+
+    String[] split = StringUtils.split(s, ",");
+
+    for (String af : split) {
+      AttributeReference attributeReference = new AttributeReference(af);
+      attributeReferences.add(attributeReference);
+    }
+
+    return attributeReferences;
+  }
+  
   private Set<Attribute> getAttributes(String s) throws AttributeDoesNotExistException {
     Set<Attribute> attributes = new HashSet<>();
 

@@ -1,6 +1,6 @@
 package edu.psu.swe.scim.spec.protocol.data;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -9,6 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 
 /**
@@ -27,19 +30,19 @@ public class SearchRequest extends BaseResource {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:SearchRequest";
 
   @XmlElement
-  List<String> attributes;
+  Set<AttributeReference> attributes;
 
   @XmlElement
-  List<String> excludedAttributes;
+  Set<AttributeReference> excludedAttributes;
 
   @XmlElement
-  String filter;
+  Filter filter;
 
   @XmlElement
-  String sortBy;
+  AttributeReference sortBy;
 
   @XmlElement
-  String sortOrder;
+  SortOrder sortOrder;
 
   @XmlElement
   int startIndex;

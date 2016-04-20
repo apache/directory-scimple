@@ -16,6 +16,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -32,11 +34,14 @@ import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
+import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
+import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
@@ -122,8 +127,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response query(String attributes, String excludedAttributes, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count) {
-    // TODO Auto-generated method stub
+  public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) {
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(attributes.getAttributeReferences());
+    searchRequest.setExcludedAttributes(excludedAttributes.getAttributeReferences());
+    searchRequest.setFilter(filter);
+    searchRequest.setSortBy(sortBy);
+    searchRequest.setSortOrder(sortOrder);
+    searchRequest.setStartIndex(startIndex);
+    searchRequest.setCount(count);
+    
     return BaseResourceTypeResource.super.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
   }
 

@@ -1,5 +1,12 @@
 package edu.psu.swe.scim.spec.protocol;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.jaxrs.PATCH;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,14 +19,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
+import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.jaxrs.PATCH;
 
 @Api("ResourceType")
 public interface BaseResourceTypeResource<T> {
@@ -60,11 +65,11 @@ public interface BaseResourceTypeResource<T> {
                   @ApiResponse(code=500, message="Internal Server Error"),
                   @ApiResponse(code=501, message="Not Implemented")
                 })
-  default Response query(@ApiParam(value="attributes", required=false) @QueryParam("attributes") String attributes,
-                                 @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") String excludedAttributes,
-                                 @ApiParam(value="filter", required=false) @QueryParam("filter") String filter,
-                                 @ApiParam(value="sortBy", required=false) @QueryParam("sortBy") String sortBy,
-                                 @ApiParam(value="sortOrder", required=false) @QueryParam("sortOrder") String sortOrder,
+  default Response query(@ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                                 @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes,
+                                 @ApiParam(value="filter", required=false) @QueryParam("filter") Filter filter,
+                                 @ApiParam(value="sortBy", required=false) @QueryParam("sortBy") AttributeReference sortBy,
+                                 @ApiParam(value="sortOrder", required=false) @QueryParam("sortOrder") SortOrder sortOrder,
                                  @ApiParam(value="startIndex", required=false) @QueryParam("startIndex") Integer startIndex,
                                  @ApiParam(value="count", required=false) @QueryParam("count") Integer count) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
