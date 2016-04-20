@@ -137,7 +137,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     searchRequest.setStartIndex(startIndex);
     searchRequest.setCount(count);
     
-    return BaseResourceTypeResource.super.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
+    return find(searchRequest);
   }
 
   @Override
