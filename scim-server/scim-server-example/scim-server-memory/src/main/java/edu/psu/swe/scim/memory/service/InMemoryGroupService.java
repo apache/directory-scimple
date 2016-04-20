@@ -14,6 +14,7 @@ import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
+import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimGroup;
 
@@ -57,7 +58,7 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   }
 
   @Override
-  public List<ScimGroup> get(Filter filter, PageRequest pageRequest) throws UnableToRetrieveResourceException {
+  public List<ScimGroup> get(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException {
     return new ArrayList<ScimGroup>(groups.values());
   }
 
