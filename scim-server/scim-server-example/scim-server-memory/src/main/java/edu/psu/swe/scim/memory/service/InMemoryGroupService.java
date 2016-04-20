@@ -24,13 +24,13 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   
   @Override
   public ScimGroup create(ScimGroup resource) {
-    groups.put(resource.getId().getValue(), resource);
+    groups.put(resource.getId(), resource);
     return resource;
   }
 
   @Override
   public ScimGroup update(ScimGroup resource) {
-    groups.put(resource.getId().getValue(), resource);
+    groups.put(resource.getId(), resource);
     return resource;
   }
 

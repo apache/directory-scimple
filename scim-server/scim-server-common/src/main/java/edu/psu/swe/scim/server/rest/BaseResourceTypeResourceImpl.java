@@ -252,7 +252,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T stored;
     try {
-      stored = provider.get(resource.getId().getValue());
+      stored = provider.get(resource.getId());
     } catch (UnableToRetrieveResourceException e2) {
       return createGenericExceptionResponse(e2);
     }
@@ -347,7 +347,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
   
   private URI buildLocationTag(T resource) {
-    return uriInfo.getAbsolutePathBuilder().path(resource.getId().getValue()).build();
+    return uriInfo.getAbsolutePathBuilder().path(resource.getId()).build();
   }
 
 
