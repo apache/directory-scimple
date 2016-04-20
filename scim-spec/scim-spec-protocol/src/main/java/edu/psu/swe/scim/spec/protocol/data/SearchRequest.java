@@ -11,7 +11,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
+import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 
 /**
@@ -45,13 +47,27 @@ public class SearchRequest extends BaseResource {
   SortOrder sortOrder;
 
   @XmlElement
-  int startIndex;
+  Integer startIndex;
 
   @XmlElement
-  int count;
+  Integer count;
   
   public SearchRequest() {
     super(SCHEMA_URI);
+  }
+  
+  public PageRequest getPageRequest() {
+    PageRequest pageRequest = new PageRequest();
+    pageRequest.setStartIndex(startIndex);
+    pageRequest.setCount(count);
+    return pageRequest;
+  }
+  
+  public SortRequest getSortRequest() {
+    SortRequest sortRequest = new SortRequest();
+    sortRequest.setSortBy(sortBy);
+    sortRequest.setSortOrder(sortOrder);
+    return sortRequest;
   }
 
 }

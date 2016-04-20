@@ -46,8 +46,8 @@ public interface BaseResourceTypeResource<T> {
                   @ApiResponse(code=501, message="Not Implemented")
                 })
     default Response getById(@ApiParam(value="id", required=true) @PathParam("id") String id, 
-                             @ApiParam(value="attributes", required=false) @QueryParam("attributes") String attributes,
-                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") String excludedAttributes) {
+                             @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 

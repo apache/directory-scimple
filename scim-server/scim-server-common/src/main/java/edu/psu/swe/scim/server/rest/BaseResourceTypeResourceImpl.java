@@ -4,7 +4,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +40,12 @@ import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
+import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
@@ -61,7 +68,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   AttributeUtil attributeUtil;
   
   @Override
-  public Response getById(String id, String attributes, String excludedAttributes) {
+  public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
     if (servletRequest.getAttribute("filter") != null) {
@@ -72,28 +79,22 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
-    if (StringUtils.isNotEmpty(attributes) && StringUtils.isNotEmpty(excludedAttributes)) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("400");
-      er.setDetail("Cannot include both attributes and excluded attributes in a single request");
-      return Response.status(Status.BAD_REQUEST).entity(er).build();
+    Set<AttributeReference> attributeReferences = attributes.getAttributeReferences();
+    Set<AttributeReference> excludedAttributeReferences = excludedAttributes.getAttributeReferences();
+    
+    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+      return createAmbiguousAttributeParametersResponse();
     }
     
     T resource;
     try {
       resource = provider.get(id);
     } catch (UnableToRetrieveResourceException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail(e1.getLocalizedMessage());
-      return Response.status(Status.BAD_REQUEST).entity(er).build();
+      return createGenericExceptionResponse(e1);
     }
 
     if (resource == null) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("404");
-      er.setDetail("User " + id + " not found");
-      return Response.status(Status.NOT_FOUND).entity(er).build();
+      return createNotFoundResponse(id);
     }
 
     EntityTag etag = null;
@@ -101,26 +102,20 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       etag = generateEtag(resource);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail("Failed to generate the etag");
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+      return createETagErrorResponse();
     }
         
     // Process Attributes 
     try {
-      if (StringUtils.isNotEmpty(excludedAttributes)) {
-          resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
+      if (!excludedAttributeReferences.isEmpty()) {
+          resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
       } else {
-        resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
+        resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
       }
       
       return Response.ok().entity(resource).location(buildLocationTag(resource)).tag(etag).build();
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail("Failed to parse the attribute query value " + e.getMessage());
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+      return createAttriubteProcessingErrorResponse(e);
     }
     
     
@@ -167,7 +162,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     
     // Process Attributes 
     try {
-      created = attributeUtil.setAttributesForDisplay(resource, "");
+      created = attributeUtil.setAttributesForDisplay(resource, Collections.emptySet());
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       if (etag == null) {
         return Response.status(Status.CREATED).location(buildLocationTag(resource)).build();
@@ -186,8 +181,64 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response find(SearchRequest request) {
-    // TODO Auto-generated method stub
-    return BaseResourceTypeResource.super.find(request);
+    Provider<T> provider = null;
+
+    if ((provider = getProvider()) == null) {
+      return BaseResourceTypeResource.super.find(request);
+    }
+    
+    Set<AttributeReference> attributes = request.getAttributes();
+    Set<AttributeReference> excludedAttributes = request.getExcludedAttributes();
+    if (!attributes.isEmpty() && !excludedAttributes.isEmpty()) {
+      return createAmbiguousAttributeParametersResponse();
+    }
+    
+    Filter filter = request.getFilter();
+    PageRequest pageRequest = request.getPageRequest();
+    SortRequest sortRequest = request.getSortRequest();
+    
+    ListResponse listResponse = new ListResponse();
+    
+    
+    List<T> resources;
+    try {
+      resources = provider.find(filter, pageRequest, sortRequest);
+    } catch (UnableToRetrieveResourceException e1) {
+      return createGenericExceptionResponse(e1);
+    }
+    
+    listResponse.setItemsPerPage(resources.size());
+    listResponse.setStartIndex(1);
+    listResponse.setTotalResults(resources.size());
+
+    List<Object> results = new ArrayList<>();
+    
+    for (T resource : resources) {
+      EntityTag etag = null;
+      
+      try {
+        etag = generateEtag(resource);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        return createETagErrorResponse();
+      }
+          
+      // Process Attributes 
+      try {
+        if (!excludedAttributes.isEmpty()) {
+            resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
+        } else {
+          resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
+        }
+        
+        results.add(resource);
+      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
+        return createAttriubteProcessingErrorResponse(e);
+      }
+    }
+    
+    listResponse.setResources(results);
+    
+    return Response.ok().entity(listResponse).build();
   }
 
   @Override
@@ -202,48 +253,32 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       stored = provider.get(resource.getId().getValue());
     } catch (UnableToRetrieveResourceException e2) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail(e2.getLocalizedMessage());
-      log.error(e2.getMessage());
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+      return createGenericExceptionResponse(e2);
     }
     
     EntityTag backingETag = null;
     try {
       backingETag = generateEtag(stored);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail("Failed to calculate etag for backing entity " + e1.getMessage());
-      log.error("Failed to calculate etag for backing entity " + e1.getMessage());
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+      return createETagErrorResponse();
     }
     
     ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
     
     if (evaluatePreconditionsResponse != null){
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("412");
-      er.setDetail("Failed to update record, backing record has changed - " + resource.getId());
-      log.warn("Failed to update record, backing record has changed - " + resource.getId());
-      return evaluatePreconditionsResponse.entity(er).build();
+      return createPreconditionFailedResponse(resource, evaluatePreconditionsResponse);
     }
 
     T updated;
     try {
       updated = provider.update(resource);
     } catch (UnableToUpdateResourceException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail(e1.getLocalizedMessage());
-      log.warn(e1.getLocalizedMessage());
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+      return createGenericExceptionResponse(e1);
     }
 
     // Process Attributes 
     try {
-      updated = attributeUtil.setAttributesForDisplay(resource, "");
+      updated = attributeUtil.setAttributesForDisplay(resource, Collections.emptySet());
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       log.error("Failed to handle attribute processing in update " + e.getMessage());
     }
@@ -312,5 +347,49 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   
   private URI buildLocationTag(T resource) {
     return uriInfo.getAbsolutePathBuilder().path(resource.getId().getValue()).build();
+  }
+
+
+  private Response createGenericExceptionResponse(Exception e1) {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus("500");
+    er.setDetail(e1.getLocalizedMessage());
+    return Response.status(Status.BAD_REQUEST).entity(er).build();
+  }
+  
+  private Response createAmbiguousAttributeParametersResponse() {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus("400");
+    er.setDetail("Cannot include both attributes and excluded attributes in a single request");
+    return Response.status(Status.BAD_REQUEST).entity(er).build();
+  }
+  
+  private Response createNotFoundResponse(String id) {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus("404");
+    er.setDetail("Resource " + id + " not found");
+    return Response.status(Status.NOT_FOUND).entity(er).build();
+  }
+
+  private Response createETagErrorResponse() {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus("500");
+    er.setDetail("Failed to generate the etag");
+    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+  }
+  
+  private Response createAttriubteProcessingErrorResponse(Exception e) {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus("500");
+    er.setDetail("Failed to parse the attribute query value " + e.getMessage());
+    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+  }
+
+  private Response createPreconditionFailedResponse(T resource, ResponseBuilder evaluatePreconditionsResponse) {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus("412");
+    er.setDetail("Failed to update record, backing record has changed - " + resource.getId());
+    log.warn("Failed to update record, backing record has changed - " + resource.getId());
+    return evaluatePreconditionsResponse.entity(er).build();
   }
 }

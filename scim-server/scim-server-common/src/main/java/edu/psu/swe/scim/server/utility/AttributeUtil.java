@@ -41,15 +41,15 @@ public class AttributeUtil {
     return resource;
   }
   
-  public <T extends ScimResource> T setAttributesForDisplay(T resource, String attributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
-    if (StringUtils.isEmpty(attributes)) {
+  public <T extends ScimResource> T setAttributesForDisplay(T resource, Set<AttributeReference> attributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
+    if (attributes.isEmpty()) {
       return setAttributesForDisplay(resource);
     } else {
       String resourceType = resource.getResourceType();
       Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and specified attributes, exclude never
-      Set<Attribute> attributesToKeep = getAttributes(attributes);
+      Set<Attribute> attributesToKeep = resolveAttributeReferences(attributes);
       removeAttributesOfType(resource, schema, Returned.DEFAULT, attributesToKeep);
       removeAttributesOfType(resource, schema, Returned.REQUEST, attributesToKeep);
       removeAttributesOfType(resource, schema, Returned.NEVER, attributesToKeep);
@@ -58,16 +58,16 @@ public class AttributeUtil {
     return resource;
   }
 
-  public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, String excludedAttributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
+  public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, Set<AttributeReference> excludedAttributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException {
    
-    if (StringUtils.isEmpty(excludedAttributes)) {
+    if (excludedAttributes.isEmpty()) {
       return setAttributesForDisplay(resource);
     } else {
       String resourceType = resource.getResourceType();
       Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and default, exclude never and specified attributes
-      Set<Attribute> attributesToRemove = getAttributes(excludedAttributes);
+      Set<Attribute> attributesToRemove = resolveAttributeReferences(excludedAttributes);
       removeAttributesOfType(resource, schema, Returned.REQUEST);
       removeAttributesOfType(resource, schema, Returned.NEVER);
       removeAttributes(resource, schema, attributesToRemove);
@@ -157,13 +157,10 @@ public class AttributeUtil {
     return attributeReferences;
   }
   
-  private Set<Attribute> getAttributes(String s) throws AttributeDoesNotExistException {
+  private Set<Attribute> resolveAttributeReferences(Set<AttributeReference> attributeReferences) throws AttributeDoesNotExistException {
     Set<Attribute> attributes = new HashSet<>();
 
-    String[] split = StringUtils.split(s, ",");
-
-    for (String af : split) {
-      AttributeReference attributeReference = new AttributeReference(af);
+    for (AttributeReference attributeReference : attributeReferences) {
       attributes.add(findAttribute(attributeReference));
     }
 
