@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+import edu.psu.swe.scim.spec.id.ScimResourceId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,7 +20,7 @@ import lombok.EqualsAndHashCode;
 public abstract class ScimResourceWithOptionalId extends ScimResource {
   
   @XmlElement
-  String id;
+  ScimResourceId id;
   
   public ScimResourceWithOptionalId(String urn) {
     super(urn);

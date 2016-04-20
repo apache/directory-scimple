@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +23,11 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
+import edu.psu.swe.scim.spec.id.ScimResourceId;
 import edu.psu.swe.scim.spec.schema.Meta;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * This class defines the attributes shared by all SCIM resources. It also
@@ -50,7 +50,7 @@ public abstract class ScimResource extends BaseResource {
   @XmlElement
   @Size(min = 1)
   @ScimAttribute(required = true, returned = Returned.ALWAYS)
-  String id;
+  ScimResourceId id;
 
   @XmlElement
   @ScimAttribute
@@ -65,6 +65,10 @@ public abstract class ScimResource extends BaseResource {
   public ScimResource(String urn) {
     super(urn);
     this.baseUrn = urn;
+  }
+
+  public void setId(String id) {
+    this.id = new ScimResourceId(id);
   }
 
   public void addExtension(String urn, ScimExtension extension) {

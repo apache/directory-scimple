@@ -1,7 +1,9 @@
 package edu.psu.swe.scim.server.rest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -13,12 +15,12 @@ import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
-import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.BulkResource;
 import edu.psu.swe.scim.spec.protocol.data.BulkOperation;
 import edu.psu.swe.scim.spec.protocol.data.BulkOperation.Status;
 import edu.psu.swe.scim.spec.protocol.data.BulkRequest;
 import edu.psu.swe.scim.spec.protocol.data.BulkResponse;
+import edu.psu.swe.scim.spec.resources.ScimGroup;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -49,9 +51,6 @@ public class BulkResourceImpl implements BulkResource {
   }
 
   @Inject
-  Registry registry;
-
-  @Inject
   ProviderRegistry providerRegistry;
 
   @Override
@@ -60,13 +59,14 @@ public class BulkResourceImpl implements BulkResource {
     int errorCount = 0;
     int requestFailOnErrors = request.getFailOnErrors();
     long maxErrorCount = requestFailOnErrors > 0 ? requestFailOnErrors : Long.MAX_VALUE;
-    List<BulkOperation> completedOperations = new ArrayList<>();
-
-    log.info("request.failOnErrors = {} requestFailOnErrors = {} maxErrorCount = {}", request.getFailOnErrors(), requestFailOnErrors, maxErrorCount);
+    List<BulkOperation> requestedOperations = request.getOperations();
+    List<BulkOperation> completedOperations = new ArrayList<>(requestedOperations.size());
+    Map<String, String> bulkIdToResourceId = new HashMap<>();
 
     BULK_OPERATIONS:
-    for (BulkOperation bulkOperation : request.getOperations()) {
+    for (BulkOperation bulkOperation : requestedOperations) {
       BulkOperation operationResult = new BulkOperation();
+      String bulkId = bulkOperation.getBulkId();
 
       try {
         ScimResource scimResource = bulkOperation.getData();
@@ -74,25 +74,27 @@ public class BulkResourceImpl implements BulkResource {
         Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
         Provider<ScimResource> provider = providerRegistry.getProvider(scimResourceClass);
 
-        operationResult.setStatus(OKAY_STATUS);
-
         switch (bulkOperation.getMethod()) {
         case POST: {
           log.debug("POST: {}", scimResource);
 
           ScimResource newResource = provider.create(scimResource);
           String bulkOperationPath = bulkOperation.getPath();
-          String newResourceId = newResource.getId();
+          String newResourceId = newResource.getId().getValue();
           String newResourceUri = uriInfo.getBaseUriBuilder().path(bulkOperationPath).path(newResourceId).build().toString();
 
           operationResult.setLocation(newResourceUri);
           operationResult.setStatus(CREATED_STATUS);
+
+          if (bulkId != null) {
+            bulkIdToResourceId.put(bulkId, newResourceId);
+          }
         } break;
 
         case DELETE: {
           log.debug("DELETE: {}", scimResource);
 
-          String scimResourceId = scimResource.getId();
+          String scimResourceId = scimResource.getId().getValue();
 
           provider.delete(scimResourceId);
           operationResult.setStatus(NO_CONTENT_STATUS);

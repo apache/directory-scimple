@@ -43,18 +43,18 @@ public class InMemoryUserService implements Provider<ScimUser> {
     
     user.addExtension(LuckyNumberExtension.SCHEMA_URN, luckyNumberExtension);
     
-    users.put(user.getId(), user);
+    users.put(user.getId().getValue(), user);
   }
   
   @Override
   public ScimUser create(ScimUser resource) {
-    users.put(resource.getId(), resource);
+    users.put(resource.getId().getValue(), resource);
     return resource;
   }
 
   @Override
   public ScimUser update(ScimUser resource) {
-    users.put(resource.getId(), resource);
+    users.put(resource.getId().getValue(), resource);
     return resource;
   }
 

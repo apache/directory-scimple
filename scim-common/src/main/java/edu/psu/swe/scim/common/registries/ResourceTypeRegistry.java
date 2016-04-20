@@ -29,7 +29,7 @@ public class ResourceTypeRegistry {
    *          the ResourceType to register.
    */
   public void add(ResourceType resourceType) {
-    String key = resourceType.getId();
+    String key = resourceType.getId().getValue();
     if (key == null) {
       key = resourceType.getName();
     }
