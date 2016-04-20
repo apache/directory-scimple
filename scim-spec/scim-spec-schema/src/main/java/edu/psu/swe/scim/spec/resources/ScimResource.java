@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +22,13 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
+import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
+import edu.psu.swe.scim.spec.exception.InvalidExtensionException;
 import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
 import edu.psu.swe.scim.spec.schema.Meta;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * This class defines the attributes shared by all SCIM resources. It also
@@ -67,8 +68,14 @@ public abstract class ScimResource extends BaseResource {
     this.baseUrn = urn;
   }
 
-  public void addExtension(String urn, ScimExtension extension) {
-    extensions.put(urn, extension);
+  public void addExtension(ScimExtension extension) throws InvalidExtensionException {
+    ScimExtensionType [] se = extension.getClass().getAnnotationsByType(ScimExtensionType.class);
+    
+    if (se.length == 0 || se.length > 1) {
+      throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
+    }
+    
+    extensions.put(se[0].id(), extension);
   }
 
   public ScimExtension getExtension(String urn) {

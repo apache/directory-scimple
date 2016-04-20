@@ -12,6 +12,7 @@ import javax.inject.Named;
 
 import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.spec.exception.InvalidExtensionException;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
@@ -41,7 +42,12 @@ public class InMemoryUserService implements Provider<ScimUser> {
     LuckyNumberExtension luckyNumberExtension = new LuckyNumberExtension();
     luckyNumberExtension.setLuckyNumber(7);
     
-    user.addExtension(LuckyNumberExtension.SCHEMA_URN, luckyNumberExtension);
+    try {
+      user.addExtension(luckyNumberExtension);
+    } catch (InvalidExtensionException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     
     users.put(user.getId(), user);
   }
