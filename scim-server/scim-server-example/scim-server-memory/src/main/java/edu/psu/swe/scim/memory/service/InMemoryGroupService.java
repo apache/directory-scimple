@@ -1,18 +1,20 @@
 package edu.psu.swe.scim.memory.service;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Singleton;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
-import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
+import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.PageRequest;
+import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimGroup;
 
@@ -53,6 +55,11 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
     return Collections.emptyList();
+  }
+
+  @Override
+  public List<ScimGroup> get(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException {
+    return new ArrayList<ScimGroup>(groups.values());
   }
 
 }

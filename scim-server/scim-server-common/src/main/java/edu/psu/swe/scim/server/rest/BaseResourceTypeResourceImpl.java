@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
@@ -14,9 +15,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBException;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +36,7 @@ import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
@@ -50,6 +49,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Context
   Request request;
   
+  @Context 
+  HttpServletRequest servletRequest;
+  
   @Inject
   AttributeUtil attributeUtil;
   
@@ -57,6 +59,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response getById(String id, String attributes, String excludedAttributes) {
     Provider<T> provider = null;
 
+    if (servletRequest.getAttribute("filter") != null) {
+      return Response.status(Status.FORBIDDEN).build();  
+    }
+    
     if ((provider = getProvider()) == null) {
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }

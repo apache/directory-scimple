@@ -1,18 +1,22 @@
 package edu.psu.swe.scim.memory.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
 import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
+import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
+import edu.psu.swe.scim.spec.protocol.search.PageRequest;
+import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.Email;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimUser;
@@ -75,6 +79,11 @@ public class InMemoryUserService implements Provider<ScimUser> {
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
     return Arrays.asList(LuckyNumberExtension.class);
+  }
+
+  @Override
+  public List<ScimUser> get(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException {
+    return new ArrayList<ScimUser>(users.values());
   }
 
 }
