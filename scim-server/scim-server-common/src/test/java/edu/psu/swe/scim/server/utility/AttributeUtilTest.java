@@ -28,6 +28,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
 import edu.psu.swe.scim.server.schema.Registry;
+import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.resources.Address;
 import edu.psu.swe.scim.spec.resources.Name;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
@@ -89,7 +90,7 @@ public class AttributeUtilTest {
     
     debugJson(resource);
     
-    resource = attributeUtil.setAttributesForDisplay(resource, "userName");
+    resource = attributeUtil.setAttributesForDisplay(resource, Collections.singleton(new AttributeReference("userName")));
     
     debugJson(resource);
 
@@ -102,10 +103,10 @@ public class AttributeUtilTest {
   }
   
   @Test
-  public void testExcludeAttributes() throws Exception {
+  public void testExcludeNeverAttributes() throws Exception {
     ScimUser resource = getScimUser();
     
-    resource = attributeUtil.setExcludedAttributesForDisplay(resource, "");
+    resource = attributeUtil.setExcludedAttributesForDisplay(resource, Collections.emptySet());
     
     Assertions.assertThat(resource.getPassword()).isNull();
 
