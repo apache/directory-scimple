@@ -17,13 +17,8 @@ public interface Provider<T> {
   T create(T resource) throws UnableToCreateResourceException;
   T update(T resource) throws UnableToUpdateResourceException;
   T get(String id) throws UnableToRetrieveResourceException;
-  List<T> get(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException;
+  List<T> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException;
   void delete(String id) throws UnableToDeleteResourceException;
-  List<T> find(SearchRequest request) throws UnableToRetrieveResourceException;
-  
-//  default T get(ScimFilter filter) throws UnableToRetrieveResourceException {
-//    return null;
-//  }
-  
+
   List<Class<? extends ScimExtension>> getExtensionList() throws UnableToRetrieveExtensionsException;
 }
