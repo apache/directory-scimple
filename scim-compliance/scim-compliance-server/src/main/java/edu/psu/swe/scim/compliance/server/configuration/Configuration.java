@@ -12,19 +12,19 @@ import com.eclipsesource.restfuse.Destination;
  * 
  * @author Steve Moyer &lt;smoyer@psu.edu&gt;
  */
-public class Configuration {
+public final class Configuration {
 
-  public static String DEFAULT_DESTINATION = "http://localhost:8080/scim/v2";
-  public static String DEFAULT_PROXY_HOST = "";
-  public static String DEFAULT_PROXY_PORT = "";
+  public static final String DEFAULT_DESTINATION = "http://localhost:8080/scim/v2";
+  public static final String DEFAULT_PROXY_HOST = "";
+  public static final String DEFAULT_PROXY_PORT = "";
 
-  public static String ENV_DESTINATION = "RESTFUSE_DESTINATION";
-  public static String ENV_PROXY_HOST = "RESTFUSE_PROXY_HOST";
-  public static String ENV_PROXY_PORT = "RESTFUSE_PROXY_PORT";
+  public static final String ENV_DESTINATION = "RESTFUSE_DESTINATION";
+  public static final String ENV_PROXY_HOST = "RESTFUSE_PROXY_HOST";
+  public static final String ENV_PROXY_PORT = "RESTFUSE_PROXY_PORT";
 
-  public static String PROPERTY_DESTINATION = "restfuse.destination";
-  public static String PROPERTY_PROXY_HOST = "restfuse.proxy.host";
-  public static String PROPERTY_PROXY_PORT = "restfuse.proxy.port";
+  public static final String PROPERTY_DESTINATION = "restfuse.destination";
+  public static final String PROPERTY_PROXY_HOST = "restfuse.proxy.host";
+  public static final String PROPERTY_PROXY_PORT = "restfuse.proxy.port";
 
   static String destinationUrl;
   static String proxyHost;
