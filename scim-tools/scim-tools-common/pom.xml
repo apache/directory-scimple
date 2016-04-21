@@ -1,10 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>edu.psu.swe.scim</groupId>
     <artifactId>scim-tools</artifactId>
     <version>2.0-SNAPSHOT</version>
   </parent>
+
   <artifactId>scim-tools-common</artifactId>
   <name>SCIM - Tools - Common</name>
 
@@ -18,12 +21,18 @@
       <artifactId>JUnitParams</artifactId>
     </dependency>
     <dependency>
-    	<groupId>com.fasterxml.jackson.jaxrs</groupId>
-    	<artifactId>jackson-jaxrs-json-provider</artifactId>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
     </dependency>
     <dependency>
-    	<groupId>edu.psu.swe.scim</groupId>
-    	<artifactId>scim-spec-schema</artifactId>
+      <groupId>edu.psu.swe.scim</groupId>
+      <artifactId>scim-spec-schema</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.foodev</groupId>
+      <artifactId>jsondiff</artifactId>
+      <version>2.0.0</version>
     </dependency>
   </dependencies>
+
 </project>
