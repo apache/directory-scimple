@@ -23,10 +23,10 @@ public class ListResponse extends BaseResource {
   int totalResults;
   
   @XmlElement
-  int startIndex;
+  Integer startIndex;
   
   @XmlElement
-  int itemsPerPage;
+  Integer itemsPerPage;
 
   @XmlElement(name = "Resources")
   List<Object> resources;
