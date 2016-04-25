@@ -48,7 +48,7 @@ public class ProviderRegistry {
 
   @Inject
   Registry registry;
-  
+
   @Inject
   ScimExtensionRegistry scimExtensionRegistry;
 
@@ -57,7 +57,7 @@ public class ProviderRegistry {
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Instance<? extends Provider<T>> providerInstance) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsException {
 
     Provider<T> provider = providerInstance.get();
-    
+
     ResourceType resourceType = generateResourceType(clazz, provider);
 
     log.debug("Calling addSchema on the base");
@@ -74,18 +74,19 @@ public class ProviderRegistry {
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
 
-    for (Class<? extends ScimExtension> scimExtension : extensionList) {
-      ScimExtension newScimExtensionInstance;
-      try {
-        newScimExtensionInstance = scimExtension.newInstance();
-        log.info("Registering a extension of type " + newScimExtensionInstance.getUrn());
-      } catch (InstantiationException | IllegalAccessException e) {
-        throw new InvalidProviderException(e.getMessage());
+    if (extensionList != null) {
+      for (Class<? extends ScimExtension> scimExtension : extensionList) {
+        ScimExtension newScimExtensionInstance;
+        try {
+          newScimExtensionInstance = scimExtension.newInstance();
+          log.info("Registering a extension of type " + newScimExtensionInstance.getUrn());
+        } catch (InstantiationException | IllegalAccessException e) {
+          throw new InvalidProviderException(e.getMessage());
+        }
+
+        scimExtensionRegistry.registerExtension(clazz, newScimExtensionInstance);
       }
-      
-      scimExtensionRegistry.registerExtension(clazz, newScimExtensionInstance);
     }
-    
     Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
 
     while (iter.hasNext()) {
@@ -102,8 +103,8 @@ public class ProviderRegistry {
     Instance<? extends Provider<? extends ScimResource>> providerInstance = providerMap.get(clazz);
     if (providerInstance == null) {
       return null;
-    } 
-    
+    }
+
     return (Provider<T>) providerInstance.get();
   }
 
@@ -148,10 +149,10 @@ public class ProviderRegistry {
     return resourceType;
   }
 
-  public static Schema generateSchema(Class<?> clazz)  throws InvalidProviderException {
+  public static Schema generateSchema(Class<?> clazz) throws InvalidProviderException {
     List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
-    
-    //Field [] fieldList = clazz.getDeclaredFields();
+
+    // Field [] fieldList = clazz.getDeclaredFields();
 
     Schema schema = new Schema();
 
@@ -166,17 +167,17 @@ public class ProviderRegistry {
     log.info("calling set attributes with " + fieldList.size() + " fields");
     Set<String> invalidAttributes = new HashSet<>();
     schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getSimpleName()));
-    
+
     if (!invalidAttributes.isEmpty()) {
       StringBuilder sb = new StringBuilder();
-      
+
       sb.append("Scim attributes cannot be primitive types unless they are required.  The following values were found that are primitive and not required\n\n");
-      
+
       for (String s : invalidAttributes) {
         sb.append(s);
         sb.append("\n");
       }
-      
+
       throw new InvalidProviderException(sb.toString());
     }
 
@@ -206,30 +207,30 @@ public class ProviderRegistry {
       }
 
       String attributeName;
-      
+
       if (sa.name() == null || sa.name().isEmpty()) {
         attributeName = f.getName();
       } else {
         attributeName = sa.name();
       }
-      
+
       if (f.getType().isPrimitive() && sa.required() == false) {
-        invalidAttributes.add(nameBase + "." +attributeName);
+        invalidAttributes.add(nameBase + "." + attributeName);
         continue;
       }
-      
+
       Attribute attribute = new Attribute();
       attribute.setField(f);
       attribute.setName(attributeName);
       List<String> cononicalTypes = Arrays.asList(sa.canonicalValues());
-      
-      //If we just have the default single empty string, set to null
+
+      // If we just have the default single empty string, set to null
       if (cononicalTypes.isEmpty() || (cononicalTypes.size() == 1 && cononicalTypes.get(0).isEmpty())) {
         attribute.setCanonicalValues(null);
       } else {
         attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
       }
-      
+
       attribute.setCaseExact(sa.caseExact());
       attribute.setDescription(sa.description());
 
@@ -240,16 +241,16 @@ public class ProviderRegistry {
       }
 
       attribute.setMutability(sa.mutability());
-      
+
       List<String> refType = Arrays.asList(sa.referenceTypes());
-      
-      //If we just have the default single empty string, set to null
+
+      // If we just have the default single empty string, set to null
       if (refType.isEmpty() || (refType.size() == 1 && refType.get(0).isEmpty())) {
         attribute.setReferenceTypes(null);
       } else {
         attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
       }
-      
+
       attribute.setRequired(sa.required());
       attribute.setReturned(sa.returned());
       attribute.setType(sa.type());
@@ -257,16 +258,19 @@ public class ProviderRegistry {
 
       if (sa.type().equals(Type.COMPLEX)) {
         if (!attribute.isMultiValued()) {
-          //attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(), BaseResource.class)));
+          // attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(),
+          // BaseResource.class)));
           attribute.setSubAttributes(createAttributes(Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()));
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
-          //attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType, BaseResource.class)));
+          // attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType,
+          // BaseResource.class)));
           attribute.setSubAttributes(createAttributes(Arrays.asList(componentType.getDeclaredFields()), invalidAttributes, nameBase + "." + componentType.getSimpleName()));
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-          //attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass, BaseResource.class)));
+          // attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass,
+          // BaseResource.class)));
           attribute.setSubAttributes(createAttributes(Arrays.asList(attributeContainedClass.getDeclaredFields()), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()));
         }
       }
@@ -286,7 +290,7 @@ public class ProviderRegistry {
     }
     return currentClassFields;
   }
-  
+
   // private Provider<ScimGroup> groupProvider = null;
   // private Provider<ScimUser> userProvider = null;
 }
