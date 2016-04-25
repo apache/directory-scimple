@@ -86,14 +86,15 @@ public class ProviderRegistry {
 
         scimExtensionRegistry.registerExtension(clazz, newScimExtensionInstance);
       }
-    }
-    Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
 
-    while (iter.hasNext()) {
-      log.debug("Calling addSchema on an extension");
-      registry.addSchema(generateSchema(iter.next()));
-    }
+      Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
 
+      while (iter.hasNext()) {
+        log.debug("Calling addSchema on an extension");
+        registry.addSchema(generateSchema(iter.next()));
+      }
+    }
+    
     registry.addResourceType(resourceType);
     providerMap.put(clazz, providerInstance);
   }
