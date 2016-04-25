@@ -1,13 +1,20 @@
 package edu.psu.swe.scim.spec.resources;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
+import lombok.Data;
 
 /**
  * Scim core schema, <a href="https://tools.ietf.org/html/rfc7643#section-4.1.2>section 4.1.2</a>
  *
  */
+@XmlType
+@XmlAccessorType(XmlAccessType.NONE)
+@Data
 public class X509Certificate {
   
   @XmlElement(nillable=true)
