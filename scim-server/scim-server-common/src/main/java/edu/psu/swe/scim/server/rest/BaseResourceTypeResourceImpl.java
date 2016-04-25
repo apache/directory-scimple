@@ -52,38 +52,38 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
   public abstract Provider<T> getProvider();
-  
+
   @Context
   UriInfo uriInfo;
-  
+
   @Context
   Request request;
-  
-  @Context 
+
+  @Context
   HttpServletRequest servletRequest;
-  
+
   @Inject
   AttributeUtil attributeUtil;
-  
+
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
     if (servletRequest.getAttribute("filter") != null) {
-      return Response.status(Status.FORBIDDEN).build();  
+      return Response.status(Status.FORBIDDEN).build();
     }
-    
+
     if ((provider = getProvider()) == null) {
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
     Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-    
+
     if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
     }
-    
+
     T resource;
     try {
       resource = provider.get(id);
@@ -96,26 +96,26 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     EntityTag etag = null;
-    
+
     try {
       etag = generateEtag(resource);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
       return createETagErrorResponse();
     }
-        
-    // Process Attributes 
+
+    // Process Attributes
     try {
       if (!excludedAttributeReferences.isEmpty()) {
-          resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
+        resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
       } else {
         resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
       }
-      
+
       return Response.ok().entity(resource).location(buildLocationTag(resource)).tag(etag).build();
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       return createAttriubteProcessingErrorResponse(e);
     }
-    
+
   }
 
   @Override
@@ -128,7 +128,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     searchRequest.setSortOrder(sortOrder);
     searchRequest.setStartIndex(startIndex);
     searchRequest.setCount(count);
-    
+
     return find(searchRequest);
   }
 
@@ -156,8 +156,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
       log.error("Failed to generate etag for newly created entity " + e.getMessage());
     }
-    
-    // Process Attributes 
+
+    // Process Attributes
     try {
       created = attributeUtil.setAttributesForDisplay(resource, Collections.emptySet());
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
@@ -167,12 +167,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         Response.status(Status.CREATED).location(buildLocationTag(resource)).tag(etag).build();
       }
     }
-    
-    //TODO - Is this the right behavior?
+
+    // TODO - Is this the right behavior?
     if (etag == null) {
       return Response.status(Status.CREATED).location(buildLocationTag(resource)).entity(created).build();
     }
-    
+
     return Response.status(Status.CREATED).location(buildLocationTag(resource)).tag(etag).entity(created).build();
   }
 
@@ -183,58 +183,63 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if ((provider = getProvider()) == null) {
       return BaseResourceTypeResource.super.find(request);
     }
-    
+
     Set<AttributeReference> attributes = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
     Set<AttributeReference> excludedAttributes = Optional.ofNullable(request.getExcludedAttributes()).orElse(Collections.emptySet());
     if (!attributes.isEmpty() && !excludedAttributes.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
     }
-    
+
     Filter filter = request.getFilter();
     PageRequest pageRequest = request.getPageRequest();
     SortRequest sortRequest = request.getSortRequest();
-    
+
     ListResponse listResponse = new ListResponse();
-    
-    
+
     List<T> resources;
     try {
       resources = provider.find(filter, pageRequest, sortRequest);
     } catch (UnableToRetrieveResourceException e1) {
       return createGenericExceptionResponse(e1);
     }
-    
-    listResponse.setItemsPerPage(resources.size());
-    listResponse.setStartIndex(1);
-    listResponse.setTotalResults(resources.size());
+
+    // If no resources are found, we should still return a ListResponse with
+    // the totalResults set to 0; (https://tools.ietf.org/html/rfc7644#section-3.4.2)
+    if (resources == null || resources.isEmpty()) {
+      listResponse.setTotalResults(0);
+    } else {
+      listResponse.setItemsPerPage(resources.size());
+      listResponse.setStartIndex(1);
+      listResponse.setTotalResults(resources.size());
+    }
 
     List<Object> results = new ArrayList<>();
-    
+
     for (T resource : resources) {
       EntityTag etag = null;
-      
+
       try {
         etag = generateEtag(resource);
       } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
         return createETagErrorResponse();
       }
-          
-      // Process Attributes 
+
+      // Process Attributes
       try {
         if (!excludedAttributes.isEmpty()) {
-            resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
+          resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
         } else {
           resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
         }
-        
+
         results.add(resource);
       } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
         return createAttriubteProcessingErrorResponse(e);
       }
     }
-    
+
     listResponse.setResources(results);
-    
+
     return Response.ok().entity(listResponse).build();
   }
 
@@ -252,17 +257,17 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     } catch (UnableToRetrieveResourceException e2) {
       return createGenericExceptionResponse(e2);
     }
-    
+
     EntityTag backingETag = null;
     try {
       backingETag = generateEtag(stored);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
       return createETagErrorResponse();
     }
-    
+
     ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
-    
-    if (evaluatePreconditionsResponse != null){
+
+    if (evaluatePreconditionsResponse != null) {
       return createPreconditionFailedResponse(resource, evaluatePreconditionsResponse);
     }
 
@@ -273,25 +278,25 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createGenericExceptionResponse(e1);
     }
 
-    // Process Attributes 
+    // Process Attributes
     try {
       updated = attributeUtil.setAttributesForDisplay(resource, Collections.emptySet());
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       log.error("Failed to handle attribute processing in update " + e.getMessage());
     }
-    
+
     EntityTag etag = null;
     try {
       etag = generateEtag(updated);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
       log.error("Failed to generate etag for newly created entity " + e.getMessage());
     }
-    
-    //TODO - Is this correct or should we support roll back semantics
+
+    // TODO - Is this correct or should we support roll back semantics
     if (etag == null) {
       return Response.ok(updated).location(buildLocationTag(resource)).build();
     }
-    
+
     return Response.ok(updated).location(buildLocationTag(resource)).tag(etag).build();
   }
 
@@ -306,9 +311,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     // TODO Auto-generated method stub
     return BaseResourceTypeResource.super.delete(id);
   }
-  
+
   private EntityTag generateEtag(T resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
-    
+
     ObjectMapper objectMapper = new ObjectMapper();
     JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
     objectMapper.registerModule(jaxbAnnotationModule);
@@ -317,35 +322,34 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
 
     objectMapper.setSerializationInclusion(Include.NON_NULL);
-    
+
     Meta meta = resource.getMeta();
-    
+
     if (meta == null) {
       meta = new Meta();
     }
 
     resource.setMeta(null);
     String writeValueAsString = objectMapper.writeValueAsString(resource);
-    
+
     EntityTag etag = hash(writeValueAsString);
     meta.setVersion(etag.getValue());
 
     resource.setMeta(meta);
-    
+
     return etag;
   }
-  
+
   public static EntityTag hash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
     digest.update(input.getBytes("UTF-8"));
     byte[] hash = digest.digest();
     return new EntityTag(Base64.getEncoder().encodeToString(hash));
   }
-  
+
   private URI buildLocationTag(T resource) {
     return uriInfo.getAbsolutePathBuilder().path(resource.getId()).build();
   }
-
 
   private Response createGenericExceptionResponse(Exception e1) {
     ErrorResponse er = new ErrorResponse();
@@ -353,14 +357,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     er.setDetail(e1.getLocalizedMessage());
     return Response.status(Status.BAD_REQUEST).entity(er).build();
   }
-  
+
   private Response createAmbiguousAttributeParametersResponse() {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("400");
     er.setDetail("Cannot include both attributes and excluded attributes in a single request");
     return Response.status(Status.BAD_REQUEST).entity(er).build();
   }
-  
+
   private Response createNotFoundResponse(String id) {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("404");
@@ -374,7 +378,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     er.setDetail("Failed to generate the etag");
     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
   }
-  
+
   private Response createAttriubteProcessingErrorResponse(Exception e) {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("500");
