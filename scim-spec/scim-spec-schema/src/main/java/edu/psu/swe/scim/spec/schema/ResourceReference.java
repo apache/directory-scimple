@@ -33,7 +33,7 @@ public class ResourceReference {
   @XmlElement
   String display;
 
-  @ScimAttribute(description="A label indicating the attribute's function; e.g., 'direct' or 'indirect'.", canonicalValues={"direct", "indirect"})
+  @ScimAttribute(description="A label indicating the attribute's function; e.g., 'direct' or 'indirect'.", canonicalValueList={"direct", "indirect"})
   @XmlElement
   ReferenceType type;
 }

@@ -30,7 +30,7 @@ public class PhoneNumber {
   String display;
   
   @XmlElement
-  @ScimAttribute(canonicalValues={"work", "home", "mobile", "fax", "pager", "other"}, description="A label indicating the attribute's function; e.g., 'work' or 'home' or 'mobile' etc.")
+  @ScimAttribute(canonicalValueList={"work", "home", "mobile", "fax", "pager", "other"}, description="A label indicating the attribute's function; e.g., 'work' or 'home' or 'mobile' etc.")
   String type;
   
   @XmlElement

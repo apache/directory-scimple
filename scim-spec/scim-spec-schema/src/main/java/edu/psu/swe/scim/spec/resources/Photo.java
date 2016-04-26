@@ -22,7 +22,7 @@ public class Photo {
   String value;
   
   @XmlElement(nillable=true)
-  @ScimAttribute(canonicalValues={"photo", "thumbnail"}, description="A label indicating the attribute's function; e.g., 'photo' or 'thumbnail'.")
+  @ScimAttribute(canonicalValueList={"photo", "thumbnail"}, description="A label indicating the attribute's function; e.g., 'photo' or 'thumbnail'.")
   String type;
   
   @XmlElement

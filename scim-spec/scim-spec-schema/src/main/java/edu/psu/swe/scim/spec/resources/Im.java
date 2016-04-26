@@ -18,7 +18,7 @@ import lombok.Data;
 public class Im {
   
   @XmlElement(nillable=true)
-  @ScimAttribute(canonicalValues={"aim", "qtalk", "icq", "xmpp", "msn", "skype", "qq", "yahoo"}, description="A label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.")
+  @ScimAttribute(canonicalValueList={"aim", "qtalk", "icq", "xmpp", "msn", "skype", "qq", "yahoo"}, description="A label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.")
   String type;
   
   @XmlElement

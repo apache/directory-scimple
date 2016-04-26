@@ -18,7 +18,7 @@ import lombok.Data;
 public class Address {
   
   @XmlElement(nillable=true)
-  @ScimAttribute(canonicalValues={"work", "home", "other"}, description="A label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.")
+  @ScimAttribute(canonicalValueList={"work", "home", "other"}, description="A label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.")
   String type;
   
   @XmlElement

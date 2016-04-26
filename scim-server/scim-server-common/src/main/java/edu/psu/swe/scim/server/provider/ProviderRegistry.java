@@ -18,6 +18,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.xml.bind.annotation.XmlEnumValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
@@ -212,7 +213,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private static List<Attribute> createAttributes(List<Field> fieldList, Set<String> invalidAttributes, String nameBase) {
+  private static List<Attribute> createAttributes(List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws InvalidProviderException {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -237,16 +238,39 @@ public class ProviderRegistry {
         continue;
       }
 
+      //TODO - Fix this to look for the two types of canonical attributes
       Attribute attribute = new Attribute();
       attribute.setField(f);
       attribute.setName(attributeName);
-      List<String> cononicalTypes = Arrays.asList(sa.canonicalValues());
+      
+      List<String> canonicalTypes = null;
+      Field [] enumFields = sa.canonicalValueEnum().getClass().getFields();
+      
+      if (enumFields.length != 0) {
+        if (sa.canonicalValueList().length != 0) {
+          throw new InvalidProviderException("You cannont set both the canonicalEnumValue and canonicalValueList attributes on the same ScimAttribute");
+        }
+        
+        canonicalTypes = new ArrayList<>();
+
+        for (Field field : enumFields) {
+          XmlEnumValue [] annotation = field.getAnnotationsByType(XmlEnumValue.class);
+          
+          if (annotation.length != 0) {
+            canonicalTypes.add(annotation[0].value());
+          } else {
+            canonicalTypes.add(field.getName());
+          }
+        }
+      } else {
+        canonicalTypes = Arrays.asList(sa.canonicalValueList());
+      }
 
       // If we just have the default single empty string, set to null
-      if (cononicalTypes.isEmpty() || (cononicalTypes.size() == 1 && cononicalTypes.get(0).isEmpty())) {
+      if (canonicalTypes.isEmpty() || (canonicalTypes.size() == 1 && canonicalTypes.get(0).isEmpty())) {
         attribute.setCanonicalValues(null);
       } else {
-        attribute.setCanonicalValues(new HashSet<String>(Arrays.asList(sa.canonicalValues())));
+        attribute.setCanonicalValues(new HashSet<String>(canonicalTypes));
       }
 
       attribute.setCaseExact(sa.caseExact());
