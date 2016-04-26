@@ -19,9 +19,6 @@ import javax.ejb.Startup;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 
@@ -39,12 +36,32 @@ import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Startup
 @Data
 @Slf4j
 public class ProviderRegistry {
+
+  private static final String STRING_TYPE_IDENTIFIER = "class java.lang.String";
+  private static final String CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [C";
+  private static final String BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [Ljava.lang.Character;";
+  private static final String INT_TYPE_IDENTIFIER = "int";
+  private static final String INTEGER_TYPE_IDENTIFIER = "class java.lang.Integer";
+  private static final String FLOAT_TYPE_IDENTIFIER = "float";
+  private static final String BIG_F_FLOAT_TYPE_IDENTIFIER = "class java.lang.Float";
+  private static final String DOUBLE_TYPE_IDENTIFIER = "double";
+  private static final String BIG_D_DOUBLE_TYPE_IDENTIFIER = "class java.lang.Double";
+  private static final String BOOLEAN_TYPE_IDENTIFIER = "boolean";
+  private static final String BIG_B_BOOLEAN_TYPE_IDENTIFIER = "class java.lang.Boolean";
+  private static final String LOCAL_TIME_TYPE_IDENTIFER = "class java.time.LocalTime";
+  private static final String LOCAL_DATE_TYPE_IDENTIFER = "class java.time.LocalDate";
+  private static final String LOCAL_DATE_TIME_TYPE_IDENTIFIER = "class java.time.LocalDateTime";
+  private static final String DATE_TYPE_IDENTIFIER = "class java.util.Date";
+  private static final String BYTE_ARRAY_TYPE_IDENTIFIER = "class [B";
+  private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class edu.psu.swe.scim.spec.schema.ResourceReference$ReferenceType";
 
   @Inject
   Registry registry;
@@ -94,7 +111,7 @@ public class ProviderRegistry {
         registry.addSchema(generateSchema(iter.next()));
       }
     }
-    
+
     registry.addResourceType(resourceType);
     providerMap.put(clazz, providerInstance);
   }
@@ -235,12 +252,69 @@ public class ProviderRegistry {
       attribute.setCaseExact(sa.caseExact());
       attribute.setDescription(sa.description());
 
-      if (Collection.class.isAssignableFrom(f.getType()) || f.getType().isArray()) {
+      String typeName = null;
+      if (Collection.class.isAssignableFrom(f.getType())) {
+        log.debug("We have a collection");
+        ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
+        Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+        typeName = attributeContainedClass.getTypeName();
+        attribute.setMultiValued(true);
+      } else if (f.getType().isArray()) {
+        log.debug("We have an array");
+        Class<?> componentType = f.getType().getComponentType();
+        typeName = componentType.getTypeName();
         attribute.setMultiValued(true);
       } else {
+        typeName = f.getType().toString();
         attribute.setMultiValued(false);
       }
 
+      // attribute.setType(sa.type());
+      log.info("Attempting to set the attribute type, raw value = " + typeName);
+      switch (typeName) {
+      case STRING_TYPE_IDENTIFIER:
+      case CHARACTER_ARRAY_TYPE_IDENTIFIER:
+      case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
+        log.debug("Setting type to String");
+        attribute.setType(Type.STRING);
+        break;
+      case INT_TYPE_IDENTIFIER:
+      case INTEGER_TYPE_IDENTIFIER:
+        log.debug("Setting type to integer");
+        attribute.setType(Type.INTEGER);
+        break;
+      case FLOAT_TYPE_IDENTIFIER:
+      case BIG_F_FLOAT_TYPE_IDENTIFIER:
+      case DOUBLE_TYPE_IDENTIFIER:
+      case BIG_D_DOUBLE_TYPE_IDENTIFIER:
+        log.debug("Setting type to decimal");
+        attribute.setType(Type.DECIMAL);
+        break;
+      case BOOLEAN_TYPE_IDENTIFIER:
+      case BIG_B_BOOLEAN_TYPE_IDENTIFIER:
+        log.debug("Setting type to boolean");
+        attribute.setType(Type.BOOLEAN);
+        break;
+      case BYTE_ARRAY_TYPE_IDENTIFIER:
+        log.debug("Setting type to binary");
+        attribute.setType(Type.BINARY);
+        break;
+      case DATE_TYPE_IDENTIFIER:
+      case LOCAL_DATE_TIME_TYPE_IDENTIFIER:
+      case LOCAL_TIME_TYPE_IDENTIFER:
+      case LOCAL_DATE_TYPE_IDENTIFER:
+        log.debug("Setting type to date time");
+        attribute.setType(Type.DATE_TIME);
+        break;
+      case RESOURCE_REFERENCE_TYPE_IDENTIFIER:
+        log.debug("Setting type to reference");
+        attribute.setType(Type.REFERENCE);
+        break;
+      default:
+        log.debug("Setting type to complex");
+        attribute.setType(Type.COMPLEX);
+      }
+      
       attribute.setMutability(sa.mutability());
 
       List<String> refType = Arrays.asList(sa.referenceTypes());
@@ -254,10 +328,10 @@ public class ProviderRegistry {
 
       attribute.setRequired(sa.required());
       attribute.setReturned(sa.returned());
-      attribute.setType(sa.type());
       attribute.setUniqueness(sa.uniqueness());
 
-      if (sa.type().equals(Type.COMPLEX)) {
+      //if (sa.type().equals(Type.COMPLEX))
+      if (attribute.getType() == Type.COMPLEX) {
         if (!attribute.isMultiValued()) {
           // attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(),
           // BaseResource.class)));
