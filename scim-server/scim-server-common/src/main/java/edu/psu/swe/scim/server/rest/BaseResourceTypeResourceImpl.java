@@ -204,41 +204,42 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     // If no resources are found, we should still return a ListResponse with
-    // the totalResults set to 0; (https://tools.ietf.org/html/rfc7644#section-3.4.2)
+    // the totalResults set to 0;
+    // (https://tools.ietf.org/html/rfc7644#section-3.4.2)
     if (resources == null || resources.isEmpty()) {
       listResponse.setTotalResults(0);
     } else {
       listResponse.setItemsPerPage(resources.size());
       listResponse.setStartIndex(1);
       listResponse.setTotalResults(resources.size());
-    }
 
-    List<Object> results = new ArrayList<>();
+      List<Object> results = new ArrayList<>();
 
-    for (T resource : resources) {
-      EntityTag etag = null;
+      for (T resource : resources) {
+        EntityTag etag = null;
 
-      try {
-        etag = generateEtag(resource);
-      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-        return createETagErrorResponse();
-      }
-
-      // Process Attributes
-      try {
-        if (!excludedAttributes.isEmpty()) {
-          resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
-        } else {
-          resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
+        try {
+          etag = generateEtag(resource);
+        } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+          return createETagErrorResponse();
         }
 
-        results.add(resource);
-      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
-        return createAttriubteProcessingErrorResponse(e);
-      }
-    }
+        // Process Attributes
+        try {
+          if (!excludedAttributes.isEmpty()) {
+            resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
+          } else {
+            resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
+          }
 
-    listResponse.setResources(results);
+          results.add(resource);
+        } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
+          return createAttriubteProcessingErrorResponse(e);
+        }
+      }
+
+      listResponse.setResources(results);
+    }
 
     return Response.ok().entity(listResponse).build();
   }
