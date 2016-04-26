@@ -74,6 +74,16 @@ public interface Provider<T> {
    *         cannot be retrieved.
    */
   List<T> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException;
+  
+  /**
+   * Deletes the ScimResource with the provided identifier (if it exists).
+   * This interface makes no distinction between hard and soft deletes but
+   * rather leaves that to the designer of the persistence layer.
+   * 
+   * @param id The ScimResource's identifier.
+   * @throws UnableToDeleteResourceException When the specified ScimResource
+   *         cannot be deleted.
+   */
   void delete(String id) throws UnableToDeleteResourceException;
 
   /**
