@@ -232,7 +232,7 @@ public class ProviderRegistry {
         attributeName = sa.name();
       }
 
-      if (f.getType().isPrimitive() && sa.required() == false) {
+      if (f.getType().isPrimitive() && !sa.required()) {
         invalidAttributes.add(nameBase + "." + attributeName);
         continue;
       }
