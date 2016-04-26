@@ -37,7 +37,7 @@ public class ScimExtensionRegistry {
   }
   
   public void registerExtension(Class<? extends ScimResource> resourceClass, ScimExtension scimExtension) {
-    String urn = scimExtension.getUrn().toString();
+    String urn = scimExtension.getUrn();
     Class<? extends ScimExtension> extensionClass = scimExtension.getClass();
     
     LOGGER.debug("Registering extension for URN: " + urn);
