@@ -244,10 +244,13 @@ public class ProviderRegistry {
       attribute.setName(attributeName);
       
       List<String> canonicalTypes = null;
-      Field [] enumFields = sa.canonicalValueEnum().getClass().getFields();
+      Field [] enumFields = sa.canonicalValueEnum().getFields();
+      log.info("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
       
       if (enumFields.length != 0) {
-        if (sa.canonicalValueList().length != 0) {
+        
+        //This looks goofy, but there's always at least the default value, so it's not an empty list
+        if (sa.canonicalValueList().length != 1 && !sa.canonicalValueList()[0].isEmpty()) {
           throw new InvalidProviderException("You cannont set both the canonicalEnumValue and canonicalValueList attributes on the same ScimAttribute");
         }
         
