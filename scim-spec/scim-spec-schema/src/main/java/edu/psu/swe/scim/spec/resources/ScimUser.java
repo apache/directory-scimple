@@ -11,7 +11,6 @@ import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.schema.ResourceReference;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Uniqueness;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,7 +26,7 @@ public class ScimUser extends ScimResource {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
   
   @XmlElement
-  @ScimAttribute(description="A Boolean value indicating the User's administrative status.", type=Type.BOOLEAN)
+  @ScimAttribute(description="A Boolean value indicating the User's administrative status.")
   Boolean active = true;
 
   @XmlElement
@@ -107,7 +106,7 @@ public class ScimUser extends ScimResource {
   String userType;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="A list of certificates issued to the User.")
+  @ScimAttribute(description="A list of certificates issued to the User.")
   List<X509Certificate> x509Certificates;
 
   public ScimUser() {

@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
 
 /**
@@ -19,7 +18,7 @@ import lombok.Data;
 public class Photo {
   
   @XmlElement
-  @ScimAttribute(description="URL of a photo of the User.", referenceTypes={"external"}, type=Type.REFERENCE)
+  @ScimAttribute(description="URL of a photo of the User.", referenceTypes={"external"})
   String value;
   
   @XmlElement(nillable=true)

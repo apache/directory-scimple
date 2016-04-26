@@ -9,7 +9,6 @@ import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
 
 /**
@@ -26,7 +25,7 @@ public class LuckyNumberExtension implements ScimExtension {
   
   public static final String  SCHEMA_URN = "urn:mem:params:scim:schemas:extension:LuckyNumberExtension";
 
-  @ScimAttribute(type=Type.INTEGER, returned=Returned.DEFAULT, required=true)
+  @ScimAttribute(returned=Returned.DEFAULT, required=true)
   @XmlElement
   private long luckyNumber;
   

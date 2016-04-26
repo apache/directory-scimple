@@ -9,10 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
-import edu.psu.swe.scim.spec.resources.ScimResource;
-import edu.psu.swe.scim.spec.resources.ScimUser;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Mutability;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
 
 @XmlRootElement
@@ -61,7 +58,7 @@ public class EnterpriseExtension implements ScimExtension {
   @XmlElement
   private String department;
 
-  @ScimAttribute(type=Type.COMPLEX, description = "The user's manager.  A complex type that optionally allows service providers to represent organizational hierarchy by referencing the \"id\" attribute of another User.")
+  @ScimAttribute(description = "The user's manager.  A complex type that optionally allows service providers to represent organizational hierarchy by referencing the \"id\" attribute of another User.")
   @XmlElement
   private Manager manager;
 
