@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
 
 /**
@@ -31,7 +30,7 @@ public class PhoneNumber {
   String display;
   
   @XmlElement
-  @ScimAttribute(type=Type.BOOLEAN, canonicalValues={"work", "home", "mobile", "fax", "pager", "other"}, description="A label indicating the attribute's function; e.g., 'work' or 'home' or 'mobile' etc.")
+  @ScimAttribute(canonicalValues={"work", "home", "mobile", "fax", "pager", "other"}, description="A label indicating the attribute's function; e.g., 'work' or 'home' or 'mobile' etc.")
   String type;
   
   @XmlElement

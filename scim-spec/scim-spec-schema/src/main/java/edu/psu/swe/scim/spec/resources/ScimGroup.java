@@ -7,12 +7,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.schema.ResourceReference;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -29,7 +28,7 @@ public class ScimGroup extends ScimResource {
   String displayName;
   
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description = "A list of members of the Group.")
+  @ScimAttribute(description = "A list of members of the Group.")
   List<ResourceReference> members;
 
   public ScimGroup() {

@@ -31,7 +31,7 @@ public class ScimUser extends ScimResource {
   Boolean active = true;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="A physical mailing address for this User, as described in (address Element). Canonical Type Values of work, home, and other. The value attribute is a complex type with the following sub-attributes.")
+  @ScimAttribute(description="A physical mailing address for this User, as described in (address Element). Canonical Type Values of work, home, and other. The value attribute is a complex type with the following sub-attributes.")
   List<Address> addresses;
 
   @XmlElement
@@ -39,19 +39,19 @@ public class ScimUser extends ScimResource {
   String displayName;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="E-mail addresses for the user. The value SHOULD be canonicalized by the Service Provider, e.g. bjensen@example.com instead of bjensen@EXAMPLE.COM. Canonical Type values of work, home, and other.")
+  @ScimAttribute(description="E-mail addresses for the user. The value SHOULD be canonicalized by the Service Provider, e.g. bjensen@example.com instead of bjensen@EXAMPLE.COM. Canonical Type values of work, home, and other.")
   List<Email> emails;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX)
+  @ScimAttribute(description="Get the description")
   List<Entitlement> entitlements;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
+  @ScimAttribute(description="A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
   List<ResourceReference> groups;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="Instant messaging address for the User.")
+  @ScimAttribute(description="Instant messaging address for the User.")
   List<Im> ims;
 
   @XmlElement
@@ -59,7 +59,7 @@ public class ScimUser extends ScimResource {
   String locale;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="The components of the user's real name. Providers MAY return just the full name as a single string in the formatted sub-attribute, or they MAY return just the individual component attributes using the other sub-attributes, or they MAY return both. If both variants are returned, they SHOULD be describing the same name, with the formatted name indicating how the component attributes should be combined.")
+  @ScimAttribute(description="The components of the user's real name. Providers MAY return just the full name as a single string in the formatted sub-attribute, or they MAY return just the individual component attributes using the other sub-attributes, or they MAY return both. If both variants are returned, they SHOULD be describing the same name, with the formatted name indicating how the component attributes should be combined.")
   Name name;
 
   @XmlElement
@@ -71,11 +71,11 @@ public class ScimUser extends ScimResource {
   String password;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="Phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider according to format in RFC3966 e.g. 'tel:+1-201-555-0123'.  Canonical Type values of work, home, mobile, fax, pager and other.")
+  @ScimAttribute(description="Phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider according to format in RFC3966 e.g. 'tel:+1-201-555-0123'.  Canonical Type values of work, home, mobile, fax, pager and other.")
   List<PhoneNumber> phoneNumbers;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="URLs of photos of the User.")
+  @ScimAttribute(description="URLs of photos of the User.")
   List<Photo> photos;
 
   @XmlElement
@@ -87,7 +87,7 @@ public class ScimUser extends ScimResource {
   String preferredLanguage;
 
   @XmlElement
-  @ScimAttribute(type = Type.COMPLEX, description="A list of roles for the User that collectively represent who the User is; e.g., 'Student', 'Faculty'.")
+  @ScimAttribute(description="A list of roles for the User that collectively represent who the User is; e.g., 'Student', 'Faculty'.")
   List<Role> roles;
 
   @XmlElement
