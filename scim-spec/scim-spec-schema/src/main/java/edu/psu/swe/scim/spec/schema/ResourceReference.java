@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
+import edu.psu.swe.scim.spec.annotation.ScimResourceIdReference;
 import lombok.Data;
 
 @Data
@@ -22,6 +23,7 @@ public class ResourceReference {
   }
   
   @ScimAttribute(description="Reference Element Identifier")
+  @ScimResourceIdReference
   @XmlElement
   String value;
 
