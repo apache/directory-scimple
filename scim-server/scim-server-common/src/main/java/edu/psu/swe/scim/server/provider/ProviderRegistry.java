@@ -80,14 +80,9 @@ public class ProviderRegistry {
 
     log.debug("Calling addSchema on the base");
     registry.addSchema(generateSchema(clazz));
-    ScimResource newScimResourceInstance;
-    try {
-      newScimResourceInstance = clazz.newInstance();
-      log.info("Registering a provider of type " + newScimResourceInstance.getResourceType());
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw new InvalidProviderException(e.getMessage());
-    }
-    String schemaUrn = newScimResourceInstance.getBaseUrn();
+    // NOTE generateResourceType() ensures ScimResourceType exists
+    ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
+    String schemaUrn = scimResourceType.schema();
     registry.addScimResourceSchemaUrn(schemaUrn, clazz);
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
