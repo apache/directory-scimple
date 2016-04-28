@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -95,15 +96,7 @@ public class AttributeUtil {
     processAttributes(object, attributeContainer, function);
   }
   
-  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
- 
-    if (attributeContainer == null) {
-      log.error("attribute container == null");
-    } else {
-      if (attributeContainer.getAttributes() == null) {
-        log.error("attribute container returned null for getAttributes");
-      }
-    }
+  private void processAttributes(Object object, @NotNull AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
     
     for (Attribute attribute : attributeContainer.getAttributes()) {
       Field field = attribute.getField();
