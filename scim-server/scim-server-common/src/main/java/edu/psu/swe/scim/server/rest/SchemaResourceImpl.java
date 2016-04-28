@@ -3,20 +3,18 @@ package edu.psu.swe.scim.server.rest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.SchemaResource;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
-import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
 
 @Stateless
