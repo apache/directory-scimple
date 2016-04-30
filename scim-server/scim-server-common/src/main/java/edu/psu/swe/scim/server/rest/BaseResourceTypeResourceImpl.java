@@ -145,9 +145,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       created = provider.create(resource);
     } catch (UnableToCreateResourceException e1) {
       ErrorResponse er = new ErrorResponse();
-      er.setStatus("500");
-      er.setDetail(e1.getMessage());
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+      Status status = e1.getStatus();
+      if (e1.getStatus().equals(Status.CONFLICT)) {
+        er.setStatus(e1.getStatus().toString());
+        er.setDetail("uniqueness");
+      } else {
+        er.setStatus(e1.getStatus().toString());
+        er.setDetail(e1.getMessage());
+      }
+      
+      return Response.status(status).entity(er).build();
     }
 
     EntityTag etag = null;
