@@ -1,6 +1,6 @@
 package edu.psu.swe.scim.spec.schema;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import edu.psu.swe.scim.spec.adapter.Iso8601DateTimeAdapter;
+import edu.psu.swe.scim.spec.adapter.LocalDateTimeAdapter;
 import lombok.Data;
 
 /**
@@ -30,12 +30,12 @@ public class Meta {
   String resourceType;
   
   @XmlElement
-  @XmlJavaTypeAdapter(Iso8601DateTimeAdapter.class)
-  Date created;
+  @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
+  LocalDateTime created;
   
   @XmlElement
-  @XmlJavaTypeAdapter(Iso8601DateTimeAdapter.class)
-  Date lastModified;
+  @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
+  LocalDateTime lastModified;
   
   @XmlElement
   String location;
