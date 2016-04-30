@@ -1,7 +1,7 @@
 package edu.psu.swe.scim.server.rest;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -50,7 +50,7 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
     String location = uriInfo.getAbsolutePath().toString();
     String resourceType = "ServiceProviderConfig";
     String version = "<META_VERSION>";
-    Date now = new Date();
+    LocalDateTime now = LocalDateTime.now();
 
     meta.setCreated(now);
     meta.setLastModified(now);
