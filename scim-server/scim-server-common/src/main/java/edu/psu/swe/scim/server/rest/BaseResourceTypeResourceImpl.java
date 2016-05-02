@@ -19,11 +19,13 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.UriInfo;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
@@ -77,18 +79,35 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
+    T resource = null;
+    try {
+      resource = provider.get(id);
+    } catch (UnableToRetrieveResourceException e2) {
+      if (e2.getStatus().getFamily().equals(Family.SERVER_ERROR)) {
+        return createGenericExceptionResponse(e2);
+      }
+    }
+
+    if (resource != null) {
+      EntityTag backingETag = null;
+      try {
+        backingETag = generateEtag(resource);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+        return createETagErrorResponse();
+      }
+
+      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+
+      if (evaluatePreconditionsResponse != null) {
+        return Response.status(Status.NOT_MODIFIED).build();
+      }
+    }
+
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
     Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
 
     if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
-    }
-
-    T resource;
-    try {
-      resource = provider.get(id);
-    } catch (UnableToRetrieveResourceException e1) {
-      return createGenericExceptionResponse(e1);
     }
 
     if (resource == null) {
@@ -153,7 +172,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         er.setStatus(e1.getStatus().toString());
         er.setDetail(e1.getMessage());
       }
-      
+
       return Response.status(status).entity(er).build();
     }
 
@@ -330,6 +349,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
 
     objectMapper.setSerializationInclusion(Include.NON_NULL);
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     Meta meta = resource.getMeta();
 
