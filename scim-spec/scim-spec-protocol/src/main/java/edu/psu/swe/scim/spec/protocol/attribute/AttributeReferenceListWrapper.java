@@ -20,7 +20,7 @@ public class AttributeReferenceListWrapper {
     String[] split = StringUtils.split(attributeReferencesString, ",");
 
     for (String af : split) {
-      AttributeReference attributeReference = new AttributeReference(af);
+      AttributeReference attributeReference = new AttributeReference(af.trim());
       attributeReferences.add(attributeReference);
     }
     
