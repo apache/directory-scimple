@@ -103,12 +103,17 @@ public class AttributeUtilTest {
   }
   
   @Test
-  public void testExcludeNeverAttributes() throws Exception {
+  public void testExcludeAttributes() throws Exception {
     ScimUser resource = getScimUser();
     
-    resource = attributeUtil.setExcludedAttributesForDisplay(resource, Collections.emptySet());
+    resource = attributeUtil.setExcludedAttributesForDisplay(resource, Collections.singleton(new AttributeReference("userName")));
     
+
+    Assertions.assertThat(resource.getId()).isNotNull();
     Assertions.assertThat(resource.getPassword()).isNull();
+    Assertions.assertThat(resource.getUserName()).isNull();
+    Assertions.assertThat(resource.getActive()).isNotNull();
+
 
   }
 
