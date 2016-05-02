@@ -93,19 +93,6 @@ public class Registry {
     resourceTypeMap.put(resourceType.getName(), resourceType);
   }
   
-  public void addResourceType(Class<? extends ScimResource> resourceTypeClass) {
-    addResourceType(resourceTypeClass, Collections.emptyList());
-  }
-  
-  public void addResourceType(Class<? extends ScimResource> resourceTypeClass, List<Class<? extends ScimExtension>> extensions) {
-    ResourceType resourceType = createResourceType(resourceTypeClass);
-    for (Class<? extends ScimExtension> extensionClass : extensions) {
-      ScimExtension extension;
-//      resourceType.addExtension(extension.getUrn(), extension);
-
-    }
-//    resourceType.setExten
-  }
   
   private ResourceType createResourceType(Class<? extends ScimResource> resourceTypeClass) {
     ScimResourceType annotation = resourceTypeClass.getAnnotation(ScimResourceType.class);
