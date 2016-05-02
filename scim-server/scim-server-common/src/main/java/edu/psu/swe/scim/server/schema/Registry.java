@@ -92,20 +92,5 @@ public class Registry {
   public void addResourceType(ResourceType resourceType) {
     resourceTypeMap.put(resourceType.getName(), resourceType);
   }
-  
-  
-  private ResourceType createResourceType(Class<? extends ScimResource> resourceTypeClass) {
-    ScimResourceType annotation = resourceTypeClass.getAnnotation(ScimResourceType.class);
-    
-    if (annotation == null) {
-      log.error(resourceTypeClass + " must be annotated with the @ScimResourceType annotation.");
-      return null;
-    }
-    
-    ResourceType resourceType = new ResourceType(annotation);
-    return resourceType;
-  }
-
-//  private ScimExtension createResourceType(Class<? extends ScimResource> resourceTypeClass) {
 
 }
