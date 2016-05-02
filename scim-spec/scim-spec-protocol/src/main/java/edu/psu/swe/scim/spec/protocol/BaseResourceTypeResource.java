@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
@@ -122,7 +123,7 @@ public interface BaseResourceTypeResource<T> {
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Patch a portion of the backing store", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default public Response patch() {
+  default public Response patch(PatchRequest patchRequest) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 

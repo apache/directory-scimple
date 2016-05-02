@@ -40,6 +40,7 @@ import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
+import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
@@ -328,9 +329,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response patch() {
+  public Response patch(PatchRequest patchRequest) {
     // TODO Auto-generated method stub
-    return BaseResourceTypeResource.super.patch();
+    return BaseResourceTypeResource.super.patch(patchRequest);
   }
 
   @Override

@@ -3,8 +3,10 @@ package edu.psu.swe.scim.spec.protocol.filter;
 public enum AttributeOperator implements Operator {
   
   EQ,
+  NE,
   CO,
   SW,
+  EW,
   PR(true),
   GT,
   GE,
