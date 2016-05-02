@@ -152,13 +152,20 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response create(T resource) {
+  public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
     if ((provider = getProvider()) == null) {
-      return BaseResourceTypeResource.super.create(resource);
+      return BaseResourceTypeResource.super.create(resource, attributes, excludedAttributes);
     }
 
+    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
+    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
+
+    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+      return createAmbiguousAttributeParametersResponse();
+    }
+    
     T created;
     try {
       created = provider.create(resource);
@@ -172,7 +179,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         er.setStatus(e1.getStatus().toString());
         er.setDetail(e1.getMessage());
       }
-
+      
       return Response.status(status).entity(er).build();
     }
 
@@ -185,7 +192,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // Process Attributes
     try {
-      created = attributeUtil.setAttributesForDisplay(resource, Collections.emptySet());
+      if (!excludedAttributeReferences.isEmpty()) {
+        created = attributeUtil.setExcludedAttributesForDisplay(created, excludedAttributeReferences);
+      } else {
+        created = attributeUtil.setAttributesForDisplay(created, attributeReferences);
+      }
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       if (etag == null) {
         return Response.status(Status.CREATED).location(buildLocationTag(resource)).build();
@@ -271,13 +282,20 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response update(T resource) {
+  public Response update(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
     if ((provider = getProvider()) == null) {
-      return BaseResourceTypeResource.super.update(resource);
+      return BaseResourceTypeResource.super.update(resource, attributes, excludedAttributes);
     }
+    
+    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
+    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
 
+    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+      return createAmbiguousAttributeParametersResponse();
+    }
+    
     T stored;
     try {
       stored = provider.get(resource.getId());
@@ -307,7 +325,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // Process Attributes
     try {
-      updated = attributeUtil.setAttributesForDisplay(resource, Collections.emptySet());
+      if (!excludedAttributeReferences.isEmpty()) {
+        updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
+      } else {
+        updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
+      }
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
       log.error("Failed to handle attribute processing in update " + e.getMessage());
     }

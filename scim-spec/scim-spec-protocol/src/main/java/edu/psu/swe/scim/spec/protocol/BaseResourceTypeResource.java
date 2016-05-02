@@ -85,7 +85,9 @@ public interface BaseResourceTypeResource<T> {
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Create", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 201)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 409, message = ErrorMessageConstants.UNIQUENESS), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response create(T resource) {
+  default Response create(T resource,
+                          @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -113,7 +115,9 @@ public interface BaseResourceTypeResource<T> {
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Update", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response update(T resource) {
+  default Response update(T resource,
+                          @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
