@@ -50,14 +50,10 @@ public class AttributeUtil {
       Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and specified attributes, exclude never
-      log.debug(" ### Resolve attribute reference");
       Set<Attribute> attributesToKeep = resolveAttributeReferences(attributes);
-      log.debug(" ### Remove attributes of type default");
       removeAttributesOfType(resource, schema, Returned.DEFAULT, attributesToKeep);
-      log.debug(" ### Remove attributes of type request");
       removeAttributesOfType(resource, schema, Returned.REQUEST, attributesToKeep);
-      log.debug(" ### Remove attributes of type never");
-      removeAttributesOfType(resource, schema, Returned.NEVER, attributesToKeep);
+      removeAttributesOfType(resource, schema, Returned.NEVER);
     }
 
     return resource;
