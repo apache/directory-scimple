@@ -112,11 +112,13 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @PUT
+  @Path("{id}")
   @Consumes(Constants.SCIM_CONTENT_TYPE)
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Update", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response update(T resource,
+  default Response update(T resource, 
+                          @PathParam("id") String id,
                           @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
                           @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
     return Response.status(Status.NOT_IMPLEMENTED).build();

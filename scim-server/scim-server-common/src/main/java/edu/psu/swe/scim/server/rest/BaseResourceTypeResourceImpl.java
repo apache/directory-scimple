@@ -283,11 +283,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response update(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
+  public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
     if ((provider = getProvider()) == null) {
-      return BaseResourceTypeResource.super.update(resource, attributes, excludedAttributes);
+      return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
     }
     
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
@@ -299,11 +299,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     
     T stored;
     try {
-      stored = provider.get(resource.getId());
+      stored = provider.get(id);
     } catch (UnableToRetrieveResourceException e2) {
       return createGenericExceptionResponse(e2);
     }
 
+    if (stored == null) {
+      return createNotFoundResponse(id);
+    }
+    
     EntityTag backingETag = null;
     try {
       backingETag = generateEtag(stored);
