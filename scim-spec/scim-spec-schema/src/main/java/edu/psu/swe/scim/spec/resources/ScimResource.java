@@ -69,12 +69,12 @@ public abstract class ScimResource extends BaseResource {
   }
 
   public void addExtension(ScimExtension extension) throws InvalidExtensionException {
-    ScimExtensionType [] se = extension.getClass().getAnnotationsByType(ScimExtensionType.class);
-    
+    ScimExtensionType[] se = extension.getClass().getAnnotationsByType(ScimExtensionType.class);
+
     if (se.length == 0 || se.length > 1) {
       throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
     }
-    
+
     extensions.put(se[0].id(), extension);
   }
 
@@ -103,21 +103,24 @@ public abstract class ScimResource extends BaseResource {
     LOG.debug("Resource class: " + resourceClass.getSimpleName());
 
     Class<? extends ScimExtension> extensionClass = ScimExtensionRegistry.getInstance().getExtensionClass(resourceClass, key);
-    LOG.debug("Extension class: " + extensionClass.getSimpleName());
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objectMapper.registerModule(jaxbAnnotationModule);
+    if (extensionClass != null) {
+      LOG.debug("Extension class: " + extensionClass.getSimpleName());
 
-    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
-    objectMapper.setAnnotationIntrospector(pair);
+      ObjectMapper objectMapper = new ObjectMapper();
+      JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
+      objectMapper.registerModule(jaxbAnnotationModule);
 
-    ScimExtension extension = objectMapper.convertValue(value, extensionClass);
-    if (extension != null) {
-      LOG.debug("    ***** Added extension to the resource *****");
-      extensions.put(key, extension);
+      AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
+      AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
+      AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
+      objectMapper.setAnnotationIntrospector(pair);
+
+      ScimExtension extension = objectMapper.convertValue(value, extensionClass);
+      if (extension != null) {
+        LOG.debug("    ***** Added extension to the resource *****");
+        extensions.put(key, extension);
+      }
     }
   }
 
