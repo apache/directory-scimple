@@ -323,7 +323,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T updated;
     try {
-      updated = provider.update(resource);
+      updated = provider.update(id, resource);
     } catch (UnableToUpdateResourceException e1) {
       return createGenericExceptionResponse(e1);
     }

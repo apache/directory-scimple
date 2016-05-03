@@ -42,7 +42,7 @@ public interface Provider<T> {
    * @throws UnableToUpdateResourceException When the ScimResource cannot be
    *         updated.
    */
-  T update(T resource) throws UnableToUpdateResourceException;
+  T update(String id, T resource) throws UnableToUpdateResourceException;
   
   /**
    * Retrieves the ScimResource associated with the provided identifier.

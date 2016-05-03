@@ -100,7 +100,8 @@ public class BulkResourceImpl implements BulkResource {
 
         case PUT: {
           log.debug("PUT: {}", scimResource);
-          provider.update(scimResource);
+          String id = bulkOperation.getPath().substring(bulkOperation.getPath().lastIndexOf("/") + 1);
+          provider.update(id, scimResource);
           operationResult.setStatus(OKAY_STATUS);
         } break;
 

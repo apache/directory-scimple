@@ -79,8 +79,8 @@ public class InMemoryUserService implements Provider<ScimUser> {
    * @see edu.psu.swe.scim.server.provider.Provider#update(java.lang.Object)
    */
   @Override
-  public ScimUser update(ScimUser resource) {
-    users.put(resource.getId(), resource);
+  public ScimUser update(String id, ScimUser resource) {
+    users.put(id, resource);
     return resource;
   }
 
