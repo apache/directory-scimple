@@ -3,8 +3,11 @@ package edu.psu.swe.scim.server.utility;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -23,11 +26,17 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
 import edu.psu.swe.scim.server.schema.Registry;
+import edu.psu.swe.scim.server.utility.ExampleObjectExtension.ComplexObject;
+import edu.psu.swe.scim.spec.exception.InvalidExtensionException;
+import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
+import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.resources.Address;
 import edu.psu.swe.scim.spec.resources.Name;
@@ -54,20 +63,28 @@ public class AttributeUtilTest {
     attributeUtil = new AttributeUtil();
     attributeUtil.registry = registry;
     Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class);
+    Schema scimEnterpriseUserSchema = ProviderRegistry.generateSchema(EnterpriseExtension.class);
+    Schema scimExampleSchema = ProviderRegistry.generateSchema(ExampleObjectExtension.class);
+
 
     Mockito.when(registry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
     Mockito.when(registry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(scimUserSchema);
-    Mockito.when(registry.getAllSchemas()).thenReturn(Collections.singleton(scimUserSchema));
-    Mockito.when(registry.getAllSchemaUrns()).thenReturn(Collections.singleton(ScimUser.SCHEMA_URI));
+    Mockito.when(registry.getSchema(EnterpriseExtension.URN)).thenReturn(scimEnterpriseUserSchema);
+    Mockito.when(registry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
+    Mockito.when(registry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
+    Mockito.when(registry.getAllSchemaUrns()).thenReturn(new HashSet<String>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
 
+    attributeUtil.init();
     
     objectMapper = new ObjectMapper();
 
     JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
     objectMapper.registerModule(jaxbAnnotationModule);
 
-    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
+    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
+    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
+    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
+    objectMapper.setAnnotationIntrospector(pair);
 
     objectMapper.setSerializationInclusion(Include.NON_NULL);
     objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -78,10 +95,25 @@ public class AttributeUtilTest {
   public void testBaseResource() throws Exception {
     ScimUser resource = getScimUser();
     
+    debugJson(resource);
+
     resource = attributeUtil.setAttributesForDisplay(resource);
-    
+
+    debugJson(resource);
+
     Assertions.assertThat(resource.getId()).isNotNull();
     Assertions.assertThat(resource.getPassword()).isNull();
+    
+    EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
+    
+    Assertions.assertThat(extension.getCostCenter()).isNotNull();
+    
+    ExampleObjectExtension exampleObjectExtension = resource.getExtension(ExampleObjectExtension.class);
+    
+    Assertions.assertThat(exampleObjectExtension.getValueAlways()).isNotNull();
+    Assertions.assertThat(exampleObjectExtension.getValueDefault()).isNotNull();
+    Assertions.assertThat(exampleObjectExtension.getValueRequest()).isNull();
+    Assertions.assertThat(exampleObjectExtension.getValueNever()).isNull();
   }
   
   @Test
@@ -90,7 +122,10 @@ public class AttributeUtilTest {
     
     debugJson(resource);
     
-    resource = attributeUtil.setAttributesForDisplay(resource, Collections.singleton(new AttributeReference("userName")));
+    Set<AttributeReference> attributes = new HashSet<>();
+    attributes.add(new AttributeReference("userName"));
+    attributes.add(new AttributeReference("addresses.streetAddress"));
+    resource = attributeUtil.setAttributesForDisplay(resource, attributes);
     
     debugJson(resource);
 
@@ -99,6 +134,40 @@ public class AttributeUtilTest {
 
     Assertions.assertThat(resource.getPassword()).isNull();
     Assertions.assertThat(resource.getActive()).isNull();
+    
+    Assertions.assertThat(resource.getAddresses().get(0).getCountry()).isNull();
+    Assertions.assertThat(resource.getAddresses().get(0).getStreetAddress()).isNotNull();
+
+    
+    EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
+    
+    // TODO Assertions.assertThat(extension).isNull();
+  }
+  
+  @Test
+  public void testIncludeAttributesWithExtension() throws Exception {
+    ScimUser resource = getScimUser();
+    
+    debugJson(resource);
+    
+    Set<AttributeReference> attributeSet = new HashSet<>();
+    attributeSet.add(new AttributeReference("userName"));
+    attributeSet.add(new AttributeReference(EnterpriseExtension.URN + ":costCenter"));
+    
+    resource = attributeUtil.setAttributesForDisplay(resource, attributeSet);
+    
+    debugJson(resource);
+
+    Assertions.assertThat(resource.getUserName()).isNotNull();
+    Assertions.assertThat(resource.getId()).isNotNull();
+
+    Assertions.assertThat(resource.getPassword()).isNull();
+    Assertions.assertThat(resource.getActive()).isNull();
+    
+    EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
+    
+    Assertions.assertThat(extension.getCostCenter()).isNotNull();
+    Assertions.assertThat(extension.getDepartment()).isNull();
 
   }
   
@@ -114,7 +183,30 @@ public class AttributeUtilTest {
     Assertions.assertThat(resource.getUserName()).isNull();
     Assertions.assertThat(resource.getActive()).isNotNull();
 
+    EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
+    
+    Assertions.assertThat(extension.getCostCenter()).isNotNull();
+  }
+  
+  @Test
+  public void testExcludeAttributesWithExtensions() throws Exception {
+    ScimUser resource = getScimUser();
+    
+    Set<AttributeReference> attributeSet = new HashSet<>();
+    attributeSet.add(new AttributeReference("userName"));
+    attributeSet.add(new AttributeReference(EnterpriseExtension.URN + ":costCenter"));
+    
+    resource = attributeUtil.setExcludedAttributesForDisplay(resource, attributeSet);
+    
+    Assertions.assertThat(resource.getId()).isNotNull();
+    Assertions.assertThat(resource.getPassword()).isNull();
+    Assertions.assertThat(resource.getUserName()).isNull();
+    Assertions.assertThat(resource.getActive()).isNotNull();
 
+    EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
+    
+    Assertions.assertThat(extension.getCostCenter()).isNull();
+    Assertions.assertThat(extension.getDepartment()).isNotNull();
   }
 
   private void debugJson(Object resource) throws JsonGenerationException, JsonMappingException, IOException {
@@ -123,7 +215,7 @@ public class AttributeUtilTest {
     LOG.info(sw.toString());
   }
   
-  private ScimUser getScimUser() {
+  private ScimUser getScimUser() throws InvalidExtensionException {
     ScimUser user = new ScimUser();
 
     user.setActive(true);
@@ -193,6 +285,31 @@ public class AttributeUtilTest {
     phoneNumbers.add(phoneNumber);
     user.setPhoneNumbers(phoneNumbers);
 
+    EnterpriseExtension enterpriseEntension = new EnterpriseExtension();
+    enterpriseEntension.setCostCenter("CC-123");
+    enterpriseEntension.setDepartment("DEPT-xyz");
+    enterpriseEntension.setDivision("DIV-1");
+    enterpriseEntension.setEmployeeNumber("1234567890");
+    Manager manager = new Manager();
+    manager.setDisplayName("Bob Smith");
+    manager.setValue("0987654321");
+    enterpriseEntension.setManager(manager);
+    enterpriseEntension.setOrganization("ORG-X");
+    
+    user.addExtension(enterpriseEntension);
+    
+    ExampleObjectExtension exampleObjectExtension = new ExampleObjectExtension();
+    exampleObjectExtension.setValueAlways("always");
+    exampleObjectExtension.setValueDefault("default");
+    exampleObjectExtension.setValueNever("never");
+    exampleObjectExtension.setValueRequest("request");
+    ComplexObject valueComplex = new ComplexObject();
+    valueComplex.setDisplayName("ValueComplex");
+    valueComplex.setValue("Value");
+    exampleObjectExtension.setValueComplex(valueComplex);
+    
+    user.addExtension(exampleObjectExtension);
+    
     return user;
   }
 

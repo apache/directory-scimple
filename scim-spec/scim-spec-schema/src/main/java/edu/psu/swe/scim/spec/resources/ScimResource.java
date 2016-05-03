@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +42,8 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResource extends BaseResource {
 
+  private static final long serialVersionUID = 3673404125396687366L;
+
   private static final Logger LOG = LoggerFactory.getLogger(ScimResource.class);
 
   @XmlElement
@@ -75,11 +78,25 @@ public abstract class ScimResource extends BaseResource {
       throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
     }
 
-    extensions.put(se[0].id(), extension);
+    String extensionUrn = se[0].id();
+    extensions.put(extensionUrn, extension);
+    
+    addSchema(extensionUrn);
   }
 
   public ScimExtension getExtension(String urn) {
     return extensions.get(urn);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T getExtension(Class<T> extensionClass) throws InvalidExtensionException {
+    ScimExtensionType[] se = extensionClass.getAnnotationsByType(ScimExtensionType.class);
+
+    if (se.length == 0 || se.length > 1) {
+      throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
+    }
+    
+    return (T) extensions.get(se[0].id());
   }
 
   public abstract String getResourceType();

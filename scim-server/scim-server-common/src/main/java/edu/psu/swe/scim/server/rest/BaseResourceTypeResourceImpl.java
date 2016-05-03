@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.server.rest;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
@@ -132,7 +133,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       }
 
       return Response.ok().entity(resource).location(buildLocationTag(resource)).tag(etag).build();
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
+    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
       return createAttriubteProcessingErrorResponse(e);
     }
 
@@ -198,7 +199,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } else {
         created = attributeUtil.setAttributesForDisplay(created, attributeReferences);
       }
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
+    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
       if (etag == null) {
         return Response.status(Status.CREATED).location(buildLocationTag(resource)).build();
       } else {
@@ -271,7 +272,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           }
 
           results.add(resource);
-        } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
+        } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
           return createAttriubteProcessingErrorResponse(e);
         }
       }
@@ -335,7 +336,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } else {
         updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
       }
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException e) {
+    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
       log.error("Failed to handle attribute processing in update " + e.getMessage());
     }
 

@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,7 +17,9 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Email {
+public class Email implements Serializable {
+
+  private static final long serialVersionUID = -7914234516870440784L;
 
   private static int indexCounter = 1;
   

@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -22,6 +23,7 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ScimUser extends ScimResource {
 
+  private static final long serialVersionUID = -2306547717245071997L;
   public static final String RESOURCE_NAME = "User";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
   

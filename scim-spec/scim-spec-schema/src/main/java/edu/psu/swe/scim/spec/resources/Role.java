@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,8 +17,10 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Role  {
-  
+public class Role implements Serializable {
+
+  private static final long serialVersionUID = -2781839189814966670L;
+
   private static int indexCounter = 1;
   
   @XmlElement

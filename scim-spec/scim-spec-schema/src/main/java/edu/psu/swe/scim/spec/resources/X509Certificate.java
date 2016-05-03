@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,8 +17,10 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class X509Certificate {
+public class X509Certificate implements Serializable {
   
+  private static final long serialVersionUID = 374273508404129850L;
+
   @XmlElement(nillable=true)
   @ScimAttribute(description="A label indicating the attribute's function.")
   String type;

@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,13 +17,15 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Entitlement {
+public class Entitlement implements Serializable {
+
+  private static final long serialVersionUID = -5657063764529902479L;
 
   private static int indexCounter = 1;
   
   @XmlElement
   private int index;
-  
+
   @XmlElement(nillable=true)
   @ScimAttribute(description="A label indicating the attribute's function.")
   String type;

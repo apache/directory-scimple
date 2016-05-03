@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,13 +17,15 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Photo {
+public class Photo implements Serializable {
+  
+  private static final long serialVersionUID = 8821620834716156789L;
  
   private static int indexCounter = 1;
   
   @XmlElement
   private int index;
-  
+
   @XmlElement
   @ScimAttribute(description="URL of a photo of the User.", referenceTypes={"external"})
   String value;

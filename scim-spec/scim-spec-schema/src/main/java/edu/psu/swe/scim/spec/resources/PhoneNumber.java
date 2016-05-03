@@ -3,6 +3,8 @@
  */
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -19,13 +21,15 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class PhoneNumber {
+public class PhoneNumber implements Serializable {
+
+  private static final long serialVersionUID = 607319505715224096L;
 
   private static int indexCounter = 1;
   
   @XmlElement
   private int index;
-  
+
   @XmlElement
   @ScimAttribute(description="Phone number of the User")
   String value;
