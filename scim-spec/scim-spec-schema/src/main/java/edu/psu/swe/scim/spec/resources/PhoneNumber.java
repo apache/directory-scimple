@@ -20,6 +20,11 @@ import lombok.Data;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 public class PhoneNumber {
+
+  private static int indexCounter = 1;
+  
+  @XmlElement
+  private int index;
   
   @XmlElement
   @ScimAttribute(description="Phone number of the User")
@@ -37,4 +42,7 @@ public class PhoneNumber {
   @ScimAttribute(description="A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
   Boolean primary = false;
   
+  public PhoneNumber() {
+    index = indexCounter++;
+  }
 }

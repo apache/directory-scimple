@@ -17,6 +17,11 @@ import lombok.Data;
 @Data
 public class Email {
 
+  private static int indexCounter = 1;
+  
+  @XmlElement
+  private int index;
+  
   @XmlElement(nillable=true)
   @ScimAttribute(canonicalValueList={"work", "home", "other" }, description="A label indicating the attribute's function; e.g., 'work' or 'home'.")
   String type;
@@ -32,4 +37,8 @@ public class Email {
   @XmlElement
   @ScimAttribute(description="A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred mailing address or primary e-mail address. The primary attribute value 'true' MUST appear no more than once.")
   Boolean primary = false;
+  
+  public Email() {
+    index = indexCounter++;
+  }
 }
