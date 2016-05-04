@@ -20,7 +20,6 @@ import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.SupportedConfig
 
 @Stateless
 public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigResource {
-  private static final List<String> SCHEMA_URN_LIST = Arrays.asList(ServiceProviderConfiguration.SCHEMA_URI);
 
   @Inject
   ServerConfiguration serverConfiguration;
@@ -67,7 +66,6 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
     serviceProviderConfiguration.setId(id);
     serviceProviderConfiguration.setMeta(meta);
     serviceProviderConfiguration.setPatch(patch);
-    serviceProviderConfiguration.setSchemaUrnList(SCHEMA_URN_LIST);
     serviceProviderConfiguration.setSort(sort);
 
     return Response.ok(serviceProviderConfiguration).build();

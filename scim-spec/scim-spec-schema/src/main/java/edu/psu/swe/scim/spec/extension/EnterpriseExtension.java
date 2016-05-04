@@ -1,16 +1,18 @@
 package edu.psu.swe.scim.spec.extension;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import lombok.Data;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Mutability;
-import lombok.Data;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -18,12 +20,16 @@ import lombok.Data;
 @Data
 public class EnterpriseExtension implements ScimExtension {
 
+  private static final long serialVersionUID = -6850246976790442980L;
+
   public static final String URN = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User";
 
   @XmlType
   @XmlAccessorType(XmlAccessType.NONE)
   @Data
-  public static class Manager {
+  public static class Manager implements Serializable {
+
+    private static final long serialVersionUID = -7930518578899296192L;
 
     @ScimAttribute(description = "The \"id\" of the SCIM resource representing the user's manager.  RECOMMENDED.")
     @XmlElement
@@ -39,7 +45,7 @@ public class EnterpriseExtension implements ScimExtension {
   }
 
   @ScimAttribute(description = "A string identifier, typically numeric or alphanumeric, assigned to a person, typically based on order of hire or association with an organization.")
-  @XmlElement(nillable = true)
+  @XmlElement
   private String employeeNumber;
 
   @ScimAttribute(description = "Identifies the name of a cost center.")

@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -20,6 +21,7 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ScimGroup extends ScimResource {
 
+  private static final long serialVersionUID = 4424638498347469070L;
   public static final String RESOURCE_NAME = "Group";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:Group";
 

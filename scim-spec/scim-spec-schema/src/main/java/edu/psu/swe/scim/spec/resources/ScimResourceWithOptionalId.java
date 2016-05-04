@@ -18,6 +18,8 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResourceWithOptionalId extends ScimResource {
   
+  private static final long serialVersionUID = -379538554565387791L;
+
   @XmlElement
   String id;
   

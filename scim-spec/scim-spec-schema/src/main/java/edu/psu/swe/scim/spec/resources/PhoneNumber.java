@@ -3,6 +3,8 @@
  */
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -21,7 +23,9 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class PhoneNumber extends KeyedResource {
+public class PhoneNumber extends KeyedResource implements Serializable {
+
+  private static final long serialVersionUID = 607319505715224096L;
 
   @XmlElement
   @ScimAttribute(description="Phone number of the User")

@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -18,7 +20,9 @@ import lombok.Data;
     "honorificSuffix"    
 })
 @XmlAccessorType(XmlAccessType.NONE)
-public class Name {
+public class Name implements Serializable {
+
+  private static final long serialVersionUID = -2761413543859555141L;
 
   @XmlElement
   @ScimAttribute(description="The full name, including all middle names, titles, and suffixes as appropriate, formatted for display (e.g. Ms. Barbara J Jensen, III.).")

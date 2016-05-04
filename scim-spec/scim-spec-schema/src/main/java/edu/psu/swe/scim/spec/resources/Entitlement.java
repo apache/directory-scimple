@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -17,7 +19,9 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class Entitlement extends KeyedResource {
+public class Entitlement extends KeyedResource implements Serializable {
+
+  private static final long serialVersionUID = -5657063764529902479L;
 
   @XmlElement(nillable=true)
   @ScimAttribute(description="A label indicating the attribute's function.")

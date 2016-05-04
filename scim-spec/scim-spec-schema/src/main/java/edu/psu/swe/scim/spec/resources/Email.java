@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.resources;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -17,8 +19,10 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class Email extends KeyedResource {
-  
+public class Email extends KeyedResource implements Serializable {
+
+  private static final long serialVersionUID = -7914234516870440784L;
+
   @XmlElement(nillable=true)
   @ScimAttribute(canonicalValueList={"work", "home", "other" }, description="A label indicating the attribute's function; e.g., 'work' or 'home'.")
   String type;
