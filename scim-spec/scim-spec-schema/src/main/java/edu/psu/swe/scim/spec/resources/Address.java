@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Scim core schema, <a href="https://tools.ietf.org/html/rfc7643#section-4.1.2>section 4.1.2</a>
@@ -15,13 +16,9 @@ import lombok.Data;
 @XmlType(name = "address")
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Address {
-  
-  private static int indexCounter = 1;
-  
-  @XmlElement
-  private int index;
-  
+@EqualsAndHashCode(callSuper=false)
+public class Address extends KeyedResource {
+    
   @XmlElement(nillable=true)
   @ScimAttribute(canonicalValueList={"work", "home", "other"}, description="A label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.")
   String type;
@@ -57,8 +54,4 @@ public class Address {
   @ScimAttribute(description="The full street address component, which may include house number, street name, PO BOX, and multi-line extended street address information. This attribute MAY contain newlines.")
   @XmlElement(nillable=true)
   private String streetAddress;
-  
-  public Address() {
-    index = indexCounter++;
-  }
 }

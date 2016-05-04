@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Scim core schema, <a href="https://tools.ietf.org/html/rfc7643#section-4.1.2>section 4.1.2</a>
@@ -19,13 +20,9 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class PhoneNumber {
+@EqualsAndHashCode(callSuper=false)
+public class PhoneNumber extends KeyedResource {
 
-  private static int indexCounter = 1;
-  
-  @XmlElement
-  private int index;
-  
   @XmlElement
   @ScimAttribute(description="Phone number of the User")
   String value;
@@ -41,8 +38,4 @@ public class PhoneNumber {
   @XmlElement
   @ScimAttribute(description="A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
   Boolean primary = false;
-  
-  public PhoneNumber() {
-    index = indexCounter++;
-  }
 }
