@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 @ScimResourceType(id = ScimUser.RESOURCE_NAME, name = ScimUser.RESOURCE_NAME, schema = ScimUser.SCHEMA_URI, description = "Top level ScimUser", endpoint = "/Users")
 @XmlRootElement(name = ScimUser.RESOURCE_NAME)
 @XmlAccessorType(XmlAccessType.NONE)
-public class ScimUser extends ScimResource {
+public class ScimUser extends ScimResource implements Serializable {
 
   private static final long serialVersionUID = -2306547717245071997L;
   public static final String RESOURCE_NAME = "User";

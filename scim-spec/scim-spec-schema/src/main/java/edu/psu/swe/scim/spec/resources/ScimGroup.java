@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 @ScimResourceType(id = ScimGroup.RESOURCE_NAME, name = ScimGroup.RESOURCE_NAME, schema = ScimGroup.SCHEMA_URI, description = "Top level ScimGroup", endpoint = "/Groups")
 @XmlRootElement(name = ScimGroup.RESOURCE_NAME)
 @XmlAccessorType(XmlAccessType.NONE)
-public class ScimGroup extends ScimResource {
+public class ScimGroup extends ScimResource implements Serializable {
 
   private static final long serialVersionUID = 4424638498347469070L;
   public static final String RESOURCE_NAME = "Group";

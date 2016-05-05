@@ -40,7 +40,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class ScimResource extends BaseResource {
+public abstract class ScimResource extends BaseResource implements Serializable {
 
   private static final long serialVersionUID = 3673404125396687366L;
 

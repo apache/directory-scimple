@@ -9,11 +9,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import edu.psu.swe.scim.spec.validator.Urn;
+import lombok.Data;
 
 /**
  * All the different variations of SCIM responses require that the object
