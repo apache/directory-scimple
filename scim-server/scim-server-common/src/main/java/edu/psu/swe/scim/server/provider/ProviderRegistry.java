@@ -28,6 +28,7 @@ import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
+import edu.psu.swe.scim.spec.annotation.ScimResourceIdReference;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
 import edu.psu.swe.scim.spec.resources.BaseResource;
@@ -221,6 +222,7 @@ public class ProviderRegistry {
       }
 
       String attributeName;
+      f.setAccessible(true);
 
       if (sa.name() == null || sa.name().isEmpty()) {
         attributeName = f.getName();
@@ -292,6 +294,7 @@ public class ProviderRegistry {
       }
 
       // attribute.setType(sa.type());
+      boolean attributeIsAString = false;
       log.info("Attempting to set the attribute type, raw value = " + typeName);
       switch (typeName) {
       case STRING_TYPE_IDENTIFIER:
@@ -299,6 +302,7 @@ public class ProviderRegistry {
       case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
         log.debug("Setting type to String");
         attribute.setType(Type.STRING);
+        attributeIsAString = true;
         break;
       case INT_TYPE_IDENTIFIER:
       case INTEGER_TYPE_IDENTIFIER:
@@ -336,7 +340,13 @@ public class ProviderRegistry {
         log.debug("Setting type to complex");
         attribute.setType(Type.COMPLEX);
       }
-      
+      if (f.getAnnotation(ScimResourceIdReference.class) != null) {
+        if (attributeIsAString) {
+          attribute.setScimResourceIdReference(true);
+        } else {
+          log.warn("Field annotated with @edu.psu.swe.scim.spec.annotation.ScimResourceIdReference must be a string: {}", f);
+        }
+      }
       attribute.setMutability(sa.mutability());
 
       List<String> refType = Arrays.asList(sa.referenceTypes());
