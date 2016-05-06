@@ -38,6 +38,32 @@ The goals for the project are as follows:
 -   A set of verification tests to ensure the project meets the specification
     and to allow inter-operability testing.
     
+Tutorials and demonstrations
+----------------------------
+
+-   [Tutorial showing how to create a SCIM server with an extension](https://www.youtube.com/watch?v=YuAOcmLYyaM)
+    - This approximately 20 minute video provides instruction on how to create
+    a SCIM server using the scim-server-common library.  In this video, a
+    resource provider is created as well as a SCIM extension.
+
+-   [TIER demonstration server](https://scim.psu.edu/tier/v2) - Penn State has
+    deployed a demonstration server that provides a memory-based persistence
+    (reset during restarts) for the Internet2 and SCIM communities to use for
+    testing purposes.  This server currently implements the SCIM User resource
+    with an eduPerson extension.  It also implements a custom resource that
+    returns a full eduPerson.  Feel free to try out SCIM - here are some
+    working URIs to get you started:
+    -   https://scim.psu.edu/tier/v2/ServiceProviderConfig
+    -   https://scim.psu.edu/tier/v2/ResourceTypes
+    -   https://scim.psu.edu/tier/v2/Schemas
+    -   https://scim.psu.edu/tier/v2/Users
+    -   https://scim.psu.edu/tier/v2/Users/1234567890
+    -   https://scim.psu.edu/tier/v2/EduPeople
+    -   https://scim.psu.edu/tier/v2/EduPeople/1234567890
+
+Example code
+------------
+    
 Examples of the project's declarative syntax are shown below.  The first example
 shows how a SCIM resource is declared:
 
