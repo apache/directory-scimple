@@ -134,6 +134,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       return Response.ok().entity(resource).location(buildLocationTag(resource)).tag(etag).build();
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+      e.printStackTrace();
       return createAttriubteProcessingErrorResponse(e);
     }
 

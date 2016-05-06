@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.spec.schema;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.validation.constraints.Size;
@@ -23,8 +24,10 @@ import lombok.Data;
 @XmlType(name = "meta")
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class Meta {
+public class Meta implements Serializable {
   
+  private static final long serialVersionUID = -9162917034280030708L;
+
   @XmlElement
   @Size(min = 1)
   String resourceType;

@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import lombok.Data;
@@ -13,6 +14,7 @@ import lombok.Data;
 @Data
 public class KeyedResource {
   
+  @XmlElement
   private String key;
   
   public KeyedResource() {
