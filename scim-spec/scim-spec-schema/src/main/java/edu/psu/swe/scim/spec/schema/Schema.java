@@ -140,6 +140,8 @@ public class Schema implements AttributeContainer {
     
     Field field;
 
+    private boolean scimResourceIdReference;
+
     @Override
     public List<Attribute> getAttributes() {
       return Collections.unmodifiableList(subAttributes);
