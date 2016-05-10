@@ -41,8 +41,7 @@ The goals for the project are as follows:
 Tutorials and demonstrations
 ----------------------------
 
--   [Tutorial showing how to create a SCIM server with an extension](https://www.youtube.com/watch?v=YuAOcmLYyaM)
-    - This approximately 20 minute video provides instruction on how to create
+-   [Tutorial showing how to create a SCIM server with an extension](https://www.youtube.com/watch?v=YuAOcmLYyaM) - This approximately 20 minute video provides instruction on how to create
     a SCIM server using the scim-server-common library.  In this video, a
     resource provider is created as well as a SCIM extension.
 
