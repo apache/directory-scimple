@@ -15,10 +15,6 @@ import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Context;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,6 +41,7 @@ import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
+import lombok.extern.slf4j.Slf4j;
 
 @Stateless
 @Slf4j
@@ -52,9 +49,9 @@ public class AttributeUtil {
 
   @Inject
   Registry registry;
-  
+
   ObjectMapper objectMapper;
-  
+
   @PostConstruct
   public void init() { // TODO move this to a CDI producer
     objectMapper = new ObjectMapper();
@@ -69,7 +66,7 @@ public class AttributeUtil {
     objectMapper.setAnnotationIntrospector(pair);
 
     objectMapper.setSerializationInclusion(Include.NON_NULL);
-    
+
     SimpleModule module = new SimpleModule();
     module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(this.registry, this.objectMapper));
     objectMapper.registerModule(module);
@@ -154,13 +151,13 @@ public class AttributeUtil {
       return copy;
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   private <T extends ScimResource> T cloneScimResource(T original) throws IOException {
     ByteArrayOutputStream boas = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(boas);
     oos.writeObject(original);
-    
+
     ByteArrayInputStream bais = new ByteArrayInputStream(boas.toByteArray());
     ObjectInputStream ois = new ObjectInputStream(bais);
     T copy = null;
@@ -188,45 +185,52 @@ public class AttributeUtil {
     processAttributes(object, attributeContainer, function);
   }
 
-  private void processAttributes(Object object, @NotNull AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
+  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
 
-    for (Attribute attribute : attributeContainer.getAttributes()) {
-      Field field = attribute.getField();
-      if (function.apply(attribute)) {
-        field.setAccessible(true);
-        if (!field.getType().isPrimitive()) {
-          field.set(object, null);
-        }
-      } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
-        String name = field.getName();
-        field.setAccessible(true);
-        Object subObject = field.get(object);
-        Attribute subAttribute = attributeContainer.getAttribute(name);
-        processAttributes(subObject, subAttribute, function);
-      } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
-        String name = field.getName();
-        field.setAccessible(true);
-        Object subObject = field.get(object);
-
-        if (subObject == null) {
-          continue;
-        }
-
-        if (Collection.class.isAssignableFrom(subObject.getClass())) {
-          Collection<?> collection = (Collection<?>) subObject;
-          for (Object o : collection) {
-            Attribute subAttribute = attributeContainer.getAttribute(name);
-            processAttributes(o, subAttribute, function);
+    if (attributeContainer != null) {
+      for (Attribute attribute : attributeContainer.getAttributes()) {
+        Field field = attribute.getField();
+        if (function.apply(attribute)) {
+          field.setAccessible(true);
+          if (!field.getType().isPrimitive()) {
+            field.set(object, null);
           }
-        } else if (field.getType().isArray()) {
-          Object[] array = (Object[]) subObject;
+        } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
+          String name = field.getName();
+          log.debug("### Processing single value complex field " + name);
+          field.setAccessible(true);
+          Object subObject = field.get(object);
+          Attribute subAttribute = attributeContainer.getAttribute(name);
+          log.debug("### container type = " + attributeContainer.getClass().getName());
+          if (subAttribute == null) {
+            log.debug("#### subattribute == null");
+          }
+          processAttributes(subObject, subAttribute, function);
+        } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
+          String name = field.getName();
+          log.debug("### Processing multi-valued complex field " + name);
+          field.setAccessible(true);
+          Object subObject = field.get(object);
 
-          for (Object o : array) {
-            Attribute subAttribute = attributeContainer.getAttribute(name);
-            processAttributes(o, subAttribute, function);
+          if (subObject == null) {
+            continue;
+          }
+
+          if (Collection.class.isAssignableFrom(subObject.getClass())) {
+            Collection<?> collection = (Collection<?>) subObject;
+            for (Object o : collection) {
+              Attribute subAttribute = attributeContainer.getAttribute(name);
+              processAttributes(o, subAttribute, function);
+            }
+          } else if (field.getType().isArray()) {
+            Object[] array = (Object[]) subObject;
+
+            for (Object o : array) {
+              Attribute subAttribute = attributeContainer.getAttribute(name);
+              processAttributes(o, subAttribute, function);
+            }
           }
         }
-
       }
     }
   }
