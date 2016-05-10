@@ -179,7 +179,7 @@ public class ProviderRegistry {
       log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
     }
 
-    log.info("calling set attributes with " + fieldList.size() + " fields");
+    log.debug("calling set attributes with " + fieldList.size() + " fields");
     Set<String> invalidAttributes = new HashSet<>();
     schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getSimpleName()));
 
@@ -242,7 +242,7 @@ public class ProviderRegistry {
       
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
-      log.info("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
+      log.debug("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
       
       if (enumFields.length != 0) {
         
@@ -295,7 +295,7 @@ public class ProviderRegistry {
 
       // attribute.setType(sa.type());
       boolean attributeIsAString = false;
-      log.info("Attempting to set the attribute type, raw value = " + typeName);
+      log.debug("Attempting to set the attribute type, raw value = " + typeName);
       switch (typeName) {
       case STRING_TYPE_IDENTIFIER:
       case CHARACTER_ARRAY_TYPE_IDENTIFIER:
