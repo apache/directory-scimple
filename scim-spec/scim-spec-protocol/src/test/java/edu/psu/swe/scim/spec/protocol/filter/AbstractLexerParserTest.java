@@ -15,6 +15,9 @@ public abstract class AbstractLexerParserTest {
   
   protected static final String JOHN_FILTER_MIXED_CASE_1 = "userName Eq \"john\"";
   protected static final String JOHN_FILTER_MIXED_CASE_2 = "Username eq \"john\"";
+  protected static final String JOHN_FILTER_MIXED_CASE_3 = "Username EQ \"john\"";
+  protected static final String JOHN_FILTER_MIXED_CASE_4 = "USERNAME EQ \"john\"";
+
   
   protected static final String EXAMPLE_1 = "userName eq \"bjensen\"";
   protected static final String EXAMPLE_2 = "name.familyName co \"O'Malley\"";
@@ -78,7 +81,7 @@ public abstract class AbstractLexerParserTest {
     EXTRA_1,
     EXTRA_2
   };
-  
+    
   protected static final String[] EXAMPLES_AND_EXTRAS = ArrayUtils.addAll(EXAMPLES, EXTRAS);
   
   protected static final String[] NOTS = {
@@ -89,6 +92,19 @@ public abstract class AbstractLexerParserTest {
 	  NOT_EXAMPLE_3_1,
 	  NOT_EXAMPLE_4
   };
+
+  protected static final String[] EXAMPLES_AND_EXTRAS_NOT = ArrayUtils.addAll(EXAMPLES_AND_EXTRAS, NOTS);
+
+  protected static final String[] MIXED_CASE = {
+    JOHN_FILTER_MIXED_CASE_1,
+    JOHN_FILTER_MIXED_CASE_2,
+    JOHN_FILTER_MIXED_CASE_3,
+    JOHN_FILTER_MIXED_CASE_4
+  };
+
+  
+  protected static final String[] ALL = ArrayUtils.addAll(EXAMPLES_AND_EXTRAS_NOT, MIXED_CASE);
+
   
   protected static final String[][] EXAMPLE_INFIX_TOKENS = {
     EXAMPLE_1_INFIX_TOKENS,

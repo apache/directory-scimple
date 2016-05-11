@@ -43,6 +43,11 @@ public class FilterLexer implements Iterator<String> {
       cleanString = cleanString.replaceAll("\\)", " ) ");
       LOGGER.debug("Padded parenthesis with spaces (maybe extra): " + cleanString);
       
+      // Make sure there are spaces around brackets
+      cleanString = cleanString.replaceAll("\\[", " [ ");
+      cleanString = cleanString.replaceAll("\\]", " ] ");
+      LOGGER.debug("Padded brackets with spaces (maybe extra): " + cleanString);
+      
       // Convert multiple consecutive spaces to single spaces
       cleanString = cleanString.replaceAll(" +", " ");
       LOGGER.debug("Padded parenthesis with single spaces: " + cleanString);
