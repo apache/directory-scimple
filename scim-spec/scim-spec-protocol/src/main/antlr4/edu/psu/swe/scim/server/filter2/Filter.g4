@@ -9,9 +9,9 @@ filter: attrExp                                     # filterAttrExp
       ;
 
 valuePath: attrPath=AttrPath '[' valueFilter=valFilter ']';
-valFilter: attrExp                                      # valFilterAttrExp
-         | left=filter SP op=LogicOp SP right=filter    # valFilterLogicExp
-         | not='not'? /'(' valueFilter=valFilter ')'      # valFilterGroupExp
+valFilter: attrExp                                          # valFilterAttrExp
+         | left=valFilter SP op=LogicOp SP right=valFilter  # valFilterLogicExp
+         | not='not'? /'(' valueFilter=valFilter ')'        # valFilterGroupExp
          ;
 
 attrExp: attrPath=AttrPath SP op=PresentOp                          # attrExpPresent
