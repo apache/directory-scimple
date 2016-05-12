@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.spec.protocol.filter2;
+package edu.psu.swe.scim.spec.protocol.filter;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -7,17 +7,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.psu.swe.scim.server.filter2.FilterBaseListener;
-import edu.psu.swe.scim.server.filter2.FilterParser.AttrExpCompareOpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.AttrExpPresentContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.FilterAttrExpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.FilterGroupExpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.FilterLogicExpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.FilterValuePathContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.ValFilterAttrExpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.ValFilterGroupExpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.ValFilterLogicExpContext;
-import edu.psu.swe.scim.server.filter2.FilterParser.ValuePathContext;
+import edu.psu.swe.scim.server.filter.FilterBaseListener;
+import edu.psu.swe.scim.server.filter.FilterParser.AttrExpCompareOpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttrExpPresentContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterAttrExpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterGroupExpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterLogicExpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterValuePathContext;
+import edu.psu.swe.scim.server.filter.FilterParser.ValFilterAttrExpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.ValFilterGroupExpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.ValFilterLogicExpContext;
+import edu.psu.swe.scim.server.filter.FilterParser.ValuePathContext;
 
 public class TreePrintingListener extends FilterBaseListener {
 

@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.spec.protocol.filter2;
+package edu.psu.swe.scim.spec.protocol.filter;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -14,9 +14,9 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.psu.swe.scim.server.filter2.FilterLexer;
-import edu.psu.swe.scim.server.filter2.FilterParser;
-import edu.psu.swe.scim.spec.protocol.filter.AbstractLexerParserTest;
+import edu.psu.swe.scim.server.filter.FilterLexer;
+import edu.psu.swe.scim.server.filter.FilterParser;
+import edu.psu.swe.scim.spec.protocol.filter.TreePrintingListener;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 

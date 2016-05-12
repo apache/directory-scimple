@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.spec.protocol.filter2;
+package edu.psu.swe.scim.spec.protocol.filter;
 
 public enum CompareOperator {
   
