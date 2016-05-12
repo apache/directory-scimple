@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.psu.swe.scim.server.filter.FilterLexer;
 import edu.psu.swe.scim.server.filter.FilterParser;
+import edu.psu.swe.scim.spec.protocol.filter.ExpressionBuildingListener;
 import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
 import edu.psu.swe.scim.spec.protocol.filter.FilterParseException;
 import edu.psu.swe.scim.spec.protocol.filter.TreePrintingListener;
@@ -61,12 +62,15 @@ public class Filter {
         throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
       }
     });
-    
 
-    ParseTree tree = p.filter();
-    ParseTreeListener listener = new TreePrintingListener();
-    ParseTreeWalker.DEFAULT.walk(listener, tree);
-    
-    return null;
+    try {
+      ParseTree tree = p.filter();
+      ExpressionBuildingListener expListener = new ExpressionBuildingListener();
+      ParseTreeWalker.DEFAULT.walk(expListener, tree);
+      
+      return expListener.getFilterExpression();
+    } catch (IllegalStateException e) {
+      throw new FilterParseException(e);
+    }
   }
 }

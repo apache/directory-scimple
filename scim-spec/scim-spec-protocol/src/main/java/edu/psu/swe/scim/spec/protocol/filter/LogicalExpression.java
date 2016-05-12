@@ -1,8 +1,8 @@
 package edu.psu.swe.scim.spec.protocol.filter;
 
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 public class LogicalExpression implements FilterExpression, ValueFilterExpression {
 
   FilterExpression left;
