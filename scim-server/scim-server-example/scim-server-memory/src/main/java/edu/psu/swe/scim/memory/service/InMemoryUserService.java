@@ -71,7 +71,17 @@ public class InMemoryUserService implements Provider<ScimUser> {
    */
   @Override
   public ScimUser create(ScimUser resource) {
-    users.put(resource.getId(), resource);
+    String resourceId = resource.getId();
+    int resourceHashCode = resource.hashCode();
+    String id = resourceId != null ? resourceId : Integer.toString(resourceHashCode);
+    int offset = 1;
+
+    while (users.containsKey(id)) {
+      id = Integer.toString(resourceHashCode + offset);
+      offset += 1;
+    }
+    users.put(id, resource);
+    resource.setId(id);
     return resource;
   }
 

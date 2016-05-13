@@ -24,7 +24,17 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   
   @Override
   public ScimGroup create(ScimGroup resource) {
-    groups.put(resource.getId(), resource);
+    String resourceId = resource.getId();
+    int resourceHashCode = resource.hashCode();
+    String id = resourceId != null ? resourceId : Integer.toString(resource.hashCode());
+    int offset = 1;
+
+    while (groups.containsKey(id)) {
+      id = Integer.toString(resourceHashCode + offset);
+      offset += 1;
+    }
+    groups.put(id, resource);
+    resource.setId(id);
     return resource;
   }
 
