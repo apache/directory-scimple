@@ -42,8 +42,7 @@ Tutorials and demonstrations
 ----------------------------
 
 -   [Tutorial showing how to create a SCIM server with an extension](https://www.youtube.com/watch?v=YuAOcmLYyaM) - This approximately 20 minute video provides instruction on how to create
-    a SCIM server using the scim-server-common library.  In this video, a
-    resource provider is created as well as a SCIM extension.
+    a SCIM server using specifying a basic ScimPerson and a simple extension.  
 
 -   [TIER demonstration server](https://scim.psu.edu/tier/v2) - Penn State has
     deployed a demonstration server that provides a memory-based persistence
