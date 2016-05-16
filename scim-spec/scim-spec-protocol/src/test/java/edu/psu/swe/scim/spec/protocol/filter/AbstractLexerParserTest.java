@@ -39,20 +39,26 @@ public abstract class AbstractLexerParserTest {
 
   protected static final String GROUP_EXAMPLE_1 = "not(userType eq \"Employee\")";
   protected static final String GROUP_EXAMPLE_1_1 = "(userType eq \"Employee\")";
+  protected static final String GROUP_EXAMPLE_1_2 = "NOT(userType eq \"Employee\")";
+  protected static final String GROUP_EXAMPLE_1_3 = "NOT (userType eq \"Employee\")";
   protected static final String GROUP_EXAMPLE_2 = "userType eq \"Employee\" and not(emails co \"example.com\" or emails co \"example.org\")";
   protected static final String GROUP_EXAMPLE_2_1 = "userType eq \"Employee\" and (emails co \"example.com\" or emails co \"example.org\")";
+  protected static final String GROUP_EXAMPLE_2_2 = "userType eq \"Employee\" and NOT(emails co \"example.com\" or emails co \"example.org\")";
+  protected static final String GROUP_EXAMPLE_2_3 = "userType eq \"Employee\" and NOT (emails co \"example.com\" or emails co \"example.org\")";
   protected static final String GROUP_EXAMPLE_3 = "not(userType eq \"Employee\") and not(userType eq \"Intern\")";
   protected static final String GROUP_EXAMPLE_3_1 = "(userType eq \"Employee\") and (userType eq \"Intern\")";
   protected static final String GROUP_EXAMPLE_4 = "not(userType eq \"Employee\" or userType eq \"Intern\")";
   protected static final String GROUP_EXAMPLE_4_1 = "(userType eq \"Employee\" or userType eq \"Intern\")";
 
-  protected static final String[] GROUPS = { GROUP_EXAMPLE_1, GROUP_EXAMPLE_1_1, GROUP_EXAMPLE_2, GROUP_EXAMPLE_2_1, GROUP_EXAMPLE_3, GROUP_EXAMPLE_3_1, GROUP_EXAMPLE_4, GROUP_EXAMPLE_4_1 };
+  protected static final String[] GROUPS = { GROUP_EXAMPLE_1, GROUP_EXAMPLE_1_1, GROUP_EXAMPLE_1_2, GROUP_EXAMPLE_1_3, GROUP_EXAMPLE_2, GROUP_EXAMPLE_2_1, GROUP_EXAMPLE_2_2, GROUP_EXAMPLE_2_3, GROUP_EXAMPLE_3, GROUP_EXAMPLE_3_1, GROUP_EXAMPLE_4, GROUP_EXAMPLE_4_1 };
 
   protected static final String VALUE_EXPRESSION_1 = "emails[type eq \"work\"]";
   protected static final String VALUE_EXPRESSION_2 = "emails[type eq \"work\" and value co \"@example.com\"]";
+  protected static final String VALUE_EXPRESSION_2_1 = "emails[type eq \"work\" AND value co \"@example.com\"]";
   protected static final String VALUE_EXPRESSION_3 = "emails[type eq \"work\" and value co \"@example.com\"] or ims[type eq \"xmpp\" and value co \"@foo.com\"]";
+  protected static final String VALUE_EXPRESSION_3_1 = "emails[type eq \"work\" AND value co \"@example.com\"] OR ims[type eq \"xmpp\" and value co \"@foo.com\"]";
 
-  protected static final String[] VALUE_EXPRESSIONS = { VALUE_EXPRESSION_1, VALUE_EXPRESSION_2, VALUE_EXPRESSION_3};
+  protected static final String[] VALUE_EXPRESSIONS = { VALUE_EXPRESSION_1, VALUE_EXPRESSION_2, VALUE_EXPRESSION_2_1, VALUE_EXPRESSION_3, VALUE_EXPRESSION_3_1};
 
   protected static final String[] EXAMPLES_AND_EXTRAS = ArrayUtils.addAll(EXAMPLES, EXTRAS);
 

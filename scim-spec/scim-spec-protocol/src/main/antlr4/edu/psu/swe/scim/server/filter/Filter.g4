@@ -5,20 +5,22 @@ import Json, Urn;
 filter: attrExp                                     # filterAttrExp
       | left=filter SP op=LogicOp SP right=filter   # filterLogicExp
       | valuePath                                   # filterValuePath
-      | not='not'? '(' f=filter ')'                 # filterGroupExp
+      | not=NotOp? SP* '(' f=filter ')'             # filterGroupExp
       ;
 
 valuePath: attrPath=AttrPath '[' valueFilter=valFilter ']';
 valFilter: attrExp                                          # valFilterAttrExp
          | left=valFilter SP op=LogicOp SP right=valFilter  # valFilterLogicExp
-         | not='not'? /'(' valueFilter=valFilter ')'        # valFilterGroupExp
+         | not=NotOp? SP* '(' valueFilter=valFilter ')'     # valFilterGroupExp
          ;
 
 attrExp: attrPath=AttrPath SP op=PresentOp                          # attrExpPresent
        | attrPath=AttrPath SP op=CompareOp SP compValue=CompValue   # attrExpCompareOp
        ;
 
-LogicOp: 'and' | 'or';
+LogicOp: [aA][nN][dD]
+       | [oO][rR]
+       ;
 
 CompValue: 'false'
          | 'null'
@@ -38,7 +40,9 @@ CompareOp: [eE][qQ]
          | [lL][eE]
          ;
          
-PresentOp: 'pr';
+PresentOp: [pP][rR];
+
+NotOp: [nN][oO][tT];
 
 AttrPath: (URN ':')? AttrName (SubAttr)?;
 AttrName: ALPHA NAMECHAR*;
