@@ -412,14 +412,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   private Response createGenericExceptionResponse(Exception e1, Status status) {
     ErrorResponse er = new ErrorResponse();
   
+    er.setDetail(e1.getLocalizedMessage());
     if (status != null) {
       er.setStatus(Integer.toString(status.getStatusCode()));
+      return Response.status(status).entity(er).build();
     } else {
       er.setStatus("500");
+      return Response.status(Status.BAD_REQUEST).entity(er).build();
     }
-    
-    er.setDetail(e1.getLocalizedMessage());
-    return Response.status(Status.BAD_REQUEST).entity(er).build();
   }
   
   private Response createAmbiguousAttributeParametersResponse() {
