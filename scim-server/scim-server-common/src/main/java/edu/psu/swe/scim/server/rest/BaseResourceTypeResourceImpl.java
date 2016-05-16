@@ -77,7 +77,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return Response.status(Status.FORBIDDEN).build();
     }
 
-    if ((provider = getProvider()) == null) {
+    provider = getProvider();
+    if (provider == null) {
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
@@ -158,7 +159,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
-    if ((provider = getProvider()) == null) {
+    provider = getProvider();
+    if (provider == null) {
       return BaseResourceTypeResource.super.create(resource, attributes, excludedAttributes);
     }
 
@@ -220,7 +222,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response find(SearchRequest request) {
     Provider<T> provider = null;
 
-    if ((provider = getProvider()) == null) {
+    provider = getProvider();
+    if (provider == null) {
       return BaseResourceTypeResource.super.find(request);
     }
 
@@ -289,7 +292,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
 
-    if ((provider = getProvider()) == null) {
+    provider = getProvider();
+    if (provider == null) {
       return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
     }
     
