@@ -9,6 +9,9 @@ import javax.ws.rs.core.UriInfo;
 
 public class UriUtilities
 {
+  private UriUtilities() {
+  }
+  
   public static String urlAsString(UriInfo uriInfo, boolean secured) throws MalformedURLException
   {
     UriBuilder builder = uriInfo.getAbsolutePathBuilder();
