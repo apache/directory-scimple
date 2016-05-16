@@ -240,7 +240,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       resources = provider.find(filter, pageRequest, sortRequest);
     } catch (UnableToRetrieveResourceException e1) {
-      return createGenericExceptionResponse(e1);
+      log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus().toString());
+      return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
     // If no resources are found, we should still return a ListResponse with
@@ -415,6 +416,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return Response.status(Status.BAD_REQUEST).entity(er).build();
   }
 
+  private Response createGenericExceptionResponse(Exception e1, Status status) {
+    ErrorResponse er = new ErrorResponse();
+    er.setStatus(Integer.toString(status.getStatusCode()));
+    er.setDetail(e1.getLocalizedMessage());
+    return Response.status(Status.BAD_REQUEST).entity(er).build();
+  }
+  
   private Response createAmbiguousAttributeParametersResponse() {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("400");
