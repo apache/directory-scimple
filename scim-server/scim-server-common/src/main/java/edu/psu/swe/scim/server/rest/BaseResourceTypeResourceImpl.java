@@ -86,7 +86,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       resource = provider.get(id);
     } catch (UnableToRetrieveResourceException e2) {
       if (e2.getStatus().getFamily().equals(Family.SERVER_ERROR)) {
-        return createGenericExceptionResponse(e2);
+        return createGenericExceptionResponse(e2, e2.getStatus());
       }
     }
 
@@ -304,7 +304,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       stored = provider.get(id);
     } catch (UnableToRetrieveResourceException e2) {
-      return createGenericExceptionResponse(e2);
+      return createGenericExceptionResponse(e2, e2.getStatus());
     }
 
     if (stored == null) {
@@ -328,7 +328,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       updated = provider.update(id, resource);
     } catch (UnableToUpdateResourceException e1) {
-      return createGenericExceptionResponse(e1);
+      return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
     // Process Attributes
@@ -409,16 +409,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return uriInfo.getAbsolutePathBuilder().path(resource.getId()).build();
   }
 
-  private Response createGenericExceptionResponse(Exception e1) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("500");
-    er.setDetail(e1.getLocalizedMessage());
-    return Response.status(Status.BAD_REQUEST).entity(er).build();
-  }
-
   private Response createGenericExceptionResponse(Exception e1, Status status) {
     ErrorResponse er = new ErrorResponse();
-    er.setStatus(Integer.toString(status.getStatusCode()));
+  
+    if (status != null) {
+      er.setStatus(Integer.toString(status.getStatusCode()));
+    } else {
+      er.setStatus("500");
+    }
+    
     er.setDetail(e1.getLocalizedMessage());
     return Response.status(Status.BAD_REQUEST).entity(er).build();
   }
