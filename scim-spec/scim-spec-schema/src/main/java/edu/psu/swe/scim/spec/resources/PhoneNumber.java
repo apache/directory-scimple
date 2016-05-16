@@ -42,4 +42,26 @@ public class PhoneNumber extends KeyedResource implements Serializable {
   @XmlElement
   @ScimAttribute(description="A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
   Boolean primary = false;
+  
+  String rawValue;
+  String internationalCode;
+  String extension;
+  
+  public void setValue(String value) {
+    this.value = value;
+    this.rawValue = value;
+    
+    if (value.startsWith("tel:")) {
+      rawValue = value.substring(value.indexOf(':') + 1);
+    }
+    
+    if (rawValue.startsWith("+")) {
+      String tmp = rawValue;
+      internationalCode = tmp.replaceAll("[- ()].*", "");
+    }
+    
+    if (rawValue.contains(";ext=")) {
+      extension = rawValue.substring(rawValue.indexOf("=") + 1);
+    }
+  }
 }
