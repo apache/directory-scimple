@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.spec.protocol;
 
-public class ErrorMessageConstants {
+public final class ErrorMessageConstants {
+ 
   private ErrorMessageConstants() {
   }
   
