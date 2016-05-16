@@ -36,8 +36,8 @@ public class EnterpriseExtension implements ScimExtension {
     private String value;
 
     @ScimAttribute(description = "The URI of the SCIM resource representing the User's manager.  RECOMMENDED.")
-    @XmlElement
-    private String $ref;
+    @XmlElement(name="$ref")
+    private String ref;
 
     @ScimAttribute(mutability = Mutability.READ_ONLY, description = "he displayName of the user's manager.  This attribute is OPTIONAL.")
     @XmlElement

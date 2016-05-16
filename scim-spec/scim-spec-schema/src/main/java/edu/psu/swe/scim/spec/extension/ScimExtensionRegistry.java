@@ -3,16 +3,13 @@ package edu.psu.swe.scim.spec.extension;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
+import lombok.extern.slf4j.Slf4j;
 
-public class ScimExtensionRegistry {
-  
-  private static final Logger LOGGER = LoggerFactory.getLogger(ScimExtensionRegistry.class);
-  
+@Slf4j
+public final class ScimExtensionRegistry {
+    
   private static final ScimExtensionRegistry INSTANCE = new ScimExtensionRegistry();
   
   private Map<Class<? extends ScimResource>, Map<String, Class<? extends ScimExtension>>> registry;
@@ -40,9 +37,9 @@ public class ScimExtensionRegistry {
     String urn = scimExtension.getUrn();
     Class<? extends ScimExtension> extensionClass = scimExtension.getClass();
     
-    LOGGER.debug("Registering extension for URN: " + urn);
-    LOGGER.debug("    (associated resource class: " + resourceClass.getSimpleName() + ")");
-    LOGGER.debug("    (associated extension class: " + extensionClass.getSimpleName() + ")");
+    log.debug("Registering extension for URN: " + urn);
+    log.debug("    (associated resource class: " + resourceClass.getSimpleName() + ")");
+    log.debug("    (associated extension class: " + extensionClass.getSimpleName() + ")");
     
     Map<String, Class<? extends ScimExtension>> resourceMap = registry.get(resourceClass);
     if(resourceMap == null) {
