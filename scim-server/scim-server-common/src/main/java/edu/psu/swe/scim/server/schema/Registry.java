@@ -3,7 +3,6 @@ package edu.psu.swe.scim.server.schema;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,8 +12,6 @@ import javax.ejb.Startup;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.psu.swe.scim.spec.annotation.ScimResourceType;
-import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;

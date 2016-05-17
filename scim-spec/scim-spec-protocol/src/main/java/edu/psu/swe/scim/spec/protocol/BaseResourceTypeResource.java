@@ -129,7 +129,7 @@ public interface BaseResourceTypeResource<T> {
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Patch a portion of the backing store", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default public Response patch(PatchRequest patchRequest) {
+  default Response patch(PatchRequest patchRequest) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -137,7 +137,7 @@ public interface BaseResourceTypeResource<T> {
   @Path("{id}")
   @ApiOperation(value = "Delete from the backing store", code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default public Response delete(@ApiParam(value = "id", required = true) @PathParam("id") String id) {
+  default Response delete(@ApiParam(value = "id", required = true) @PathParam("id") String id) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }
