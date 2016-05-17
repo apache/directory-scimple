@@ -1,7 +1,6 @@
 package edu.psu.swe.scim.server.rest;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ejb.Stateless;
