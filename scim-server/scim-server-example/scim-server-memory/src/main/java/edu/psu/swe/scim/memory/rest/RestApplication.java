@@ -11,12 +11,17 @@ import edu.psu.swe.scim.server.rest.ScimResourceHelper;
 @ApplicationPath("v2")
 public class RestApplication extends Application {
   
+  static {
+    
+  }
+  
   @Override
   public Set<Class<?>> getClasses() {
     Set<Class<?>> clazzes = new HashSet<Class<?>>();
     
     clazzes.addAll(ScimResourceHelper.getScimClassesToLoad());
-    
+    clazzes.addAll(ScimResourceHelper.getSwaggerClassesToLoad());
+
     return clazzes;
   }
   
