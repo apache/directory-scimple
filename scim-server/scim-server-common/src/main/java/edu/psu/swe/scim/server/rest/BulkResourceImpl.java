@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -42,18 +43,21 @@ public class BulkResourceImpl implements BulkResource {
   private static final Status NO_CONTENT_STATUS = new Status();
   private static final Status METHOD_NOT_ALLOWED_STATUS = new Status();
   private static final Status CONFLICT_STATUS = new Status();
+  private static final Status CLIENT_ERROR_STATUS = new Status();
   private static final Status INTERNAL_SERVER_ERROR_STATUS = new Status();
   private static final Status METHOD_NOT_IMPLEMENTED_STATUS = new Status();
   private static final String OKAY = "200";
   private static final String CREATED = "201";
   private static final String NO_CONTENT = "204";
+  private static final String CLIENT_ERROR = "400";
   private static final String METHOD_NOT_ALLOWED = "405";
   private static final String CONFLICT = "409";
   private static final String INTERNAL_SERVER_ERROR = "500";
   private static final String METHOD_NOT_IMPLEMENTED = "501";
   private static final String BULK_ID_DOES_NOT_EXIST = "Bulk ID cannot be resolved because it refers to no bulkId in any Bulk Operation: %s";
   private static final String BULK_ID_REFERS_TO_FAILED_RESOURCE = "Bulk ID cannot be resolved because the resource it refers to had failed to be created: %s";
-  private static final String BULK_ID_DEPENDS_ON_FAILED_OPERATION = "Bulk ID depends on failed bulk operation \"%s\": %s";
+  private static final String OPERATION_DEPENDS_ON_FAILED_OPERATION = "Operation depends on failed bulk operation: %s";
+  private static final Pattern PATH_PATTERN = Pattern.compile("^/[^/]+/[^/]+$");
 
   static {
     METHOD_NOT_ALLOWED_STATUS.setCode(METHOD_NOT_ALLOWED);
@@ -61,6 +65,7 @@ public class BulkResourceImpl implements BulkResource {
     CREATED_STATUS.setCode(CREATED);
     NO_CONTENT_STATUS.setCode(NO_CONTENT);
     CONFLICT_STATUS.setCode(CONFLICT);
+    CLIENT_ERROR_STATUS.setCode(CLIENT_ERROR);
     INTERNAL_SERVER_ERROR_STATUS.setCode(INTERNAL_SERVER_ERROR);
     METHOD_NOT_IMPLEMENTED_STATUS.setCode(METHOD_NOT_IMPLEMENTED);
   }
@@ -87,25 +92,104 @@ public class BulkResourceImpl implements BulkResource {
     log.debug("Reverse dependencies: {}", reverseDependenciesGraph);
     log.debug("Transitive reverse dependencies: {}", transitiveReverseDependencies);
 
-    // Step 0 - get all known bulkIds, handle duplicates
+    // clean out unwanted data
+    for (BulkOperation operationRequest : bulkOperations) {
+      operationRequest.setResponse(null);
+      operationRequest.setStatus(null);
+    }
+    // get all known bulkIds, handle bad input
     for (BulkOperation operationRequest : bulkOperations) {
       String bulkId = operationRequest.getBulkId();
+      Method method = operationRequest.getMethod();
+      String bulkIdKey = bulkId != null ? "bulkId:" + bulkId : null;
+      boolean errorOccurred = false;
 
-      if (bulkId != null) {
-        String bulkIdKey = "bulkId:" + bulkId;
-
+      // duplicate bulkId
+      if (bulkIdKey != null) {
         if (!bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
           bulkIdKeyToOperationResult.put(bulkIdKey, operationRequest);
         } else {
+          errorCount += errorCountIncrement;
+          errorOccurred = true;
+          BulkOperation duplicateOperation = bulkIdKeyToOperationResult.get(bulkIdKey);
+
           createAndSetErrorResponse(operationRequest, CONFLICT_STATUS, "Duplicate bulkId");
+
+          if (!(duplicateOperation.getResponse() instanceof ErrorResponse)) {
+            errorCount += errorCountIncrement;
+
+            duplicateOperation.setData(null);
+            createAndSetErrorResponse(duplicateOperation, CONFLICT_STATUS, "Duplicate bulkId");
+          }
+        }
+      }
+      // bad/missing input for method
+      if (method != null && !(operationRequest.getResponse() instanceof ErrorResponse)) {
+        switch (method) {
+        case POST:
+        case PUT: {
+          if (operationRequest.getData() == null) {
+            errorCount += errorCountIncrement;
+            errorOccurred = true;
+
+            createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "data not provided");
+          }
+        } break;
+
+        case DELETE: {
+          String path = operationRequest.getPath();
+
+          if (path == null) {
+            errorCount += errorCountIncrement;
+            errorOccurred = true;
+
+            createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path not provided");
+          } else if (!PATH_PATTERN.matcher(path).matches()) {
+            errorCount += errorCountIncrement;
+            errorOccurred = true;
+
+            createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path is not valid path (e.g. \"/Groups/123abc\", \"/Users/123xyz\", ...)");
+          } else {
+            String endPoint = path.substring(0, path.lastIndexOf('/'));
+            Class<ScimResource> clazz = (Class<ScimResource>) registry.findScimResourceClassFromEndpoint(endPoint);
+
+            if (clazz == null) {
+              errorOccurred = true;
+
+              createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path does not contain a valid endpoint (e.g. \"/Groups/...\", \"/Users/...\", ...)");
+            }
+          }
+        } break;
+
+        default: {
+        } break;
+        }
+      }
+      if (errorOccurred) {
+        operationRequest.setData(null);
+
+        if (bulkIdKey != null) {
+          Set<String> reverseDependencies = transitiveReverseDependencies.get(bulkIdKey);
+          String detail = String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkIdKey);
+
+          for (String dependentBulkIdKey : reverseDependencies) {
+            BulkOperation dependentOperation = bulkIdKeyToOperationResult.get(dependentBulkIdKey);
+
+            if (!(dependentOperation.getResponse() instanceof ErrorResponse)) {
+              errorCount += errorCountIncrement;
+
+              dependentOperation.setData(null);
+              createAndSetErrorResponse(dependentOperation, CONFLICT_STATUS, detail);
+            }
+          }
         }
       }
     }
-    // Step 1 - do the operations
+    // do the operations
     for (BulkOperation operationResult : bulkOperations) {
-      boolean alreadyFailed = operationResult.getResponse() != null && operationResult.getResponse() instanceof ErrorResponse;
+      boolean errorCountExceeded = errorCount >= maxErrorCount;
 
-      if (errorCount < maxErrorCount && !alreadyFailed) {
+      if (!errorCountExceeded && !(operationResult.getResponse() instanceof ErrorResponse)) {
         try {
           this.handleBulkOperationMethod(allUnresolveds, operationResult, bulkIdKeyToOperationResult, uriInfo);
         } catch (UnableToCreateResourceException | UnableToDeleteResourceException | UnableToUpdateResourceException resourceException) {
@@ -146,7 +230,7 @@ public class BulkResourceImpl implements BulkResource {
             this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
           }
         }
-      } else if (errorCount >= maxErrorCount) {
+      } else if (errorCountExceeded) {
         createAndSetErrorResponse(operationResult, CONFLICT_STATUS, "failOnErrors count reached");
 
         if (operationResult.getBulkId() != null) {
@@ -156,7 +240,7 @@ public class BulkResourceImpl implements BulkResource {
         }
       }
     }
-    // Step 2 - Resolve unresolved bulkIds
+    // Resolve unresolved bulkIds
     for (IWishJavaHadTuples iwjht : allUnresolveds) {
       BulkOperation bulkOperationResult = iwjht.bulkOperationResult;
       String bulkIdKey = iwjht.bulkIdKey;
@@ -178,6 +262,7 @@ public class BulkResourceImpl implements BulkResource {
 
         String detail = unresolvableOperationException.getLocalizedMessage();
 
+        bulkOperationResult.setData(null);
         createAndSetErrorResponse(bulkOperationResult, CONFLICT_STATUS, detail);
         this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
       } catch (UnableToUpdateResourceException unableToUpdateResourceException) {
@@ -188,6 +273,7 @@ public class BulkResourceImpl implements BulkResource {
           Status status = new Status();
 
           status.setCode(code);
+          bulkOperationResult.setData(null);
           createAndSetErrorResponse(bulkOperationResult, status, detail);
           this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
       }
@@ -219,8 +305,7 @@ public class BulkResourceImpl implements BulkResource {
     for (String dependentBulkIdKey : reverseDependencies) {
       BulkOperation dependentOperationResult = bulkIdKeyToOperationResult.get(dependentBulkIdKey);
 
-      // operation may have already been removed for depending on a different failed operation
-      if (dependentOperationResult != null) try {
+      if (!(dependentOperationResult.getResponse() instanceof ErrorResponse)) try {
         ScimResource dependentResource = dependentOperationResult.getData();
         String dependentResourceId  = dependentResource.getId();
         @SuppressWarnings("unchecked")
@@ -228,12 +313,10 @@ public class BulkResourceImpl implements BulkResource {
         Provider<ScimResource> dependentResourceProvider = this.providerRegistry.getProvider(dependentResourceClass);
 
         dependentOperationResult.setData(null);
-        createAndSetErrorResponse(dependentOperationResult, CONFLICT_STATUS, String.format(BULK_ID_DEPENDS_ON_FAILED_OPERATION, bulkId, dependentBulkIdKey));
+        createAndSetErrorResponse(dependentOperationResult, CONFLICT_STATUS, String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkId, dependentBulkIdKey));
         dependentResourceProvider.delete(dependentResourceId);
       } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
         log.error("Could not delete depenedent ScimResource after failing to update dependee", unableToDeleteResourceException);
-      } finally {
-        bulkIdKeyToOperationResult.remove(dependentBulkIdKey);
       }
     }
   }
@@ -245,11 +328,21 @@ public class BulkResourceImpl implements BulkResource {
       UriInfo uriInfo)
       throws UnableToCreateResourceException, UnableToDeleteResourceException, UnableToUpdateResourceException, UnresolvableOperationException {
     ScimResource scimResource = operationResult.getData();
-    @SuppressWarnings("unchecked")
-    Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
-    Provider<ScimResource> provider = providerRegistry.getProvider(scimResourceClass);
     Method bulkOperationMethod = operationResult.getMethod();
     String bulkId = operationResult.getBulkId();
+    Class<ScimResource> scimResourceClass;
+
+    if (scimResource == null) {
+      String path = operationResult.getPath();
+      String endPoint = path.substring(0, path.lastIndexOf('/'));
+      Class<ScimResource> clazz = (Class<ScimResource>) registry.findScimResourceClassFromEndpoint(endPoint);
+      scimResourceClass = clazz;
+    } else {
+      @SuppressWarnings("unchecked")
+      Class<ScimResource> clazz = (Class<ScimResource>) scimResource.getClass();
+      scimResourceClass = clazz;
+    }
+    Provider<ScimResource> provider = providerRegistry.getProvider(scimResourceClass);
 
     switch (bulkOperationMethod) {
     case POST: {
@@ -276,7 +369,7 @@ public class BulkResourceImpl implements BulkResource {
     } break;
 
     case DELETE: {
-      log.debug("DELETE: {}", scimResource);
+      log.debug("DELETE: {}", operationResult.getPath());
 
       String scimResourceId = operationResult.getPath().substring(operationResult.getPath().lastIndexOf("/") + 1);
 
@@ -437,12 +530,13 @@ public class BulkResourceImpl implements BulkResource {
           String bulkIdKey = (String) attributeField.get(attributeValue);
 
           if (bulkIdKey != null && bulkIdKey.startsWith("bulkId:")) {
+            log.debug("Found bulkId: {}", bulkIdKey);
             if (bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
               BulkOperation resolvedOperationResult = bulkIdKeyToOperationResult.get(bulkIdKey);
               BaseResource response = resolvedOperationResult.getResponse();
               ScimResource resolvedResource = resolvedOperationResult.getData();
 
-              if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null) {
+              if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null && resolvedResource.getId() != null) {
                 String resolvedId = resolvedResource.getId();
 
                 attributeField.set(attributeValue, resolvedId);
@@ -478,6 +572,7 @@ public class BulkResourceImpl implements BulkResource {
         log.error("Could not resolve bulkId within ScimResource attribute", illegalAccessException);
       }
     }
+    log.debug("Resolved attribute had {} unresolved fields", unresolveds.size());
     return unresolveds;
   }
 
@@ -507,12 +602,10 @@ public class BulkResourceImpl implements BulkResource {
               if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null) {
                 String resolvedId = resolvedResource.getId();
 
-                log.debug("resolved bulkId {}: {}", bulkIdKey, resolvedId); // DELETE
                 attributeField.set(scimResource, resolvedId);
               } else {
                 UnresolvedTopLevel unresolved = new UnresolvedTopLevelBulkId(attributeField, bulkIdKey);
 
-                log.debug("unresolved bulkId: {}", bulkIdKey); // DELETE
                 attributeField.set(scimResource, null);
                 unresolvedTopLevels.add(unresolved);
               }
@@ -532,18 +625,16 @@ public class BulkResourceImpl implements BulkResource {
               @SuppressWarnings("unchecked")
               Collection<Object> subFieldValues = isCollection ? (Collection<Object>) attributeFieldValue : Arrays.asList((Object[]) attributeFieldValue);
 
-              log.debug("found multivalued: {}", attribute.getField()); // DELETE
-
               for (Object subArrayFieldValue : subFieldValues) {
                 resolveAttribute(subUnresolveds, subArrayFieldValue, attribute, bulkIdKeyToOperationResult);
               }
             } else {
               resolveAttribute(subUnresolveds, attributeFieldValue, attribute, bulkIdKeyToOperationResult);
             }
+
             if (subUnresolveds.size() > 0) {
               UnresolvedTopLevel unresolved = new UnresolvedTopLevelComplex(attributeField, attributeFieldValue, subUnresolveds);
 
-              log.debug("There are {} unresolved subattributes", subUnresolveds.size()); // DELETE
               attributeField.set(scimResource, null);
               unresolvedTopLevels.add(unresolved);
             }
@@ -556,7 +647,6 @@ public class BulkResourceImpl implements BulkResource {
     if (unresolvedTopLevels.size() > 0) {
       String bulkIdKey = "bulkId:" + bulkOperationResult.getBulkId();
 
-      log.debug("there are {} unresloved attributes", unresolvedTopLevels.size()); // DELETE
       unresolveds.add(new IWishJavaHadTuples(bulkIdKey, unresolvedTopLevels, bulkOperationResult));
     }
   }
