@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.spec.schema;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -14,7 +16,9 @@ import lombok.Data;
 @Data
 @XmlType(propOrder = {"value","ref","display","type"})
 @XmlAccessorType(XmlAccessType.NONE)
-public class ResourceReference {
+public class ResourceReference implements Serializable {
+
+  private static final long serialVersionUID = 9126588075353486789L;
 
   @XmlEnum
   public enum ReferenceType {
