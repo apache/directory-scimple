@@ -148,7 +148,7 @@ public class BulkResourceImpl implements BulkResource {
             errorCount += errorCountIncrement;
             errorOccurred = true;
 
-            createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path is not valid path (e.g. \"/Groups/123abc\", \"/Users/123xyz\", ...)");
+            createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path is not a valid path (e.g. \"/Groups/123abc\", \"/Users/123xyz\", ...)");
           } else {
             String endPoint = path.substring(0, path.lastIndexOf('/'));
             Class<ScimResource> clazz = (Class<ScimResource>) registry.findScimResourceClassFromEndpoint(endPoint);
@@ -156,14 +156,23 @@ public class BulkResourceImpl implements BulkResource {
             if (clazz == null) {
               errorOccurred = true;
 
-              createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path does not contain a valid endpoint (e.g. \"/Groups/...\", \"/Users/...\", ...)");
+              createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path does not contain a recognized endpoint (e.g. \"/Groups/...\", \"/Users/...\", ...)");
             }
           }
         } break;
 
+        case PATCH: {
+            createAndSetErrorResponse(operationRequest, METHOD_NOT_IMPLEMENTED_STATUS, "Method not implemented: PATCH");
+          } break;
+
         default: {
         } break;
         }
+      } else if (method == null) {
+        errorCount += errorCountIncrement;
+
+        operationRequest.setData(null);
+        createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "no method provided (e.g. PUT, POST, ...");
       }
       if (errorOccurred) {
         operationRequest.setData(null);
@@ -263,6 +272,7 @@ public class BulkResourceImpl implements BulkResource {
         String detail = unresolvableOperationException.getLocalizedMessage();
 
         bulkOperationResult.setData(null);
+        bulkOperationResult.setLocation(null);
         createAndSetErrorResponse(bulkOperationResult, CONFLICT_STATUS, detail);
         this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
       } catch (UnableToUpdateResourceException unableToUpdateResourceException) {
@@ -274,6 +284,7 @@ public class BulkResourceImpl implements BulkResource {
 
           status.setCode(code);
           bulkOperationResult.setData(null);
+          bulkOperationResult.setLocation(null);
           createAndSetErrorResponse(bulkOperationResult, status, detail);
           this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
       }
@@ -319,6 +330,7 @@ public class BulkResourceImpl implements BulkResource {
         Provider<ScimResource> dependentResourceProvider = this.providerRegistry.getProvider(dependentResourceClass);
 
         dependentOperationResult.setData(null);
+        dependentOperationResult.setLocation(null);
         createAndSetErrorResponse(dependentOperationResult, CONFLICT_STATUS, String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkId, dependentBulkIdKey));
         dependentResourceProvider.delete(dependentResourceId);
       } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
@@ -402,11 +414,6 @@ public class BulkResourceImpl implements BulkResource {
 
       provider.update(id, scimResource);
       operationResult.setStatus(OKAY_STATUS);
-    } break;
-
-    case PATCH: {
-      log.debug("PATCH: {}", scimResource);
-      createAndSetErrorResponse(operationResult, METHOD_NOT_IMPLEMENTED_STATUS, "Method not implemented: PATCH");
     } break;
 
     default: {
