@@ -285,6 +285,12 @@ public class BulkResourceImpl implements BulkResource {
     return Response.ok(response).build();
   }
 
+  /**
+   * Delete resources that depend on {@code bulkIdKeyToCleanup}, remove {@link BulkOperation}s data, and set their code and response
+   * @param bulkIdKeyToCleanup
+   * @param transitiveReverseDependencies
+   * @param bulkIdKeyToOperationResult
+   */
   private void cleanup(
       String bulkIdKeyToCleanup,
       Map<String, Set<String>> transitiveReverseDependencies,
@@ -321,6 +327,17 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
+  /**
+   * Based on the method requested by {@code operationResult}, invoke that method. Fill {@code unresolveds} with unresolved bulkIds and complexes that contain unresolved bulkIds.
+   * @param unresolveds
+   * @param operationResult
+   * @param bulkIdKeyToOperationResult
+   * @param uriInfo
+   * @throws UnableToCreateResourceException
+   * @throws UnableToDeleteResourceException
+   * @throws UnableToUpdateResourceException
+   * @throws UnresolvableOperationException
+   */
   private void handleBulkOperationMethod(
       List<IWishJavaHadTuples> unresolveds,
       BulkOperation operationResult,
@@ -510,6 +527,15 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
+  /**
+   * Search through the subattribute {@code subAttributeValue} and fill {@code unresolveds} with unresolved bulkIds.
+   * @param unresolveds
+   * @param attributeValue
+   * @param attribute
+   * @param bulkIdKeyToOperationResult
+   * @return
+   * @throws UnresolvableOperationException
+   */
   private static List<UnresolvedComplex> resolveAttribute(
       List<UnresolvedComplex> unresolveds,
       Object attributeValue,
@@ -576,6 +602,13 @@ public class BulkResourceImpl implements BulkResource {
     return unresolveds;
   }
 
+  /**
+   * Attempt to resolve the bulkIds referenced inside of the {@link ScimResource} contained inside of {@code bulkOperationResult}. Fill {@code unresolveds} with bulkIds that could not be yet resolved.
+   * @param unresolveds
+   * @param bulkOperationResult
+   * @param bulkIdKeyToOperationResult
+   * @throws UnresolvableOperationException
+   */
   private void resolveTopLevel(
       List<IWishJavaHadTuples> unresolveds,
       BulkOperation bulkOperationResult,
@@ -651,6 +684,13 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
+  /**
+   * Traverse the provided dependency graph and fill {@code visited} with visited bulkIds.
+   * @param visited
+   * @param dependencyGraph
+   * @param root
+   * @param current
+   */
   private static void generateVisited(Set<String> visited, Map<String, Set<String>> dependencyGraph, String root, String current) {
     if (!root.equals(current) && !visited.contains(current)) {
       visited.add(current);
@@ -663,6 +703,11 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
+  /**
+   * If A -> {B} and B -> {C} then A -> {B, C}.
+   * @param dependenciesGraph
+   * @return
+   */
   private static Map<String, Set<String>> generateTransitiveDependenciesGraph(Map<String, Set<String>> dependenciesGraph) {
     Map<String, Set<String>> transitiveDependenciesGraph = new HashMap<>();
 
@@ -715,6 +760,11 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
+  /**
+   * Finds the reverse dependencies of each {@link BulkOperation}.
+   * @param bulkOperations
+   * @return
+   */
   private Map<String, Set<String>> generateReverseDependenciesGraph(List<BulkOperation> bulkOperations) {
     Map<String, Set<String>> reverseDependenciesGraph = new HashMap<>();
 
