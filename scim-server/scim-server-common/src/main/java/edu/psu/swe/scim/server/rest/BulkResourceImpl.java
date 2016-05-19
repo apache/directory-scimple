@@ -109,15 +109,12 @@ public class BulkResourceImpl implements BulkResource {
         if (!bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
           bulkIdKeyToOperationResult.put(bulkIdKey, operationRequest);
         } else {
-          errorCount += errorCountIncrement;
           errorOccurred = true;
           BulkOperation duplicateOperation = bulkIdKeyToOperationResult.get(bulkIdKey);
 
           createAndSetErrorResponse(operationRequest, CONFLICT_STATUS, "Duplicate bulkId");
 
           if (!(duplicateOperation.getResponse() instanceof ErrorResponse)) {
-            errorCount += errorCountIncrement;
-
             duplicateOperation.setData(null);
             createAndSetErrorResponse(duplicateOperation, CONFLICT_STATUS, "Duplicate bulkId");
           }
@@ -129,7 +126,6 @@ public class BulkResourceImpl implements BulkResource {
         case POST:
         case PUT: {
           if (operationRequest.getData() == null) {
-            errorCount += errorCountIncrement;
             errorOccurred = true;
 
             createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "data not provided");
@@ -140,12 +136,10 @@ public class BulkResourceImpl implements BulkResource {
           String path = operationRequest.getPath();
 
           if (path == null) {
-            errorCount += errorCountIncrement;
             errorOccurred = true;
 
             createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path not provided");
           } else if (!PATH_PATTERN.matcher(path).matches()) {
-            errorCount += errorCountIncrement;
             errorOccurred = true;
 
             createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "path is not a valid path (e.g. \"/Groups/123abc\", \"/Users/123xyz\", ...)");
@@ -162,14 +156,16 @@ public class BulkResourceImpl implements BulkResource {
         } break;
 
         case PATCH: {
-            createAndSetErrorResponse(operationRequest, METHOD_NOT_IMPLEMENTED_STATUS, "Method not implemented: PATCH");
-          } break;
+          errorOccurred = true;
+
+          createAndSetErrorResponse(operationRequest, METHOD_NOT_IMPLEMENTED_STATUS, "Method not implemented: PATCH");
+        } break;
 
         default: {
         } break;
         }
       } else if (method == null) {
-        errorCount += errorCountIncrement;
+        errorOccurred = true;
 
         operationRequest.setData(null);
         createAndSetErrorResponse(operationRequest, CLIENT_ERROR_STATUS, "no method provided (e.g. PUT, POST, ...");
@@ -185,8 +181,6 @@ public class BulkResourceImpl implements BulkResource {
             BulkOperation dependentOperation = bulkIdKeyToOperationResult.get(dependentBulkIdKey);
 
             if (!(dependentOperation.getResponse() instanceof ErrorResponse)) {
-              errorCount += errorCountIncrement;
-
               dependentOperation.setData(null);
               createAndSetErrorResponse(dependentOperation, CONFLICT_STATUS, detail);
             }
