@@ -84,7 +84,9 @@ public class ProviderRegistry {
     // NOTE generateResourceType() ensures ScimResourceType exists
     ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
     String schemaUrn = scimResourceType.schema();
+    String endpoint = scimResourceType.endpoint();
     registry.addScimResourceSchemaUrn(schemaUrn, clazz);
+    registry.addScimResourceEndPoint(endpoint, clazz);
 
     List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
 
