@@ -33,6 +33,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
 import edu.psu.swe.scim.server.exception.UnableToCreateResourceException;
+import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
@@ -369,8 +370,26 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response delete(String id) {
-    // TODO Auto-generated method stub
-    return BaseResourceTypeResource.super.delete(id);
+    try {
+      Response response;
+      Provider<T> provider = getProvider();
+
+      if (provider == null) {
+        response =  BaseResourceTypeResource.super.delete(id);
+      } else {
+        response = Response.noContent().build();
+
+        provider.delete(id);
+      }
+      return response;
+    } catch (UnableToDeleteResourceException e) {
+      Status status = e.getStatus();
+      Response response = Response.status(status).build();
+
+      log.error("Unable to delete resource", e);
+
+      return response;
+    }
   }
 
   private EntityTag generateEtag(T resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
