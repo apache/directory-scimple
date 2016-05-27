@@ -150,7 +150,7 @@ public class ProviderRegistry {
 
         ScimExtensionType extensionType = se.getAnnotation(ScimExtensionType.class);
 
-        if (extensionList == null) {
+        if (extensionType == null) {
           throw new InvalidProviderException("Missing annotation: ScimExtensionType must be at the top of scim extension classes");
         }
 
