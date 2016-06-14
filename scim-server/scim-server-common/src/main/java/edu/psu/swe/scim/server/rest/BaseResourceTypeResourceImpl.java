@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -38,6 +39,7 @@ import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.utility.AttributeUtil;
+import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
@@ -69,6 +71,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Inject
   AttributeUtil attributeUtil;
+  
+  @Inject
+  EndpointUtil endpointUtil;
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -83,6 +88,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
     }
 
+    endpointUtil.process(uriInfo);
     T resource = null;
     try {
       resource = provider.get(id);
