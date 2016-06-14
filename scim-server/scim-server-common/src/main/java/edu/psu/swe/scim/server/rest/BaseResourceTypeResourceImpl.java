@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -178,6 +177,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createAmbiguousAttributeParametersResponse();
     }
     
+    endpointUtil.process(uriInfo);
     T created;
     try {
       created = provider.create(resource);
@@ -246,6 +246,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     ListResponse listResponse = new ListResponse();
 
+    endpointUtil.process(uriInfo);
     List<T> resources;
     try {
       resources = provider.find(filter, pageRequest, sortRequest);
@@ -311,6 +312,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createAmbiguousAttributeParametersResponse();
     }
     
+    endpointUtil.process(uriInfo);
     T stored;
     try {
       stored = provider.get(id);
@@ -383,6 +385,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       if (provider == null) {
         response =  BaseResourceTypeResource.super.delete(id);
       } else {
+        endpointUtil.process(uriInfo);
         response = Response.noContent().build();
 
         provider.delete(id);
