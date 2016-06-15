@@ -151,9 +151,9 @@ simply sets a flag and alter the find and retrieve methods to only return
       EndpointUtil endpointUtil;
       .....
       .....
-      URL groupEndpoint = endpointUtil.getGroupEndpoint();
-      URL userEndpoint = endpointUtil.getUserEndpoint();
+      URL groupEndpoint = endpointUtil.getEndpoint(ScimGroup.class);
+      URL userEndpoint = endpointUtil.getEndpoint(ScimUser.class);
      
 With reference type returns developers may need to access the base endpoints used to execute the SCIM request.  
 The example above illustrates injecting an endpointUtil class, which is a helper class that provides that specific 
-information.
+information.  If this identity provider does not provide a a provisioner for the endpoint requested null is returned.
