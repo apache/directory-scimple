@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -78,8 +79,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
-
-    if (servletRequest.getAttribute("filter") != null) {
+    
+    if (servletRequest.getParameter("filter") != null) {
       return Response.status(Status.FORBIDDEN).build();
     }
 
