@@ -13,6 +13,7 @@ import javax.inject.Named;
 import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.spec.exception.InvalidExtensionException;
+import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
@@ -113,8 +114,8 @@ public class InMemoryUserService implements Provider<ScimUser> {
    * @see edu.psu.swe.scim.server.provider.Provider#find(edu.psu.swe.scim.spec.protocol.search.Filter, edu.psu.swe.scim.spec.protocol.search.PageRequest, edu.psu.swe.scim.spec.protocol.search.SortRequest)
    */
   @Override
-  public List<ScimUser> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
-    return new ArrayList<ScimUser>(users.values());
+  public FilterResponse<ScimUser> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
+    return new FilterResponse<ScimUser>(users.values(), pageRequest, users.size());
   }
 
   /**

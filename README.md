@@ -146,3 +146,14 @@ retrieve, update and delete methods (as well as find).  Customization is
 flexible - if your system implements soft deletes, create a delete method that
 simply sets a flag and alter the find and retrieve methods to only return
 "undeleted" resources.
+
+      @Inject
+      EndpointUtil endpointUtil;
+      .....
+      .....
+      URL groupEndpoint = endpointUtil.getGroupEndpoint();
+      URL userEndpoint = endpointUtil.getUserEndpoint();
+     
+With reference type returns developers may need to access the base endpoints used to execute the SCIM request.  
+The example above illustrates injecting an endpointUtil class, which is a helper class that provides that specific 
+information.

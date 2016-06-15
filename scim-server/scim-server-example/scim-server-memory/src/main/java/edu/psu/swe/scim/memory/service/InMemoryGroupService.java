@@ -10,6 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
@@ -54,8 +55,8 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   }
 
   @Override
-  public List<ScimGroup> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
-    return new ArrayList<ScimGroup>(groups.values());
+  public FilterResponse<ScimGroup> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
+    return new FilterResponse<ScimGroup>(groups.values(), pageRequest, groups.size());
   }
 
   @Override

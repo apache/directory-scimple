@@ -45,6 +45,7 @@ import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
@@ -247,9 +248,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     ListResponse listResponse = new ListResponse();
 
     endpointUtil.process(uriInfo);
-    List<T> resources;
+    FilterResponse<T> filterResp = null;
     try {
-      resources = provider.find(filter, pageRequest, sortRequest);
+      filterResp = provider.find(filter, pageRequest, sortRequest);
     } catch (UnableToRetrieveResourceException e1) {
       log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus().toString());
       return createGenericExceptionResponse(e1, e1.getStatus());
@@ -258,16 +259,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     // If no resources are found, we should still return a ListResponse with
     // the totalResults set to 0;
     // (https://tools.ietf.org/html/rfc7644#section-3.4.2)
-    if (resources == null || resources.isEmpty()) {
+    if (filterResp == null || filterResp.getResources() == null ||  filterResp.getResources().isEmpty()) {
       listResponse.setTotalResults(0);
     } else {
-      listResponse.setItemsPerPage(resources.size());
+      listResponse.setItemsPerPage(filterResp.getResources().size());
       listResponse.setStartIndex(1);
-      listResponse.setTotalResults(resources.size());
+      listResponse.setTotalResults(filterResp.getResources().size());
 
       List<Object> results = new ArrayList<>();
 
-      for (T resource : resources) {
+      for (T resource : filterResp.getResources()) {
         EntityTag etag = null;
 
         try {
