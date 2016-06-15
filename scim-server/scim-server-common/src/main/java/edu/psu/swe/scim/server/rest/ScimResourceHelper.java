@@ -3,6 +3,8 @@ package edu.psu.swe.scim.server.rest;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.psu.swe.scim.server.exception.FilterParseExceptionMapper;
+
 /**
  * Provides the SCIM defined set of end-points and resources without declaring a
  * JAX-RS application. Additional end-points and extensions can be added by the
@@ -34,6 +36,7 @@ public final class ScimResourceHelper {
     clazzez.add(SelfResourceImpl.class);
     clazzez.add(ServiceProviderConfigResourceImpl.class);
     clazzez.add(UserResourceImpl.class);
+    clazzez.add(FilterParseExceptionMapper.class);
 
     clazzez.add(ObjectMapperContextResolver.class);
 
