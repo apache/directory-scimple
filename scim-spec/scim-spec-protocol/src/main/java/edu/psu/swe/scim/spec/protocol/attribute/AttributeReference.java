@@ -37,5 +37,9 @@ public class AttributeReference {
   public String getFullyQualifiedAttributeName() {
     return (urn != null ? (urn + ":") : "") + StringUtils.join(attributeName, ".");
   }
+  
+  public String getAttributeBase() {
+    return (urn != null ? (urn + ":") : "") + StringUtils.join(attributeName, ".", 0, attributeName.length - 1);
+  }
 
 }
