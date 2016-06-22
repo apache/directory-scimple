@@ -22,6 +22,11 @@
       <artifactId>scim-server-common</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+    	<groupId>org.hibernate</groupId>
+    	<artifactId>hibernate-jpamodelgen</artifactId>
+    	<version>5.2.0.Final</version>
+    </dependency>
   </dependencies>
 
 </project>
