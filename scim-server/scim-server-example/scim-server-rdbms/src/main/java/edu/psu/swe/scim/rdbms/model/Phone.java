@@ -17,7 +17,7 @@ public class Phone {
   @Column(name="phone_id")
   private long phoneId;
   
-  @Column(name="type")
+  @Column(name="phone_type")
   private String type;
   
   @Column(name="international_prefix")

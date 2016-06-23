@@ -1,12 +1,11 @@
 package edu.psu.swe.scim.rdbms.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.PostActivate;
-import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -19,6 +18,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.ws.rs.core.Response.Status;
 
 import edu.psu.swe.scim.rdbms.model.Address;
 import edu.psu.swe.scim.rdbms.model.Address_;
@@ -41,12 +41,15 @@ import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
+import edu.psu.swe.scim.spec.resources.Name;
+import edu.psu.swe.scim.spec.resources.PhoneNumber;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 //@Stateless
+@SuppressWarnings("rawtypes")
 public class ScimRdbmsService implements Provider<ScimUser> {
 
   @PersistenceContext(name="ExampleDS")
@@ -118,16 +121,59 @@ public class ScimRdbmsService implements Provider<ScimUser> {
     criteriaQuery.select(queryRoot);
     
     Predicate predicate = processExpression(expression, criteriaBuilder);
-    criteriaQuery.where(predicate);
+    criteriaQuery.where(predicate).distinct(true);
     
     TypedQuery<Person> tq = entityManager.createQuery(criteriaQuery);
     List<Person> personList = tq.getResultList();
     log.info("---> Query executed, " + personList.size() + " returns");
-    return null;
+    
+    List<ScimUser> scimUserList = new ArrayList<>();
+    
+    for (Person p : personList) {
+      ScimUser su = new ScimUser();
+      List<edu.psu.swe.scim.spec.resources.Address> scimAddressList = new ArrayList<>();
+      
+      for (Address a : p.getAddressList()) {
+        edu.psu.swe.scim.spec.resources.Address sa = new edu.psu.swe.scim.spec.resources.Address();
+        sa.setPostalCode(a.getZipCode());
+        sa.setStreetAddress(a.getStreetAddress());
+        sa.setLocality(a.getCity());
+        sa.setRegion(a.getState());
+        sa.setCountry(a.getCountryCode());
+        scimAddressList.add(sa);
+      }
+      
+      su.setAddresses(scimAddressList);
+      
+      List<edu.psu.swe.scim.spec.resources.PhoneNumber> scimPhoneList = new ArrayList<>();
+      for (Phone phone : p.getPhoneList()) {
+        PhoneNumber pn = new PhoneNumber();
+        pn.setValue(phone.getNumber());
+        scimPhoneList.add(pn);
+      }
+      
+      su.setPhoneNumbers(scimPhoneList);
+      
+      Name name = new Name();
+      name.setFamilyName(p.getLastName());
+      name.setGivenName(p.getFirstName());
+      name.setMiddleName(p.getMiddleName());
+      su.setName(name);
+      scimUserList.add(su);
+    }
+    
+    FilterResponse<ScimUser> response = new FilterResponse<>();
+    response.setResources(scimUserList);
+    PageRequest pr = new PageRequest();
+    pr.setCount(scimUserList.size());
+    pr.setStartIndex(0);
+    response.setPageRequest(pr);
+    response.setTotalResults(scimUserList.size());
+    
+    return response;
   }
 
-  private Predicate processExpression(FilterExpression expression, 
-                                      CriteriaBuilder criteriaBuilder) {
+  private Predicate processExpression(FilterExpression expression, CriteriaBuilder criteriaBuilder) throws UnableToRetrieveResourceException {
     
     if (expression instanceof LogicalExpression) {
       LogicalExpression le = (LogicalExpression) expression;
@@ -140,67 +186,51 @@ public class ScimRdbmsService implements Provider<ScimUser> {
         return criteriaBuilder.or(p1, p2);
       }
     } else if (expression instanceof AttributeComparisonExpression) {
+      
       AttributeComparisonExpression ace = (AttributeComparisonExpression) expression;
+      
+      String attributeBase = ace.getAttributePath().getAttributeBase();
+      
+      Join join = joinMap.get(attributeBase);
+      Path path = null;
+      
+      if (join == null) {
+        AttributeReference attributePath = ace.getAttributePath();
+        path = queryRoot.get((SingularAttribute<? super Person, ?>) tableAliasMap.get(ace.getAttributePath().getFullAttributeName()));
+      } else {
+        path = join.get(tableAliasMap.get(ace.getAttributePath().getFullAttributeName()));
+      }
+      
+      if (path == null) {
+        throw new UnableToRetrieveResourceException(Status.BAD_REQUEST, "Unable to map filter attribute " + ace.getAttributePath().getFullAttributeName());
+      }
       
       switch(ace.getOperation()) {
         case EQ:
-          String attributeBase = ace.getAttributePath().getAttributeBase();
-          log.info("----> Attribute base: " + attributeBase);
-          Join j = joinMap.get(attributeBase);
-          Path p = null;
-          
-          if (j == null) {
-            
-            AttributeReference attributePath = ace.getAttributePath();
-            
-            if (attributePath == null) {
-              log.info("**** null attribute path");
-            }
-            
-            String attributeName = attributePath.getFullAttributeName();
-            
-            if (attributeName == null) {
-              log.info("**** null attributeName");
-            }
-            
-            if (tableAliasMap == null) {
-              log.info("**** null tableAliasMap");
-            }
-            
-            log.info("----> Trying to get JPA object for " + ace.getAttributePath().getFullAttributeName() + 
-                  ", exists? " + tableAliasMap.containsKey(ace.getAttributePath().getFullAttributeName()));
-      
-            p = queryRoot.get((SingularAttribute<? super Person, ?>) tableAliasMap.get(ace.getAttributePath().getFullAttributeName()));
-          } else {
-            p = j.get(tableAliasMap.get(ace.getAttributePath().getFullAttributeName()));
-          }
-          return criteriaBuilder.equal(p, ace.getCompareValue());
-      case CO:
-        //return criteriaBuilder.like(x, "*" + ace.getCompareValue() + "*");
-        break;
-      case EW:
-        //return criteriaBuilder.like(x, "*" + ace.getCompareValue());
-        break;
-      case GE:
-        //return criteriaBuilder.greaterThanOrEqualTo(x, y);
-        break;
-      case GT:
-        //return criteriaBuilder.greaterThan(x, y);
-        break;
-      case LE:
-        //return criteriaBuilder.lessThanOrEqualTo(x, y);
-        break;
-      case LT:
-        //return criteriaBuilder.lessThan(x, y);
-        break;
-      case NE:
-        //return criteriaBuilder.notEqual(x, y);
-        break;
-      case SW:
-        //return criteriaBuilder.like(x, ace.getCompareValue() + "*");
-        break;
-      default:
-        break;
+          return criteriaBuilder.equal(path, ace.getCompareValue());
+        case CO:
+          return criteriaBuilder.like(path, "*" + ace.getCompareValue() + "*");
+        case EW:
+          return criteriaBuilder.like(path, "*" + ace.getCompareValue());
+        case GE:
+          //return criteriaBuilder.greaterThanOrEqualTo(x, y);
+          break;
+        case GT:
+          //return criteriaBuilder.greaterThan(x, y);
+          break;
+        case LE:
+          //return criteriaBuilder.lessThanOrEqualTo(x, y);
+          break;
+        case LT:
+          //return criteriaBuilder.lessThan(x, y);
+          break;
+        case NE:
+          //return criteriaBuilder.notEqual(x, y);
+          break;
+        case SW:
+          return criteriaBuilder.like(path, ace.getCompareValue() + "*");
+        default:
+          break;
       }
     }
     
