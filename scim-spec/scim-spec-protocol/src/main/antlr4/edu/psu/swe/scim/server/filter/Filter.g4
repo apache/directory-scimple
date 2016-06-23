@@ -50,4 +50,4 @@ NAMECHAR: ('-' | '_' | DIGIT | ALPHA);
 fragment ALPHA : [a-zA-Z];
 SubAttr: '.' AttrName;
 
-SP: ' ';
+SP: (' ')+;
