@@ -47,22 +47,7 @@ public class FilterBuilder {
     return this;
   }
   
-  public FilterBuilder equalTo(String key, Integer value) {
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterBuilder equalTo(String key, Long value) {
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterBuilder equalTo(String key, Float value) {
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterBuilder equalTo(String key, Double value) {
+  public <T extends Number> FilterBuilder equalTo(String key, T value) {
     filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(value.toString());
     return this;
   }
@@ -87,35 +72,119 @@ public class FilterBuilder {
     return this;
   }
   
+  public FilterBuilder notEqual(String key, Boolean value) {
+    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(value.toString());
+    return this;
+  }
+  
+  public FilterBuilder notEqual(String key, Date value) {
+    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE);
+    return this;
+  }
+  
+  public FilterBuilder notEqual(String key, LocalDate value) {
+    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE);
+    return this;
+  }
+  
+  public FilterBuilder notEqual(String key, LocalDateTime value) {
+    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE);
+    return this;
+  }
+  
+  public <T extends Number> FilterBuilder notEqual(String key, T value) {
+    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(value.toString());
+    return this;
+  }
+  
+  public FilterBuilder notEqualNull(String key) {
+    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(NULL);
+    return this;
+  }
+  
   public FilterBuilder contains(String key, String value) {
     filter.append(key).append(SPACE).append(CompareOperator.CO.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
     return this;
   }
   
-  public FilterBuilder greaterThan(String key, String value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
+  public <T extends Number> FilterBuilder greaterThan(String key, T value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(value.toString());
     return this;
   }
   
-  public FilterBuilder greaterThanOrEquals(String key, String value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
+  public FilterBuilder greaterThan(String key, Date value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder greaterThan(String key, LocalDate value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder greaterThan(String key, LocalDateTime value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    return this;
+  }
+  
+  public <T extends Number> FilterBuilder greaterThanOrEquals(String key, T value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(value.toString());
     return this;
   }
 
-  
-  public FilterBuilder lessThan(String key, String value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
+  public FilterBuilder greaterThanOrEquals(String key, Date value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
     return this;
   }
   
-  public FilterBuilder lessThanOrEquals(String key, String value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
+  public FilterBuilder greaterThanOrEquals(String key, LocalDate value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
     return this;
   }
   
-  public static AttributeComparisonExpression makeAttributeComparisonExpression(String attribute, CompareOperator operator, String value) {
-    AttributeReference reference = new AttributeReference(attribute);
-    return new AttributeComparisonExpression(reference, operator, value);
+  public FilterBuilder greaterThanOrEquals(String key, LocalDateTime value) {
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    return this;
+  }
+  
+  public <T extends Number> FilterBuilder lessThan(String key, T value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(value.toString());
+    return this;
+  }
+  
+  public FilterBuilder lessThan(String key, Date value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder lessThan(String key, LocalDate value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder lessThan(String key, LocalDateTime value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    return this;
+  }
+  
+  public <T extends Number> FilterBuilder lessThanOrEquals(String key, T value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(value.toString());
+    return this;
+  }
+  
+  public FilterBuilder lessThanOrEquals(String key, Date value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder lessThanOrEquals(String key, LocalDate value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder lessThanOrEquals(String key, LocalDateTime value) {
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    return this;
   }
   
   public FilterBuilder and(AttributeComparisonExpression ex1, AttributeComparisonExpression ex2) {
