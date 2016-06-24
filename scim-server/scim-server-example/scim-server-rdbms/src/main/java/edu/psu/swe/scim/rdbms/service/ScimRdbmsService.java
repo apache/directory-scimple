@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.rdbms.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import edu.psu.swe.scim.spec.resources.Name;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimUser;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -55,33 +57,63 @@ public class ScimRdbmsService implements Provider<ScimUser> {
   @PersistenceContext(name="ExampleDS")
   EntityManager entityManager;
   
-  static Map<String, SingularAttribute<?,?>> tableAliasMap = new HashMap<>();
+  //static Map<String, SingularAttribute<?,?>> tableAliasMap = new HashMap<>();
+  static Map<String, AttributeType> tableAliasMap = new HashMap<>();
+  
+  @AllArgsConstructor
+  static class AttributeType<T> {
+     SingularAttribute<?, T> attribute;
+     Class<T> clazz;
+  }
     
   static {
-    tableAliasMap.put("addresses.streetAddress", Address_.streetAddress);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.streetAddress", Address_.streetAddress);
-    tableAliasMap.put("addresses.locality", Address_.city);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.locality", Address_.city);
-    tableAliasMap.put("addresses.region", Address_.state);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.region", Address_.state);
-    tableAliasMap.put("addresses.postalCode", Address_.zipCode);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.postalCode", Address_.zipCode);
-    tableAliasMap.put("addresses.country", Address_.countryCode);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.country", Address_.countryCode);
     
-    tableAliasMap.put("phoneNumbers.type", Phone_.type);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "phoneNumbers.type", Phone_.type);
-    tableAliasMap.put("phoneNumbers.value", Phone_.number);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "phoneNumbers.value", Phone_.number);
+    AttributeType at = new AttributeType<String>(Address_.streetAddress, String.class);
+    tableAliasMap.put("addresses.streetAddress", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.streetAddress", at);
     
-    tableAliasMap.put("name.familyName", Person_.lastName);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "name.familyName", Person_.lastName);
-    tableAliasMap.put("name.givenName", Person_.firstName);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "name.givenName", Person_.firstName);
-    tableAliasMap.put("name.middleName", Person_.middleName);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "name.middleName", Person_.middleName);
-    tableAliasMap.put("active", Person_.active);
-    tableAliasMap.put(ScimUser.SCHEMA_URI + "active", Person_.active);
+    at = new AttributeType<String>(Address_.city, String.class);
+    tableAliasMap.put("addresses.locality", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.locality", at);
+    
+    at = new AttributeType<String>(Address_.state, String.class);
+    tableAliasMap.put("addresses.region", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.region", at);
+    
+    at = new AttributeType<String>(Address_.zipCode, String.class);
+    tableAliasMap.put("addresses.postalCode", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.postalCode", at);
+    
+    at = new AttributeType<String>(Address_.countryCode, String.class);
+    tableAliasMap.put("addresses.country", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "addresses.country", at);
+    
+    at = new AttributeType<String>(Phone_.type, String.class);
+    tableAliasMap.put("phoneNumbers.type", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "phoneNumbers.type", at);
+    
+    at = new AttributeType<String>(Phone_.number, String.class);
+    tableAliasMap.put("phoneNumbers.value", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "phoneNumbers.value", at);
+    
+    at = new AttributeType<String>(Person_.lastName, String.class);
+    tableAliasMap.put("name.familyName", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "name.familyName", at);
+    
+    at = new AttributeType<String>(Person_.firstName, String.class);
+    tableAliasMap.put("name.givenName", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "name.givenName", at);
+    
+    at = new AttributeType<String>(Person_.middleName, String.class);
+    tableAliasMap.put("name.middleName", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "name.middleName", at);
+    
+    at = new AttributeType<Boolean>(Person_.active, Boolean.class);
+    tableAliasMap.put("active", at);
+    tableAliasMap.put(ScimUser.SCHEMA_URI + "active", at);
+    
+    at = new AttributeType<Long>(Person_.personId, long.class);
+    tableAliasMap.put("person_id", at);    
   }
   
   CriteriaBuilder criteriaBuilder = null;
@@ -194,11 +226,17 @@ public class ScimRdbmsService implements Provider<ScimUser> {
       Join join = joinMap.get(attributeBase);
       Path path = null;
       
+      AttributeType attributeType = tableAliasMap.get(ace.getAttributePath().getFullAttributeName());
+      
+      if (attributeType == null) {
+        throw new UnableToRetrieveResourceException(Status.BAD_REQUEST, "Unable to map filter attribute " + ace.getAttributePath().getFullAttributeName());
+      }
+      
       if (join == null) {
         AttributeReference attributePath = ace.getAttributePath();
-        path = queryRoot.get((SingularAttribute<? super Person, ?>) tableAliasMap.get(ace.getAttributePath().getFullAttributeName()));
+        path = queryRoot.get((SingularAttribute<? super Person, ?>) attributeType.attribute);
       } else {
-        path = join.get(tableAliasMap.get(ace.getAttributePath().getFullAttributeName()));
+        path = join.get(attributeType.attribute);
       }
       
       if (path == null) {
@@ -209,31 +247,87 @@ public class ScimRdbmsService implements Provider<ScimUser> {
         case EQ:
           return criteriaBuilder.equal(path, ace.getCompareValue());
         case CO:
-          return criteriaBuilder.like(path, "*" + ace.getCompareValue() + "*");
+          return criteriaBuilder.like(path, "%" + ace.getCompareValue() + "%");
         case EW:
-          return criteriaBuilder.like(path, "*" + ace.getCompareValue());
+          return criteriaBuilder.like(path, "%" + ace.getCompareValue());
         case GE:
-          //return criteriaBuilder.greaterThanOrEqualTo(x, y);
-          break;
+          if (attributeType.clazz.equals(Long.class) || attributeType.clazz.equals(long.class)) {
+            Long l = Long.parseLong((String)ace.getCompareValue());
+            return criteriaBuilder.greaterThanOrEqualTo(path, l);
+          } else if (attributeType.clazz.equals(Integer.class) || attributeType.clazz.equals(int.class)) {
+            Integer i = Integer.parseInt(((String)ace.getCompareValue()));
+            return criteriaBuilder.greaterThanOrEqualTo(path, i);
+          } else if (attributeType.clazz.equals(Float.class) || attributeType.clazz.equals(float.class)) {
+            Float f = Float.parseFloat(((String)ace.getCompareValue()));
+            return criteriaBuilder.greaterThanOrEqualTo(path, f);
+          } else if (attributeType.clazz.equals(Double.class) || attributeType.clazz.equals(double.class)) {
+            Double d = Double.parseDouble(((String)ace.getCompareValue()));
+            return criteriaBuilder.greaterThanOrEqualTo(path, d);
+          } else {
+            throw new UnableToRetrieveResourceException(Status.BAD_REQUEST, "Invalid value type for boolean evaluation (GT), " + ace.getAttributePath().getFullAttributeName());
+          }
         case GT:
-          //return criteriaBuilder.greaterThan(x, y);
-          break;
+          if (attributeType.clazz.equals(Long.class) || attributeType.clazz.equals(long.class)) {
+            Long l = Long.parseLong((String)ace.getCompareValue());
+            return criteriaBuilder.greaterThan(path, l);
+          } else if (attributeType.clazz.equals(Integer.class) || attributeType.clazz.equals(int.class)) {
+            Integer i = Integer.parseInt(((String)ace.getCompareValue()));
+            return criteriaBuilder.greaterThan(path, i);
+          } else if (attributeType.clazz.equals(Float.class) || attributeType.clazz.equals(float.class)) {
+            Float f = Float.parseFloat(((String)ace.getCompareValue()));
+            return criteriaBuilder.greaterThan(path, f);
+          } else if (attributeType.clazz.equals(Double.class) || attributeType.clazz.equals(double.class)) {
+            Double d = Double.parseDouble(((String)ace.getCompareValue()));
+            return criteriaBuilder.greaterThan(path, d);
+          } else {
+            throw new UnableToRetrieveResourceException(Status.BAD_REQUEST, "Invalid value type for boolean evaluation (GT), " + ace.getAttributePath().getFullAttributeName());
+          }
+//          else if (attributeType.clazz.equals(Date.class)) {
+//            Date d = Long.parseLong(((String)ace.getCompareValue());
+//            return criteriaBuilder.greaterThan(path, d);
+//          }
         case LE:
-          //return criteriaBuilder.lessThanOrEqualTo(x, y);
-          break;
+          if (attributeType.clazz.equals(Long.class) || attributeType.clazz.equals(long.class)) {
+            Long l = Long.parseLong((String)ace.getCompareValue());
+            return criteriaBuilder.lessThanOrEqualTo(path, l);
+          } else if (attributeType.clazz.equals(Integer.class) || attributeType.clazz.equals(int.class)) {
+            Integer i = Integer.parseInt(((String)ace.getCompareValue()));
+            return criteriaBuilder.lessThanOrEqualTo(path, i);
+          } else if (attributeType.clazz.equals(Float.class) || attributeType.clazz.equals(float.class)) {
+            Float f = Float.parseFloat(((String)ace.getCompareValue()));
+            return criteriaBuilder.lessThanOrEqualTo(path, f);
+          } else if (attributeType.clazz.equals(Double.class) || attributeType.clazz.equals(double.class)) {
+            Double d = Double.parseDouble(((String)ace.getCompareValue()));
+            return criteriaBuilder.lessThanOrEqualTo(path, d);
+          } else {
+            throw new UnableToRetrieveResourceException(Status.BAD_REQUEST, "Invalid value type for boolean evaluation (GT), " + ace.getAttributePath().getFullAttributeName());
+          }
         case LT:
-          //return criteriaBuilder.lessThan(x, y);
-          break;
+          if (attributeType.clazz.equals(Long.class) || attributeType.clazz.equals(long.class)) {
+            Long l = Long.parseLong((String)ace.getCompareValue());
+            return criteriaBuilder.lessThan(path, l);
+          } else if (attributeType.clazz.equals(Integer.class) || attributeType.clazz.equals(int.class)) {
+            Integer i = Integer.parseInt(((String)ace.getCompareValue()));
+            return criteriaBuilder.lessThan(path, i);
+          } else if (attributeType.clazz.equals(Float.class) || attributeType.clazz.equals(float.class)) {
+            Float f = Float.parseFloat(((String)ace.getCompareValue()));
+            return criteriaBuilder.lessThan(path, f);
+          } else if (attributeType.clazz.equals(Double.class) || attributeType.clazz.equals(double.class)) {
+            Double d = Double.parseDouble(((String)ace.getCompareValue()));
+            return criteriaBuilder.lessThan(path, d);
+          } else {
+            throw new UnableToRetrieveResourceException(Status.BAD_REQUEST, "Invalid value type for boolean evaluation (GT), " + ace.getAttributePath().getFullAttributeName());
+          }
         case NE:
           //return criteriaBuilder.notEqual(x, y);
           break;
         case SW:
-          return criteriaBuilder.like(path, ace.getCompareValue() + "*");
+          return criteriaBuilder.like(path, ace.getCompareValue() + "%");
         default:
           break;
       }
     }
-    
+        
     return null;
     //log.info("------> sql = " + sb.toString());//  + '\n' + "--------> query.toString() = " + query.toString());
   }
