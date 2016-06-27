@@ -7,14 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
 import edu.psu.swe.scim.spec.protocol.filter.FilterParseException;
+import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
+import junitparams.JUnitParamsRunner;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -77,6 +76,14 @@ public class FilterBuilderTest {
     attributeComparisonExpression2 = new AttributeComparisonExpression(attributeReference2, CompareOperator.EQ, "Bilbo");
   }
 
+  @Test
+  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
+ 
+     String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).build();
+ 
+     String decoded = decode(encoded);
+     Filter filter = new Filter(decoded);
+  }
 
   @Test
   public void testAnd() {
@@ -87,7 +94,6 @@ public class FilterBuilderTest {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    // fail("Not yet implemented");
   }
 
   @Test
@@ -105,6 +111,17 @@ public class FilterBuilderTest {
     log.info(decoded);
     
     Filter filter = new Filter(decoded);
+  }
+  
+  private String decode(String encoded) throws UnsupportedEncodingException {
+
+    log.info(encoded);
+    
+    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
+    
+    log.info(decoded);
+    
+    return decoded;
   }
 
 }

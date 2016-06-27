@@ -18,6 +18,7 @@ public class FilterBuilder {
   private static final String SPACE = " ";
   private static final String OPEN_PAREN = "(";
   private static final String CLOSE_PAREN = ")";
+  private static final String NOT = "NOT";
   
   private StringBuilder filter = new StringBuilder();
   
@@ -183,6 +184,22 @@ public class FilterBuilder {
   
   public FilterBuilder lessThanOrEquals(String key, LocalDateTime value) {
     filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
+    return this;
+  }
+  
+  public FilterBuilder not(AttributeComparisonExpression expression) {
+    filter.append(SPACE).append(NOT).append(OPEN_PAREN);
+    buildExpression(expression);
+    filter.append(CLOSE_PAREN);
+    return this;
+  }
+  
+  public FilterBuilder not(AttributeComparisonExpression ex1, LogicalOperator operator, AttributeComparisonExpression ex2) {
+    filter.append(SPACE).append(NOT).append(OPEN_PAREN);
+    buildExpression(ex1);
+    filter.append(operator.name());
+    buildExpression(ex2);
+    filter.append(CLOSE_PAREN);
     return this;
   }
   
