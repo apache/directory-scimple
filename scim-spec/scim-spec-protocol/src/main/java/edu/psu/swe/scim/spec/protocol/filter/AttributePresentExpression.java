@@ -6,4 +6,9 @@ import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 @Value
 public class AttributePresentExpression implements AttributeExpression, ValueFilterExpression {
   AttributeReference attributePath;
+
+  @Override
+  public String toFilter() {
+    return attributePath.getFullyQualifiedAttributeName() + " PR";
+  }
 }
