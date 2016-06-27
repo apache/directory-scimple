@@ -9,7 +9,7 @@ fragment DIGIT : [0-9] ;
 E: 'e' | 'E';
 EXP: E (MINUS | PLUS)? DIGIT+;
 FRAC: DEC_PT DIGIT+;
-INT: ZERO | DIGIT1_9 DIGIT+;
+INT: ZERO | DIGIT1_9 (DIGIT+)?;
 MINUS: '-';
 PLUS: '+';
 ZERO: '0';
