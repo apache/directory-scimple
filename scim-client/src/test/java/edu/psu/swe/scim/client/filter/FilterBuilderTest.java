@@ -56,7 +56,7 @@ public class FilterBuilderTest {
 //  address.2type EQ "work"
 
   
-  FilterBuilder filterBuilder;
+  FilterClient filterBuilder;
   AttributeReference attributeReference;
   AttributeReference attributeReference2;
   AttributeComparisonExpression attributeComparisonExpression;
@@ -66,7 +66,7 @@ public class FilterBuilderTest {
 
   @Before
   public void initialize() {
-    filterBuilder = new FilterBuilder();
+    filterBuilder = new FilterClient();
 
     attributeReference = new AttributeReference("addresses.streetAddress");
 
@@ -76,7 +76,7 @@ public class FilterBuilderTest {
     attributeComparisonExpression2 = new AttributeComparisonExpression(attributeReference2, CompareOperator.EQ, "Bilbo");
   }
 
-  @Test
+  //@Test
   public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
  
      String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).build();
@@ -85,18 +85,16 @@ public class FilterBuilderTest {
      Filter filter = new Filter(decoded);
   }
 
-  @Test
-  public void testAnd() {
+  //@Test
+  public void testAnd() throws UnsupportedEncodingException, FilterParseException {
 
-    try {
-      System.out.println(filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).build());
-    } catch (UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    String encoded = filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).build();
+    
+    String decoded = decode(encoded);
+    Filter filter = new Filter(decoded);
   }
 
-  @Test
+  //@Test
   public void testOr() throws UnsupportedEncodingException, FilterParseException {
 
     String encoded = filterBuilder.equalTo("addresses.postalCode", "16801")

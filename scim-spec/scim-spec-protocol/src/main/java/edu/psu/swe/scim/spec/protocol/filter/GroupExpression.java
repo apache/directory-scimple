@@ -1,8 +1,12 @@
 package edu.psu.swe.scim.spec.protocol.filter;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GroupExpression implements FilterExpression, ValueFilterExpression {
 
   boolean not;

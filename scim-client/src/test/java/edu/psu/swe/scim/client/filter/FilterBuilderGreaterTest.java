@@ -41,11 +41,11 @@ public class FilterBuilderGreaterTest {
     return DOUBLE_EXAMPLES;
   }
   
-  FilterBuilder filterBuilder;
+  FilterClient filterBuilder;
 
   @Before
   public void init() {
-    filterBuilder = new FilterBuilder();
+    filterBuilder = new FilterClient();
   }
   
   @Test

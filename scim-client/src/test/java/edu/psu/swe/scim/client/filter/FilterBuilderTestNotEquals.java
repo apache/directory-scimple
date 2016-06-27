@@ -16,11 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FilterBuilderTestNotEquals {
   
-  FilterBuilder filterBuilder;
+  FilterClient filterBuilder;
   
   @Before
   public void init() {
-    filterBuilder = new FilterBuilder();
+    filterBuilder = new FilterClient();
   }
 
   @Test
