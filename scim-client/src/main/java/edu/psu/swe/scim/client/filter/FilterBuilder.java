@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 import edu.psu.swe.scim.common.ScimUtils;
-import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
@@ -113,17 +112,17 @@ public class FilterBuilder {
   }
   
   public FilterBuilder greaterThan(String key, Date value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder greaterThan(String key, LocalDate value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder greaterThan(String key, LocalDateTime value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
@@ -133,17 +132,17 @@ public class FilterBuilder {
   }
 
   public FilterBuilder greaterThanOrEquals(String key, Date value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder greaterThanOrEquals(String key, LocalDate value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder greaterThanOrEquals(String key, LocalDateTime value) {
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
@@ -153,17 +152,17 @@ public class FilterBuilder {
   }
   
   public FilterBuilder lessThan(String key, Date value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder lessThan(String key, LocalDate value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder lessThan(String key, LocalDateTime value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
@@ -173,17 +172,17 @@ public class FilterBuilder {
   }
   
   public FilterBuilder lessThanOrEquals(String key, Date value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder lessThanOrEquals(String key, LocalDate value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
   public FilterBuilder lessThanOrEquals(String key, LocalDateTime value) {
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(SPACE).append(ScimUtils.toDateTimeString(value)).append(SPACE);
+    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
     return this;
   }
   
@@ -223,7 +222,8 @@ public class FilterBuilder {
   }
   
   public String build() throws UnsupportedEncodingException {
-    return URLEncoder.encode(filter.toString(), "UTF-8").replace("+", "%20");
+    String filterString = filter.toString().trim();
+    return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
   }
   
   private FilterBuilder buildExpression(AttributeComparisonExpression ex) {
