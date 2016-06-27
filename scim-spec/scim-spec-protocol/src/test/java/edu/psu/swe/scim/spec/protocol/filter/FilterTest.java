@@ -27,6 +27,7 @@ public class FilterTest extends AbstractLexerParserTest {
     LOG.info("Running Filter Parser test on input: " + filterText);
     Filter filter = new Filter(filterText);
     FilterExpression expression = filter.getExpression();
+    LOG.info("Parsed String: " + expression.toFilter());
     Assert.assertNotNull(expression);
   }
 }

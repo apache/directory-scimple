@@ -11,4 +11,9 @@ public class GroupExpression implements FilterExpression, ValueFilterExpression 
 
   boolean not;
   FilterExpression filterExpression;
+  
+  @Override
+  public String toFilter() {
+    return (not ? "NOT" : "") + "(" + filterExpression.toFilter() + ")";
+  }
 }
