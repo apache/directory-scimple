@@ -20,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @RunWith(JUnitParamsRunner.class)
 public class FilterBuilderGreaterTest {
 
-  static final Integer[] INT_EXAMPLES = { 1, 12, 123, 1234, 12345, 123456 };
-  static final Long[] LONG_EXAMPLES = { 3L, 33L, 333L, 3333L, 33333L, 333333L };
+  static final Integer[] INT_EXAMPLES = { -1, -10, -111, 1, 12, 123, 1234, 12345, 123456 };
+  static final Long[] LONG_EXAMPLES = { -1L, -10L, -111L, 3L, 33L, 333L, 3333L, 33333L, 333333L };
   static final Float [] FLOAT_EXAMPLES = {.14f, 3.14f, 2.1415f, 3.14E+10f, 333.14f};
   static final Double [] DOUBLE_EXAMPLES = {.14, 3.14, 2.1415, 3.14E+10, 333.14};
  
@@ -79,7 +79,6 @@ public class FilterBuilderGreaterTest {
     String encoded = filterBuilder.greaterThan("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
-  
   
   @Test
   public void testGreaterThanDate() throws UnsupportedEncodingException, FilterParseException {
