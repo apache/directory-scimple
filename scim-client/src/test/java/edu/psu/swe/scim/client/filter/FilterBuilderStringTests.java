@@ -13,28 +13,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FilterBuilderStringTests {
 
-  FilterClient filterBuilder;
-
-  @Before
-  public void init() {
-    filterBuilder = new FilterClient();
-  }
-
   @Test
   public void testEndsWith() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.endsWith("address.streetAddress", "Way").build();
+    String encoded = FilterClient.builder().endsWith("address.streetAddress", "Way").build();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testStartsWith()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.startsWith("address.streetAddress", "133").build();
+    String encoded = FilterClient.builder().startsWith("address.streetAddress", "133").build();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testContains()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.contains("address.streetAddress", "MacDuff").build();
+    String encoded = FilterClient.builder().contains("address.streetAddress", "MacDuff").build();
     Filter filter = new Filter(decode(encoded));
   }
 

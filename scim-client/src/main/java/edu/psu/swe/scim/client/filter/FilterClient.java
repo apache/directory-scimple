@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import edu.psu.swe.scim.common.ScimUtils;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
@@ -18,527 +17,487 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FilterClient {
-  
-  private static final String QUOTE = "\"";
-  private static final String NULL = "null";
-  private static final String SPACE = " ";
-  private static final String OPEN_PAREN = "(";
-  private static final String CLOSE_PAREN = ")";
-  private static final String NOT = "NOT";
-  
-  private StringBuilder filter = new StringBuilder();
-  private FilterExpression filterExpression = null;
-  
-  private static class Builder {
-    
-  }
-  
-  public FilterClient equalTo(String key, String value) {
-    
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient equalTo(String key, Boolean value) {
-    
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient equalTo(String key, Date value) {
-    AttributeReference ar = new AttributeReference(key);
-    String dateString = ScimUtils.toDateTimeString(value);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(QUOTE).append(dateString).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient equalTo(String key, LocalDate value) {
-    
-    AttributeReference ar = new AttributeReference(key);
-    String dateString = ScimUtils.toDateString(value);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(QUOTE).append(dateString).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient equalTo(String key, LocalDateTime value) {
-    AttributeReference ar = new AttributeReference(key);
-    String dateString = ScimUtils.toDateTimeString(value);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(QUOTE).append(dateString).append(QUOTE);
-    return this;
-  }
-  
-  public <T extends Number> FilterClient equalTo(String key, T value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient equalNull(String key) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, null);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EQ.name()).append(SPACE).append(NULL);
-    return this;
-  }
-  
-  public FilterClient endsWith(String key, String value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EW, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.EW.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient startsWith(String key, String value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.SW, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.SW.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient notEqual(String key, String value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient notEqual(String key, Boolean value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient notEqual(String key, Date value) {
-    AttributeReference ar = new AttributeReference(key);
-    String dateString = ScimUtils.toDateTimeString(value);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
-    
-    handleComparisonExpression(filterExpression);
-      
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(dateString).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient notEqual(String key, LocalDate value) {
-    AttributeReference ar = new AttributeReference(key);
-    String dateString = ScimUtils.toDateString(value);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(dateString).append(QUOTE);
-    return this;
-  }
-  
-  public FilterClient notEqual(String key, LocalDateTime value) {
-    AttributeReference ar = new AttributeReference(key);
-    String dateString = ScimUtils.toDateTimeString(value);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(QUOTE).append(dateString).append(QUOTE);
-    return this;
-  }
-  
-  public <T extends Number> FilterClient notEqual(String key, T value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient notEqualNull(String key) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, null);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.NE.name()).append(SPACE).append(NULL);
-    return this;
-  }
-  
-  public FilterClient contains(String key, String value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.CO, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.CO.name()).append(SPACE).append(QUOTE).append(value).append(QUOTE);
-    return this;
-  }
-  
-  public <T extends Number> FilterClient greaterThan(String key, T value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient greaterThan(String key, Date value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient greaterThan(String key, LocalDate value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient greaterThan(String key, LocalDateTime value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public <T extends Number> FilterClient greaterThanOrEquals(String key, T value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(value.toString());
-    return this;
+
+  public static abstract class SimpleLogicalBuilder extends Builder {
+    SimpleLogicalBuilder() {
+    }
+
+    public Builder and() {
+      if (filterExpression == null) {
+        throw new IllegalStateException();
+      }
+
+      LogicalExpression logicalExpression = new LogicalExpression();
+      logicalExpression.setLeft(filterExpression);
+      logicalExpression.setOperator(LogicalOperator.AND);
+      filterExpression = logicalExpression;
+
+      return this;
+    }
+
+    public Builder or() {
+      if (filterExpression == null) {
+        throw new IllegalStateException();
+      }
+
+      LogicalExpression logicalExpression = new LogicalExpression();
+      logicalExpression.setLeft(filterExpression);
+      logicalExpression.setOperator(LogicalOperator.OR);
+      filterExpression = logicalExpression;
+
+      return this;
+    }
   }
 
-  public FilterClient greaterThanOrEquals(String key, Date value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
+  public static abstract class ComplexLogicalBuilder extends SimpleLogicalBuilder {
+
+    public Builder or(FilterExpression fe1, FilterExpression fe2) {
+      LogicalExpression logicalExpression = new LogicalExpression();
+      logicalExpression.setLeft(fe1);
+      logicalExpression.setRight(fe2);
+      logicalExpression.setOperator(LogicalOperator.OR);
+
+      return handleLogicalExpression(logicalExpression, LogicalOperator.OR);
+    }
+
+    public Builder and(FilterExpression fe1, FilterExpression fe2) {
+      LogicalExpression logicalExpression = new LogicalExpression();
+      logicalExpression.setLeft(fe1);
+      logicalExpression.setRight(fe2);
+      logicalExpression.setOperator(LogicalOperator.AND);
+
+      return handleLogicalExpression(logicalExpression, LogicalOperator.AND);
+    }
   }
-  
-  public FilterClient greaterThanOrEquals(String key, LocalDate value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
+
+  // This class is returned from comparison operations to ensure
+  // that the next step is correct
+  public static class ComparisonBuilder extends ComplexLogicalBuilder {
     
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient greaterThanOrEquals(String key, LocalDateTime value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.GE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public <T extends Number> FilterClient lessThan(String key, T value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient lessThan(String key, Date value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient lessThan(String key, LocalDate value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient lessThan(String key, LocalDateTime value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LT.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public <T extends Number> FilterClient lessThanOrEquals(String key, T value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(value.toString());
-    return this;
-  }
-  
-  public FilterClient lessThanOrEquals(String key, Date value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient lessThanOrEquals(String key, LocalDate value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient lessThanOrEquals(String key, LocalDateTime value) {
-    AttributeReference ar = new AttributeReference(key);
-    FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
-    
-    handleComparisonExpression(filterExpression);
-    
-    filter.append(key).append(SPACE).append(CompareOperator.LE.name()).append(SPACE).append(QUOTE).append(ScimUtils.toDateTimeString(value)).append(QUOTE).append(SPACE);
-    return this;
-  }
-  
-  public FilterClient not(AttributeComparisonExpression expression) {
-    filter.append(SPACE).append(NOT).append(OPEN_PAREN);
-    buildExpression(expression);
-    filter.append(CLOSE_PAREN);
-    return this;
-  }
-  
-  public FilterClient not(AttributeComparisonExpression ex1, LogicalOperator operator, AttributeComparisonExpression ex2) {
-    filter.append(SPACE).append(NOT).append(OPEN_PAREN);
-    buildExpression(ex1);
-    filter.append(operator.name());
-    buildExpression(ex2);
-    filter.append(CLOSE_PAREN);
-    return this;
-  }
-  
-  public FilterClient and() {
-    if (filterExpression == null) {
-      throw new IllegalStateException();
+    public Builder equalTo(String key, String value) {
+
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder equalTo(String key, Boolean value) {
+
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
     }
     
-    LogicalExpression logicalExpression = new LogicalExpression();
-    logicalExpression.setLeft(filterExpression);
-    logicalExpression.setOperator(LogicalOperator.AND);
-    filterExpression = logicalExpression;
-    
-    return this;
-  }
-  
-  public FilterClient and(FilterExpression fe1, FilterExpression fe2) {
-     LogicalExpression logicalExpression = new LogicalExpression();
-     logicalExpression.setLeft(fe1);
-     logicalExpression.setRight(fe2);
-     logicalExpression.setOperator(LogicalOperator.AND);
-     
-     return handleLogicalExpression(logicalExpression, LogicalOperator.AND);
-  }
-  
-  public FilterClient or() {
-    if (filterExpression == null) {
-      throw new IllegalStateException();
+    public Builder equalTo(String key, Date value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
     }
     
-    LogicalExpression logicalExpression = new LogicalExpression();
-    logicalExpression.setLeft(filterExpression);
-    logicalExpression.setOperator(LogicalOperator.OR);
-    filterExpression = logicalExpression;
+    public Builder equalTo(String key, LocalDate value) {
+
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
     
-    return this;
-  }
-  
-  public FilterClient or(FilterExpression fe1, FilterExpression fe2) {
-    LogicalExpression logicalExpression = new LogicalExpression();
-    logicalExpression.setLeft(fe1);
-    logicalExpression.setRight(fe2);
-    logicalExpression.setOperator(LogicalOperator.OR);
+    public Builder equalTo(String key, LocalDateTime value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
     
-    return handleLogicalExpression(logicalExpression, LogicalOperator.OR);
- }
-  
-  public FilterClient and(AttributeComparisonExpression ex1, AttributeComparisonExpression ex2) {
-        
-    filter.append(OPEN_PAREN);
-    buildExpression(ex1);
-    filter.append(LogicalOperator.AND.name());
-    buildExpression(ex2);
-    filter.append(CLOSE_PAREN);    
-    return this;
-  }
-  
-//  public FilterBuilder and() {
-//    filter.append(SPACE).append(LogicalOperator.AND.name()).append(SPACE);
-//    
-//    return this;
-//  }
-  
-  public FilterClient or(AttributeComparisonExpression ex1, AttributeComparisonExpression ex2) {
-     
-     filter.append(OPEN_PAREN);
-     buildExpression(ex1);
- 
-     filter.append(SPACE).append(LogicalOperator.OR.name()).append(SPACE);
-     
-     buildExpression(ex2);
-     filter.append(CLOSE_PAREN);
-         
-     return this;
-  }
-  
-//  public FilterClient or() {
-//    filter.append(SPACE).append(LogicalOperator.OR.name()).append(SPACE);
-//    
-//    return this;
-//  }
-  
-  public String build() throws UnsupportedEncodingException {
-    //String filterString = filter.toString().trim();
-    String filterString = filterExpression.toFilter();
-    return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
-  }
-  
-  private void handleComparisonExpression(FilterExpression expression) {
+    public <T extends Number> Builder equalTo(String key, T value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
     
-    if (filterExpression == null) {
-      filterExpression = expression;
-    } else {
+    public Builder equalNull(String key) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, null);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+    
+    public Builder notEqual(String key, String value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder notEqual(String key, Boolean value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder notEqual(String key, Date value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder notEqual(String key, LocalDate value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder notEqual(String key, LocalDateTime value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public <T extends Number> Builder notEqual(String key, T value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder notEqualNull(String key) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, null);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+    
+    public Builder endsWith(String key, String value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EW, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder startsWith(String key, String value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.SW, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+    
+    public Builder contains(String key, String value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.CO, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public <T extends Number> Builder greaterThan(String key, T value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder greaterThan(String key, Date value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder greaterThan(String key, LocalDate value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder greaterThan(String key, LocalDateTime value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public <T extends Number> Builder greaterThanOrEquals(String key, T value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder greaterThanOrEquals(String key, Date value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder greaterThanOrEquals(String key, LocalDate value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder greaterThanOrEquals(String key, LocalDateTime value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public <T extends Number> Builder lessThan(String key, T value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder lessThan(String key, Date value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder lessThan(String key, LocalDate value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder lessThan(String key, LocalDateTime value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public <T extends Number> Builder lessThanOrEquals(String key, T value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder lessThanOrEquals(String key, Date value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder lessThanOrEquals(String key, LocalDate value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    public Builder lessThanOrEquals(String key, LocalDateTime value) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+  }
+
+  public abstract static class Builder {
+
+    FilterExpression filterExpression;
+
+    Builder() {
+    }
+
+    public abstract Builder and();
+
+    public abstract Builder and(FilterExpression fe1, FilterExpression fe2);
+
+    public abstract Builder or();
+
+    public abstract Builder or(FilterExpression fe1, FilterExpression fe2);
+    
+    public abstract Builder equalTo(String key, String value);
+    public abstract Builder equalTo(String key, Boolean value);
+    public abstract Builder equalTo(String key, Date value);
+    public abstract Builder equalTo(String key, LocalDate value);
+    public abstract Builder equalTo(String key, LocalDateTime value);
+    public abstract <T extends Number> Builder equalTo(String key, T value);
+    public abstract Builder equalNull(String key);
+    
+    public abstract Builder notEqual(String key, String value);
+    public abstract Builder notEqual(String key, Boolean value);
+    public abstract Builder notEqual(String key, Date value);
+    public abstract Builder notEqual(String key, LocalDate value);
+    public abstract Builder notEqual(String key, LocalDateTime value);
+    public abstract <T extends Number> Builder notEqual(String key, T value);
+    public abstract Builder notEqualNull(String key);
+    
+    public abstract <T extends Number> Builder greaterThan(String key, T value);
+    public abstract Builder greaterThan(String key, Date value);
+    public abstract Builder greaterThan(String key, LocalDate value);
+    public abstract Builder greaterThan(String key, LocalDateTime value);
+    
+    public abstract <T extends Number> Builder greaterThanOrEquals(String key, T value);
+    public abstract Builder greaterThanOrEquals(String key, Date value);
+    public abstract Builder greaterThanOrEquals(String key, LocalDate value);
+    public abstract Builder greaterThanOrEquals(String key, LocalDateTime value);
+    
+    public abstract <T extends Number> Builder lessThan(String key, T value);
+    public abstract Builder lessThan(String key, Date value);
+    public abstract Builder lessThan(String key, LocalDate value);
+    public abstract Builder lessThan(String key, LocalDateTime value);
+    
+    public abstract <T extends Number> Builder lessThanOrEquals(String key, T value);
+    public abstract Builder lessThanOrEquals(String key, Date value);
+    public abstract Builder lessThanOrEquals(String key, LocalDate value);
+    public abstract Builder lessThanOrEquals(String key, LocalDateTime value);
+    
+    public abstract Builder endsWith(String key, String value);
+    public abstract Builder startsWith(String key, String value);
+    public abstract Builder contains(String key, String value);
+    
+    protected Builder handleLogicalExpression(LogicalExpression expression, LogicalOperator operator) {
+      log.info("In handleLogicalExpression");
+      if (filterExpression == null) {
+        filterExpression = expression;
+      } else if (filterExpression instanceof AttributeComparisonExpression) {
+        System.out.println("Adding a logical expression as the new root");
+
+        log.info("Setting as left: " + filterExpression.toFilter());
+        expression.setLeft(filterExpression);
+        log.info("Setting as right: " + expression.toFilter());
+
+        filterExpression = expression;
+      } else if (filterExpression instanceof LogicalExpression) {
+        System.out.println("filter exression is a logical expression");
+        LogicalExpression le = (LogicalExpression) filterExpression;
+
+        if (le.getLeft() == null) {
+          log.info("Setting left to: " + expression.toFilter());
+          le.setLeft(expression);
+        } else if (le.getRight() == null) {
+          log.info("Setting right to: " + expression.toFilter());
+          le.setRight(expression);
+        } else {
+          log.info("The current base is complete, raising up one level");
+          LogicalExpression newRoot = new LogicalExpression();
+          log.info("Setting left to: " + expression);
+          newRoot.setLeft(expression);
+          filterExpression = newRoot;
+        }
+      } else if (filterExpression instanceof GroupExpression) {
+        System.out.println("Found group expression");
+        LogicalExpression newRoot = new LogicalExpression();
+        newRoot.setLeft(filterExpression);
+        newRoot.setRight(expression);
+        newRoot.setOperator(operator);
+        filterExpression = newRoot;
+      }
+
+      log.info("New filter expression: " + filterExpression.toFilter());
+
+      return this;
+    }
+
+    protected void handleComparisonExpression(FilterExpression expression) {
+
+      if (filterExpression == null) {
+        filterExpression = expression;
+      } else {
         if (!(filterExpression instanceof LogicalExpression)) {
           throw new IllegalStateException();
         }
-        
-        LogicalExpression le = (LogicalExpression)filterExpression;
-        le.setRight(expression);
-    }
-  }
-  
-  private FilterClient handleLogicalExpression(LogicalExpression expression, LogicalOperator operator) {
-    log.info("In handleLogicalExpression");
-    if (filterExpression == null) {
-      filterExpression = expression;
-    } else if (filterExpression instanceof AttributeComparisonExpression) {
-      System.out.println("Adding a logical expression as the new root");
-      
-      log.info("Setting as left: " + filterExpression.toFilter());
-      expression.setLeft(filterExpression);
-      log.info("Setting as right: " + expression.toFilter());
 
-      filterExpression = expression;
-    } else if (filterExpression instanceof LogicalExpression) {
-      System.out.println("filter exression is a logical expression");
-      LogicalExpression le = (LogicalExpression) filterExpression;
-      
-      if (le.getLeft() == null) {
-        log.info("Setting left to: " + expression.toFilter());
-        le.setLeft(expression);
-      } else if (le.getRight() == null) {
-        log.info("Setting right to: " + expression.toFilter());
+        LogicalExpression le = (LogicalExpression) filterExpression;
         le.setRight(expression);
-      } else {
-        log.info("The current base is complete, raising up one level");
-        LogicalExpression newRoot = new LogicalExpression();
-        log.info("Setting left to: " + expression);
-        newRoot.setLeft(expression);
-        filterExpression = newRoot;
       }
-    } else if (filterExpression instanceof GroupExpression) {
-      System.out.println("Found group expression");
-      LogicalExpression newRoot = new LogicalExpression();
-      newRoot.setLeft(filterExpression);
-      newRoot.setRight(expression);
-      newRoot.setOperator(operator);
-      filterExpression = newRoot;
     }
     
-    log.info("New filter expression: " + filterExpression.toFilter());
-
-    return this;
-  }
-  
-  private FilterClient buildExpression(AttributeComparisonExpression ex) {
-    filter.append(ex.getAttributePath().getFullAttributeName())
-    .append(SPACE)
-    .append(ex.getOperation().name())
-    .append(SPACE)
-    .append(QUOTE)
-    .append(ex.getCompareValue().toString())
-    .append(QUOTE);
+    public String build() throws UnsupportedEncodingException {
+      String filterString = filterExpression.toFilter();
+      return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
+    }
     
-    return this;
+    public FilterExpression filter() {
+      return filterExpression;
+    }
+  }
+
+  public static Builder builder() {
+    return new FilterClient.ComparisonBuilder();
   }
 }

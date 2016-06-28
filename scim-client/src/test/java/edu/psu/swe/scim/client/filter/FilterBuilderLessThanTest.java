@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,18 +40,11 @@ public class FilterBuilderLessThanTest {
     return DOUBLE_EXAMPLES;
   }
   
-  FilterClient filterBuilder;
-
-  @Before
-  public void init() {
-    filterBuilder = new FilterClient();
-  }
-  
   @Test
   @Parameters(method="getIntExamples")
   public void testLessThanT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThan("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThan("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
 
@@ -60,7 +52,7 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getLongExamples")
   public void testLessThanT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThan("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThan("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
   
@@ -68,7 +60,7 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getFloatExamples")
   public void testLessThanT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThan("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThan("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
   
@@ -76,26 +68,26 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getDoubleExamples")
   public void testLessThanT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThan("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThan("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
   
   
   @Test
   public void testLessThanDate() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.lessThan("dog.dob", new Date()).build();
+    String encoded = FilterClient.builder().lessThan("dog.dob", new Date()).build();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testLessThanLocalDate() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.lessThan("dog.dob", LocalDate.now()).build();
+    String encoded = FilterClient.builder().lessThan("dog.dob", LocalDate.now()).build();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testLessThanLocalDateTime() throws UnsupportedEncodingException, FilterParseException  {
-    String encoded = filterBuilder.lessThan("dog.dob", LocalDateTime.now()).build();
+    String encoded = FilterClient.builder().lessThan("dog.dob", LocalDateTime.now()).build();
     Filter filter = new Filter(decode(encoded));
   }
 
@@ -103,7 +95,7 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getIntExamples")
   public void testLessThanOrEqualsT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThanOrEquals("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
 
@@ -111,7 +103,7 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getLongExamples")
   public void testLessThanOrEqualsT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThanOrEquals("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
   
@@ -119,7 +111,7 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getFloatExamples")
   public void testLessThanOrEqualsT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThanOrEquals("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
   
@@ -127,25 +119,25 @@ public class FilterBuilderLessThanTest {
   @Parameters(method="getDoubleExamples")
   public void testLessThanOrEqualsT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
     
-    String encoded = filterBuilder.lessThanOrEquals("dog.weight", arg).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).build();
     Filter filter = new Filter(decode(encoded));
   }
   
   @Test
   public void testLessThanOrEqualsDate() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.lessThanOrEquals("dog.dob", new Date()).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.dob", new Date()).build();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testLessThanOrEqualsLocalDate()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.lessThanOrEquals("dog.dob", LocalDate.now()).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.dob", LocalDate.now()).build();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testLessThanOrEqualsLocalDateTime() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = filterBuilder.lessThanOrEquals("dog.dob", LocalDateTime.now()).build();
+    String encoded = FilterClient.builder().lessThanOrEquals("dog.dob", LocalDateTime.now()).build();
     Filter filter = new Filter(decode(encoded));
   }
 
