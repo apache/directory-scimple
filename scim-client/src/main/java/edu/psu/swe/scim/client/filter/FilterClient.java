@@ -14,7 +14,9 @@ import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
 import edu.psu.swe.scim.spec.protocol.filter.GroupExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FilterClient {
   
   private static final String QUOTE = "\"";
@@ -393,6 +395,7 @@ public class FilterClient {
     
     LogicalExpression logicalExpression = new LogicalExpression();
     logicalExpression.setLeft(filterExpression);
+    logicalExpression.setOperator(LogicalOperator.AND);
     filterExpression = logicalExpression;
     
     return this;
@@ -404,7 +407,7 @@ public class FilterClient {
      logicalExpression.setRight(fe2);
      logicalExpression.setOperator(LogicalOperator.AND);
      
-     return handleLogicalExpression(logicalExpression);
+     return handleLogicalExpression(logicalExpression, LogicalOperator.AND);
   }
   
   public FilterClient or() {
@@ -414,6 +417,7 @@ public class FilterClient {
     
     LogicalExpression logicalExpression = new LogicalExpression();
     logicalExpression.setLeft(filterExpression);
+    logicalExpression.setOperator(LogicalOperator.OR);
     filterExpression = logicalExpression;
     
     return this;
@@ -425,7 +429,7 @@ public class FilterClient {
     logicalExpression.setRight(fe2);
     logicalExpression.setOperator(LogicalOperator.OR);
     
-    return handleLogicalExpression(logicalExpression);
+    return handleLogicalExpression(logicalExpression, LogicalOperator.OR);
  }
   
   public FilterClient and(AttributeComparisonExpression ex1, AttributeComparisonExpression ex2) {
@@ -464,7 +468,8 @@ public class FilterClient {
 //  }
   
   public String build() throws UnsupportedEncodingException {
-    String filterString = filter.toString().trim();
+    //String filterString = filter.toString().trim();
+    String filterString = filterExpression.toFilter();
     return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
   }
   
@@ -478,38 +483,50 @@ public class FilterClient {
         }
         
         LogicalExpression le = (LogicalExpression)filterExpression;
-        le.setLeft(filterExpression);
+        le.setRight(expression);
     }
   }
   
-  private FilterClient handleLogicalExpression(LogicalExpression expression) {
-    
+  private FilterClient handleLogicalExpression(LogicalExpression expression, LogicalOperator operator) {
+    log.info("In handleLogicalExpression");
     if (filterExpression == null) {
       filterExpression = expression;
     } else if (filterExpression instanceof AttributeComparisonExpression) {
-      LogicalExpression newRoot = new LogicalExpression();
-      newRoot.setLeft(filterExpression);
-      newRoot.setRight(expression);
-      filterExpression = newRoot;
+      System.out.println("Adding a logical expression as the new root");
+      
+      log.info("Setting as left: " + filterExpression.toFilter());
+      expression.setLeft(filterExpression);
+      log.info("Setting as right: " + expression.toFilter());
+
+      filterExpression = expression;
     } else if (filterExpression instanceof LogicalExpression) {
+      System.out.println("filter exression is a logical expression");
       LogicalExpression le = (LogicalExpression) filterExpression;
       
       if (le.getLeft() == null) {
+        log.info("Setting left to: " + expression.toFilter());
         le.setLeft(expression);
       } else if (le.getRight() == null) {
+        log.info("Setting right to: " + expression.toFilter());
         le.setRight(expression);
       } else {
+        log.info("The current base is complete, raising up one level");
         LogicalExpression newRoot = new LogicalExpression();
+        log.info("Setting left to: " + expression);
         newRoot.setLeft(expression);
         filterExpression = newRoot;
       }
     } else if (filterExpression instanceof GroupExpression) {
+      System.out.println("Found group expression");
       LogicalExpression newRoot = new LogicalExpression();
       newRoot.setLeft(filterExpression);
       newRoot.setRight(expression);
+      newRoot.setOperator(operator);
       filterExpression = newRoot;
     }
     
+    log.info("New filter expression: " + filterExpression.toFilter());
+
     return this;
   }
   

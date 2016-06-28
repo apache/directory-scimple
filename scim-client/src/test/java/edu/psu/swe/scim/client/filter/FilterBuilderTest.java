@@ -76,6 +76,15 @@ public class FilterBuilderTest {
     attributeComparisonExpression2 = new AttributeComparisonExpression(attributeReference2, CompareOperator.EQ, "Bilbo");
   }
 
+  @Test
+  public void testSimpleAnd() throws UnsupportedEncodingException, FilterParseException {
+  
+    String encoded = filterBuilder.equalTo("name.givenName", "Bilbo").and().equalTo("name.familyName", "Baggins").build();
+  
+    String decoded = decode(encoded);
+    Filter filter = new Filter(decoded); 
+  }
+  
   //@Test
   public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
  
