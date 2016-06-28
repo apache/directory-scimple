@@ -57,23 +57,12 @@ public class FilterBuilderTest {
 
   
   FilterClient filterBuilder;
-  AttributeReference attributeReference;
-  AttributeReference attributeReference2;
-  AttributeComparisonExpression attributeComparisonExpression;
-  AttributeComparisonExpression attributeComparisonExpression2;
 
   Filter filter;
 
   @Before
   public void initialize() {
-    filterBuilder = new FilterClient();
-
-    attributeReference = new AttributeReference("addresses.streetAddress");
-
-    attributeComparisonExpression = new AttributeComparisonExpression(attributeReference, CompareOperator.EW, "Cir");
-
-    attributeReference2 = new AttributeReference("name.givenName");
-    attributeComparisonExpression2 = new AttributeComparisonExpression(attributeReference2, CompareOperator.EQ, "Bilbo");
+    filterBuilder = new FilterClient();   
   }
 
   @Test
@@ -85,40 +74,58 @@ public class FilterBuilderTest {
     Filter filter = new Filter(decoded); 
   }
   
-  //@Test
-  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
- 
-     String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).build();
- 
-     String decoded = decode(encoded);
-     Filter filter = new Filter(decoded);
-  }
-
-  //@Test
-  public void testAnd() throws UnsupportedEncodingException, FilterParseException {
-
-    String encoded = filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).build();
-    
+  @Test
+  public void testSimpleOr() throws UnsupportedEncodingException, FilterParseException {
+  
+    String encoded = filterBuilder.equalTo("name.givenName", "Bilbo").or().equalTo("name.familyName", "Baggins").build();
+  
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded);
+    Filter filter = new Filter(decoded); 
   }
-
+  
+  @Test
+  public void testAndOrChain() throws UnsupportedEncodingException, FilterParseException {
+  
+    String encoded = filterBuilder.equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").build();
+  
+    String decoded = decode(encoded);
+    Filter filter = new Filter(decoded); 
+  }
+  
   //@Test
-  public void testOr() throws UnsupportedEncodingException, FilterParseException {
-
-    String encoded = filterBuilder.equalTo("addresses.postalCode", "16801")
-                                  .and()
-                                  .or(attributeComparisonExpression, attributeComparisonExpression2)
-                                  .build();
-
-    log.info(encoded);
-    
-    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
-    
-    log.info(decoded);
-    
-    Filter filter = new Filter(decoded);
-  }
+//  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
+// 
+//     String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).build();
+// 
+//     String decoded = decode(encoded);
+//     Filter filter = new Filter(decoded);
+//  }
+//
+//  //@Test
+//  public void testAnd() throws UnsupportedEncodingException, FilterParseException {
+//
+//    String encoded = filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).build();
+//    
+//    String decoded = decode(encoded);
+//    Filter filter = new Filter(decoded);
+//  }
+//
+//  //@Test
+//  public void testOr() throws UnsupportedEncodingException, FilterParseException {
+//
+//    String encoded = filterBuilder.equalTo("addresses.postalCode", "16801")
+//                                  .and()
+//                                  .or(attributeComparisonExpression, attributeComparisonExpression2)
+//                                  .build();
+//
+//    log.info(encoded);
+//    
+//    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
+//    
+//    log.info(decoded);
+//    
+//    Filter filter = new Filter(decoded);
+//  }
   
   private String decode(String encoded) throws UnsupportedEncodingException {
 
