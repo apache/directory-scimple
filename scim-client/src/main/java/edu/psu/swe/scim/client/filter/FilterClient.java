@@ -13,6 +13,8 @@ import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
 import edu.psu.swe.scim.spec.protocol.filter.GroupExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
+import edu.psu.swe.scim.spec.protocol.filter.ValueFilterExpression;
+import edu.psu.swe.scim.spec.protocol.filter.ValuePathExpression;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -373,6 +375,25 @@ public class FilterClient {
 
       return this;
     }
+    
+    public Builder not(FilterExpression expression) {
+      GroupExpression groupExpression = new GroupExpression();
+      
+      groupExpression.setNot(true);
+      groupExpression.setFilterExpression(expression);
+      
+      handleComparisonExpression(groupExpression);
+      
+      return this;
+    }
+    
+    public Builder attributeContains(String attribute, FilterExpression expression) {
+      ValuePathExpression valuePathExpression = new ValuePathExpression();
+      AttributeReference ar = new AttributeReference(attribute);
+      //ValueFilterExpression valueFilterExpression = 
+      
+      return this;
+    }
   }
 
   public abstract static class Builder {
@@ -429,6 +450,9 @@ public class FilterClient {
     public abstract Builder endsWith(String key, String value);
     public abstract Builder startsWith(String key, String value);
     public abstract Builder contains(String key, String value);
+    
+    public abstract Builder not(FilterExpression filter);
+    public abstract Builder attributeContains(String attribute, FilterExpression filter);
     
     protected Builder handleLogicalExpression(LogicalExpression expression, LogicalOperator operator) {
       log.info("In handleLogicalExpression");

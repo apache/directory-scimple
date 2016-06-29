@@ -97,6 +97,16 @@ public class FilterBuilderTest {
     Filter filter = new Filter(decoded); 
   }
   
+  @Test
+  public void testNot() throws UnsupportedEncodingException, FilterParseException {
+    FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
+
+    String encoded = FilterClient.builder().not(b1.filter()).build();
+    
+    String decoded = decode(encoded);
+    Filter filter = new Filter(decoded); 
+  }
+  
   //@Test
 //  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
 // 
