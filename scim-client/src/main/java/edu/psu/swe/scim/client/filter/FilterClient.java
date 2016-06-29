@@ -387,10 +387,13 @@ public class FilterClient {
       return this;
     }
     
-    public Builder attributeContains(String attribute, FilterExpression expression) {
+    public Builder attributeHas(String attribute, ValueFilterExpression expression) {
       ValuePathExpression valuePathExpression = new ValuePathExpression();
       AttributeReference ar = new AttributeReference(attribute);
-      //ValueFilterExpression valueFilterExpression = 
+      valuePathExpression.setAttributePath(ar);
+      valuePathExpression.setValueFilter(expression);
+      
+      handleComparisonExpression(valuePathExpression);
       
       return this;
     }
@@ -452,7 +455,7 @@ public class FilterClient {
     public abstract Builder contains(String key, String value);
     
     public abstract Builder not(FilterExpression filter);
-    public abstract Builder attributeContains(String attribute, FilterExpression filter);
+    public abstract Builder attributeHas(String attribute, ValueFilterExpression filter);
     
     protected Builder handleLogicalExpression(LogicalExpression expression, LogicalOperator operator) {
       log.info("In handleLogicalExpression");
