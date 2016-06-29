@@ -10,10 +10,10 @@ import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
 import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
+import edu.psu.swe.scim.spec.protocol.filter.FilterParseException;
 import edu.psu.swe.scim.spec.protocol.filter.GroupExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
-import edu.psu.swe.scim.spec.protocol.filter.ValueFilterExpression;
 import edu.psu.swe.scim.spec.protocol.filter.ValuePathExpression;
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,7 +75,7 @@ public class FilterClient {
   // This class is returned from comparison operations to ensure
   // that the next step is correct
   public static class ComparisonBuilder extends ComplexLogicalBuilder {
-    
+
     public Builder equalTo(String key, String value) {
 
       AttributeReference ar = new AttributeReference(key);
@@ -95,7 +95,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder equalTo(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
@@ -104,7 +104,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder equalTo(String key, LocalDate value) {
 
       AttributeReference ar = new AttributeReference(key);
@@ -114,7 +114,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder equalTo(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
@@ -123,7 +123,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public <T extends Number> Builder equalTo(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
@@ -132,7 +132,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder equalNull(String key) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, null);
@@ -141,7 +141,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder notEqual(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -204,7 +204,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder endsWith(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EW, value);
@@ -222,7 +222,7 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder contains(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.CO, value);
@@ -375,26 +375,22 @@ public class FilterClient {
 
       return this;
     }
-    
+
     public Builder not(FilterExpression expression) {
       GroupExpression groupExpression = new GroupExpression();
-      
+
       groupExpression.setNot(true);
       groupExpression.setFilterExpression(expression);
-      
+
       handleComparisonExpression(groupExpression);
-      
+
       return this;
     }
-    
-    public Builder attributeHas(String attribute, ValueFilterExpression expression) {
-      ValuePathExpression valuePathExpression = new ValuePathExpression();
-      AttributeReference ar = new AttributeReference(attribute);
-      valuePathExpression.setAttributePath(ar);
-      valuePathExpression.setValueFilter(expression);
-      
-      handleComparisonExpression(valuePathExpression);
-      
+
+    @Override
+    public Builder attributeHas(String attribute, FilterExpression expression) throws FilterParseException {
+      handleComparisonExpression(ValuePathExpression.fromFilterExpression(attribute, expression));
+
       return this;
     }
   }
@@ -413,50 +409,77 @@ public class FilterClient {
     public abstract Builder or();
 
     public abstract Builder or(FilterExpression fe1, FilterExpression fe2);
-    
+
     public abstract Builder equalTo(String key, String value);
+
     public abstract Builder equalTo(String key, Boolean value);
+
     public abstract Builder equalTo(String key, Date value);
+
     public abstract Builder equalTo(String key, LocalDate value);
+
     public abstract Builder equalTo(String key, LocalDateTime value);
+
     public abstract <T extends Number> Builder equalTo(String key, T value);
+
     public abstract Builder equalNull(String key);
-    
+
     public abstract Builder notEqual(String key, String value);
+
     public abstract Builder notEqual(String key, Boolean value);
+
     public abstract Builder notEqual(String key, Date value);
+
     public abstract Builder notEqual(String key, LocalDate value);
+
     public abstract Builder notEqual(String key, LocalDateTime value);
+
     public abstract <T extends Number> Builder notEqual(String key, T value);
+
     public abstract Builder notEqualNull(String key);
-    
+
     public abstract <T extends Number> Builder greaterThan(String key, T value);
+
     public abstract Builder greaterThan(String key, Date value);
+
     public abstract Builder greaterThan(String key, LocalDate value);
+
     public abstract Builder greaterThan(String key, LocalDateTime value);
-    
+
     public abstract <T extends Number> Builder greaterThanOrEquals(String key, T value);
+
     public abstract Builder greaterThanOrEquals(String key, Date value);
+
     public abstract Builder greaterThanOrEquals(String key, LocalDate value);
+
     public abstract Builder greaterThanOrEquals(String key, LocalDateTime value);
-    
+
     public abstract <T extends Number> Builder lessThan(String key, T value);
+
     public abstract Builder lessThan(String key, Date value);
+
     public abstract Builder lessThan(String key, LocalDate value);
+
     public abstract Builder lessThan(String key, LocalDateTime value);
-    
+
     public abstract <T extends Number> Builder lessThanOrEquals(String key, T value);
+
     public abstract Builder lessThanOrEquals(String key, Date value);
+
     public abstract Builder lessThanOrEquals(String key, LocalDate value);
+
     public abstract Builder lessThanOrEquals(String key, LocalDateTime value);
-    
+
     public abstract Builder endsWith(String key, String value);
+
     public abstract Builder startsWith(String key, String value);
+
     public abstract Builder contains(String key, String value);
-    
+
     public abstract Builder not(FilterExpression filter);
-    public abstract Builder attributeHas(String attribute, ValueFilterExpression filter);
-    
+
+    public abstract Builder attributeHas(String attribute, FilterExpression filter) throws FilterParseException;
+
     protected Builder handleLogicalExpression(LogicalExpression expression, LogicalOperator operator) {
       log.info("In handleLogicalExpression");
       if (filterExpression == null) {
@@ -513,12 +536,12 @@ public class FilterClient {
         le.setRight(expression);
       }
     }
-    
+
     public String build() throws UnsupportedEncodingException {
       String filterString = filterExpression.toFilter();
       return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
     }
-    
+
     public FilterExpression filter() {
       return filterExpression;
     }
