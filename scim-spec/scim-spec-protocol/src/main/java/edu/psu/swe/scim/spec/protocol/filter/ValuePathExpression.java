@@ -13,6 +13,7 @@ public class ValuePathExpression implements FilterExpression {
   ValueFilterExpression valueFilter;
   
   private static class ValuePathValidator {
+    
     public ValuePathValidator(FilterExpression expression) throws FilterParseException {
       
       if (!(expression instanceof ValuePathExpression)) {
@@ -25,12 +26,15 @@ public class ValuePathExpression implements FilterExpression {
         LogicalExpression le = (LogicalExpression) expression;
         validateFilterExpression(le.getLeft());
         validateFilterExpression(le.getRight());
+      } else {
+        validateFilterExpression(expression);
       }
     }
     
     private void validateFilterExpression(FilterExpression expression) throws FilterParseException {
-      if (expression instanceof ValueFilterExpression) {
-        throw new FilterParseException("Value filter expressions can not own other value filter expressions");
+      if (expression instanceof ValuePathExpression) {
+        System.out.println("########## Throwing a FilterParseException");
+        throw new FilterParseException("Value path expressions can not own other value path expressions");
       } else if (expression instanceof LogicalExpression) {
         LogicalExpression le = (LogicalExpression) expression;
         validateFilterExpression(le.getLeft());
@@ -67,6 +71,8 @@ public class ValuePathExpression implements FilterExpression {
       AttributeComparisonExpression ace = (AttributeComparisonExpression) filterExpression;
       vpe.setValueFilter(ace);
       return vpe;
+    } else if (filterExpression instanceof ValuePathExpression) {
+      throw new FilterParseException("Value path expressions can not own other value path expressions");
     }
       
     return null;

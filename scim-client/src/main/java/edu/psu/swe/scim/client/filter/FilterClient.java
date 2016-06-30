@@ -53,6 +53,23 @@ public class FilterClient {
 
   public static abstract class ComplexLogicalBuilder extends SimpleLogicalBuilder {
 
+    public Builder or(FilterExpression fe1) {
+      if (filterExpression instanceof AttributeComparisonExpression) {
+        LogicalExpression logicalExpression = new LogicalExpression();
+        logicalExpression.setLeft(filterExpression);
+        logicalExpression.setRight(fe1);
+        logicalExpression.setOperator(LogicalOperator.OR);
+        filterExpression = logicalExpression;
+        return this;
+      }
+      
+      LogicalExpression logicalExpression = new LogicalExpression();
+      logicalExpression.setLeft(fe1);
+      logicalExpression.setOperator(LogicalOperator.OR);
+
+      return handleLogicalExpression(logicalExpression, LogicalOperator.OR);
+    }
+    
     public Builder or(FilterExpression fe1, FilterExpression fe2) {
       LogicalExpression logicalExpression = new LogicalExpression();
       logicalExpression.setLeft(fe1);
@@ -66,6 +83,23 @@ public class FilterClient {
       LogicalExpression logicalExpression = new LogicalExpression();
       logicalExpression.setLeft(fe1);
       logicalExpression.setRight(fe2);
+      logicalExpression.setOperator(LogicalOperator.AND);
+
+      return handleLogicalExpression(logicalExpression, LogicalOperator.AND);
+    }
+    
+    public Builder and(FilterExpression fe1) {
+      if (filterExpression instanceof AttributeComparisonExpression) {
+        LogicalExpression logicalExpression = new LogicalExpression();
+        logicalExpression.setLeft(filterExpression);
+        logicalExpression.setRight(fe1);
+        logicalExpression.setOperator(LogicalOperator.AND);
+        filterExpression = logicalExpression;
+        return this;
+      }
+      
+      LogicalExpression logicalExpression = new LogicalExpression();
+      logicalExpression.setLeft(fe1);
       logicalExpression.setOperator(LogicalOperator.AND);
 
       return handleLogicalExpression(logicalExpression, LogicalOperator.AND);
@@ -403,10 +437,14 @@ public class FilterClient {
     }
 
     public abstract Builder and();
+    
+    public abstract Builder and(FilterExpression fe1);
 
     public abstract Builder and(FilterExpression fe1, FilterExpression fe2);
 
     public abstract Builder or();
+    
+    public abstract Builder or(FilterExpression fe1);
 
     public abstract Builder or(FilterExpression fe1, FilterExpression fe2);
 
@@ -525,6 +563,10 @@ public class FilterClient {
 
     protected void handleComparisonExpression(FilterExpression expression) {
 
+      if (expression == null) {
+        log.error("*** in handle comparison ---> expression == null");
+      }
+      
       if (filterExpression == null) {
         filterExpression = expression;
       } else {
@@ -538,6 +580,11 @@ public class FilterClient {
     }
 
     public String build() throws UnsupportedEncodingException {
+      
+      if (filterExpression == null) {
+        log.error("****** filterExression == null");
+      }
+      
       String filterString = filterExpression.toFilter();
       return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
     }
