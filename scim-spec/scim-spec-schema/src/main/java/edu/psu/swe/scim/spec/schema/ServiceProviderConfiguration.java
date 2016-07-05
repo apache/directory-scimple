@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import edu.psu.swe.scim.spec.resources.ScimResourceWithOptionalId;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

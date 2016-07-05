@@ -1,6 +1,6 @@
 package edu.psu.swe.scim.common;
 
-public class Constants {
+public final class Constants {
   private Constants() {
   }
   

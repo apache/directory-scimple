@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 
-public class ScimUtils {
+public final class ScimUtils {
   private ScimUtils() {
   }
   

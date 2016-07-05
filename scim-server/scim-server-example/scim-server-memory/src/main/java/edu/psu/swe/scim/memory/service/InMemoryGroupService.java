@@ -1,6 +1,5 @@
 package edu.psu.swe.scim.memory.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
