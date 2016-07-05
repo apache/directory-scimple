@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FilterClient {
 
-  public static abstract class SimpleLogicalBuilder extends Builder {
+  public abstract static class SimpleLogicalBuilder extends Builder {
     SimpleLogicalBuilder() {
     }
 
@@ -51,7 +51,7 @@ public class FilterClient {
     }
   }
 
-  public static abstract class ComplexLogicalBuilder extends SimpleLogicalBuilder {
+  public abstract static class ComplexLogicalBuilder extends SimpleLogicalBuilder {
 
     public Builder or(FilterExpression fe1) {
       if (filterExpression instanceof AttributeComparisonExpression) {
@@ -580,10 +580,6 @@ public class FilterClient {
     }
 
     public String build() throws UnsupportedEncodingException {
-      
-      if (filterExpression == null) {
-        log.error("****** filterExression == null");
-      }
       
       String filterString = filterExpression.toFilter();
       return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");

@@ -27,6 +27,10 @@
     	<artifactId>hibernate-jpamodelgen</artifactId>
     	<version>5.2.0.Final</version>
     </dependency>
+    <dependency>
+    	<groupId>edu.psu.swe.scim</groupId>
+    	<artifactId>scim-common</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

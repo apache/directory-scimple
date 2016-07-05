@@ -20,21 +20,21 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-    	<groupId>junit</groupId>
-    	<artifactId>junit</artifactId>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>slf4j-simple</artifactId>
-    	<version>1.7.21</version>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.7.21</version>
     </dependency>
     <dependency>
-    	<groupId>pl.pragmatists</groupId>
-    	<artifactId>JUnitParams</artifactId>
+        <groupId>pl.pragmatists</groupId>
+        <artifactId>JUnitParams</artifactId>
     </dependency>
     <dependency>
-    	<groupId>edu.psu.swe.scim</groupId>
-    	<artifactId>scim-common</artifactId>
+        <groupId>edu.psu.swe.scim</groupId>
+        <artifactId>scim-common</artifactId>
     </dependency>
   </dependencies>
   
