@@ -17,8 +17,6 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
   
   private static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd";
   private static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SS";
-  private static final SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
-  private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(ISO_8601_DATE_TIME_FORMAT);
   private static final String QUOTE = "\"";
   
   @Override
@@ -41,10 +39,12 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
     return attributePath.getFullyQualifiedAttributeName() + " " + operation + " " + compareValueString;
   }
   public static String toDateString(Date date) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
     return dateFormat.format(date);
   }
   
   public static String toDateTimeString(Date date) {
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(ISO_8601_DATE_TIME_FORMAT);
     return dateTimeFormat.format(date);
   }
   
