@@ -11,14 +11,13 @@ public final class ScimUtils {
   private ScimUtils() {
   }
   
-  private static SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.ISO_8601_DATE_FORMAT);
-  private static SimpleDateFormat dateTimeFormat = new SimpleDateFormat(Constants.ISO_8601_DATE_TIME_FORMAT);
-  
   public static String toDateString(Date date) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.ISO_8601_DATE_FORMAT);
     return dateFormat.format(date);
   }
   
   public static String toDateTimeString(Date date) {
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(Constants.ISO_8601_DATE_TIME_FORMAT);
     return dateTimeFormat.format(date);
   }
   
