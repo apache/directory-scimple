@@ -23,6 +23,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.UriInfo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -59,6 +62,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
+  
   public abstract Provider<T> getProvider();
 
   @Context
@@ -215,18 +220,18 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       }
     } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
       if (etag == null) {
-        return Response.status(Status.CREATED).location(buildLocationTag(resource)).build();
+        return Response.status(Status.CREATED).location(buildLocationTag(created)).build();
       } else {
-        Response.status(Status.CREATED).location(buildLocationTag(resource)).tag(etag).build();
+        Response.status(Status.CREATED).location(buildLocationTag(created)).tag(etag).build();
       }
     }
 
     // TODO - Is this the right behavior?
     if (etag == null) {
-      return Response.status(Status.CREATED).location(buildLocationTag(resource)).entity(created).build();
+      return Response.status(Status.CREATED).location(buildLocationTag(created)).entity(created).build();
     }
 
-    return Response.status(Status.CREATED).location(buildLocationTag(resource)).tag(etag).entity(created).build();
+    return Response.status(Status.CREATED).location(buildLocationTag(created)).tag(etag).entity(created).build();
   }
 
   @Override
@@ -368,10 +373,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // TODO - Is this correct or should we support roll back semantics
     if (etag == null) {
-      return Response.ok(updated).location(buildLocationTag(resource)).build();
+      return Response.ok(updated).location(buildLocationTag(updated)).build();
     }
 
-    return Response.ok(updated).location(buildLocationTag(resource)).tag(etag).build();
+    return Response.ok(updated).location(buildLocationTag(updated)).tag(etag).build();
   }
 
   @Override
@@ -442,7 +447,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   private URI buildLocationTag(T resource) {
-    return uriInfo.getAbsolutePathBuilder().path(resource.getId()).build();
+    String id = resource.getId();
+    if (id == null) {
+      LOG.warn("Provider must supply an id for a resource");
+      id = "unknown";
+    }
+    return uriInfo.getAbsolutePathBuilder().path(id).build();
   }
 
   private Response createGenericExceptionResponse(Exception e1, Status status) {
