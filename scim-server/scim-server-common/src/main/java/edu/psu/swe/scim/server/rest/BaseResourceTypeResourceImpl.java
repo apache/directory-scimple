@@ -290,7 +290,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           if (!excludedAttributes.isEmpty()) {
             resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
           } else {
-            resource = attributeUtil.setAttributesForDisplay(resource, excludedAttributes);
+            resource = attributeUtil.setAttributesForDisplay(resource, attributes);
           }
 
           results.add(resource);
