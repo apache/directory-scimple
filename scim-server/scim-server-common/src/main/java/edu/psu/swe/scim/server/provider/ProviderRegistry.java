@@ -173,45 +173,11 @@ public class ProviderRegistry {
   }
   
   public static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
-    log.info("----> In generateExtensionSchema");
-    List<Field> fieldList = ScimUtils.getFieldsUpTo(clazz, Object.class);
-    List<Field> subFields = new ArrayList<>();
+    log.debug("----> In generateExtensionSchema");
     
-    Iterator<Field> iter = fieldList.iterator();
-    
-//    while(iter.hasNext()) {
-//      Field f = iter.next();
-//      Class<?> c = f.getType();
-//      log.info("Processing class " + c.getName());
-//      
-//      if (Collection.class.isAssignableFrom(f.getType())) {
-//        log.info("We have a collection");
-//        ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
-//        Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-//        log.info("processing " + attributeContainedClass.getName());
-//        if (!attributeContainedClass.isPrimitive()) {
-//          subFields.addAll(ScimUtils.getFieldsUpTo(attributeContainedClass, Object.class));
-//        }        
-//      } else if (f.getType().isArray()) {
-//        log.info("We have an array");
-//        Class<?> componentType = f.getType().getComponentType();
-//        log.info("processing " + componentType.getName());
-//        if (!componentType.isPrimitive()) {
-//          subFields.addAll(ScimUtils.getFieldsUpTo(componentType, Object.class));
-//        } else if (!c.isPrimitive()) {
-//          subFields.addAll(ScimUtils.getFieldsUpTo(c, Object.class));
-//        }
-//      }
-//    }
-//    
-//    fieldList.addAll(subFields);
-//    for (Field field : fieldList) {
-//      log.info("----> " + field.getName());
-//    }
-    
-    return generateSchema(clazz, fieldList);
+    return generateSchema(clazz, ScimUtils.getFieldsUpTo(clazz, Object.class));
   }
-  //public static Schema generateSchema(Class<?> clazz) throws InvalidProviderException {
+  
   public static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidProviderException {
 
     // Field [] fieldList = clazz.getDeclaredFields();
@@ -331,29 +297,11 @@ public class ProviderRegistry {
         Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
         typeName = attributeContainedClass.getTypeName();
         attribute.setMultiValued(true);
-        List<Field> fl = ScimUtils.getFieldsUpTo(attributeContainedClass, Object.class);
-        
-        log.info("#############  Fields in contained class ###############");
-        for (Field f1 : fl) {
-          log.info("####### " + f1.getName());
-        }
-        log.info("~~~~~~~ contained class = " + attributeContainedClass.getName());
-        
-        List<Attribute> la = createAttributes(fl, invalidAttributes, nameBase + "." + f.getName());
-        
-        for (Attribute att : la) {
-          log.info("===========" + att.getName());
-        }
-        attribute.setSubAttributes(la, AddAction.APPEND);
-        
-        
-        //attributeList.addAll(createAttributes(Arrays.asList(fl), invalidAttributes, (nameBase + "." +attributeContainedClass.getName())));
       } else if (f.getType().isArray()) {
         log.info("We have an array");
         Class<?> componentType = f.getType().getComponentType();
         typeName = componentType.getTypeName();
         attribute.setMultiValued(true);
-        // TODO set sub attributes
       } else {
         typeName = f.getType().toString();
         attribute.setMultiValued(false);
@@ -431,24 +379,22 @@ public class ProviderRegistry {
       //if (sa.type().equals(Type.COMPLEX))
       ScimType st = f.getType().getAnnotation(ScimType.class);
       
-      log.info("~~~~~~ st == null? " + (st == null));
       if (attribute.getType() == Type.COMPLEX || st != null) {
+        Class<?> componentType;
         if (!attribute.isMultiValued()) {
-          // attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(),
-          // BaseResource.class)));
+          componentType = f.getType();
           attribute.setSubAttributes(createAttributes(Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()), AddAction.APPEND);
         } else if (f.getType().isArray()) {
-          Class<?> componentType = f.getType().getComponentType();
-          // attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType,
-          // BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(Arrays.asList(componentType.getDeclaredFields()), invalidAttributes, nameBase + "." + componentType.getSimpleName()), AddAction.APPEND);
+          componentType = f.getType().getComponentType();
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
-          Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-          // attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass,
-          // BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(Arrays.asList(attributeContainedClass.getDeclaredFields()), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()), AddAction.APPEND);
+          componentType = (Class<?>) stringListType.getActualTypeArguments()[0];
         }
+        
+        List<Field> fl = ScimUtils.getFieldsUpTo(componentType, Object.class);
+        List<Attribute> la = createAttributes(fl, invalidAttributes, nameBase + "." + f.getName());
+          
+        attribute.setSubAttributes(la, AddAction.APPEND);
       }
       attributeList.add(attribute);
     }
