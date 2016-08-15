@@ -179,35 +179,35 @@ public class ProviderRegistry {
     
     Iterator<Field> iter = fieldList.iterator();
     
-    while(iter.hasNext()) {
-      Field f = iter.next();
-      Class<?> c = f.getType();
-      log.info("Processing class " + c.getName());
-      
-      if (Collection.class.isAssignableFrom(f.getType())) {
-        log.info("We have a collection");
-        ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
-        Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-        log.info("processing " + attributeContainedClass.getName());
-        if (!attributeContainedClass.isPrimitive()) {
-          subFields.addAll(ScimUtils.getFieldsUpTo(attributeContainedClass, Object.class));
-        }        
-      } else if (f.getType().isArray()) {
-        log.info("We have an array");
-        Class<?> componentType = f.getType().getComponentType();
-        log.info("processing " + componentType.getName());
-        if (!componentType.isPrimitive()) {
-          subFields.addAll(ScimUtils.getFieldsUpTo(componentType, Object.class));
-        } else if (!c.isPrimitive()) {
-          subFields.addAll(ScimUtils.getFieldsUpTo(c, Object.class));
-        }
-      }
-    }
-    
-    fieldList.addAll(subFields);
-    for (Field field : fieldList) {
-      log.info("----> " + field.getName());
-    }
+//    while(iter.hasNext()) {
+//      Field f = iter.next();
+//      Class<?> c = f.getType();
+//      log.info("Processing class " + c.getName());
+//      
+//      if (Collection.class.isAssignableFrom(f.getType())) {
+//        log.info("We have a collection");
+//        ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
+//        Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+//        log.info("processing " + attributeContainedClass.getName());
+//        if (!attributeContainedClass.isPrimitive()) {
+//          subFields.addAll(ScimUtils.getFieldsUpTo(attributeContainedClass, Object.class));
+//        }        
+//      } else if (f.getType().isArray()) {
+//        log.info("We have an array");
+//        Class<?> componentType = f.getType().getComponentType();
+//        log.info("processing " + componentType.getName());
+//        if (!componentType.isPrimitive()) {
+//          subFields.addAll(ScimUtils.getFieldsUpTo(componentType, Object.class));
+//        } else if (!c.isPrimitive()) {
+//          subFields.addAll(ScimUtils.getFieldsUpTo(c, Object.class));
+//        }
+//      }
+//    }
+//    
+//    fieldList.addAll(subFields);
+//    for (Field field : fieldList) {
+//      log.info("----> " + field.getName());
+//    }
     
     return generateSchema(clazz, fieldList);
   }
@@ -228,7 +228,8 @@ public class ProviderRegistry {
 
     log.info("calling set attributes with " + fieldList.size() + " fields");
     Set<String> invalidAttributes = new HashSet<>();
-    schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getSimpleName()));
+    List<Attribute> createAttributes = createAttributes(fieldList, invalidAttributes, clazz.getSimpleName());
+    schema.setAttributes(createAttributes);
 
     if (!invalidAttributes.isEmpty()) {
       StringBuilder sb = new StringBuilder();
@@ -343,7 +344,7 @@ public class ProviderRegistry {
         for (Attribute att : la) {
           log.info("===========" + att.getName());
         }
-        attribute.setSubAttributes(createAttributes(fl, invalidAttributes, nameBase + "." + f.getName()), AddAction.APPEND);
+        attribute.setSubAttributes(la, AddAction.APPEND);
         
         
         //attributeList.addAll(createAttributes(Arrays.asList(fl), invalidAttributes, (nameBase + "." +attributeContainedClass.getName())));
@@ -352,6 +353,7 @@ public class ProviderRegistry {
         Class<?> componentType = f.getType().getComponentType();
         typeName = componentType.getTypeName();
         attribute.setMultiValued(true);
+        // TODO set sub attributes
       } else {
         typeName = f.getType().toString();
         attribute.setMultiValued(false);
