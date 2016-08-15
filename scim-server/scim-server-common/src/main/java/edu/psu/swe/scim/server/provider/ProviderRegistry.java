@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Instance;
@@ -21,8 +19,8 @@ import javax.inject.Inject;
 import javax.xml.bind.annotation.XmlEnumValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.Lists;
 
+import edu.psu.swe.scim.common.ScimUtils;
 import edu.psu.swe.scim.server.exception.InvalidProviderException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.schema.Registry;
@@ -30,6 +28,7 @@ import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
 import edu.psu.swe.scim.spec.annotation.ScimResourceIdReference;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.annotation.ScimType;
 import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
@@ -37,6 +36,7 @@ import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
+import edu.psu.swe.scim.spec.schema.Schema.Attribute.AddAction;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -79,8 +79,8 @@ public class ProviderRegistry {
 
     ResourceType resourceType = generateResourceType(clazz, provider);
 
-    log.debug("Calling addSchema on the base");
-    registry.addSchema(generateSchema(clazz));
+    log.info("Calling addSchema on the base");
+    registry.addSchema(generateBaseSchema(clazz));
     // NOTE generateResourceType() ensures ScimResourceType exists
     ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
     String schemaUrn = scimResourceType.schema();
@@ -106,8 +106,8 @@ public class ProviderRegistry {
       Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
 
       while (iter.hasNext()) {
-        log.debug("Calling addSchema on an extension");
-        registry.addSchema(generateSchema(iter.next()));
+        log.info("Calling addSchema on an extension");
+        registry.addSchema(generateExtensionSchema(iter.next()));
       }
     }
 
@@ -166,8 +166,53 @@ public class ProviderRegistry {
     return resourceType;
   }
 
-  public static Schema generateSchema(Class<?> clazz) throws InvalidProviderException {
-    List<Field> fieldList = getFieldsUpTo(clazz, BaseResource.class);
+  public static Schema generateBaseSchema(Class<?> clazz) throws InvalidProviderException {
+    List<Field> fieldList = ScimUtils.getFieldsUpTo(clazz, BaseResource.class);
+
+    return generateSchema(clazz, fieldList);
+  }
+  
+  public static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
+    log.info("----> In generateExtensionSchema");
+    List<Field> fieldList = ScimUtils.getFieldsUpTo(clazz, Object.class);
+    List<Field> subFields = new ArrayList<>();
+    
+    Iterator<Field> iter = fieldList.iterator();
+    
+    while(iter.hasNext()) {
+      Field f = iter.next();
+      Class<?> c = f.getType();
+      log.info("Processing class " + c.getName());
+      
+      if (Collection.class.isAssignableFrom(f.getType())) {
+        log.info("We have a collection");
+        ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
+        Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+        log.info("processing " + attributeContainedClass.getName());
+        if (!attributeContainedClass.isPrimitive()) {
+          subFields.addAll(ScimUtils.getFieldsUpTo(attributeContainedClass, Object.class));
+        }        
+      } else if (f.getType().isArray()) {
+        log.info("We have an array");
+        Class<?> componentType = f.getType().getComponentType();
+        log.info("processing " + componentType.getName());
+        if (!componentType.isPrimitive()) {
+          subFields.addAll(ScimUtils.getFieldsUpTo(componentType, Object.class));
+        } else if (!c.isPrimitive()) {
+          subFields.addAll(ScimUtils.getFieldsUpTo(c, Object.class));
+        }
+      }
+    }
+    
+    fieldList.addAll(subFields);
+    for (Field field : fieldList) {
+      log.info("----> " + field.getName());
+    }
+    
+    return generateSchema(clazz, fieldList);
+  }
+  //public static Schema generateSchema(Class<?> clazz) throws InvalidProviderException {
+  public static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidProviderException {
 
     // Field [] fieldList = clazz.getDeclaredFields();
 
@@ -181,7 +226,7 @@ public class ProviderRegistry {
       log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
     }
 
-    log.debug("calling set attributes with " + fieldList.size() + " fields");
+    log.info("calling set attributes with " + fieldList.size() + " fields");
     Set<String> invalidAttributes = new HashSet<>();
     schema.setAttributes(createAttributes(fieldList, invalidAttributes, clazz.getSimpleName()));
 
@@ -217,9 +262,9 @@ public class ProviderRegistry {
     for (Field f : fieldList) {
       ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
 
-      log.debug("Processing field " + f.getName());
+      log.info("++++++++++++++++++++ Processing field " + f.getName());
       if (sa == null) {
-        log.warn("Attribute " + f.getName() + " did not have a ScimAttribute annotation");
+        log.debug("Attribute " + f.getName() + " did not have a ScimAttribute annotation");
         continue;
       }
 
@@ -244,7 +289,7 @@ public class ProviderRegistry {
       
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
-      log.debug("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
+      log.info("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
       
       if (enumFields.length != 0) {
         
@@ -280,13 +325,30 @@ public class ProviderRegistry {
 
       String typeName = null;
       if (Collection.class.isAssignableFrom(f.getType())) {
-        log.debug("We have a collection");
+        log.info("We have a collection");
         ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
         Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
         typeName = attributeContainedClass.getTypeName();
         attribute.setMultiValued(true);
+        List<Field> fl = ScimUtils.getFieldsUpTo(attributeContainedClass, Object.class);
+        
+        log.info("#############  Fields in contained class ###############");
+        for (Field f1 : fl) {
+          log.info("####### " + f1.getName());
+        }
+        log.info("~~~~~~~ contained class = " + attributeContainedClass.getName());
+        
+        List<Attribute> la = createAttributes(fl, invalidAttributes, nameBase + "." + f.getName());
+        
+        for (Attribute att : la) {
+          log.info("===========" + att.getName());
+        }
+        attribute.setSubAttributes(createAttributes(fl, invalidAttributes, nameBase + "." + f.getName()), AddAction.APPEND);
+        
+        
+        //attributeList.addAll(createAttributes(Arrays.asList(fl), invalidAttributes, (nameBase + "." +attributeContainedClass.getName())));
       } else if (f.getType().isArray()) {
-        log.debug("We have an array");
+        log.info("We have an array");
         Class<?> componentType = f.getType().getComponentType();
         typeName = componentType.getTypeName();
         attribute.setMultiValued(true);
@@ -297,49 +359,49 @@ public class ProviderRegistry {
 
       // attribute.setType(sa.type());
       boolean attributeIsAString = false;
-      log.debug("Attempting to set the attribute type, raw value = " + typeName);
+      log.info("Attempting to set the attribute type, raw value = " + typeName);
       switch (typeName) {
       case STRING_TYPE_IDENTIFIER:
       case CHARACTER_ARRAY_TYPE_IDENTIFIER:
       case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
-        log.debug("Setting type to String");
+        log.info("Setting type to String");
         attribute.setType(Type.STRING);
         attributeIsAString = true;
         break;
       case INT_TYPE_IDENTIFIER:
       case INTEGER_TYPE_IDENTIFIER:
-        log.debug("Setting type to integer");
+        log.info("Setting type to integer");
         attribute.setType(Type.INTEGER);
         break;
       case FLOAT_TYPE_IDENTIFIER:
       case BIG_F_FLOAT_TYPE_IDENTIFIER:
       case DOUBLE_TYPE_IDENTIFIER:
       case BIG_D_DOUBLE_TYPE_IDENTIFIER:
-        log.debug("Setting type to decimal");
+        log.info("Setting type to decimal");
         attribute.setType(Type.DECIMAL);
         break;
       case BOOLEAN_TYPE_IDENTIFIER:
       case BIG_B_BOOLEAN_TYPE_IDENTIFIER:
-        log.debug("Setting type to boolean");
+        log.info("Setting type to boolean");
         attribute.setType(Type.BOOLEAN);
         break;
       case BYTE_ARRAY_TYPE_IDENTIFIER:
-        log.debug("Setting type to binary");
+        log.info("Setting type to binary");
         attribute.setType(Type.BINARY);
         break;
       case DATE_TYPE_IDENTIFIER:
       case LOCAL_DATE_TIME_TYPE_IDENTIFIER:
       case LOCAL_TIME_TYPE_IDENTIFER:
       case LOCAL_DATE_TYPE_IDENTIFER:
-        log.debug("Setting type to date time");
+        log.info("Setting type to date time");
         attribute.setType(Type.DATE_TIME);
         break;
       case RESOURCE_REFERENCE_TYPE_IDENTIFIER:
-        log.debug("Setting type to reference");
+        log.info("Setting type to reference");
         attribute.setType(Type.REFERENCE);
         break;
       default:
-        log.debug("Setting type to complex");
+        log.info("Setting type to complex");
         attribute.setType(Type.COMPLEX);
       }
       if (f.getAnnotation(ScimResourceIdReference.class) != null) {
@@ -365,40 +427,35 @@ public class ProviderRegistry {
       attribute.setUniqueness(sa.uniqueness());
 
       //if (sa.type().equals(Type.COMPLEX))
-      if (attribute.getType() == Type.COMPLEX) {
+      ScimType st = f.getType().getAnnotation(ScimType.class);
+      
+      log.info("~~~~~~ st == null? " + (st == null));
+      if (attribute.getType() == Type.COMPLEX || st != null) {
         if (!attribute.isMultiValued()) {
           // attribute.setSubAttributes(addAttributes(getFieldsUpTo(f.getType(),
           // BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()));
+          attribute.setSubAttributes(createAttributes(Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()), AddAction.APPEND);
         } else if (f.getType().isArray()) {
           Class<?> componentType = f.getType().getComponentType();
           // attribute.setSubAttributes(addAttributes(getFieldsUpTo(componentType,
           // BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(Arrays.asList(componentType.getDeclaredFields()), invalidAttributes, nameBase + "." + componentType.getSimpleName()));
+          attribute.setSubAttributes(createAttributes(Arrays.asList(componentType.getDeclaredFields()), invalidAttributes, nameBase + "." + componentType.getSimpleName()), AddAction.APPEND);
         } else {
           ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
           Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
           // attribute.setSubAttributes(addAttributes(getFieldsUpTo(attributeContainedClass,
           // BaseResource.class)));
-          attribute.setSubAttributes(createAttributes(Arrays.asList(attributeContainedClass.getDeclaredFields()), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()));
+          attribute.setSubAttributes(createAttributes(Arrays.asList(attributeContainedClass.getDeclaredFields()), invalidAttributes, nameBase + "." + attributeContainedClass.getSimpleName()), AddAction.APPEND);
         }
       }
       attributeList.add(attribute);
     }
 
-    log.debug("Returning " + attributeList.size() + " attributes");
+    log.info("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }
 
-  public static List<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
-    List<Field> currentClassFields = Lists.newArrayList(startClass.getDeclaredFields());
-    Class<?> parentClass = startClass.getSuperclass();
-    if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
-      List<Field> parentClassFields = (List<Field>) getFieldsUpTo(parentClass, exclusiveParent);
-      currentClassFields.addAll(parentClassFields);
-    }
-    return currentClassFields;
-  }
+  
 
   // private Provider<ScimGroup> groupProvider = null;
   // private Provider<ScimUser> userProvider = null;

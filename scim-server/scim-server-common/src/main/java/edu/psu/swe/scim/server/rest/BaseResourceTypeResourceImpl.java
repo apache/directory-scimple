@@ -48,7 +48,6 @@ import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
-import edu.psu.swe.scim.spec.protocol.filter.FilterParseException;
 import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;

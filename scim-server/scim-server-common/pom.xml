@@ -61,6 +61,10 @@
       <artifactId>swagger-jaxrs</artifactId>
       <version>1.5.0</version>
     </dependency>
+    <dependency>
+    	<groupId>edu.psu.swe.scim</groupId>
+    	<artifactId>scim-common</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

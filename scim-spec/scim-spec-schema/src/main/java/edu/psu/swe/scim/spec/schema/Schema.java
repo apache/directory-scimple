@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.spec.schema;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,15 +20,14 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.psu.swe.scim.spec.validator.Urn;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Defines the structure of the SCIM schemas as defined by section 7 of the SCIM
@@ -94,6 +94,11 @@ public class Schema implements AttributeContainer {
       @XmlEnumValue("none") NONE,
       @XmlEnumValue("server") SERVER;
     }
+    
+    public enum AddAction {
+      REPLACE,
+      APPEND
+    }
 
     // The attribute name must match the ABNF pattern defined in section 2.1 of
     // the SCIM Schema specification.
@@ -147,8 +152,11 @@ public class Schema implements AttributeContainer {
       return Collections.unmodifiableList(subAttributes);
     }
     
-    public void setSubAttributes(List<Attribute> attributes) {
-      subAttributeNamesMap.clear();
+    public void setSubAttributes(List<Attribute> attributes, AddAction action) {
+      
+      if (action.equals(AddAction.REPLACE)) {
+        subAttributeNamesMap.clear();
+      }
       
       for (Attribute attribute : attributes) {
         String name = attribute.getName();
@@ -159,7 +167,14 @@ public class Schema implements AttributeContainer {
         subAttributeNamesMap.put(name.toLowerCase(), attribute);
       }
       
-      this.subAttributes = attributes;
+      if(action.equals(AddAction.REPLACE)) {
+        this.subAttributes = attributes;
+      } else {
+        if (subAttributes == null) {
+          subAttributes = new ArrayList<>();
+        }
+        this.subAttributes.addAll(attributes);
+      }
     }
     
     public Attribute getAttribute(String name) {

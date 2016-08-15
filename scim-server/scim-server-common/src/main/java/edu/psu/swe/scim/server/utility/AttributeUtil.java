@@ -187,12 +187,18 @@ public class AttributeUtil {
 
   private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
 
-    if (attributeContainer != null) {
+    if (attributeContainer != null && object != null) {
       for (Attribute attribute : attributeContainer.getAttributes()) {
         Field field = attribute.getField();
         if (function.apply(attribute)) {
           field.setAccessible(true);
           if (!field.getType().isPrimitive()) {
+            Object obj = field.get(object);
+            if (obj == null) {
+              continue;
+            }
+            
+            log.info("field to be set to null = " + field.getType().getName());
             field.set(object, null);
           }
         } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
@@ -200,6 +206,11 @@ public class AttributeUtil {
           log.debug("### Processing single value complex field " + name);
           field.setAccessible(true);
           Object subObject = field.get(object);
+
+          if (subObject == null) {
+            continue;
+          }
+          
           Attribute subAttribute = attributeContainer.getAttribute(name);
           log.debug("### container type = " + attributeContainer.getClass().getName());
           if (subAttribute == null) {

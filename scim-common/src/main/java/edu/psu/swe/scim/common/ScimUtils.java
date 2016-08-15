@@ -1,10 +1,17 @@
 package edu.psu.swe.scim.common;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.google.common.collect.Lists;
 
 
 public final class ScimUtils {
@@ -29,4 +36,13 @@ public final class ScimUtils {
     return ldt.format(DateTimeFormatter.ISO_DATE_TIME);
   }
   
+  public static List<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
+    List<Field> currentClassFields = Lists.newArrayList(startClass.getDeclaredFields());
+    Class<?> parentClass = startClass.getSuperclass();
+    if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+      List<Field> parentClassFields = (List<Field>) getFieldsUpTo(parentClass, exclusiveParent);
+      currentClassFields.addAll(parentClassFields);
+    }
+    return currentClassFields;
+  }
 }
