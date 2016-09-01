@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>edu.psu.swe.scim</groupId>
+    <artifactId>scim-server-examples</artifactId>
+    <version>2.0</version>
+  </parent>
+
+  <artifactId>scim-server-memory</artifactId>
+  <name>SCIM - Server - Memory</name>
+  <packaging>war</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>scim-server-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <finalName>${project.artifactId}</finalName>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+          <archive>
+            <manifestEntries>
+              <Logging-Profile>${project.artifactId}</Logging-Profile>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.wildfly.plugins</groupId>
+        <artifactId>wildfly-maven-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <skip>false</skip>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
+          <images>
+            <image>
+              <name>scim-server-memory</name>
+              <build>
+                <from>jboss/wildfly</from>
+                <tags>
+                  <tag>latest</tag>
+                  <tag>${project.version}</tag>
+                </tags>
+                <runCmds>
+                  <runCmd>/opt/jboss/wildfly/bin/add-user.sh vadmin vpassword --silent</runCmd>
+                </runCmds>
+                <cmd>
+                  <exec>
+                    <args>/opt/jboss/wildfly/bin/standalone.sh</args>
+                    <args>-b</args>
+                    <args>0.0.0.0</args>
+                    <args>-bmanagement</args>
+                    <args>0.0.0.0</args>
+                  </exec>
+                </cmd>
+                <ports>
+                  <port>8080</port>
+                  <port>9990</port>
+                </ports>
+                <assembly>
+                  <basedir>/opt/jboss/wildfly/standalone/deployments</basedir>
+                  <descriptorRef>artifact</descriptorRef>
+                </assembly>
+              </build>
+              <run>
+                <ports>
+                  <port>wildfly.port:8080</port>
+                  <port>wildfly.management.port:9990</port>
+                </ports>
+                <wait>
+                  <http>
+                    <url>http://localhost:${wildfly.port}/</url>
+                  </http>
+                  <time>60000</time>
+                </wait>
+                <log>
+                  <enabled>true</enabled>
+                  <prefix>ScimMem</prefix>
+                </log>
+              </run>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
