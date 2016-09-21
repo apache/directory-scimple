@@ -43,7 +43,7 @@ import javax.ws.rs.core.Response.Status;
  */
 
 @Path("Schemas")
-@Api("Configuration")
+@Api("SCIM-Configuration")
 public interface SchemaResource {
 
   @GET
