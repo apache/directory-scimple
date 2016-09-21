@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.processing.Processor;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -40,6 +41,10 @@ import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.annotations.AttributeFilterExtension;
+import edu.psu.swe.scim.server.provider.annotations.ProcessingExtension;
+import edu.psu.swe.scim.server.provider.annotations.ScimProcessingExtension;
+import edu.psu.swe.scim.server.provider.annotations.ScimRequestContext;
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
@@ -137,7 +142,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createETagErrorResponse();
     }
 
+    
     // Process Attributes
+    processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);    
+
     try {
       if (!excludedAttributeReferences.isEmpty()) {
         resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
@@ -211,6 +219,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     // Process Attributes
+    processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+    
     try {
       if (!excludedAttributeReferences.isEmpty()) {
         created = attributeUtil.setExcludedAttributesForDisplay(created, excludedAttributeReferences);
@@ -242,9 +252,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return BaseResourceTypeResource.super.find(request);
     }
 
-    Set<AttributeReference> attributes = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
-    Set<AttributeReference> excludedAttributes = Optional.ofNullable(request.getExcludedAttributes()).orElse(Collections.emptySet());
-    if (!attributes.isEmpty() && !excludedAttributes.isEmpty()) {
+    Set<AttributeReference> attributeReferences = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
+    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(request.getExcludedAttributes()).orElse(Collections.emptySet());
+    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
     }
 
@@ -285,11 +295,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         }
 
         // Process Attributes
+        processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);    
+
         try {
-          if (!excludedAttributes.isEmpty()) {
-            resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
+          if (!excludedAttributeReferences.isEmpty()) {
+            resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
           } else {
-            resource = attributeUtil.setAttributesForDisplay(resource, attributes);
+            resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
           }
 
           results.add(resource);
@@ -352,7 +364,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
+    
     // Process Attributes
+    processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);    
+
     try {
       if (!excludedAttributeReferences.isEmpty()) {
         updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
@@ -436,6 +451,26 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     resource.setMeta(meta);
 
     return etag;
+  }
+  
+  private void processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) {
+    ScimProcessingExtension annotation = provider.getClass().getAnnotation(ScimProcessingExtension.class);
+    if (annotation != null) {
+      Class<? extends ProcessingExtension>[] value = annotation.value();
+      for (Class<? extends ProcessingExtension> class1 : value) {
+        try {
+          ProcessingExtension processingExtension = class1.newInstance();
+          if (processingExtension instanceof AttributeFilterExtension) {
+            AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
+            ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);;
+            attributeFilterExtension.filterAttributes(resource, scimRequestContext);
+          }
+        } catch (InstantiationException | IllegalAccessException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
   }
 
   public static EntityTag hash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
