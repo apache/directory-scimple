@@ -27,7 +27,7 @@ import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 
-@Api(tags="ResourceType", hidden=true)
+@Api(tags="SCIM", hidden=true)
 public interface BaseResourceTypeResource<T> {
 
   /**

@@ -36,7 +36,7 @@ import edu.psu.swe.scim.spec.resources.ScimResource;
 
 
 @Path(".search")
-@Api("ResourceType")
+@Api("SCIM")
 public interface SearchResource {
 
   /**

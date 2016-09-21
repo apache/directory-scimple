@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiResponses;
 //@formatter:on
 
 @Path("Bulk")
-@Api("ResourceType")
+@Api("SCIM")
 public interface BulkResource {
 
   /**

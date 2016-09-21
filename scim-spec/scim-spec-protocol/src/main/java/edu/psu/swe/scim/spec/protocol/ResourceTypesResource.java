@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @Path("ResourceTypes")
-@Api("Configuration")
+@Api("SCIM-CONFIG")
 public interface ResourceTypesResource {
 
   @GET

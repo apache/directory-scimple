@@ -26,7 +26,7 @@ import edu.psu.swe.scim.spec.resources.ScimGroup;
 //@formatter:on
 
 @Path("Groups")
-@Api("ResourceType")
+@Api("SCIM")
 public interface GroupResource extends BaseResourceTypeResource<ScimGroup> {
 
 }
