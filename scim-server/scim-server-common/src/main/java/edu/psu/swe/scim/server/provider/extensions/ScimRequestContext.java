@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.server.provider.annotations;
+package edu.psu.swe.scim.server.provider.extensions;
 
 import java.util.Set;
 

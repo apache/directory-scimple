@@ -1,4 +1,4 @@
-package edu.psu.swe.scim.server.provider.annotations;
+package edu.psu.swe.scim.server.provider.extensions;
 
 import edu.psu.swe.scim.spec.resources.BaseResource;
 
