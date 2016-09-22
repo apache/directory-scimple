@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.processing.Processor;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -45,6 +44,7 @@ import edu.psu.swe.scim.server.provider.annotations.ScimProcessingExtension;
 import edu.psu.swe.scim.server.provider.extensions.AttributeFilterExtension;
 import edu.psu.swe.scim.server.provider.extensions.ProcessingExtension;
 import edu.psu.swe.scim.server.provider.extensions.ScimRequestContext;
+import edu.psu.swe.scim.server.provider.extensions.exceptions.ClientFilterException;
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
@@ -67,7 +67,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
-  
+
   public abstract Provider<T> getProvider();
 
   @Context
@@ -81,14 +81,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Inject
   AttributeUtil attributeUtil;
-  
+
   @Inject
   EndpointUtil endpointUtil;
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = null;
-    
+
     if (servletRequest.getParameter("filter") != null) {
       return Response.status(Status.FORBIDDEN).build();
     }
@@ -142,9 +142,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createETagErrorResponse();
     }
 
-    
     // Process Attributes
-    processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);    
+    try {
+      processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+    } catch (ClientFilterException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
+      er.setDetail(e1.getMessage());
+      return Response.status(e1.getStatus()).entity(er).build();
+    }
 
     try {
       if (!excludedAttributeReferences.isEmpty()) {
@@ -166,9 +172,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.setAttributes(Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
     searchRequest.setExcludedAttributes(Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
-   
+
     searchRequest.setFilter(filter);
-    
+
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
     searchRequest.setStartIndex(startIndex);
@@ -192,7 +198,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
     }
-    
+
     endpointUtil.process(uriInfo);
     T created;
     try {
@@ -207,7 +213,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         er.setStatus(e1.getStatus().toString());
         er.setDetail(e1.getMessage());
       }
-      
+
       return Response.status(status).entity(er).build();
     }
 
@@ -219,8 +225,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     // Process Attributes
-    processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
-    
+    try {
+      processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+    } catch (ClientFilterException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
+      er.setDetail(e1.getMessage());
+      return Response.status(e1.getStatus()).entity(er).build();
+    }
+
     try {
       if (!excludedAttributeReferences.isEmpty()) {
         created = attributeUtil.setExcludedAttributesForDisplay(created, excludedAttributeReferences);
@@ -276,7 +289,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     // If no resources are found, we should still return a ListResponse with
     // the totalResults set to 0;
     // (https://tools.ietf.org/html/rfc7644#section-3.4.2)
-    if (filterResp == null || filterResp.getResources() == null ||  filterResp.getResources().isEmpty()) {
+    if (filterResp == null || filterResp.getResources() == null || filterResp.getResources().isEmpty()) {
       listResponse.setTotalResults(0);
     } else {
       listResponse.setItemsPerPage(filterResp.getResources().size());
@@ -295,7 +308,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         }
 
         // Process Attributes
-        processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);    
+        try {
+          processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+        } catch (ClientFilterException e1) {
+          ErrorResponse er = new ErrorResponse();
+          er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
+          er.setDetail(e1.getMessage());
+          return Response.status(e1.getStatus()).entity(er).build();
+        }
 
         try {
           if (!excludedAttributeReferences.isEmpty()) {
@@ -324,14 +344,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (provider == null) {
       return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
     }
-    
+
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
     Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
 
     if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       return createAmbiguousAttributeParametersResponse();
     }
-    
+
     endpointUtil.process(uriInfo);
     T stored;
     try {
@@ -343,7 +363,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (stored == null) {
       return createNotFoundResponse(id);
     }
-    
+
     EntityTag backingETag = null;
     try {
       backingETag = generateEtag(stored);
@@ -364,9 +384,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
-    
     // Process Attributes
-    processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);    
+    try {
+      processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+    } catch (ClientFilterException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
+      er.setDetail(e1.getMessage());
+      return Response.status(e1.getStatus()).entity(er).build();
+    }
 
     try {
       if (!excludedAttributeReferences.isEmpty()) {
@@ -406,7 +432,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       Provider<T> provider = getProvider();
 
       if (provider == null) {
-        response =  BaseResourceTypeResource.super.delete(id);
+        response = BaseResourceTypeResource.super.delete(id);
       } else {
         endpointUtil.process(uriInfo);
         response = Response.noContent().build();
@@ -452,8 +478,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     return etag;
   }
-  
-  private void processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) {
+
+  private void processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
     ScimProcessingExtension annotation = provider.getClass().getAnnotation(ScimProcessingExtension.class);
     if (annotation != null) {
       Class<? extends ProcessingExtension>[] value = annotation.value();
@@ -462,8 +488,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           ProcessingExtension processingExtension = class1.newInstance();
           if (processingExtension instanceof AttributeFilterExtension) {
             AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
-            ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);;
+            ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
+            ;
+
             attributeFilterExtension.filterAttributes(resource, scimRequestContext);
+
           }
         } catch (InstantiationException | IllegalAccessException e) {
           // TODO Auto-generated catch block
@@ -491,7 +520,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private Response createGenericExceptionResponse(Exception e1, Status status) {
     ErrorResponse er = new ErrorResponse();
-  
+
     er.setDetail(e1.getLocalizedMessage());
     if (status != null) {
       er.setStatus(Integer.toString(status.getStatusCode()));
@@ -501,7 +530,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return Response.status(Status.BAD_REQUEST).entity(er).build();
     }
   }
-  
+
   private Response createAmbiguousAttributeParametersResponse() {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("400");
