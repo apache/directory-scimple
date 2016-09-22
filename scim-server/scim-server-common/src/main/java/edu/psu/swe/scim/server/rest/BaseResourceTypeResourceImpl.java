@@ -144,7 +144,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // Process Attributes
     try {
-      processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+      resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -226,7 +226,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // Process Attributes
     try {
-      processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+      resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -292,6 +292,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (filterResp == null || filterResp.getResources() == null || filterResp.getResources().isEmpty()) {
       listResponse.setTotalResults(0);
     } else {
+      log.info("Find returned " + filterResp.getResources().size());
       listResponse.setItemsPerPage(filterResp.getResources().size());
       listResponse.setStartIndex(1);
       listResponse.setTotalResults(filterResp.getResources().size());
@@ -309,7 +310,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
         // Process Attributes
         try {
-          processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+          log.info("=== Calling processFilterAttributeExtensions");
+          resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
         } catch (ClientFilterException e1) {
           ErrorResponse er = new ErrorResponse();
           er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -386,7 +388,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // Process Attributes
     try {
-      processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+      resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -479,7 +481,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return etag;
   }
 
-  private void processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
+  private T processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
     ScimProcessingExtension annotation = provider.getClass().getAnnotation(ScimProcessingExtension.class);
     if (annotation != null) {
       Class<? extends ProcessingExtension>[] value = annotation.value();
@@ -489,10 +491,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           if (processingExtension instanceof AttributeFilterExtension) {
             AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
             ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
-            ;
 
-            attributeFilterExtension.filterAttributes(resource, scimRequestContext);
-
+            resource = (T) attributeFilterExtension.filterAttributes(resource, scimRequestContext);
+            log.info("Resource now - " + resource.toString());
           }
         } catch (InstantiationException | IllegalAccessException e) {
           // TODO Auto-generated catch block
@@ -500,6 +501,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         }
       }
     }
+    
+    return resource;
   }
 
   public static EntityTag hash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {

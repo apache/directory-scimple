@@ -24,6 +24,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.ws.rs.core.Response.Status;
 
 import edu.psu.swe.scim.common.ScimUtils;
+import edu.psu.swe.scim.rdbms.filter.ExampleFilter;
 import edu.psu.swe.scim.rdbms.model.Address;
 import edu.psu.swe.scim.rdbms.model.Address_;
 import edu.psu.swe.scim.rdbms.model.Person;
@@ -36,6 +37,7 @@ import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.annotations.ScimProcessingExtension;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
@@ -53,7 +55,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
+@ScimProcessingExtension(ExampleFilter.class)
 public class ScimRdbmsService implements Provider<ScimUser> {
 
   @PersistenceContext(name = "ExampleDS")
@@ -148,18 +151,25 @@ public class ScimRdbmsService implements Provider<ScimUser> {
   public FilterResponse<ScimUser> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws UnableToRetrieveResourceException {
     log.info("@@@@@@@ In find");
 
-    FilterExpression expression = filter.getExpression();
+    List<Person> personList = new ArrayList<>();
+    
+    if (filter != null) {
+      FilterExpression expression = filter.getExpression();
 
-    log.info("Processing filter " + filter.getFilter());
+      log.info("Processing filter " + filter.getFilter());
 
-    criteriaQuery.select(queryRoot);
+      criteriaQuery.select(queryRoot);
 
-    Predicate predicate = processExpression(expression, criteriaBuilder);
-    criteriaQuery.where(predicate).distinct(true);
+      Predicate predicate = processExpression(expression, criteriaBuilder);
+      criteriaQuery.where(predicate).distinct(true);
 
-    TypedQuery<Person> tq = entityManager.createQuery(criteriaQuery);
-    List<Person> personList = tq.getResultList();
-    log.info("---> Query executed, " + personList.size() + " returns");
+      TypedQuery<Person> tq = entityManager.createQuery(criteriaQuery);
+      personList = tq.getResultList();
+      log.info("---> Query executed, " + personList.size() + " returns");
+    } else {
+      TypedQuery<Person> tq = entityManager.createNamedQuery("Person.getAll", Person.class);
+      personList = tq.getResultList();
+    }
 
     List<ScimUser> scimUserList = new ArrayList<>();
 
