@@ -1,4 +1,5 @@
 .classpath
+.errai
 .project
 .settings/
 target/

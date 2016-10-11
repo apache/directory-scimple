@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/2.4/distro-source/core/src/gwt-module.dtd">
+
+<module rename-to="ScimErraiShowcase">
+
+  <inherits name="org.jboss.errai.enterprise.All" />
+  <inherits name="edu.psu.swe.scim.errai.ScimErraiComponents" />
+
+  <set-property name="gwt.logging.enabled" value="TRUE" />
+  <set-property name="gwt.logging.logLevel" value="ALL" />
+
+  <source path="showcase" />
+
+</module>
