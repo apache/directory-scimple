@@ -16,6 +16,8 @@
 
     <version.errai>4.0.0.Beta2</version.errai>
     <version.gwt>2.8.0-rc2</version.gwt>
+    <version.lombok>1.16.10</version.lombok>
+    <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
   </properties>
 
@@ -85,7 +87,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.14.2</version>
+        <version>${version.lombok}</version>
       </dependency>
 
       <dependency>
@@ -262,6 +264,19 @@
           <configuration>
             <additionalparam>-Xdoclint:none</additionalparam>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok-maven-plugin</artifactId>
+          <version>${version.lombok.plugin}</version>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>delombok</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
