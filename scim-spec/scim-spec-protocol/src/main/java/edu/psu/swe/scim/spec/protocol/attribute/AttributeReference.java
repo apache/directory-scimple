@@ -25,6 +25,11 @@ public class AttributeReference {
       attributeName = parseAttributeName(substringAfterLast);
     }
   }
+  
+  public AttributeReference(String urn, String attributeName) {
+    this.urn = urn;
+    this.attributeName = parseAttributeName(attributeName);
+  }
 
   private String[] parseAttributeName(String attributeName) {
     return StringUtils.split(attributeName, ".");

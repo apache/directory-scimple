@@ -31,6 +31,8 @@ public class ServerConfiguration {
   
   static final int FILTER_MAXIMUM_RESULTS = 100;
 
+  String id = "spc";
+  
   boolean supportsChangePassword = false;
   
   @Setter(AccessLevel.NONE)
@@ -47,6 +49,8 @@ public class ServerConfiguration {
   boolean supportsPatch = false;
   
   boolean supportsSort = false;
+  
+  String documentationUri;
   
   @Setter(AccessLevel.NONE)
   List<AuthenticationSchema> authenticationSchemas = new ArrayList<>();

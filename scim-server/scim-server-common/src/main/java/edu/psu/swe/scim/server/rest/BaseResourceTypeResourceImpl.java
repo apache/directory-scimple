@@ -3,10 +3,8 @@ package edu.psu.swe.scim.server.rest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,13 +24,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
 import edu.psu.swe.scim.server.exception.UnableToCreateResourceException;
@@ -47,6 +39,7 @@ import edu.psu.swe.scim.server.provider.extensions.ScimRequestContext;
 import edu.psu.swe.scim.server.provider.extensions.exceptions.ClientFilterException;
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
+import edu.psu.swe.scim.server.utility.EtagGenerator;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
@@ -60,7 +53,6 @@ import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.schema.ErrorResponse;
-import edu.psu.swe.scim.spec.schema.Meta;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -84,6 +76,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Inject
   EndpointUtil endpointUtil;
+  
+  @Inject
+  EtagGenerator etagGenerator;
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -111,7 +106,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (resource != null) {
       EntityTag backingETag = null;
       try {
-        backingETag = generateEtag(resource);
+        backingETag = etagGenerator.generateEtag(resource);
       } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
         return createETagErrorResponse();
       }
@@ -137,7 +132,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     EntityTag etag = null;
 
     try {
-      etag = generateEtag(resource);
+      etag = etagGenerator.generateEtag(resource);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
       return createETagErrorResponse();
     }
@@ -219,7 +214,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     EntityTag etag = null;
     try {
-      etag = generateEtag(created);
+      etag = etagGenerator.generateEtag(created);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
       log.error("Failed to generate etag for newly created entity " + e.getMessage());
     }
@@ -303,7 +298,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         EntityTag etag = null;
 
         try {
-          etag = generateEtag(resource);
+          etag = etagGenerator.generateEtag(resource);
         } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
           return createETagErrorResponse();
         }
@@ -368,7 +363,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     EntityTag backingETag = null;
     try {
-      backingETag = generateEtag(stored);
+      backingETag = etagGenerator.generateEtag(stored);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
       return createETagErrorResponse();
     }
@@ -408,7 +403,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     EntityTag etag = null;
     try {
-      etag = generateEtag(updated);
+      etag = etagGenerator.generateEtag(updated);
     } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
       log.error("Failed to generate etag for newly created entity " + e.getMessage());
     }
@@ -452,35 +447,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
   }
 
-  private EntityTag generateEtag(T resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objectMapper.registerModule(jaxbAnnotationModule);
-
-    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
-
-    objectMapper.setSerializationInclusion(Include.NON_NULL);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    Meta meta = resource.getMeta();
-
-    if (meta == null) {
-      meta = new Meta();
-    }
-
-    resource.setMeta(null);
-    String writeValueAsString = objectMapper.writeValueAsString(resource);
-
-    EntityTag etag = hash(writeValueAsString);
-    meta.setVersion(etag.getValue());
-
-    resource.setMeta(meta);
-
-    return etag;
-  }
-
   private T processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
     ScimProcessingExtension annotation = provider.getClass().getAnnotation(ScimProcessingExtension.class);
     if (annotation != null) {
@@ -503,13 +469,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
     
     return resource;
-  }
-
-  public static EntityTag hash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-    MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    digest.update(input.getBytes("UTF-8"));
-    byte[] hash = digest.digest();
-    return new EntityTag(Base64.getEncoder().encodeToString(hash));
   }
 
   private URI buildLocationTag(T resource) {
