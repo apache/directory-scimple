@@ -6,8 +6,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 import lombok.Data;
 
@@ -16,6 +17,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@NamedQueries({ @NamedQuery(name="Person.getAll", query="Select p from Person p") })
 public class Person {
   
   @Id

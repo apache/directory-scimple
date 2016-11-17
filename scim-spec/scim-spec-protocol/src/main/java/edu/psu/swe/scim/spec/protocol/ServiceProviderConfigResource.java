@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 //@formatter:on
 
 @Path("ServiceProviderConfig")
-@Api("Configuration")
+@Api("SCIM-Configuration")
 public interface ServiceProviderConfigResource {
 
   @GET

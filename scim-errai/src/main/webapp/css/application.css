@@ -1,0 +1,9 @@
+.navbar-brand img {
+  margin: -7px 5px;
+}
+
+@media(min-width: 768px) {
+  .contact {
+    height: 350px !important;
+  }
+}

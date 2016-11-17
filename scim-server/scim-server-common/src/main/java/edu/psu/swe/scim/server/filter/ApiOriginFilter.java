@@ -9,7 +9,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
-@WebFilter(filterName = "ScimCorsFilter", urlPatterns = {"/*"})
+//@WebFilter(filterName = "ScimCorsFilter", urlPatterns = {"/*"})
 public class ApiOriginFilter implements javax.servlet.Filter {
 
     @Override

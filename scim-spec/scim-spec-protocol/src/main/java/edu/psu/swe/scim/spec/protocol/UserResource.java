@@ -26,7 +26,7 @@ import edu.psu.swe.scim.spec.resources.ScimUser;
 //@formatter:on
 
 @Path("Users")
-@Api("ResourceType")
+@Api("SCIM")
 public interface UserResource extends BaseResourceTypeResource<ScimUser> {
   
 }

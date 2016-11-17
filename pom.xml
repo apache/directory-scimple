@@ -3,7 +3,7 @@
 
   <groupId>edu.psu.swe.scim</groupId>
   <artifactId>scim-parent</artifactId>
-  <version>2.0</version>
+  <version>2.1</version>
   <packaging>pom</packaging>
   <name>SCIM - Parent</name>
   <description>Penn State's Open Source JavaEE implmentation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
@@ -13,6 +13,10 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
+    <version.errai>4.0.0.Beta2</version.errai>
+    <version.gwt>2.8.0-rc2</version.gwt>
+    <version.lombok>1.16.10</version.lombok>
+    <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
   </properties>
 
@@ -23,6 +27,7 @@
     <module>scim-tools</module>
     <module>scim-compliance</module>
     <module>scim-common</module>
+    <module>scim-errai</module>
   </modules>
 
   <dependencyManagement>
@@ -81,7 +86,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.14.2</version>
+        <version>${version.lombok}</version>
       </dependency>
 
       <dependency>
@@ -140,6 +145,20 @@
         <groupId>com.restfuse</groupId>
         <artifactId>com.eclipsesource.restfuse</artifactId>
         <version>${version.restfuse}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt</artifactId>
+        <version>${version.gwt}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai.bom</groupId>
+        <artifactId>errai-bom</artifactId>
+        <version>${version.errai}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -244,6 +263,19 @@
           <configuration>
             <additionalparam>-Xdoclint:none</additionalparam>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok-maven-plugin</artifactId>
+          <version>${version.lombok.plugin}</version>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>delombok</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
