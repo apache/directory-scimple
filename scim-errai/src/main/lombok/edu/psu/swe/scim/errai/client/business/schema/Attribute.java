@@ -48,6 +48,7 @@ public class Attribute {
     DECIMAL,
     INTEGER,
     DATE_TIME,
+    BINARY,
     REFERENCE,
     COMPLEX,
     ;
