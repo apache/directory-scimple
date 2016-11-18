@@ -11,6 +11,7 @@ import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import edu.psu.swe.scim.errai.client.business.common.ListResponse;
+import edu.psu.swe.scim.errai.client.business.resourcetype.ResourceType;
 import edu.psu.swe.scim.errai.client.business.schema.Schema;
 import edu.psu.swe.scim.errai.client.business.scim.ScimServiceProvider;
 
@@ -25,16 +26,34 @@ public class ScimErraiShowcase {
     label.setInnerHTML("This is a test");
     root = (Div) Window.getDocument().getElementById("scimErraiShowcase");
     root.appendChild(label);
-    //RestClient.setApplicationRoot("/tier/v2");
+    
     RestClient.setJacksonMarshallingActive(true);
-//    RestClient.create(ScimServiceProvider.class, "https://scim.psu.edu", new RemoteCallback<ListResponse<Schema>>() {
-      RestClient.create(ScimServiceProvider.class, new RemoteCallback<ListResponse<Schema>>() {
+
+    RestClient.create(ScimServiceProvider.class, new RemoteCallback<ListResponse<Schema>>() {
 
       @Override
       public void callback(ListResponse<Schema> response) {
         showSchemaList(response.getResources());
       }
+      
     }, 200).getSchemas();
+    
+    RestClient.create(ScimServiceProvider.class, new RemoteCallback<ListResponse<ResourceType>>() {
+
+		@Override
+		public void callback(ListResponse<ResourceType> response) {
+			showResourceTypeList(response.getResources());
+		}
+    
+    }, 200).getResourceTypes();
+  }
+  
+  void showResourceTypeList(List<ResourceType> resourceTypes) {
+	  resourceTypes.forEach(s -> {
+		  Div resourceType = (Div) Window.getDocument().createElement("div");
+		  resourceType.setInnerHTML(s.toString());
+		  root.appendChild(resourceType);
+	  });
   }
   
   void showSchemaList(List<Schema> schemas) {
