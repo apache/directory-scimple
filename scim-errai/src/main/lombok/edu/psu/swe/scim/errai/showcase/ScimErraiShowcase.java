@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.errai.showcase;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.dom.Div;
@@ -12,6 +13,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import edu.psu.swe.scim.errai.client.business.common.ListResponse;
 import edu.psu.swe.scim.errai.client.business.resourcetype.ResourceType;
+import edu.psu.swe.scim.errai.client.business.schema.Attribute;
 import edu.psu.swe.scim.errai.client.business.schema.Schema;
 import edu.psu.swe.scim.errai.client.business.scim.ScimServiceProvider;
 
@@ -57,11 +59,32 @@ public class ScimErraiShowcase {
   }
   
   void showSchemaList(List<Schema> schemas) {
-    schemas.forEach((s) -> {
+    schemas.forEach(s -> {
       Div schema = (Div) Window.getDocument().createElement("div");
-      schema.setInnerHTML(s.getName());
+      schema.setInnerHTML(s.getName() + " - " + s.getAttributes().length);
       root.appendChild(schema);
+      Stream.of(s.getAttributes()).forEach(a -> {
+        root.appendChild(getAttribute(a, ""));
+      });
     });
+  }
+  
+  Div getAttribute(Attribute a, String spacer) {
+    String adjustedSpacer = spacer + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    Div attribute = (Div) Window.getDocument().createElement("div");
+    attribute.appendChild(getSpan(adjustedSpacer));
+    attribute.appendChild(getSpan("Name: " + a.getName()));
+    attribute.appendChild(getSpan("Type: " + a.getType().name()));
+    if(Attribute.Type.COMPLEX.equals(a.getType())) {
+      Stream.of(a.getSubAttributes()).forEach(sa -> attribute.appendChild(getAttribute(sa, adjustedSpacer)));
+    }
+    return attribute;
+  }
+  
+  Span getSpan(String innerHtml) {
+    Span spacer = (Span) Window.getDocument().createElement("span");
+    spacer.setInnerHTML(innerHtml);
+    return spacer;
   }
 
 }
