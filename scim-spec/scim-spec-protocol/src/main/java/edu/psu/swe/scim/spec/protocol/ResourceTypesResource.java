@@ -45,7 +45,7 @@ public interface ResourceTypesResource {
   @GET
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Get All Resource Types", produces=Constants.SCIM_CONTENT_TYPE)
-  default Response getAllResourceTypes(@QueryParam("filter") String filter) {
+  default Response getAllResourceTypes(@QueryParam("filter") String filter) throws Exception {
 
     if (filter != null) {
       return Response.status(Status.FORBIDDEN).build();
@@ -58,7 +58,7 @@ public interface ResourceTypesResource {
   @Path("{name}")
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Get Resource Type by URN", produces=Constants.SCIM_CONTENT_TYPE)
-  default Response getResourceType(@PathParam("name") String name) {
+  default Response getResourceType(@PathParam("name") String name) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

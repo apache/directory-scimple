@@ -36,6 +36,11 @@
         <groupId>edu.psu.swe.scim</groupId>
         <artifactId>scim-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>edu.psu.swe.commons</groupId>
+      <artifactId>commons-jaxrs</artifactId>
+      <version>1.13</version>
+    </dependency>
   </dependencies>
   
 </project>
