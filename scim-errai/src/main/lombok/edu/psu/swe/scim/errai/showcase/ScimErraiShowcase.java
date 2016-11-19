@@ -19,6 +19,9 @@ import edu.psu.swe.scim.errai.client.business.scim.ScimServiceProvider;
 
 @EntryPoint
 public class ScimErraiShowcase {
+
+  RemoteCallback<ListResponse<ResourceType>> resourceTypesCallaback = r -> showResourceTypeList(r.getResources());
+  RemoteCallback<ListResponse<Schema>> schemasCallback = r -> showSchemaList(r.getResources());
   
   Div root;
   
@@ -31,23 +34,9 @@ public class ScimErraiShowcase {
     
     RestClient.setJacksonMarshallingActive(true);
 
-    RestClient.create(ScimServiceProvider.class, new RemoteCallback<ListResponse<Schema>>() {
-
-      @Override
-      public void callback(ListResponse<Schema> response) {
-        showSchemaList(response.getResources());
-      }
-      
-    }, 200).getSchemas();
+    RestClient.create(ScimServiceProvider.class, schemasCallback, 200).getSchemas();
     
-    RestClient.create(ScimServiceProvider.class, new RemoteCallback<ListResponse<ResourceType>>() {
-
-		@Override
-		public void callback(ListResponse<ResourceType> response) {
-			showResourceTypeList(response.getResources());
-		}
-    
-    }, 200).getResourceTypes();
+    RestClient.create(ScimServiceProvider.class, resourceTypesCallaback, 200).getResourceTypes();
   }
   
   void showResourceTypeList(List<ResourceType> resourceTypes) {
@@ -63,9 +52,7 @@ public class ScimErraiShowcase {
       Div schema = (Div) Window.getDocument().createElement("div");
       schema.setInnerHTML(s.getName() + " - " + s.getAttributes().length);
       root.appendChild(schema);
-      Stream.of(s.getAttributes()).forEach(a -> {
-        root.appendChild(getAttribute(a, ""));
-      });
+      Stream.of(s.getAttributes()).forEach(a -> root.appendChild(getAttribute(a, "")));
     });
   }
   
