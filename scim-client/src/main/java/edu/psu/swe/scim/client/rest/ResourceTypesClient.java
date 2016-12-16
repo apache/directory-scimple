@@ -3,12 +3,17 @@ package edu.psu.swe.scim.client.rest;
 import java.util.List;
 import java.util.Optional;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
+import edu.psu.swe.commons.jaxrs.exceptions.BackingStoreChangedException;
+import edu.psu.swe.commons.jaxrs.exceptions.ConflictingDataException;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
+import edu.psu.swe.commons.jaxrs.exceptions.RestServerException;
+import edu.psu.swe.commons.jaxrs.exceptions.ServiceAuthException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
 import edu.psu.swe.scim.spec.protocol.ResourceTypesResource;
 import edu.psu.swe.scim.spec.schema.ResourceType;
@@ -26,7 +31,7 @@ public class ResourceTypesClient implements AutoCloseable {
     this.target = this.client.target(baseUrl).path("ResourceTypes");
   }
 
-  public List<ResourceType> getAllResourceTypes(String filter) throws RestClientException {
+  public List<ResourceType> getAllResourceTypes(String filter) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     List<ResourceType> resourceTypes;
     Response response = this.resourceTypesResourceClient.getAllResourceTypes(filter);
 
@@ -40,7 +45,7 @@ public class ResourceTypesClient implements AutoCloseable {
     return resourceTypes;
   }
 
-  public Optional<ResourceType> getResourceType(String name) throws RestClientException {
+  public Optional<ResourceType> getResourceType(String name) throws RestClientException, ProcessingException, IllegalStateException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Optional<ResourceType> resourceType;
     Response response = this.resourceTypesResourceClient.getResourceType(name);
 

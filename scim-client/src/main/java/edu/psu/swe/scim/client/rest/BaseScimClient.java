@@ -4,13 +4,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
+import edu.psu.swe.commons.jaxrs.RestCall;
+import edu.psu.swe.commons.jaxrs.exceptions.BackingStoreChangedException;
+import edu.psu.swe.commons.jaxrs.exceptions.ConflictingDataException;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
+import edu.psu.swe.commons.jaxrs.exceptions.RestServerException;
+import edu.psu.swe.commons.jaxrs.exceptions.ServiceAuthException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
@@ -30,13 +37,14 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
   private final GenericType<List<T>> scimResourceListGenericType;
   private final WebTarget target;
   private final ScimClient scimClient;
+  private RestCall invoke = Invocation::invoke;
 
   public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<List<T>> scimResourceListGenericType) throws IllegalArgumentException {
     ScimResourceType scimResourceType = scimResourceClass.getAnnotation(ScimResourceType.class);
     String endpoint = scimResourceType != null ? scimResourceType.endpoint() : null;
 
     if (endpoint == null) {
-      throw new IllegalArgumentException("scimResourceClass: " + scimResourceType.getClass().getSimpleName() + " must have annotation " + ScimResourceType.class.getSimpleName() + " and annotation must have non-null endpoint");
+      throw new IllegalArgumentException("scimResourceClass: " + scimResourceClass.getSimpleName() + " must have annotation " + ScimResourceType.class.getSimpleName() + " and annotation must have non-null endpoint");
     }
     this.client = client;
     this.scimResourceClass = scimResourceClass;
@@ -45,18 +53,24 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     this.scimClient = new ScimClient();
   }
 
+  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<List<T>> scimResourceListGenericType, RestCall invoke) throws IllegalArgumentException {
+    this(client, baseUrl, scimResourceClass, scimResourceListGenericType);
+
+    this.invoke = invoke;
+  }
+
   @Override
   public void close() {
     this.client.close();
   }
 
-  public Optional<T> getById(String id) throws RestClientException {
+  public Optional<T> getById(String id) throws RestClientException, ProcessingException, IllegalStateException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Optional<T> resource = this.getById(id, null, null);
 
     return resource;
   }
 
-  public Optional<T> getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException {
+  public Optional<T> getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException, ProcessingException, IllegalStateException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Optional<T> resource;
     Response response = this.scimClient.getById(id, attributes, excludedAttributes);
 
@@ -68,7 +82,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return resource;
   }
 
-  public List<T> query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws RestClientException {
+  public List<T> query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     List<T> resourceList;
     Response response = this.scimClient.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
     resourceList = handleResponse(response, this.scimResourceListGenericType, response::readEntity);
@@ -76,17 +90,17 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return resourceList;
   }
 
-  public void create(T resource) throws RestClientException {
+  public void create(T resource) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     this.create(resource, null, null);
   }
 
-  public void create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException {
+  public void create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Response response = this.scimClient.create(resource, attributes, excludedAttributes);
 
     handleResponse(response);
   }
 
-  public List<T> find(SearchRequest searchRequest) throws RestClientException {
+  public List<T> find(SearchRequest searchRequest) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     List<T> resourceList;
     Response response = this.scimClient.find(searchRequest);
     resourceList = handleResponse(response, this.scimResourceListGenericType, response::readEntity);
@@ -94,29 +108,29 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return resourceList;
   }
 
-  public void update(String id, T resource) throws RestClientException {
+  public void update(String id, T resource) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     this.update(id, resource, null, null);
   }
 
-  public void update(String id, T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException {
+  public void update(String id, T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Response response = this.scimClient.update(resource, id, attributes, excludedAttributes);
 
     handleResponse(response);
   }
 
-  public void patch(PatchRequest patchRequest) throws RestClientException {
+  public void patch(PatchRequest patchRequest) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Response response = this.scimClient.patch(patchRequest);
 
     handleResponse(response);
   }
 
-  public void delete(String id) throws RestClientException {
+  public void delete(String id) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     Response response = this.scimClient.delete(id);
 
     handleResponse(response);
   }
 
-  private static <E, T> E handleResponse(Response response, T type, Function<T, E> readEntity) throws RestClientException {
+  private static <E, T> E handleResponse(Response response, T type, Function<T, E> readEntity) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     E entity;
 
     try {
@@ -129,7 +143,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return entity;
   }
 
-  private static void handleResponse(Response response) throws RestClientException {
+  private static void handleResponse(Response response) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
     try {
       RestClientUtil.checkForSuccess(response);
     } finally {
@@ -137,23 +151,34 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     }
   }
 
+  public RestCall getInvoke() {
+    return this.invoke;
+  }
+
+  public void setInvoke(RestCall invoke) {
+    this.invoke = invoke;
+  }
+
   private class ScimClient implements BaseResourceTypeResource<T> {
 
     @Override
     public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .path(id)
           .queryParam("attributes", attributes)
           .queryParam("excludedAttributes", excludedAttributes)
           .request(Constants.SCIM_CONTENT_TYPE)
-          .get();
+          .buildGet();
+      response = invoke.apply(request);
 
       return response;
     }
 
     @Override
     public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .queryParam("attributes", attributes)
           .queryParam("excludedAttributes", excludedAttributes)
           .queryParam("filter", filter)
@@ -162,59 +187,70 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .queryParam("startIndex", startIndex)
           .queryParam("count", count)
           .request(Constants.SCIM_CONTENT_TYPE)
-          .get();
+          .buildGet();
+      response = invoke.apply(request);
 
       return response;
     }
 
     @Override
     public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .queryParam("attributes", attributes)
           .queryParam("excludedAttributes", excludedAttributes)
           .request(Constants.SCIM_CONTENT_TYPE)
-          .post(Entity.entity(resource, Constants.SCIM_CONTENT_TYPE));
+          .buildPost(Entity.entity(resource, Constants.SCIM_CONTENT_TYPE));
+      response = invoke.apply(request);
 
       return response;
     }
 
     @Override
     public Response find(SearchRequest searchRequest) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .path(".search")
           .request(Constants.SCIM_CONTENT_TYPE)
-          .post(Entity.entity(searchRequest, Constants.SCIM_CONTENT_TYPE));
+          .buildPost(Entity.entity(searchRequest, Constants.SCIM_CONTENT_TYPE));
+      response = invoke.apply(request);
 
       return response;
     }
 
     @Override
     public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .path(id)
           .queryParam("attributes", attributes)
           .queryParam("excludedAttributes", excludedAttributes)
           .request(Constants.SCIM_CONTENT_TYPE)
-          .put(Entity.entity(resource, Constants.SCIM_CONTENT_TYPE));
+          .buildPut(Entity.entity(resource, Constants.SCIM_CONTENT_TYPE));
+      response = invoke.apply(request);
 
       return response;
     }
 
     @Override
     public Response patch(PatchRequest patchRequest) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .request(Constants.SCIM_CONTENT_TYPE)
-          .method("PATCH", Entity.entity(patchRequest, Constants.SCIM_CONTENT_TYPE));
+          .build("PATCH", Entity.entity(patchRequest, Constants.SCIM_CONTENT_TYPE));
+      response = invoke.apply(request);
 
       return response;
     }
 
     @Override
     public Response delete(String id) throws RestClientException {
-      Response response = BaseScimClient.this.target
+      Response response;
+      Invocation request = BaseScimClient.this.target
           .path(id)
           .request(Constants.SCIM_CONTENT_TYPE)
-          .delete();
+          .buildDelete();
+      response = invoke.apply(request);
 
       return response;
     }
