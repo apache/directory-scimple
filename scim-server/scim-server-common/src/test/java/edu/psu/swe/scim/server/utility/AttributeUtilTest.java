@@ -220,7 +220,7 @@ public class AttributeUtilTest {
     LOG.info(sw.toString());
   }
   
-  private ScimUser getScimUser() throws InvalidExtensionException {
+  private ScimUser getScimUser() {
     ScimUser user = new ScimUser();
 
     user.setActive(true);
