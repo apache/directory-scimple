@@ -19,7 +19,7 @@ public class EndpointUtil {
   @Inject
   ProviderRegistry registry;
   
-  public URI getEndpoint(Class<? extends ScimResource> resource) {
+  public URI getEndpointUri(Class<? extends ScimResource> resource) {
     
     URI uri = null;
     if (registry.getProvider(resource) != null) {
@@ -27,6 +27,16 @@ public class EndpointUtil {
     }
     
     return uri;
+  }
+  
+  public UriBuilder getEndpointUriBuilder(Class<? extends ScimResource> resource) {
+    
+    UriBuilder uriBuilder = null;
+    if (registry.getProvider(resource) != null) {
+      uriBuilder = baseUri.path(resource.getSimpleName());
+    }
+    
+    return uriBuilder;
   }
   
   public void process(UriInfo uriInfo) {
