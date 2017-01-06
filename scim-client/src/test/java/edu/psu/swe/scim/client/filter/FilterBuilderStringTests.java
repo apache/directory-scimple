@@ -15,19 +15,19 @@ public class FilterBuilderStringTests {
 
   @Test
   public void testEndsWith() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().endsWith("address.streetAddress", "Way").build();
+    String encoded = FilterClient.builder().endsWith("address.streetAddress", "Way").toString();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testStartsWith()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().startsWith("address.streetAddress", "133").build();
+    String encoded = FilterClient.builder().startsWith("address.streetAddress", "133").toString();
     Filter filter = new Filter(decode(encoded));
   }
 
   @Test
   public void testContains()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().contains("address.streetAddress", "MacDuff").build();
+    String encoded = FilterClient.builder().contains("address.streetAddress", "MacDuff").toString();
     Filter filter = new Filter(decode(encoded));
   }
 

@@ -59,7 +59,7 @@ public class FilterBuilderTest {
   @Test
   public void testSimpleAnd() throws UnsupportedEncodingException, FilterParseException {
   
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and().equalTo("name.familyName", "Baggins").build();
+    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and().equalTo("name.familyName", "Baggins").toString();
   
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -68,7 +68,7 @@ public class FilterBuilderTest {
   @Test
   public void testSimpleOr() throws UnsupportedEncodingException, FilterParseException {
   
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.familyName", "Baggins").build();
+    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.familyName", "Baggins").toString();
   
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -77,7 +77,7 @@ public class FilterBuilderTest {
   @Test
   public void testAndOrChain() throws UnsupportedEncodingException, FilterParseException {
   
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").build();
+    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").toString();
   
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -86,7 +86,7 @@ public class FilterBuilderTest {
   @Test
   public void testAndOrChainComplex() throws UnsupportedEncodingException, FilterParseException {
   
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).build();
+    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).toString();
   
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -95,7 +95,7 @@ public class FilterBuilderTest {
   @Test
   public void testOrAndChainComplex() throws UnsupportedEncodingException, FilterParseException {
   
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).build();
+    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).toString();
   
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -107,7 +107,7 @@ public class FilterBuilderTest {
     FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
     FilterClient.Builder b2 = FilterClient.builder().equalTo("address.streetAddress", "Underhill").or().equalTo("address.streetAddress", "Overhill").and().equalTo("address.postalCode", "16803");
     
-    String encoded = FilterClient.builder().and(b1.filter(), b2.filter()).build();
+    String encoded = FilterClient.builder().and(b1.filter(), b2.filter()).toString();
     
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -117,7 +117,7 @@ public class FilterBuilderTest {
   public void testNot() throws UnsupportedEncodingException, FilterParseException {
     FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
 
-    String encoded = FilterClient.builder().not(b1.filter()).build();
+    String encoded = FilterClient.builder().not(b1.filter()).toString();
     
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -129,7 +129,7 @@ public class FilterBuilderTest {
     FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
     FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
     
-    String encoded = b2.build();
+    String encoded = b2.toString();
     
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -144,7 +144,7 @@ public class FilterBuilderTest {
     
     FilterClient.Builder b3 = FilterClient.builder().attributeHas("address", b2.filter());
    
-    String encoded = b3.build();
+    String encoded = b3.toString();
     
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -159,7 +159,7 @@ public class FilterBuilderTest {
     FilterClient.Builder b3 = FilterClient.builder().equalTo("name.giveName", "Gandalf").and(b2.filter());
     FilterClient.Builder b4 = FilterClient.builder().attributeHas("address", b3.filter());
    
-    String encoded = b4.build();
+    String encoded = b4.toString();
     
     String decoded = decode(encoded);
     Filter filter = new Filter(decoded); 
@@ -167,7 +167,7 @@ public class FilterBuilderTest {
   //@Test
 //  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
 // 
-//     String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).build();
+//     String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).toString();
 // 
 //     String decoded = decode(encoded);
 //     Filter filter = new Filter(decoded);
@@ -176,7 +176,7 @@ public class FilterBuilderTest {
 //  //@Test
 //  public void testAnd() throws UnsupportedEncodingException, FilterParseException {
 //
-//    String encoded = filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).build();
+//    String encoded = filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).toString();
 //    
 //    String decoded = decode(encoded);
 //    Filter filter = new Filter(decoded);
@@ -188,7 +188,7 @@ public class FilterBuilderTest {
 //    String encoded = filterBuilder.equalTo("addresses.postalCode", "16801")
 //                                  .and()
 //                                  .or(attributeComparisonExpression, attributeComparisonExpression2)
-//                                  .build();
+//                                  .toString();
 //
 //    log.info(encoded);
 //    

@@ -3,43 +3,35 @@ package edu.psu.swe.scim.server.utility;
 import java.net.URI;
 
 import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import edu.psu.swe.scim.server.provider.ProviderRegistry;
+import edu.psu.swe.scim.spec.annotation.ScimResourceType;
+import edu.psu.swe.scim.spec.exception.InvalidScimResourceException;
 import edu.psu.swe.scim.spec.resources.ScimResource;
-import lombok.Data;
 
 @RequestScoped
-@Data
 public class EndpointUtil {
-  private UriBuilder baseUri;
+  private URI baseUri;
   
-  @Inject
-  ProviderRegistry registry;
-  
-  public URI getEndpointUri(Class<? extends ScimResource> resource) {
-    
-    URI uri = null;
-    if (registry.getProvider(resource) != null) {
-      uri = baseUri.path(resource.getSimpleName()).build();
-    }
-    
-    return uri;
+  public UriBuilder getBaseUriBuilder() {
+    return UriBuilder.fromUri(baseUri);
   }
   
   public UriBuilder getEndpointUriBuilder(Class<? extends ScimResource> resource) {
-    
-    UriBuilder uriBuilder = null;
-    if (registry.getProvider(resource) != null) {
-      uriBuilder = baseUri.path(resource.getSimpleName());
+    ScimResourceType[] sr = resource.getAnnotationsByType(ScimResourceType.class);
+
+    if (sr.length == 0 || sr.length > 1) {
+      throw new InvalidScimResourceException("ScimResource class must have a ScimResourceType annotation");
     }
+
+    // yuck! TODO where to get REST endpoint from?
+    String resourceName = sr[0].name() + "s";  
     
-    return uriBuilder;
+    return UriBuilder.fromUri(baseUri).path(resourceName);
   }
   
   public void process(UriInfo uriInfo) {
-    baseUri = uriInfo.getBaseUriBuilder();
+    baseUri = uriInfo.getBaseUri();
   }
 }

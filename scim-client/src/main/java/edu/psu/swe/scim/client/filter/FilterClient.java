@@ -15,6 +15,7 @@ import edu.psu.swe.scim.spec.protocol.filter.GroupExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
 import edu.psu.swe.scim.spec.protocol.filter.ValuePathExpression;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -623,10 +624,20 @@ public class FilterClient {
       }
     }
 
-    public String build() throws UnsupportedEncodingException {
+    @Override
+    public String toString() {
       
       String filterString = filterExpression.toFilter();
-      return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
+      try {
+        return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
+      } catch (UnsupportedEncodingException e) {
+        log.error("Unsupported encoding:", e);
+        return null;
+      }
+    }
+    
+    public Filter build() {
+      return new Filter(filterExpression);
     }
 
     public FilterExpression filter() {
