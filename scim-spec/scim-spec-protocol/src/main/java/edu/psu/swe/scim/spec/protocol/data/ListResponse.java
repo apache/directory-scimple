@@ -15,7 +15,9 @@ import edu.psu.swe.scim.spec.resources.BaseResource;
 @EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class ListResponse extends BaseResource {
+public class ListResponse<T> extends BaseResource {
+
+  private static final long serialVersionUID = -2381780997440673136L;
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
   
@@ -29,7 +31,7 @@ public class ListResponse extends BaseResource {
   Integer itemsPerPage;
 
   @XmlElement(name = "Resources")
-  List<Object> resources;
+  List<T> resources;
 
   public ListResponse() {
     super(SCHEMA_URI);
