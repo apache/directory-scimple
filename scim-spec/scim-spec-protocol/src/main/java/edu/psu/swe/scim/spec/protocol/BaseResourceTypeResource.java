@@ -1,12 +1,5 @@
 package edu.psu.swe.scim.spec.protocol;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.jaxrs.PATCH;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,11 +14,18 @@ import javax.ws.rs.core.Response.Status;
 
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.jaxrs.PATCH;
 
 @Api(tags="SCIM", hidden=true)
 public interface BaseResourceTypeResource<T> {
@@ -59,7 +59,7 @@ public interface BaseResourceTypeResource<T> {
    */
   @GET
   @Produces(Constants.SCIM_CONTENT_TYPE)
-  @ApiOperation(value="Find by a combination of query parameters", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, responseContainer="List", code=200)
+  @ApiOperation(value="Find by a combination of query parameters", produces=Constants.SCIM_CONTENT_TYPE, response=ListResponse.class, code=200)
   @ApiResponses(value={
                   @ApiResponse(code=400, message="Bad Request"),
                   @ApiResponse(code=404, message="Not found"),
@@ -100,7 +100,7 @@ public interface BaseResourceTypeResource<T> {
   @POST
   @Path("/.search")
   @Produces(Constants.SCIM_CONTENT_TYPE)
-  @ApiOperation(value = "Search", produces=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, responseContainer = "List", code = 200)
+  @ApiOperation(value = "Search", produces=Constants.SCIM_CONTENT_TYPE, response = ListResponse.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response find(SearchRequest request) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();

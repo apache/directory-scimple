@@ -75,4 +75,9 @@ public class Filter {
       throw new FilterParseException(e);
     }
   }
+  
+  @Override
+  public String toString() {
+    return expression.toFilter();
+  }
 }

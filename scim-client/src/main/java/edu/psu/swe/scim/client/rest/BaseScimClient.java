@@ -24,6 +24,7 @@ import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.Constants;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
@@ -82,12 +83,12 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return resource;
   }
 
-  public List<T> query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
-    List<T> resourceList;
+  public ListResponse query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
+    ListResponse listResponse;;
     Response response = this.scimClient.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
-    resourceList = handleResponse(response, this.scimResourceListGenericType, response::readEntity);
+    listResponse = handleResponse(response, ListResponse.class, response::readEntity);
 
-    return resourceList;
+    return listResponse;
   }
 
   public void create(T resource) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
@@ -100,12 +101,12 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     handleResponse(response);
   }
 
-  public List<T> find(SearchRequest searchRequest) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
-    List<T> resourceList;
+  public ListResponse find(SearchRequest searchRequest) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
+    ListResponse listResponse;
     Response response = this.scimClient.find(searchRequest);
-    resourceList = handleResponse(response, this.scimResourceListGenericType, response::readEntity);
+    listResponse = handleResponse(response, ListResponse.class, response::readEntity);
 
-    return resourceList;
+    return listResponse;
   }
 
   public void update(String id, T resource) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
