@@ -92,15 +92,8 @@ public class ProviderRegistry {
 
     if (extensionList != null) {
       for (Class<? extends ScimExtension> scimExtension : extensionList) {
-        ScimExtension newScimExtensionInstance;
-        try {
-          newScimExtensionInstance = scimExtension.newInstance();
-          log.info("Registering a extension of type " + newScimExtensionInstance.getUrn());
-        } catch (InstantiationException | IllegalAccessException e) {
-          throw new InvalidProviderException(e.getMessage());
-        }
-
-        scimExtensionRegistry.registerExtension(clazz, newScimExtensionInstance);
+        log.info("Registering a extension of type " + scimExtension);
+        scimExtensionRegistry.registerExtension(clazz, scimExtension);
       }
 
       Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();

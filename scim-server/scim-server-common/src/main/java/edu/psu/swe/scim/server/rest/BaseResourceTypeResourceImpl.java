@@ -285,7 +285,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     PageRequest pageRequest = request.getPageRequest();
     SortRequest sortRequest = request.getSortRequest();
 
-    ListResponse listResponse = new ListResponse();
+    ListResponse<T> listResponse = new ListResponse<>();
 
     endpointUtil.process(uriInfo);
     FilterResponse<T> filterResp = null;
@@ -307,7 +307,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       listResponse.setStartIndex(1);
       listResponse.setTotalResults(filterResp.getResources().size());
 
-      List<Object> results = new ArrayList<>();
+      List<T> results = new ArrayList<>();
 
       for (T resource : filterResp.getResources()) {
         EntityTag etag = null;
