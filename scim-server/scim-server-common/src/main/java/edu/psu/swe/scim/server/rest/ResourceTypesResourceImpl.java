@@ -43,12 +43,12 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
       resourceType.setMeta(meta);
     }
     
-    ListResponse listResponse = new ListResponse();
+    ListResponse<ResourceType> listResponse = new ListResponse<>();
     listResponse.setItemsPerPage(resourceTypes.size());
     listResponse.setStartIndex(1);
     listResponse.setTotalResults(resourceTypes.size());
     
-    List<Object> objectList = new ArrayList<>(resourceTypes);
+    List<ResourceType> objectList = new ArrayList<>(resourceTypes);
     listResponse.setResources(objectList);
     
     return Response.ok(listResponse).build();

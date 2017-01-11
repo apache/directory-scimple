@@ -57,12 +57,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
     LuckyNumberExtension luckyNumberExtension = new LuckyNumberExtension();
     luckyNumberExtension.setLuckyNumber(DEFAULT_USER_LUCKY_NUMBER);
     
-    try {
-      user.addExtension(luckyNumberExtension);
-    } catch (InvalidExtensionException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    user.addExtension(luckyNumberExtension);
     
     users.put(user.getId(), user);
   }

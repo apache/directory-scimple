@@ -71,7 +71,12 @@ public abstract class ScimResource extends BaseResource implements Serializable 
     this.baseUrn = urn;
   }
 
-  public void addExtension(ScimExtension extension) throws InvalidExtensionException {
+  /**
+   * Add an extension to the ScimResource
+   * @param extension the scim extension
+   * @throws InvalidExtensionException if the ScimExtension passed in is improperly configured.  
+   */
+  public void addExtension(ScimExtension extension) {
     ScimExtensionType[] se = extension.getClass().getAnnotationsByType(ScimExtensionType.class);
 
     if (se.length == 0 || se.length > 1) {
@@ -88,8 +93,14 @@ public abstract class ScimResource extends BaseResource implements Serializable 
     return extensions.get(urn);
   }
   
+  /**
+   * Returns the scim extension of a particular class
+   * @param extensionClass 
+   * @return
+   * @throws InvalidExtensionException if the ScimExtension passed in is improperly configured.  
+   */
   @SuppressWarnings("unchecked")
-  public <T> T getExtension(Class<T> extensionClass) throws InvalidExtensionException {
+  public <T> T getExtension(Class<T> extensionClass) {
     ScimExtensionType[] se = extensionClass.getAnnotationsByType(ScimExtensionType.class);
 
     if (se.length == 0 || se.length > 1) {

@@ -90,7 +90,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     provider = getProvider();
     if (provider == null) {
-      return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
+      try {
+        // does not throw an exception server side
+        return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
+      } catch (Exception e) {
+        throw new RuntimeException();
+      }
     }
 
     endpointUtil.process(uriInfo);
@@ -184,7 +189,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     provider = getProvider();
     if (provider == null) {
-      return BaseResourceTypeResource.super.create(resource, attributes, excludedAttributes);
+      try {
+        // does not throw an exception server side
+        return BaseResourceTypeResource.super.create(resource, attributes, excludedAttributes);
+      } catch (Exception e) {
+        throw new RuntimeException();
+      }
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
@@ -257,7 +267,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     provider = getProvider();
     if (provider == null) {
-      return BaseResourceTypeResource.super.find(request);
+      try {
+        // does not throw an exception server side
+        return BaseResourceTypeResource.super.find(request);
+      } catch (Exception e) {
+        throw new RuntimeException();
+      }
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
@@ -270,7 +285,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     PageRequest pageRequest = request.getPageRequest();
     SortRequest sortRequest = request.getSortRequest();
 
-    ListResponse listResponse = new ListResponse();
+    ListResponse<T> listResponse = new ListResponse<>();
 
     endpointUtil.process(uriInfo);
     FilterResponse<T> filterResp = null;
@@ -292,7 +307,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       listResponse.setStartIndex(1);
       listResponse.setTotalResults(filterResp.getResources().size());
 
-      List<Object> results = new ArrayList<>();
+      List<T> results = new ArrayList<>();
 
       for (T resource : filterResp.getResources()) {
         EntityTag etag = null;
@@ -339,7 +354,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     provider = getProvider();
     if (provider == null) {
-      return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
+      try {
+        // does not throw an exception server side
+        return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
+      } catch (Exception e) {
+        throw new RuntimeException();
+      }
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
@@ -419,7 +439,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Override
   public Response patch(PatchRequest patchRequest) {
     // TODO Auto-generated method stub
-    return BaseResourceTypeResource.super.patch(patchRequest);
+    try {
+      // does not throw an exception server side
+      return BaseResourceTypeResource.super.patch(patchRequest);
+    } catch (Exception e) {
+      throw new RuntimeException();
+    }
   }
 
   @Override
@@ -429,7 +454,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       Provider<T> provider = getProvider();
 
       if (provider == null) {
-        response = BaseResourceTypeResource.super.delete(id);
+        try {
+          // does not throw an exception server side
+          response = BaseResourceTypeResource.super.delete(id);
+        } catch (Exception e) {
+          throw new RuntimeException();
+        }
       } else {
         endpointUtil.process(uriInfo);
         response = Response.noContent().build();

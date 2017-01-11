@@ -33,7 +33,7 @@ public class SchemaResourceImpl implements SchemaResource {
       return Response.status(Status.FORBIDDEN).build();
     }
     
-    ListResponse listResponse = new ListResponse();
+    ListResponse<Schema> listResponse = new ListResponse<>();
     Collection<Schema> schemas = registry.getAllSchemas();
     
     for (Schema schema : schemas) {
@@ -48,7 +48,7 @@ public class SchemaResourceImpl implements SchemaResource {
     listResponse.setStartIndex(1);
     listResponse.setTotalResults(schemas.size());
     
-    List<Object> objectList = new ArrayList<>(schemas);
+    List<Schema> objectList = new ArrayList<>(schemas);
     listResponse.setResources(objectList);
     
     return Response.ok(listResponse).build();

@@ -3,13 +3,20 @@
  */
 package edu.psu.swe.scim.errai.client.business.schema;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+
 import lombok.Data;
 
 /**
- * @author smoyer1
- *
+ * A DTO representing the wire format of each of a SCIM Schema's
+ * attributes.  See section 7 of the SCIM Schema Specification at:
+ * 
+ * https://tools.ietf.org/html/rfc7643#section-7
+ * 
+ * @author Steve Moyer &lt;smoyer@psu.edu&gt;
  */
 @Data
+@Portable
 public class Attribute {
   
   public enum Mutability {
@@ -41,6 +48,7 @@ public class Attribute {
     DECIMAL,
     INTEGER,
     DATE_TIME,
+    BINARY,
     REFERENCE,
     COMPLEX,
     ;

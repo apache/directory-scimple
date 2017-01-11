@@ -3,13 +3,20 @@
  */
 package edu.psu.swe.scim.errai.client.business.common;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+
 import lombok.Data;
 
 /**
- * @author smoyer1
- *
+ * A DTO that represents the SCIM error while on the wire.  See
+ * section 3.12 of the SCIM Protocol Specification at:
+ * 
+ * https://tools.ietf.org/html/rfc7644#section-3.12
+ * 
+ * @author Steve Moyer &lt;smoyer@psu.edu&gt;
  */
 @Data
+@Portable
 public class Error {
   
   public enum Type {
@@ -27,7 +34,7 @@ public class Error {
     
   }
   
-  int status = 200;
+  int status = 400;
   Type scimType;
   String detail;
 

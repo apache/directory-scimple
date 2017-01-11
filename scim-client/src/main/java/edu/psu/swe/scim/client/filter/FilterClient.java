@@ -15,15 +15,21 @@ import edu.psu.swe.scim.spec.protocol.filter.GroupExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalExpression;
 import edu.psu.swe.scim.spec.protocol.filter.LogicalOperator;
 import edu.psu.swe.scim.spec.protocol.filter.ValuePathExpression;
+import edu.psu.swe.scim.spec.protocol.search.Filter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FilterClient {
 
+  private FilterClient() {
+    
+  }
+  
   public abstract static class SimpleLogicalBuilder extends Builder {
     SimpleLogicalBuilder() {
     }
 
+    @Override
     public Builder and() {
       if (filterExpression == null) {
         throw new IllegalStateException();
@@ -37,6 +43,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder or() {
       if (filterExpression == null) {
         throw new IllegalStateException();
@@ -53,6 +60,7 @@ public class FilterClient {
 
   public abstract static class ComplexLogicalBuilder extends SimpleLogicalBuilder {
 
+    @Override
     public Builder or(FilterExpression fe1) {
       if (filterExpression instanceof AttributeComparisonExpression) {
         LogicalExpression logicalExpression = new LogicalExpression();
@@ -70,6 +78,7 @@ public class FilterClient {
       return handleLogicalExpression(logicalExpression, LogicalOperator.OR);
     }
     
+    @Override
     public Builder or(FilterExpression fe1, FilterExpression fe2) {
       LogicalExpression logicalExpression = new LogicalExpression();
       logicalExpression.setLeft(fe1);
@@ -79,6 +88,7 @@ public class FilterClient {
       return handleLogicalExpression(logicalExpression, LogicalOperator.OR);
     }
 
+    @Override
     public Builder and(FilterExpression fe1, FilterExpression fe2) {
       LogicalExpression logicalExpression = new LogicalExpression();
       logicalExpression.setLeft(fe1);
@@ -88,6 +98,7 @@ public class FilterClient {
       return handleLogicalExpression(logicalExpression, LogicalOperator.AND);
     }
     
+    @Override
     public Builder and(FilterExpression fe1) {
       if (filterExpression instanceof AttributeComparisonExpression) {
         LogicalExpression logicalExpression = new LogicalExpression();
@@ -110,6 +121,7 @@ public class FilterClient {
   // that the next step is correct
   public static class ComparisonBuilder extends ComplexLogicalBuilder {
 
+    @Override
     public Builder equalTo(String key, String value) {
 
       AttributeReference ar = new AttributeReference(key);
@@ -120,6 +132,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder equalTo(String key, Boolean value) {
 
       AttributeReference ar = new AttributeReference(key);
@@ -130,6 +143,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder equalTo(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
@@ -139,6 +153,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder equalTo(String key, LocalDate value) {
 
       AttributeReference ar = new AttributeReference(key);
@@ -149,6 +164,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder equalTo(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
@@ -158,6 +174,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public <T extends Number> Builder equalTo(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, value);
@@ -167,6 +184,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder equalNull(String key) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EQ, null);
@@ -176,6 +194,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder notEqual(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -185,6 +204,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder notEqual(String key, Boolean value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -194,6 +214,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder notEqual(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -203,6 +224,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder notEqual(String key, LocalDate value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -212,6 +234,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder notEqual(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -221,6 +244,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public <T extends Number> Builder notEqual(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, value);
@@ -230,6 +254,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder notEqualNull(String key) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.NE, null);
@@ -239,6 +264,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder endsWith(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.EW, value);
@@ -248,6 +274,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder startsWith(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.SW, value);
@@ -257,6 +284,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder contains(String key, String value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.CO, value);
@@ -266,6 +294,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public <T extends Number> Builder greaterThan(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
@@ -275,6 +304,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder greaterThan(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
@@ -284,6 +314,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder greaterThan(String key, LocalDate value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
@@ -293,6 +324,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder greaterThan(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
@@ -302,6 +334,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public <T extends Number> Builder greaterThanOrEquals(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
@@ -311,6 +344,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder greaterThanOrEquals(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
@@ -320,6 +354,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder greaterThanOrEquals(String key, LocalDate value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
@@ -329,6 +364,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder greaterThanOrEquals(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GE, value);
@@ -338,6 +374,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public <T extends Number> Builder lessThan(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
@@ -347,6 +384,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder lessThan(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
@@ -356,6 +394,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder lessThan(String key, LocalDate value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
@@ -365,6 +404,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder lessThan(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LT, value);
@@ -374,6 +414,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public <T extends Number> Builder lessThanOrEquals(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
@@ -383,6 +424,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder lessThanOrEquals(String key, Date value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
@@ -392,6 +434,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder lessThanOrEquals(String key, LocalDate value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
@@ -401,6 +444,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder lessThanOrEquals(String key, LocalDateTime value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.LE, value);
@@ -410,6 +454,7 @@ public class FilterClient {
       return this;
     }
 
+    @Override
     public Builder not(FilterExpression expression) {
       GroupExpression groupExpression = new GroupExpression();
 
@@ -523,7 +568,7 @@ public class FilterClient {
       if (filterExpression == null) {
         filterExpression = expression;
       } else if (filterExpression instanceof AttributeComparisonExpression) {
-        System.out.println("Adding a logical expression as the new root");
+        log.info("Adding a logical expression as the new root");
 
         log.info("Setting as left: " + filterExpression.toFilter());
         expression.setLeft(filterExpression);
@@ -531,7 +576,7 @@ public class FilterClient {
 
         filterExpression = expression;
       } else if (filterExpression instanceof LogicalExpression) {
-        System.out.println("filter exression is a logical expression");
+        log.info("filter exression is a logical expression");
         LogicalExpression le = (LogicalExpression) filterExpression;
 
         if (le.getLeft() == null) {
@@ -548,7 +593,7 @@ public class FilterClient {
           filterExpression = newRoot;
         }
       } else if (filterExpression instanceof GroupExpression) {
-        System.out.println("Found group expression");
+        log.info("Found group expression");
         LogicalExpression newRoot = new LogicalExpression();
         newRoot.setLeft(filterExpression);
         newRoot.setRight(expression);
@@ -579,10 +624,20 @@ public class FilterClient {
       }
     }
 
-    public String build() throws UnsupportedEncodingException {
+    @Override
+    public String toString() {
       
       String filterString = filterExpression.toFilter();
-      return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
+      try {
+        return URLEncoder.encode(filterString, "UTF-8").replace("+", "%20");
+      } catch (UnsupportedEncodingException e) {
+        log.error("Unsupported encoding:", e);
+        return null;
+      }
+    }
+    
+    public Filter build() {
+      return new Filter(filterExpression);
     }
 
     public FilterExpression filter() {

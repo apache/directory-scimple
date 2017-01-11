@@ -38,6 +38,12 @@ public class Filter {
     setFilter(filter);
   }
   
+  public Filter(FilterExpression filterExpression) {
+    log.info("Creating a filter - " + filterExpression.toString());
+    expression = filterExpression;
+    this.filter = filterExpression.toString();
+  }
+  
   /**
    * @param filter the filter to set
    * @throws FilterParseException 
@@ -68,5 +74,10 @@ public class Filter {
     } catch (IllegalStateException e) {
       throw new FilterParseException(e);
     }
+  }
+  
+  @Override
+  public String toString() {
+    return expression.toFilter();
   }
 }

@@ -1,12 +1,16 @@
 package edu.psu.swe.scim.spec.protocol.attribute;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.StringUtils;
 
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 
 @Data
-public class AttributeReference {
+public class AttributeReference implements Serializable {
+
+  private static final long serialVersionUID = -3559538009692681470L;
 
   @Urn
   String urn;
