@@ -39,7 +39,7 @@
     <dependency>
       <groupId>edu.psu.swe.commons</groupId>
       <artifactId>commons-jaxrs</artifactId>
-      <version>1.17-SNAPSHOT</version>
+      <version>1.17</version>
     </dependency>
   </dependencies>
   
