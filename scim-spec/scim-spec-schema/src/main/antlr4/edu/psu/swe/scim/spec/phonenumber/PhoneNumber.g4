@@ -3,7 +3,7 @@ grammar PhoneNumber;
 import Core;
 
 phoneNumber: 'tel:' (globalNumber=GlobalNumber | localNumber=LocalNumber);
-				   
+
 GlobalNumber: GlobalNumberDigits Par? Parameter?
             ;
             
@@ -45,20 +45,20 @@ TopLabel: ALPHA | ALPHA ( ALPHA_NUM | '-' )* ALPHA_NUM
 Parameter: ';' ParameterName ('=' ParameterValue )?
          ;
          
-ParameterName: ( ALPHA_NUM | '-' )+;
+fragment ParameterName: ( ALPHA_NUM | '-' )+;
      
-ParameterValue: ParamChar+;
+fragment ParameterValue: ParamChar+;
       
-ParamChar: ParamUnreserved 
+fragment ParamChar: ParamUnreserved 
          | Unreserved
          | PctEncoded
          ;
          
-Unreserved: ALPHA_NUM 
+fragment Unreserved: ALPHA_NUM 
           | Mark
           ;
           
-Mark: '-' 
+fragment Mark: '-' 
     | '_' 
     | '.' 
     | '!' 
@@ -68,34 +68,35 @@ Mark: '-'
     | '(' 
     | ')'
     ;
-    
-PctEncoded: '%' HEX_DIGIT HEX_DIGIT;
+
+fragment PctEncoded: '%' HEX_DIGIT HEX_DIGIT;
            
-ParamUnreserved: '[' 
-               | ']' 
-               | '/' 
-               | ':' 
-               | '&' 
-               | '+' 
-               | '$'
-               ;
+fragment ParamUnreserved: '[' 
+                        | ']' 
+                        | '/' 
+                        | ':' 
+                        | '&' 
+                        | '+' 
+                        | '$'
+                        ;
                
-PhoneDigit: DIGIT | VisualSeparator
-          ;
+fragment PhoneDigit: DIGIT 
+                   | VisualSeparator
+                   ;
           
-PhoneDigitHex: HEX_DIGIT 
-             | '*' 
-             | '#' 
-             | VisualSeparator
-             ;
+fragment PhoneDigitHex: HEX_DIGIT 
+                      | '*' 
+                      | '#' 
+                      | VisualSeparator
+                      ;
               
-VisualSeparator: '-' 
-               | '.' 
-               | '(' 
-               | ')'
-               ;
-               
-Reserved: ';' 
+fragment VisualSeparator: '-' 
+                          | '.' 
+                          | '(' 
+                          | ')'
+                          ;
+
+fragment Reserved: ';' 
         | '/' 
         | '?' 
         | ':' 
@@ -107,7 +108,7 @@ Reserved: ';'
         | ','
         ;
         
-Uric: Reserved 
+fragment Uric: Reserved 
     | Unreserved 
     | PctEncoded
     ;

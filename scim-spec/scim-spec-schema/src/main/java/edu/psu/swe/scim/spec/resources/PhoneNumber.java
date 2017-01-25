@@ -62,7 +62,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
   String extension;
   
   public void setValue(String value) {
-	PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream());
+	PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
 	PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
     p.setBuildParseTree(true);
 
