@@ -68,12 +68,7 @@ public class ExampleFilter implements AttributeFilterExtension {
 
     log.info("####### -----> Request is legal, strip down to the allowed references");
     try {
-//      if (attributeUtil == null) {
-//        log.error("NULL ATTRIBUTE UTIL");
-//        return scimResource;
-//      }
       return CDI.current().select(AttributeUtil.class).get().setAttributesForDisplay(scimResource, allowedReferences);
-      //return attributeUtil.get().setAttributesForDisplay(scimResource, allowedReferences);
     } catch (IllegalArgumentException | AttributeDoesNotExistException e) {
       throw new ClientFilterException(Status.BAD_REQUEST, e.getMessage());
     } catch (IllegalAccessException | IOException e) {
