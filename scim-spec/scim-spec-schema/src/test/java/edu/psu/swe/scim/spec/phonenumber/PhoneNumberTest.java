@@ -2,6 +2,8 @@ package edu.psu.swe.scim.spec.phonenumber;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
 import junitparams.JUnitParamsRunner;
@@ -9,6 +11,9 @@ import junitparams.Parameters;
 
 @RunWith(JUnitParamsRunner.class)
 public class PhoneNumberTest {
+  
+  private static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberTest.class);
+  
   @SuppressWarnings("unused")
   private String[] getAllValidPhones() {
     return new String[] { 
@@ -37,7 +42,6 @@ public class PhoneNumberTest {
   @SuppressWarnings("unused")
   private String[] getAllInvalidPhones() {
     return new String[] {
-      null,//missing prefix and numbers
       "",//missing prefix and numbers
       "tel:",//missing numbers
       "201-555-0123",//missing prefix
@@ -65,13 +69,15 @@ public class PhoneNumberTest {
 	@Test
 	@Parameters(method = "getAllValidPhones")
 	public void test_parser_with_valid_phone_numbers(String phoneUri) throws Exception {
+	  LOGGER.info("valid phones (" + phoneUri + ") start");
 		PhoneNumber phoneNumber = new PhoneNumber();
 		phoneNumber.setValue(phoneUri);
 	}
 	
-	@Test
+	@Test(expected = IllegalStateException.class)
   @Parameters(method = "getAllInvalidPhones")
-  public void test_parser_with_invalid_phone_numbers(String phoneUri) throws Exception {
+  public void test_parser_with_invalid_phone_numbers(String phoneUri) {
+	  LOGGER.info("invalid phones (" + phoneUri + ") start");
     PhoneNumber phoneNumber = new PhoneNumber();
     phoneNumber.setValue(phoneUri);
   }

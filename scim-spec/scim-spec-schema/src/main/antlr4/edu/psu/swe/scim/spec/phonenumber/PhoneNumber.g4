@@ -12,17 +12,13 @@ isdnSubaddress: ';isub=' isub=Uric+;
 
 extension: ';ext=' ext=PhoneDigit+;
 
-phoneContext: ';phone-context=' pContext=Descriptor;
-            
-fragment Descriptor: DomainName 
-                   | GlobalNumberDigits
-                   ;
-          
+phoneContext: ';phone-context=' pContext=(DomainName | GlobalNumberDigits);
+
 GlobalNumberDigits: '+' PhoneDigit* DIGIT PhoneDigit*;
                     
 LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | '*' | '#') PhoneDigitHex*;         
-
-fragment DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?;
+          
+DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?;
           
 fragment DomainLabel: ALPHA_NUM 
                     | ALPHA_NUM ( ALPHA_NUM | '-' )* ALPHA_NUM
@@ -32,22 +28,9 @@ fragment TopLabel: ALPHA
                  | ALPHA ( ALPHA_NUM | '-' )* ALPHA_NUM
                  ;
         
-parameter: ';' pName=ParameterName ('=' pValue=ParameterValue )?;
-         
-fragment ParameterName: ( ALPHA_NUM | '-' )+;
-     
-fragment ParameterValue: ParamChar+;
-      
-fragment ParamChar: ParamUnreserved 
-         | Unreserved
-         | PctEncoded
-         ;
-         
-fragment Unreserved: ALPHA_NUM 
-          | Mark
-          ;
-          
-fragment Mark: '-' 
+parameter: ';' pName=( ALPHA_NUM | '-' )+ ('=' pValue=(ParamUnreserved | ALPHA_NUM | Mark | PctEncoded)+ )?;
+               
+Mark: '-' 
     | '_' 
     | '.' 
     | '!' 
@@ -58,9 +41,9 @@ fragment Mark: '-'
     | ')'
     ;
 
-fragment PctEncoded: '%' HEX_DIGIT HEX_DIGIT;
+PctEncoded: '%' HEX_DIGIT HEX_DIGIT;
            
-fragment ParamUnreserved: '[' 
+ParamUnreserved: '[' 
                         | ']' 
                         | '/' 
                         | ':' 
@@ -69,10 +52,10 @@ fragment ParamUnreserved: '['
                         | '$'
                         ;
                
-fragment PhoneDigit: DIGIT 
-                   | VisualSeparator
-                   ;
-          
+PhoneDigit: DIGIT 
+          | VisualSeparator
+          ;
+
 fragment PhoneDigitHex: HEX_DIGIT 
                       | '*' 
                       | '#' 
@@ -97,7 +80,8 @@ fragment Reserved: ';'
         | ','
         ;
         
-fragment Uric: Reserved 
-    | Unreserved 
+Uric: Reserved 
+    | ALPHA_NUM 
+    | Mark 
     | PctEncoded
     ;
