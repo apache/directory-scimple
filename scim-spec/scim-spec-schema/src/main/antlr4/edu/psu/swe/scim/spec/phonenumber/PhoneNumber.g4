@@ -1,6 +1,6 @@
 grammar PhoneNumber;
 
-import Core;
+//import Core;
 
 phoneNumber: 'tel:' (global=globalNumber | local=localNumber);
 
@@ -8,7 +8,7 @@ globalNumber: globalDigits=GlobalNumberDigits (extension | isdnSubaddress)? para
             
 localNumber: localDigits=LocalNumberDigits (extension | isdnSubaddress)? phoneContext parameter*;
 
-isdnSubaddress: ';isub=' isub=Uric+;
+isdnSubaddress: ';isub=' isub=(Reserved | ALPHA | DIGIT | Mark | PctEncoded)+;
 
 extension: ';ext=' ext=PhoneDigit+;
 
@@ -20,15 +20,15 @@ LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | '*' | '#') PhoneDigitHex*;
           
 DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?;
           
-fragment DomainLabel: ALPHA_NUM 
-                    | ALPHA_NUM ( ALPHA_NUM | '-' )* ALPHA_NUM
+fragment DomainLabel: (ALPHA | DIGIT ) 
+                    | (ALPHA | DIGIT ) ( (ALPHA | DIGIT ) | '-' )* (ALPHA | DIGIT )
                     ;
            
 fragment TopLabel: ALPHA 
-                 | ALPHA ( ALPHA_NUM | '-' )* ALPHA_NUM
+                 | ALPHA ( (ALPHA | DIGIT ) | '-' )* (ALPHA | DIGIT )
                  ;
         
-parameter: ';' pName=( ALPHA_NUM | '-' )+ ('=' pValue=(ParamUnreserved | ALPHA_NUM | Mark | PctEncoded)+ )?;
+parameter: ';' pName=( ALPHA | DIGIT | '-' )+ ('=' pValue=(ParamUnreserved | ALPHA | DIGIT | Mark | PctEncoded)+ )?;
                
 Mark: '-' 
     | '_' 
@@ -68,7 +68,7 @@ fragment VisualSeparator: '-'
                           | ')'
                           ;
 
-fragment Reserved: ';' 
+Reserved: ';' 
         | '/' 
         | '?' 
         | ':' 
@@ -79,9 +79,8 @@ fragment Reserved: ';'
         | '$' 
         | ','
         ;
-        
-Uric: Reserved 
-    | ALPHA_NUM 
-    | Mark 
-    | PctEncoded
-    ;
+
+    
+ALPHA: [a-zA-Z];
+DIGIT: [0-9];
+fragment HEX_DIGIT: [A-F0-9];
