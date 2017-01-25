@@ -8,15 +8,15 @@ globalNumber: globalDigits=GlobalNumberDigits (extension | isdnSubaddress)? para
             
 localNumber: localDigits=LocalNumberDigits (extension | isdnSubaddress)? phoneContext parameter*;
 
-isdnSubaddress: ';isub=' isub=(Reserved | SPECIAL | ALPHA | DIGIT | Mark | DASH | PctEncoded)+;
+isdnSubaddress: ';isub=' isub=(Reserved | SPECIAL | ALPHA | DIGIT | Mark | STAR | VisualSeparator | DASH | PctEncoded)+;
 
-extension: ';ext=' ext=PhoneDigit+;
+extension: ';ext=' ext=(DIGIT | VisualSeparator | DASH)+;
 
 phoneContext: ';phone-context=' pContext=(DomainName | GlobalNumberDigits);
 
-GlobalNumberDigits: '+' PhoneDigit* DIGIT PhoneDigit*;
+GlobalNumberDigits: '+' (DIGIT | VisualSeparator | DASH)* DIGIT (DIGIT | VisualSeparator | DASH)*;
                     
-LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | STAR_POUND) PhoneDigitHex*;         
+LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | STAR | POUND) PhoneDigitHex*;         
           
 DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?;
           
@@ -28,39 +28,30 @@ fragment TopLabel: ALPHA
                  | ALPHA ( (ALPHA | DIGIT ) | DASH )* (ALPHA | DIGIT )
                  ;
         
-parameter: ';' pName=( ALPHA | DIGIT | DASH )+ ('=' pValue=(ParamUnreserved | SPECIAL | ALPHA | DIGIT | Mark | DASH | PctEncoded)+ )?;
-               
+parameter: ';' pName=( ALPHA | DIGIT | DASH )+ ('=' pValue=(ParamUnreserved | SPECIAL | ALPHA | DIGIT | Mark | STAR | VisualSeparator | DASH | PctEncoded)+ )?;
+
 Mark: '_' 
-    | '.' 
     | '!' 
     | '~' 
-    | '*' 
     | '\'' 
-    | '(' 
-    | ')'
     ;
 
 PctEncoded: '%' HEX_DIGIT HEX_DIGIT;
            
 ParamUnreserved: '[' 
                | ']' 
-                        ;
-               
-PhoneDigit: DIGIT 
-          | VisualSeparator
-          ;
+               ;
 
 fragment PhoneDigitHex: HEX_DIGIT 
-                      | STAR_POUND
+                      | STAR
+                      | POUND
                       | VisualSeparator
+                      | DASH
                       ;
 
-fragment STAR_POUND: '*'
-                   | '#'
-                   ;
 
-fragment VisualSeparator: DASH
-                        | '.' 
+
+VisualSeparator: '.' 
                         | '(' 
                         | ')'
                         ;
@@ -71,6 +62,9 @@ Reserved: ';'
         | '=' 
         | ','
         ;
+
+STAR: '*';
+POUND: '#';
 
 SPECIAL: '+'
        | '$'
