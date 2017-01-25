@@ -1,55 +1,79 @@
 package edu.psu.swe.scim.spec.phonenumber;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 
+@RunWith(JUnitParamsRunner.class)
 public class PhoneNumberTest {
-
+  @SuppressWarnings("unused")
+  private String[] getAllValidPhones() {
+    return new String[] { 
+      "tel:7042;phone-context=example.com",//local number
+      "tel:863-1234;phone-context=+1-914-555",//local number
+      "tel:235-1707;ext=4567;phone-context=+1-814-555",//local with ext and context      
+      "tel:235-1707;isub=example.sub.com;phone-context=+1-814-555",//local with isub and context      
+      "tel:235-1707;ext=4567;phone-context=+1-814-555;par2=ghnkl23",//local with ext, context and additional param
+      "tel:235-1707;isub=example.sub.com;phone-context=+1-814-555;par2=ghnkl23",//local with isub, context and additional param
+      
+      "tel:+44-20-1234-5678",//global with visualSeparator -
+      "tel:+44.20.1234.5678",//global with visualSeparator .
+      "tel:+44.20.1234.5678;ext=4567",//global with ext      
+      "tel:+44.20.1234.5678;isub=example.sub.com",//global with isub      
+      "tel:+44.20.1234.5678;ext=4567;par2=ghnkl23",//global with ext and additional param
+      "tel:+44.20.1234.5678;isub=example.sub.com;par2=ghnkl23",//global with isub and additional param
+      
+      "tel:+1-201-555-0123",//US global format with visualSeparator -
+      "tel:+1.201.555.0123",//US global format with visualSeparator .
+      "tel:+1(201)555.0123",//US global format with visualSeparator . and ()
+      "tel:+1(201)555-0123",//US global format with visualSeparator - and ()
+      "tel:+1-201-555-0123;ext=1234"//US global format with extension
+    };
+  }
+  
+  @SuppressWarnings("unused")
+  private String[] getAllInvalidPhones() {
+    return new String[] {
+      null,//missing prefix and numbers
+      "",//missing prefix and numbers
+      "tel:",//missing numbers
+      "201-555-0123",//missing prefix
+      "tel:201 555 0123",//not allowed spaces
+      "tel:201-555-0123",//no phone-context
+      "tel:814-235-1707;ext=4567", //no phone-context for local
+      "tel:235-1707;ext=4567;ext=1234;phone-context:+1=814-555", //two ext params
+      "tel:235-1707;phone-context:+1=814-555;ext=4567", //ext in wrong order
+      "tel:235-1707;ext=4567;isub=example.phone.com;phone-context:+1=814-555",//has both ext and isub; allowed only one
+      "tel:1707;isub=sub.example.com",//no phone-context
+      "tel:1707;ext=1234;isub=sub.example.com",//local with ext and isub, no phone-context
+      "tel:865-8773;ext=#44;phone-context:+1-814-555",//local with symbol in ext param
+      "tel:(814) 235-1707;ext=4567",//spaces not allowed
+      
+      "+1-201-555-0123", //no prefix
+      "tel:+1-814-235-1707;ext=4567;ext=1234", //two ext params
+      "tel:+1-814-235-1707;ext=4567;isub=example.phone.com", //has both ext and isub; allowed only one
+      
+      "+44.20.1234.5678",//no prefix
+      "tel:+44-20-1234-5678;phone-context=+44",//phone-context not allowed on global number
+      "tel:+44-20-1234-5678;ext=#44"//global with symbol in ext param
+    };
+  }
+	
 	@Test
-	public void test_parser() throws Exception {
-		String phoneUri = "tel:+1-201-555-0123;ext=1234";
+	@Parameters(method = "getAllValidPhones")
+	public void test_parser_with_valid_phone_numbers(String phoneUri) throws Exception {
 		PhoneNumber phoneNumber = new PhoneNumber();
 		phoneNumber.setValue(phoneUri);
-		/*"tel:7042;phone-context=example.com";
-	      "tel:863-1234;phone-context=+1-914-555"
-	      'tel:+44 20 1234 5678', //UK International format
-	        'tel:011 44 20 1234 5678', //Dialing from US to UK: note the + is replaced with the NANPA-standard international dialing prefix, 011, but this will vary by country
-	        'tel:(0)20 1234 4567', //UK National format
-	        'tel:020 1234 5678', //Dialing locally within the UK    
-	        'tel:(02) 1234 5678', //
-	        'tel:02 1234 5678', //
-	        'tel:0411 123 123', // (but I've never seen 04 1112 3456)
-	        'tel:131 123', //
-	        'tel:13 1123', //
-	        'tel:131 123', //
-	        'tel:1 300 123 123', //
-	        'tel:1300 123 123', //
-	        'tel:02-1234-5678', //
-	        'tel:1300-234-234', //
-	        'tel:+44 (0)78 1234 1234', //
-	        'tel:+44-78-1234-1234', //
-	        'tel:+44-(0)78-1234-1234', //
-	        'tel:0011 44 78 1234 1234', // (0011 is the standard international dialling code)
-	        'tel:(44) 078 1234 1234' // (not common)
-	        '814-235-1707',//US local dialing
-	        'tel:814-235-1707',//US local dialing
-	        'tel:814.235.1707',//US local dialing
-	        'tel:814 235 1707',//US local dialing
-	        'tel:+1-814-235-1707',
-	        'tel:814-235-1707;ext=#4567',
-	        'tel:814-235-1707;ext=#4567;ext=#1234',
-	        'tel:1707;isub=sub.example.com',
-	        'tel:1707;ext=#1234;isub=sub.example.com',
-	        'tel:1707;phone-context=example.com',
-	        'tel:235-1707;ext=#4567;phone-context=+1-814-555',      
-	        'tel:235-1707;ext=#4567;phone-context=+1-814-555;par2=ghnkl23',
-	        'tel:+44-20-1234-5678',
-	        'tel:+44-20-1234-5678;phone-context=+44',
-	        'tel:+44.20.1234.5678',
-	        '+44.20.1234.5678',
-	        'tel:(814) 235-1707;ext=#4567'
-		    */
 	}
+	
+	@Test
+  @Parameters(method = "getAllInvalidPhones")
+  public void test_parser_with_invalid_phone_numbers(String phoneUri) throws Exception {
+    PhoneNumber phoneNumber = new PhoneNumber();
+    phoneNumber.setValue(phoneUri);
+  }
 
 }
