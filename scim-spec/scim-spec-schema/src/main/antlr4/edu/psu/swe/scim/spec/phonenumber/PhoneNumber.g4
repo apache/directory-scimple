@@ -6,29 +6,21 @@ phoneNumber: 'tel:' (global=globalNumber | local=localNumber);
 
 globalNumber: globalDigits=GlobalNumberDigits (extension | isdnSubaddress)? parameter*;
             
-localNumber: localDigits=LocalNumberDigits (extension | isdnSubaddress)? phoneContext parameter*;
+localNumber: localDigits=localNumberDigits (extension | isdnSubaddress)? phoneContext parameter*;
 
-isdnSubaddress: ';isub=' isub=(Reserved | SPECIAL | ALPHA | DIGIT | Mark | STAR | VisualSeparator | DASH | PctEncoded)+;
+isdnSubaddress: ';isub=' isub=(Reserved | SPECIAL | HEX_ALPHA | ALPHA | DIGIT | Mark | STAR | VisualSeparator | DOT | DASH | PctEncoded)+;
 
-extension: ';ext=' ext=(DIGIT | VisualSeparator | DASH)+;
+extension: ';ext=' ext=(DIGIT | VisualSeparator | DOT | DASH)+;
 
-phoneContext: ';phone-context=' pContext=(DomainName | GlobalNumberDigits);
+phoneContext: ';phone-context=' (dn=domainName | dig=GlobalNumberDigits);
 
-GlobalNumberDigits: '+' (DIGIT | VisualSeparator | DASH)* DIGIT (DIGIT | VisualSeparator | DASH)*;
+GlobalNumberDigits: '+' (DIGIT | VisualSeparator | DOT | DASH)* DIGIT (DIGIT | VisualSeparator | DOT | DASH)*;
                     
-LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | STAR | POUND) PhoneDigitHex*;         
+localNumberDigits: (DIGIT | HEX_ALPHA | STAR | POUND | VisualSeparator | DOT | DASH)* (DIGIT | HEX_ALPHA | STAR | POUND) (DIGIT | HEX_ALPHA | STAR | POUND | VisualSeparator | DOT | DASH)*;         
           
-DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?;
-          
-fragment DomainLabel: (ALPHA | DIGIT ) 
-                    | (ALPHA | DIGIT ) ( (ALPHA | DIGIT ) | DASH )* (ALPHA | DIGIT )
-                    ;
-           
-fragment TopLabel: ALPHA 
-                 | ALPHA ( (ALPHA | DIGIT ) | DASH )* (ALPHA | DIGIT )
-                 ;
-        
-parameter: ';' pName=( ALPHA | DIGIT | DASH )+ ('=' pValue=(ParamUnreserved | SPECIAL | ALPHA | DIGIT | Mark | STAR | VisualSeparator | DASH | PctEncoded)+ )?;
+domainName: ( ((HEX_ALPHA | ALPHA | DIGIT ) ((HEX_ALPHA | ALPHA | DIGIT | DASH )* (HEX_ALPHA | ALPHA | DIGIT ))?) DOT )* ((HEX_ALPHA | ALPHA) ((HEX_ALPHA | ALPHA | DIGIT | DASH )* (HEX_ALPHA | ALPHA | DIGIT ))?) ( DOT )?;
+
+parameter: ';' pName=( HEX_ALPHA | ALPHA | DIGIT | DASH )+ ('=' pValue=(ParamUnreserved | SPECIAL | HEX_ALPHA | ALPHA | DIGIT | Mark | STAR | VisualSeparator | DOT | DASH | PctEncoded)+ )?;
 
 Mark: '_' 
     | '!' 
@@ -36,25 +28,15 @@ Mark: '_'
     | '\'' 
     ;
 
-PctEncoded: '%' HEX_DIGIT HEX_DIGIT;
+PctEncoded: '%' [A-F0-9] [A-F0-9];
            
 ParamUnreserved: '[' 
                | ']' 
                ;
 
-fragment PhoneDigitHex: HEX_DIGIT 
-                      | STAR
-                      | POUND
-                      | VisualSeparator
-                      | DASH
-                      ;
-
-
-
-VisualSeparator: '.' 
-                        | '(' 
-                        | ')'
-                        ;
+VisualSeparator: '(' 
+               | ')'
+               ;
 
 Reserved: ';' 
         | '?' 
@@ -72,6 +54,8 @@ SPECIAL: '+'
        | '/'
        | ':';
 DASH: '-';
-ALPHA: [a-zA-Z];
+DOT: '.';
+HEX_ALPHA: [A-F];
+ALPHA: [a-zG-Z];
 DIGIT: [0-9];
-fragment HEX_DIGIT: [A-F0-9];
+
