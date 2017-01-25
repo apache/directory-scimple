@@ -8,7 +8,7 @@ public class PhoneNumberTest {
 
 	@Test
 	public void test_parser() throws Exception {
-		String phoneUri = "tel:+1-201-555-0123";
+		String phoneUri = "tel:+1-201-555-0123;ext=1234";
 		PhoneNumber phoneNumber = new PhoneNumber();
 		phoneNumber.setValue(phoneUri);
 		/*"tel:7042;phone-context=example.com";

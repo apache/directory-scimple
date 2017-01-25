@@ -2,48 +2,37 @@ grammar PhoneNumber;
 
 import Core;
 
-phoneNumber: 'tel:' (globalNumber=GlobalNumber | localNumber=LocalNumber);
+phoneNumber: 'tel:' (global=globalNumber | local=localNumber);
 
-GlobalNumber: GlobalNumberDigits Par? Parameter?
-            ;
+globalNumber: globalDigits=GlobalNumberDigits (extension | isdnSubaddress)? parameter*;
             
-LocalNumber: LocalNumberDigits Par? PhoneContext Parameter?
-           ;
-           
-Par: Extension 
-   | IsdnSubaddress
-   ;
+localNumber: localDigits=LocalNumberDigits (extension | isdnSubaddress)? phoneContext parameter*;
 
-IsdnSubaddress: ';isub=' Uric+
-               ;
+isdnSubaddress: ';isub=' isub=Uric+;
 
-Extension: ';ext=' PhoneDigit+
-         ;
+extension: ';ext=' ext=PhoneDigit+;
 
-PhoneContext: ';phone-context=' Descriptor
-            ;
+phoneContext: ';phone-context=' pContext=Descriptor;
             
-Descriptor: DomainName 
-          | GlobalNumberDigits
-          ;
+fragment Descriptor: DomainName 
+                   | GlobalNumberDigits
+                   ;
           
-GlobalNumberDigits: '+' PhoneDigit* DIGIT PhoneDigit*
-                  ;
+GlobalNumberDigits: '+' PhoneDigit* DIGIT PhoneDigit*;
                     
-LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | '*' | '#') PhoneDigitHex*
-                 ;         
+LocalNumberDigits: PhoneDigitHex* (HEX_DIGIT | '*' | '#') PhoneDigitHex*;         
 
-DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?
-          ;
+fragment DomainName: ( DomainLabel '.' )* TopLabel ( '.' )?;
           
-DomainLabel: ALPHA_NUM | ALPHA_NUM ( ALPHA_NUM | '-' )* ALPHA_NUM
-           ;
+fragment DomainLabel: ALPHA_NUM 
+                    | ALPHA_NUM ( ALPHA_NUM | '-' )* ALPHA_NUM
+                    ;
            
-TopLabel: ALPHA | ALPHA ( ALPHA_NUM | '-' )* ALPHA_NUM
-        ;
+fragment TopLabel: ALPHA 
+                 | ALPHA ( ALPHA_NUM | '-' )* ALPHA_NUM
+                 ;
         
-Parameter: ';' ParameterName ('=' ParameterValue )?
-         ;
+parameter: ';' pName=ParameterName ('=' pValue=ParameterValue )?;
          
 fragment ParameterName: ( ALPHA_NUM | '-' )+;
      

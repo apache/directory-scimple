@@ -5,6 +5,12 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.ExtensionContext;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.GlobalNumberContext;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.IsdnSubaddressContext;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.LocalNumberContext;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.ParameterContext;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneContextContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneNumberContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +27,66 @@ public class TreePrintingListener extends PhoneNumberBaseListener {
   @Override
   public void exitPhoneNumber(PhoneNumberContext ctx) {
     log.info(indent("<-- Exit PhoneNumber ---"));
+  }
+
+  @Override
+  public void enterGlobalNumber(GlobalNumberContext ctx) {
+    log.info(indent("<-- Enter GlobalNumber ---"));
+  }
+
+  @Override
+  public void exitGlobalNumber(GlobalNumberContext ctx) {
+    log.info(indent("<-- Exit GlobalNumber ---"));
+  }
+
+  @Override
+  public void enterLocalNumber(LocalNumberContext ctx) {
+    log.info(indent("<-- Enter LocalNumber ---"));
+  }
+
+  @Override
+  public void exitLocalNumber(LocalNumberContext ctx) {
+    log.info(indent("<-- Exit LocalNumber ---"));
+  }
+  
+  @Override
+  public void enterIsdnSubaddress(IsdnSubaddressContext ctx) {
+    log.info(indent("<-- Enter IsdnSubaddress ---"));
+  }
+
+  @Override
+  public void exitIsdnSubaddress(IsdnSubaddressContext ctx) {
+	log.info(indent("<-- Exit IsdnSubaddress"));
+  }
+
+  @Override
+  public void enterExtension(ExtensionContext ctx) {
+	log.info(indent("<-- Enter Extension"));
+  }
+
+  @Override
+  public void exitExtension(ExtensionContext ctx) {
+	log.info(indent("<-- Exit Extension"));
+  }
+
+  @Override
+  public void enterPhoneContext(PhoneContextContext ctx) {
+	log.info(indent("<-- Enter PhoneContext "));
+  }
+
+  @Override
+  public void exitPhoneContext(PhoneContextContext ctx) {
+	log.info(indent("<-- Exit PhoneContext"));
+  }
+
+  @Override
+  public void enterParameter(ParameterContext ctx) {
+	log.info(indent("<-- Enter Parameter"));
+  }
+
+  @Override
+  public void exitParameter(ParameterContext ctx) {
+	log.info(indent("<-- Exit Parameter"));
   }
 
   @Override

@@ -4,6 +4,7 @@
 package edu.psu.swe.scim.spec.resources;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -15,13 +16,14 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberLexer;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser;
 import edu.psu.swe.scim.spec.phonenumber.TreePrintingListener;
-import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -63,9 +65,15 @@ public class PhoneNumber extends KeyedResource implements Serializable {
   
   public void setValue(String value) {
 	PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
+	
+    List<? extends Token> allTokens = phoneNumberLexer.getAllTokens();
+    allTokens.stream().forEach(System.out::println);
+    
+    phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
+    
 	PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
     p.setBuildParseTree(true);
-
+    
     p.addErrorListener(new BaseErrorListener() {
       @Override
       public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
