@@ -5,9 +5,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 
-import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.ExtensionContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.GlobalNumberContext;
-import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.IsdnSubaddressContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.LocalNumberContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.ParameterContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneContextContext;
@@ -15,7 +13,7 @@ import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneNumberContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TreePrintingListener extends PhoneNumberBaseListener {
+public class TreePrintingListener extends PhoneNumberParserBaseListener {
 
   private int indent = -1;
   
@@ -49,26 +47,6 @@ public class TreePrintingListener extends PhoneNumberBaseListener {
     log.info(indent("<-- Exit LocalNumber ---"));
   }
   
-  @Override
-  public void enterIsdnSubaddress(IsdnSubaddressContext ctx) {
-    log.info(indent("<-- Enter IsdnSubaddress ---"));
-  }
-
-  @Override
-  public void exitIsdnSubaddress(IsdnSubaddressContext ctx) {
-	log.info(indent("<-- Exit IsdnSubaddress"));
-  }
-
-  @Override
-  public void enterExtension(ExtensionContext ctx) {
-	log.info(indent("<-- Enter Extension"));
-  }
-
-  @Override
-  public void exitExtension(ExtensionContext ctx) {
-	log.info(indent("<-- Exit Extension"));
-  }
-
   @Override
   public void enterPhoneContext(PhoneContextContext ctx) {
 	log.info(indent("<-- Enter PhoneContext "));

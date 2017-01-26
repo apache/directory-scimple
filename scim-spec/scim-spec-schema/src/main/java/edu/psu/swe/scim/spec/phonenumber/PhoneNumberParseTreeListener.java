@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 //import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.LocalNumberContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneNumberContext;
 
-public class PhoneNumberParseTreeListener extends PhoneNumberBaseListener {
+public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener {
 
 	@Override
 	public void visitTerminal(TerminalNode node) {
