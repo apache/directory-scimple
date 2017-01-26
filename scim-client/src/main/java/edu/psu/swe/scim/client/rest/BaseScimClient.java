@@ -3,7 +3,6 @@ package edu.psu.swe.scim.client.rest;
 import java.util.Optional;
 import java.util.function.Function;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -13,25 +12,21 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import edu.psu.swe.commons.jaxrs.RestCall;
-import edu.psu.swe.commons.jaxrs.exceptions.BackingStoreChangedException;
-import edu.psu.swe.commons.jaxrs.exceptions.ConflictingDataException;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
-import edu.psu.swe.commons.jaxrs.exceptions.RestServerException;
-import edu.psu.swe.commons.jaxrs.exceptions.ServiceAuthException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
-import edu.psu.swe.scim.spec.exception.ScimException;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.Constants;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.exception.ScimException;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
-import edu.psu.swe.scim.spec.schema.ErrorResponse;
 
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {
 
