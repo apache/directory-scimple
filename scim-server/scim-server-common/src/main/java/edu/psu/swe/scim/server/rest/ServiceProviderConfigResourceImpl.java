@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.psu.swe.scim.server.configuration.ServerConfiguration;
 import edu.psu.swe.scim.server.utility.EtagGenerator;
 import edu.psu.swe.scim.spec.protocol.ServiceProviderConfigResource;
-import edu.psu.swe.scim.spec.schema.ErrorResponse;
+import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import edu.psu.swe.scim.spec.schema.Meta;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration;
 import edu.psu.swe.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema;

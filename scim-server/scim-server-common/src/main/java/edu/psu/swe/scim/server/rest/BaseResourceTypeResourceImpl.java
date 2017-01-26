@@ -41,8 +41,10 @@ import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.server.utility.EtagGenerator;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
+import edu.psu.swe.scim.spec.protocol.ErrorMessageType;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
@@ -52,7 +54,6 @@ import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
-import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -213,7 +214,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       Status status = e1.getStatus();
       if (e1.getStatus().equals(Status.CONFLICT)) {
         er.setStatus(e1.getStatus().toString());
-        er.setDetail("uniqueness");
+        er.setScimType(ErrorMessageType.UNIQUENESS);
       } else {
         er.setStatus(e1.getStatus().toString());
         er.setDetail(e1.getMessage());

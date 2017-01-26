@@ -1,8 +1,8 @@
-package edu.psu.swe.scim.spec.exception;
+package edu.psu.swe.scim.spec.protocol.exception;
 
 import javax.ws.rs.core.Response.Status;
 
-import edu.psu.swe.scim.spec.schema.ErrorResponse;
+import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

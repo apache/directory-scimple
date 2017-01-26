@@ -1,10 +1,11 @@
-package edu.psu.swe.scim.spec.schema;
+package edu.psu.swe.scim.spec.protocol.data;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import edu.psu.swe.scim.spec.protocol.ErrorMessageType;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,6 +16,8 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ErrorResponse extends BaseResource {
 
+  private static final long serialVersionUID = 9045421198080348116L;
+
   public static String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:Error";
 
   @XmlElement(nillable = true)
@@ -22,6 +25,9 @@ public class ErrorResponse extends BaseResource {
 
   @XmlElement
   private String status;
+  
+  @XmlElement
+  private ErrorMessageType scimType;
 
   public ErrorResponse() {
     super(SCHEMA_URI);
