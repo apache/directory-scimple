@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.GlobalNumberContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.LocalNumberContext;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.LocalNumberDigitsContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.ParameterContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneContextContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneNumberContext;
@@ -65,6 +66,16 @@ public class TreePrintingListener extends PhoneNumberParserBaseListener {
   @Override
   public void exitParameter(ParameterContext ctx) {
 	log.info(indent("<-- Exit Parameter"));
+  }
+
+  @Override
+  public void enterLocalNumberDigits(LocalNumberDigitsContext ctx) {
+    log.info(indent("<-- Enter LocalNumberDigits"));
+  }
+
+  @Override
+  public void exitLocalNumberDigits(LocalNumberDigitsContext ctx) {
+    log.info(indent("<-- Exit LocalNumberDigits"));
   }
 
   @Override

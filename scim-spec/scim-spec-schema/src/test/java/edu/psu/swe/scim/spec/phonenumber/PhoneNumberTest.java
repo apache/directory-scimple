@@ -61,7 +61,6 @@ public class PhoneNumberTest {
       "tel:+359-2-912-4501",//Bulgaria
       "tel:+359-37-9873-571",//Bulgaria mobile
       "tel:+358-9-333-444",//Finland
-      "tel:+358-4x-123-4", //Finland mobile
       "tel:+358-045-123-45", //Finland mobile
       "tel:+358-050-123-45-6", //Finland mobile
       "tel:+358-045-123-45-67", //Finland mobile
@@ -135,7 +134,9 @@ public class PhoneNumberTest {
       
       "+44.20.1234.5678",//no prefix
       "tel:+44-20-1234-5678;phone-context=+44",//phone-context not allowed on global number
-      "tel:+44-20-1234-5678;ext=#44"//global with symbol in ext param
+      "tel:+44-20-1234-5678;ext=#44", //global with symbol in ext param
+      "tel:+358-4x-123-4", //Finland mobile (wikipedia says that this is ok???)
+
     };
   }
 	
