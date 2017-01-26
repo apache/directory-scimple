@@ -106,4 +106,27 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       extension = rawValue.substring(rawValue.indexOf("=") + 1);
     }
   }
+  
+  /*
+   Two "tel" URIs are equivalent according to the following rules:
+
+   o  Both must be either a 'local-number' or a 'global-number', i.e.,
+      start with a '+'.
+   o  The 'global-number-digits' and the 'local-number-digits' must be
+      equal, after removing all visual separators.
+   o  For mandatory additional parameters (section 5.4) and the 'phone-
+      context' and 'extension' parameters defined in this document, the
+      'phone-context' parameter value is compared as a host name if it
+      is a 'domainname' or digit by digit if it is 'global-number-
+      digits'.  The latter is compared after removing all 'visual-
+      separator' characters.
+   o  Parameters are compared according to 'pname', regardless of the
+      order they appeared in the URI.  If one URI has a parameter name
+      not found in the other, the two URIs are not equal.
+   o  URI comparisons are case-insensitive.
+
+   All parameter names and values SHOULD use lower-case characters, as
+   tel URIs may be used within contexts where comparisons are case
+   sensitive.
+   */
 }
