@@ -27,10 +27,7 @@ public class PhoneNumberBuilderTest {
   private static final String SUBADDRESS = "subAddress";
   private static final String GLOBAL_NUMBER = "globalNumber";
   private static final String DOMAIN_NAME = "domainName";
-  private static final String PHONE_NUMBER = "number";
-  private static final String PHONE_CONTEXT = "phoneContext";
   private static final String FAILURE_MESSAGE = "IllegalArgumentException should have been thrown";
-  // TODO params
 
   @SuppressWarnings("unused")
   private String[] getInvalidSubscriberNumbers() {
@@ -632,7 +629,7 @@ public class PhoneNumberBuilderTest {
     assertNull("SubAddress should be null", phoneNumber.getSubAddress());
 
     //assertEquals("888-5555", phoneNumber.getNumber());
-    //assertEquals("+1-(888)", phoneNumber.getPhoneContext());
+    //assertEquals("+1-888", phoneNumber.getPhoneContext());
     //assertEquals("1234", phoneNumber.getExtension());
     assertEquals(("tel:888-5555;ext=1234;phone-context=+1-888"), phoneNumber.getValue());
   }
@@ -660,7 +657,7 @@ public class PhoneNumberBuilderTest {
     assertNull("Extension should be null", phoneNumber.getExtension());
 
     //assertEquals("888-5555", phoneNumber.getNumber());
-    //assertEquals("+1-(888)", phoneNumber.getPhoneContext());
+    //assertEquals("+1-888", phoneNumber.getPhoneContext());
     //assertEquals("1234", phoneNumber.getExtension());
     assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888"), phoneNumber.getValue());
   }
@@ -692,7 +689,7 @@ public class PhoneNumberBuilderTest {
     assertNull("Extension should be null", phoneNumber.getExtension());
     
     //assertEquals("888-5555", phoneNumber.getNumber());
-    //assertEquals("+1-(888)", phoneNumber.getPhoneContext());
+    //assertEquals("+1-888", phoneNumber.getPhoneContext());
     //assertEquals("example.a.com", phoneNumber.getSubAddress());
     assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888;milhouse=simpson;example=gh234"), phoneNumber.getValue());
   }
