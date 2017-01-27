@@ -26,6 +26,7 @@ public class PhoneNumberBuilderTest {
   private static final String EXTENSION = "extension";
   private static final String SUBADDRESS = "subAddress";
   private static final String GLOBAL_NUMBER = "globalNumber";
+  private static final String DOMAIN_NAME = "domainName";
   private static final String PHONE_NUMBER = "number";
   private static final String PHONE_CONTEXT = "phoneContext";
   private static final String FAILURE_MESSAGE = "IllegalArgumentException should have been thrown";
@@ -437,7 +438,7 @@ public class PhoneNumberBuilderTest {
     assertNull("SubAddress should be null", phoneNumber.getSubAddress());
     assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
     
-    //assertEquals("123-4567", phoneNumber.getNumber());
+    //assertEquals(validGlobalNumber, phoneNumber.getNumber());
     assertEquals(("tel:"+validGlobalNumber), phoneNumber.getValue());
 
   }
@@ -453,9 +454,247 @@ public class PhoneNumberBuilderTest {
     assertNull("SubAddress should be null", phoneNumber.getSubAddress());
     assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
 
-    //assertEquals("123-4567", phoneNumber.getNumber());
-    assertEquals(("tel:+"+temp), phoneNumber.getValue());
+    //assertEquals("+" + temp, phoneNumber.getNumber());
+    assertEquals(("tel:+" + temp), phoneNumber.getValue());
+  }
+  
+  @SuppressWarnings("unused")
+  private String[] getInvalidDomainNames() {
+    return new String[] { 
+       "#1",
+       "*1",
+       "@1",
+       "example com",
+       "hhh@example.com",
+       "EXAMPLE COM",
+       "HHH@EXAMPLE.COM",
+       "eXAmpLE Com2",
+       "hhH@ExaMPlE.CoM2"
+    };
+  }
+  
+  @SuppressWarnings("unused")
+  private String[] getValidDomainNames() {
+    return new String[] { 
+      "google.com",
+      "2xkcd-ex.com",
+      "Ab0c1d2e3f4g5H6i7-J8K9l0m.org",
+      "Ab0c1d2e3f4g5H6i7-J8K9l0m"
+    };
+  }
+  
+  @Test
+  @Parameters(method = "getInvalidDomainNames")
+  public void test_invalid_domainName_for_LocalPhoneNumberBuilder(String invalidDomainName) throws Exception {
+
+    LOGGER.info("invalid domain name '" + invalidDomainName + "' start");
+    try {
+      new LocalPhoneNumberBuilder("1707", invalidDomainName).build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME));
+    }
+    
+    String temp = invalidDomainName != null ? (" " + invalidDomainName + " ") : null; 
+    LOGGER.info("invalid domain name '" + temp + "' start");
+    try {
+      new LocalPhoneNumberBuilder("1707", temp).build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME));
+    }
+    
+  }
+  
+  @Test
+  public void test_invalid_padded_domainName_for_LocalPhoneNumberBuilder() throws Exception {
+    //parameterized value coming into test method has spaces stripped from beginning and end; need to test that spaces are not allowed at all
+    try {
+      new LocalPhoneNumberBuilder("1707", " 23 ").build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME));
+    }
+  }
+  
+  @Test
+  public void test_no_domainName_coutryCode_or_areaCode_for_LocalPhoneNumberBuilder() throws Exception {
+    try {
+      new LocalPhoneNumberBuilder("1707", null).build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+    }
+    
+    try {
+      new LocalPhoneNumberBuilder("1707", "").build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+    }
+    
+    try {
+      new LocalPhoneNumberBuilder("1707", "  ").build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+    }
+    
+    try {
+      new LocalPhoneNumberBuilder("222-1707", null, null).build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+    }
+    
+    try {
+      new LocalPhoneNumberBuilder("222-1707", "", "").build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+    }
+    
+    try {
+      new LocalPhoneNumberBuilder("222-1707", "  ", "  ").build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+    }
+  }
+  
+  @Test
+  @Parameters(method = "getValidDomainNames")
+  public void test_valid_domainName_for_LocalPhoneNumberBuilder(String validDomainName) throws Exception {
+
+    LOGGER.info("valid domain name '" + validDomainName + "' start");
+    
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("1707", validDomainName).build();
+    assertNull("Extension should be null", phoneNumber.getExtension());
+    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+   
+    //assertEquals("1707", phoneNumber.getNumber());
+    //assertEquals(validDomainName, phoneNumber.getPhoneContext());
+    assertEquals(("tel:1707;phone-context="+validDomainName), phoneNumber.getValue());
+  }
+  
+  @Test
+  public void test_extension_subAddress_conflict_for_GlobalPhoneNumberBuilder() {
+    GlobalPhoneNumberBuilder builder = new GlobalPhoneNumberBuilder("+1-888-888-5555");
+    builder.build(); //should be valid builder at this point
+    
+    builder.extension("1234");
+    builder.subAddress("example.a.com");
+    
+    try {
+      builder.build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(EXTENSION) && ex.getMessage().contains(SUBADDRESS));
+    }
+  }
+  
+  @Test
+  public void test_extension_subAddress_conflict_for_LocalPhoneNumberBuilder() {
+    LocalPhoneNumberBuilder builder = new LocalPhoneNumberBuilder("888-5555", "+1", "888");
+    builder.build(); //should be valid builder at this point
+    
+    builder.extension("1234");
+    builder.subAddress("example.a.com");
+    
+    try {
+      builder.build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      assert (ex.getMessage().contains(EXTENSION) && ex.getMessage().contains(SUBADDRESS));
+    }
   }
 
+  @Test
+  public void test_extension_for_GlobalPhoneNumberBuilder() {
+    PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder("+1-888-888-5555")
+                              .extension("1234")
+                              .build();
+    
+    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+
+    //assertEquals("+1-888-888-5555", phoneNumber.getNumber());
+    //assertEquals("1234", phoneNumber.getExtension());
+    assertEquals(("tel:+1-888-888-5555;ext=1234"), phoneNumber.getValue());
+  }
+  
+  @Test
+  public void test_extension_for_LocalPhoneNumberBuilder() {
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("888-5555", "+1", "888")
+                              .extension("1234")
+                              .build();
+    
+    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+
+    //assertEquals("888-5555", phoneNumber.getNumber());
+    //assertEquals("+1-(888)", phoneNumber.getPhoneContext());
+    //assertEquals("1234", phoneNumber.getExtension());
+    assertEquals(("tel:888-5555;ext=1234;phone-context=+1-888"), phoneNumber.getValue());
+  }
+  
+  @Test
+  public void test_subAddress_for_GlobalPhoneNumberBuilder() {
+    PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder("+1-888-888-5555")
+                              .subAddress("example.a.com")
+                              .build();
+    
+    assertNull("Extension should be null", phoneNumber.getExtension());
+    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+
+    //assertEquals("+1-888-888-5555", phoneNumber.getNumber());
+    //assertEquals("example.a.com", phoneNumber.getSubAddress());
+    assertEquals(("tel:+1-888-888-5555;isub=example.a.com"), phoneNumber.getValue());
+  }
+  
+  @Test
+  public void test_subAddress_for_LocalPhoneNumberBuilder() {
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("888-5555", "+1", "888")
+                              .subAddress("example.a.com")
+                              .build();
+    
+    assertNull("Extension should be null", phoneNumber.getExtension());
+
+    //assertEquals("888-5555", phoneNumber.getNumber());
+    //assertEquals("+1-(888)", phoneNumber.getPhoneContext());
+    //assertEquals("1234", phoneNumber.getExtension());
+    assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888"), phoneNumber.getValue());
+  }
+  
+  @Test
+  public void test_adding_params_for_GlobalPhoneNumberBuilder() {
+    PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder("+1-888-888-5555")
+        .extension("1234")
+        .param("example", "gh234")
+        .param("milhouse", "simpson")
+        .build();
+    
+    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+
+    //assertEquals("+1-888-888-5555", phoneNumber.getNumber());
+    //assertEquals("1234", phoneNumber.getExtension());
+    assertEquals(("tel:+1-888-888-5555;ext=1234;milhouse=simpson;example=gh234"), phoneNumber.getValue());
+  }  
+  
+  @Test
+  public void test_adding_params_for_LocalPhoneNumberBuilder() {
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("888-5555", "+1", "888")
+        .subAddress("example.a.com")
+        .param("example", "gh234")
+        .param("milhouse", "simpson")
+        .build();
+    
+    assertNull("Extension should be null", phoneNumber.getExtension());
+    
+    //assertEquals("888-5555", phoneNumber.getNumber());
+    //assertEquals("+1-(888)", phoneNumber.getPhoneContext());
+    //assertEquals("example.a.com", phoneNumber.getSubAddress());
+    assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888;milhouse=simpson;example=gh234"), phoneNumber.getValue());
+  }
 
 }

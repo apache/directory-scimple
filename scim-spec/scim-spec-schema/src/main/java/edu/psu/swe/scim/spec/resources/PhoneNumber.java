@@ -104,18 +104,18 @@ public class PhoneNumber extends KeyedResource implements Serializable {
     this.value = value;
     this.rawValue = value;
 
-    if (value.startsWith("tel:")) {
-      rawValue = value.substring(value.indexOf(':') + 1);
-    }
-
-    if (rawValue.startsWith("+")) {
-      String tmp = rawValue;
-      internationalCode = tmp.replaceAll("[- ()].*", "");
-    }
-
-    if (rawValue.contains(";ext=")) {
-      extension = rawValue.substring(rawValue.indexOf("=") + 1);
-    }
+//    if (value.startsWith("tel:")) {
+//      rawValue = value.substring(value.indexOf(':') + 1);
+//    }
+//
+//    if (rawValue.startsWith("+")) {
+//      String tmp = rawValue;
+//      internationalCode = tmp.replaceAll("[- ()].*", "");
+//    }
+//
+//    if (rawValue.contains(";ext=")) {
+//      extension = rawValue.substring(rawValue.indexOf("=") + 1);
+//    }
   }
 
   /*
@@ -165,11 +165,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
         this.params = new HashMap<String, String>();
       }
 
-      if (name != null && !name.isEmpty()) {
-        this.params.put(name, value);
-      } else {
-        throw new IllegalArgumentException("Name cannot be null for a PhoneNumber params property");
-      }
+      this.params.put(name, value);
     }
 
     String getFormattedExtension() {
@@ -235,9 +231,12 @@ public class PhoneNumber extends KeyedResource implements Serializable {
     }
 
     PhoneNumber build() {
+      //TODO: extension and subAddress regex validation?
       if (!StringUtils.isBlank(extension) && !StringUtils.isBlank(subAddress)) {
         throw new IllegalArgumentException("PhoneNumberBuilder cannot have a value for both extension and subAddress.");
       }
+      
+      //TODO: make sure params are safe
       
       PhoneNumber phoneNumber = new PhoneNumber();
       
@@ -288,6 +287,10 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       
       this.number = subscriberNumber;
 
+      if (StringUtils.isBlank(countryCode) && StringUtils.isBlank(areaCode) && StringUtils.isBlank(domainName)) {
+        throw new IllegalArgumentException("LocalPhoneNumberBuilder must have values for domainName or countryCode and areaCode.");
+      }
+      
       if (StringUtils.isBlank(domainName)) {
         if (StringUtils.isBlank(countryCode) || !countryCode.matches(COUNTRY_CODE_REGEX)) {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder countryCode must contain only numeric characters and an optional plus (+) prefix.");
@@ -304,7 +307,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
         }
         
       } else {
-        if (StringUtils.isBlank(domainName) || !domainName.matches(DOMAIN_NAME_REGEX)) {
+        if (!domainName.matches(DOMAIN_NAME_REGEX)) {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder domainName must contain only alphanumeric, . and - characters.");
         }
         
