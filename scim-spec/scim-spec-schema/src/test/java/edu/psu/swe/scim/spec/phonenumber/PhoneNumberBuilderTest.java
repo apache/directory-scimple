@@ -202,18 +202,19 @@ public class PhoneNumberBuilderTest {
     public void test_valid_countryCode_for_LocalPhoneNumberBuilder(String validCountryCode) throws Exception {
 
       LOGGER.info("valid country code '" + validCountryCode + "' start");
-      try {
-        new LocalPhoneNumberBuilder("123-4567", validCountryCode, null).build();
-        fail(FAILURE_MESSAGE);
-      } catch (IllegalArgumentException ex) {
-        assertTrue("Exception should have been for area code.", ex.getMessage().contains(AREA_CODE));
-      }
+
+      PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("123-4567", validCountryCode, null).build();
+      assertNull("Extension should be null", phoneNumber.getExtension());
+      assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+      //assertEquals("123-4567", phoneNumber.getNumber());
+      //assertEquals(("+" + validCountryCode), phoneNumber.getPhoneContext());
+      
+      assertEquals(("tel:123-4567;phone-context=+" + validCountryCode.replace("+", "")), phoneNumber.getValue());
     }
     
     @SuppressWarnings("unused")
     private String[] getInvalidAreaCodes() {
       return new String[] { 
-         null,
          "",
          "A",
          "b",
@@ -271,7 +272,25 @@ public class PhoneNumberBuilderTest {
       LOGGER.info("padded areaCode ->" + ex.getMessage());
       assert (ex.getMessage().contains(AREA_CODE));
     }
+    
+    try {
+      new LocalPhoneNumberBuilder("123-4567", "23", "  ").build();
+      fail(FAILURE_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      LOGGER.info("padded areaCode ->" + ex.getMessage());
+      assert (ex.getMessage().contains(AREA_CODE));
+    }
   }
+  
+  @Test
+  public void test_areaCode_can_be_null_for_LocalPhoneNumberBuilder() throws Exception {
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("123-4567", "23", null).build();
+    assertNull("Extension should be null", phoneNumber.getExtension());
+    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    //assertEquals("123-4567", phoneNumber.getNumber());
+    //assertEquals(("+23" + validAreaCode), phoneNumber.getPhoneContext());
+    assertEquals(("tel:123-4567;phone-context=+23"), phoneNumber.getValue());    
+  }  
   
   @Test
   @Parameters(method = "getValidAreaCodes")
@@ -520,42 +539,42 @@ public class PhoneNumberBuilderTest {
       new LocalPhoneNumberBuilder("1707", null).build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
     }
     
     try {
       new LocalPhoneNumberBuilder("1707", "").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
     }
     
     try {
       new LocalPhoneNumberBuilder("1707", "  ").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
     }
     
     try {
       new LocalPhoneNumberBuilder("222-1707", null, null).build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
     }
     
     try {
       new LocalPhoneNumberBuilder("222-1707", "", "").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
     }
     
     try {
       new LocalPhoneNumberBuilder("222-1707", "  ", "  ").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE) && ex.getMessage().contains(AREA_CODE));
+      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
     }
   }
   

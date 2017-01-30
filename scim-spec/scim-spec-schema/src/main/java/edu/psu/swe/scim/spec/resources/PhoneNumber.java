@@ -287,8 +287,8 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       
       this.number = subscriberNumber;
 
-      if (StringUtils.isBlank(countryCode) && StringUtils.isBlank(areaCode) && StringUtils.isBlank(domainName)) {
-        throw new IllegalArgumentException("LocalPhoneNumberBuilder must have values for domainName or countryCode and areaCode.");
+      if (StringUtils.isBlank(countryCode) && StringUtils.isBlank(domainName)) {
+        throw new IllegalArgumentException("LocalPhoneNumberBuilder must have values for domainName or countryCode.");
       }
       
       if (StringUtils.isBlank(domainName)) {
@@ -296,14 +296,18 @@ public class PhoneNumber extends KeyedResource implements Serializable {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder countryCode must contain only numeric characters and an optional plus (+) prefix.");
         }
   
-        if (StringUtils.isBlank(areaCode) || !StringUtils.isNumeric(areaCode)) {
+        if (areaCode != null && !StringUtils.isNumeric(areaCode)) {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder areaCode must contain only numberic characters.");
         }
         
-        if (countryCode.startsWith(INTERNATIONAL_PREFIX)) {
-          this.phoneContext = countryCode + HYPHEN + areaCode;
+        if (!countryCode.startsWith(INTERNATIONAL_PREFIX)) {
+          this.phoneContext = INTERNATIONAL_PREFIX + countryCode;
         } else {
-          this.phoneContext = INTERNATIONAL_PREFIX + countryCode + HYPHEN + areaCode;
+          this.phoneContext = countryCode;
+        }
+                
+        if (!StringUtils.isBlank(areaCode)) {
+          this.phoneContext += (HYPHEN + areaCode);
         }
         
       } else {
