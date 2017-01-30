@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,11 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberLexer;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseException;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseTreeListener;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser;
-import edu.psu.swe.scim.spec.phonenumber.TreePrintingListener;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Setter;
 
 /**
@@ -43,10 +44,11 @@ import lombok.Setter;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-@EqualsAndHashCode(callSuper = false)
 public class PhoneNumber extends KeyedResource implements Serializable {
 
   private static final long serialVersionUID = 607319505715224096L;
+  
+  private static final String VISUAL_SEPARATORS = "[\\(\\)\\-\\.]";
 
   @Setter(AccessLevel.NONE)
   @XmlElement
@@ -66,14 +68,23 @@ public class PhoneNumber extends KeyedResource implements Serializable {
   Boolean primary = false;
 
   String rawValue;
-  String internationalCode;
+  boolean isGlobalNumber = false;
   String number;
   String extension;
   String subAddress;
   String phoneContext;
+  boolean isDomainPhoneContext = false;
   Map<String, String> params;
+  
+  public void addParam(String name, String value) {
+    if (this.params == null) {
+      this.params = new HashMap<String, String>();
+    }
 
-  public void setValue(String value) {
+    this.params.put(name, value);
+  }
+
+  public void setValue(String value) throws PhoneNumberParseException {
     PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
 
     List<? extends Token> allTokens = phoneNumberLexer.getAllTokens();
@@ -92,50 +103,160 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       }
     });
 
-    // try {
-    ParseTree tree = p.phoneNumber();
-    TreePrintingListener tpl = new TreePrintingListener();
-    ParseTreeWalker.DEFAULT.walk(tpl, tree);
-    // } catch (IllegalStateException e) {
-    // TODO:remove generic exception for a more specific one
-    // throw new Exception("Trouble with phone number value parser");
-    // }
-
+    PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
+    try {
+      ParseTree tree = p.phoneNumber();
+      ParseTreeWalker.DEFAULT.walk(tpl, tree);
+    } catch (IllegalStateException e) {
+      throw new PhoneNumberParseException(e);
+    }
+      
+    PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
+    
     this.value = value;
     this.rawValue = value;
+    this.number = parsedPhoneNumber.getNumber();
+    this.extension = parsedPhoneNumber.getExtension();
+    this.subAddress = parsedPhoneNumber.getSubAddress();
+    this.phoneContext = parsedPhoneNumber.getPhoneContext();
+    this.params = parsedPhoneNumber.getParams();
+    this.isGlobalNumber = parsedPhoneNumber.isGlobalNumber();
+    this.isDomainPhoneContext = parsedPhoneNumber.isDomainPhoneContext();
+  }
+  
+  /*
+   * Implements RFC 3996 URI Equality for the value property
+   * https://tools.ietf.org/html/rfc3966#section-3
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    PhoneNumber other = (PhoneNumber) obj;
+    
+    if (isGlobalNumber != other.isGlobalNumber)
+      return false;
+    
+    
+    String numberWithoutVisualSeparators = number != null ? number.replaceAll(VISUAL_SEPARATORS, "") : null;
+    String otherNumberWithoutVisualSeparators = other.number != null ? other.number.replaceAll(VISUAL_SEPARATORS, "") : null;
+    if (numberWithoutVisualSeparators == null) {
+      if (otherNumberWithoutVisualSeparators != null)
+        return false;
+    } else if (!numberWithoutVisualSeparators.equals(otherNumberWithoutVisualSeparators))
+      return false;
+    
+    
+    String extensionWithoutVisualSeparators = extension != null ? extension.replaceAll(VISUAL_SEPARATORS, "") : null;
+    String otherExtensionWithoutVisualSeparators = other.extension != null ? other.extension.replaceAll(VISUAL_SEPARATORS, "") : null;
+    if (extensionWithoutVisualSeparators == null) {
+      if (otherExtensionWithoutVisualSeparators != null)
+        return false;
+    } else if (!extensionWithoutVisualSeparators.equals(otherExtensionWithoutVisualSeparators))
+      return false;
+    
+    
+    if (subAddress == null) {
+      if (other.subAddress != null)
+        return false;
+    } else if (!subAddress.equalsIgnoreCase(other.subAddress))
+      return false;
 
-//    if (value.startsWith("tel:")) {
-//      rawValue = value.substring(value.indexOf(':') + 1);
-//    }
-//
-//    if (rawValue.startsWith("+")) {
-//      String tmp = rawValue;
-//      internationalCode = tmp.replaceAll("[- ()].*", "");
-//    }
-//
-//    if (rawValue.contains(";ext=")) {
-//      extension = rawValue.substring(rawValue.indexOf("=") + 1);
-//    }
+    
+    String phoneContextTemp = phoneContext;
+    if (!StringUtils.isBlank(phoneContext) && !isDomainPhoneContext) {
+      phoneContextTemp = phoneContext.replaceAll(VISUAL_SEPARATORS, "");
+    }
+    
+    String otherPhoneContextTemp = other.phoneContext;
+    if (!StringUtils.isBlank(other.phoneContext) && !other.isDomainPhoneContext) {
+      otherPhoneContextTemp = other.phoneContext.replaceAll(VISUAL_SEPARATORS, "");
+    }
+
+    if (phoneContextTemp == null) {
+      if (otherPhoneContextTemp != null)
+        return false;
+    } else if (!phoneContextTemp.equalsIgnoreCase(otherPhoneContextTemp))
+      return false;
+    
+    
+    if (!equalsIgnoreCaseAndOrderParams(other.params)) {
+      return false;
+    }
+        
+    
+    if (primary == null) {
+      if (other.primary != null)
+        return false;
+    } else if (!primary.equals(other.primary))
+      return false;
+    
+    
+    if (type == null) {
+      if (other.type != null)
+        return false;
+    } else if (!type.equals(other.type))
+      return false;
+    
+    
+    return true;
   }
 
   /*
-   * Two "tel" URIs are equivalent according to the following rules:
-   * 
-   * o Both must be either a 'local-number' or a 'global-number', i.e., start
-   * with a '+'. o The 'global-number-digits' and the 'local-number-digits' must
-   * be equal, after removing all visual separators. o For mandatory additional
-   * parameters (section 5.4) and the 'phone- context' and 'extension'
-   * parameters defined in this document, the 'phone-context' parameter value is
-   * compared as a host name if it is a 'domainname' or digit by digit if it is
-   * 'global-number- digits'. The latter is compared after removing all 'visual-
-   * separator' characters. o Parameters are compared according to 'pname',
-   * regardless of the order they appeared in the URI. If one URI has a
-   * parameter name not found in the other, the two URIs are not equal. o URI
-   * comparisons are case-insensitive.
-   * 
-   * All parameter names and values SHOULD use lower-case characters, as tel
-   * URIs may be used within contexts where comparisons are case sensitive.
+   * Implements RFC 3996 URI Equality for the value property
+   * https://tools.ietf.org/html/rfc3966#section-3
    */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (isGlobalNumber ? 1231 : 1237);
+    result = prime * result + ((number == null) ? 0 : number.replaceAll(VISUAL_SEPARATORS, "").hashCode());
+    result = prime * result + ((extension == null) ? 0 : extension.replaceAll(VISUAL_SEPARATORS, "").hashCode());
+    result = prime * result + ((subAddress == null) ? 0 : subAddress.toLowerCase().hashCode());
+    result = prime * result + ((phoneContext == null) ? 0 : (isDomainPhoneContext ? phoneContext.toLowerCase().hashCode() : phoneContext.replaceAll(VISUAL_SEPARATORS, "").hashCode()));
+    result = prime * result + ((params == null) ? 0 : paramsToLowerCase().hashCode());
+    result = prime * result + ((primary == null) ? 0 : primary.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.hashCode());
+    return result;
+  }
+  
+  HashMap<String, String> paramsToLowerCase() {
+    HashMap<String, String> paramsLowercase = new HashMap<String, String>();
+    for(Entry<String, String> entry : params.entrySet()) {
+      paramsLowercase.put(entry.getKey().toLowerCase(), entry.getValue().toLowerCase());
+    }
+    
+    return paramsLowercase;
+  }
+  
+  boolean equalsIgnoreCaseAndOrderParams(Map<String, String> otherParams) {
+    if (params == null && otherParams == null) {
+      return true;
+    }
+    
+    if ((params == null && otherParams != null) ||
+        (params != null && otherParams == null) ||
+        (params.size() != otherParams.size())) {
+      return false;
+    }
+    
+    HashMap<String, String> paramsLowercase = paramsToLowerCase(); 
+    
+    for(Entry<String, String> entry : otherParams.entrySet()) {
+      String foundValue = paramsLowercase.get(entry.getKey().toLowerCase());
+      
+      if (!entry.getValue().equalsIgnoreCase(foundValue)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
   
   protected static class PhoneNumberBuilder {
     
@@ -197,7 +318,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
 
       if (params != null) {
         for (Map.Entry<String, String> entry : params.entrySet()) {
-          paramsFormatted += String.format(PARAMS_STRING, entry.getKey(), entry.getValue());
+          paramsFormatted += String.format(PARAMS_STRING, entry.getKey(), entry.getValue() != null ? entry.getValue() : "");
         }
       }
       
@@ -230,13 +351,23 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       return !valueString.isEmpty() ? valueString : null;
     }
 
-    PhoneNumber build() {
-      //TODO: extension and subAddress regex validation?
+    PhoneNumber build() throws PhoneNumberParseException {
       if (!StringUtils.isBlank(extension) && !StringUtils.isBlank(subAddress)) {
         throw new IllegalArgumentException("PhoneNumberBuilder cannot have a value for both extension and subAddress.");
       }
       
-      //TODO: make sure params are safe
+      if (extension != null && !extension.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX)) {
+        throw new IllegalArgumentException("PhoneNumberBuilder extension must contain only numeric characters and optional ., -, (, ) visual separator characters.");
+      }
+      
+      if (params != null && !params.isEmpty()) {
+        if (params.get("") != null ||
+            params.get(null) != null ||
+            params.values().contains(null) ||
+            params.values().contains("")) {
+          throw new IllegalArgumentException("PhoneNumberBuilder params names and values cannot be null or empty."); 
+        }
+      }
       
       PhoneNumber phoneNumber = new PhoneNumber();
       
@@ -280,7 +411,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       return this;
     }
     
-    public PhoneNumber build() {
+    public PhoneNumber build() throws PhoneNumberParseException {
       if (StringUtils.isBlank(subscriberNumber) || !subscriberNumber.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX) ) {
         throw new IllegalArgumentException("LocalPhoneNumberBuilder subscriberNumber must contain only numeric characters and optional ., -, (, ) visual separator characters.");
       }
@@ -344,7 +475,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
       return this;
     }
     
-    public PhoneNumber build() {
+    public PhoneNumber build() throws PhoneNumberParseException {
       if (StringUtils.isBlank(globalNumber) || !globalNumber.matches(GLOBAL_NUMBER_REGEX)) {
         throw new IllegalArgumentException("GlobalPhoneNumberBuilder globalNumber must contain only numeric characters, optional ., -, (, ) visual separators, and an optional plus (+) prefix.");
       }

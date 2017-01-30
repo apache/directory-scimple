@@ -148,9 +148,9 @@ public class PhoneNumberTest {
 		phoneNumber.setValue(phoneUri);
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = PhoneNumberParseException.class)
   @Parameters(method = "getAllInvalidPhones")
-  public void test_parser_with_invalid_phone_numbers(String phoneUri) {
+  public void test_parser_with_invalid_phone_numbers(String phoneUri) throws PhoneNumberParseException {
 	  LOGGER.info("invalid phones (" + phoneUri + ") start");
     PhoneNumber phoneNumber = new PhoneNumber();
     phoneNumber.setValue(phoneUri);
