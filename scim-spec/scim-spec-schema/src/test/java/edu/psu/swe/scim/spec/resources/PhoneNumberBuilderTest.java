@@ -1087,7 +1087,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @Test
-  public void test_equalsAndHashCode_phoneContext_asDomainName() throws PhoneNumberParseException {
+  public void test_equalsAndHashCode_phoneContext_as_domainName() throws PhoneNumberParseException {
     PhoneNumber localPh = new LocalPhoneNumberBuilder("888-5555", "example.ZXC.com").build();
     
     PhoneNumber localPhSame = new LocalPhoneNumberBuilder("8885555", "Example.zxc.com").build();
@@ -1108,7 +1108,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @Test
-  public void test_equalsAndHashCode_phoneContext_asDe() throws PhoneNumberParseException {
+  public void test_equalsAndHashCode_phoneContext_as_digits() throws PhoneNumberParseException {
     PhoneNumber localPh = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
 
     PhoneNumber localPhSame = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
@@ -1127,5 +1127,154 @@ public class PhoneNumberBuilderTest {
     assertNotEquals(localPh, nullContextPh);
     assertNotEquals(localPh.hashCode(), nullContextPh.hashCode());
   }
+  
+  @Test
+  public void test_equalsAndHashCode_params() throws PhoneNumberParseException {
+    PhoneNumber localPh = new LocalPhoneNumberBuilder("888-5555", "+1", "888")
+                          .param("A","c")
+                          .param("B","d")
+                          .build();
+
+    PhoneNumber localPhSame = new LocalPhoneNumberBuilder("888-5555", "+1", "888")
+                              .param("a","C")
+                              .param("b","D")
+                              .build();
+    
+    PhoneNumber localPhDiff = new LocalPhoneNumberBuilder("888-5555", "+1", "888")
+                              .param("A","e")
+                              .param("B","d")
+                              .build();
+    
+    PhoneNumber nullParamsPh = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    
+    assertEquals(localPh, localPhSame);
+    assertEquals(localPh.hashCode(), localPhSame.hashCode());
+    
+    assertNotEquals(localPh, localPhDiff);
+    assertNotEquals(localPh.hashCode(), localPhDiff.hashCode());
+    
+    assertNotEquals(localPh, nullParamsPh);
+    assertNotEquals(localPh.hashCode(), nullParamsPh.hashCode());
+    
+    PhoneNumber globalPh = new GlobalPhoneNumberBuilder("+683-5791")
+                          .param("A","c")
+                          .param("B","d")
+                          .build();
+
+    PhoneNumber globalPhSame = new GlobalPhoneNumberBuilder("+683-5791")
+                               .param("a","C")
+                               .param("b","D")
+                               .build();
+
+    PhoneNumber globalPhDiff = new GlobalPhoneNumberBuilder("+683-5791")
+                               .param("A","e")
+                               .param("f","D")
+                                .build();
+
+    PhoneNumber nullParamsGlobalPh = new GlobalPhoneNumberBuilder("+683-5791").build();
+
+    assertEquals(globalPh, globalPhSame);
+    assertEquals(globalPh.hashCode(), globalPhSame.hashCode());
+
+    assertNotEquals(globalPh, globalPhDiff);
+    assertNotEquals(globalPh.hashCode(), globalPhDiff.hashCode());
+
+    assertNotEquals(globalPh, nullParamsGlobalPh);
+    assertNotEquals(globalPh.hashCode(), nullParamsGlobalPh.hashCode());
+  }
+  
+  @Test
+  public void test_equalsAndHashCode_phoneContext_primary_flag() throws PhoneNumberParseException {
+    PhoneNumber localPh = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    localPh.setPrimary(Boolean.TRUE);
+    
+    PhoneNumber localPhSame = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    localPhSame.setPrimary(Boolean.TRUE);
+    
+    PhoneNumber localPhDiff = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    localPhDiff.setPrimary(Boolean.FALSE);
+    
+    PhoneNumber nullPrimaryPh = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    nullPrimaryPh.setPrimary(null);
+    
+    assertEquals(localPh, localPhSame);
+    assertEquals(localPh.hashCode(), localPhSame.hashCode());
+    
+    assertNotEquals(localPh, localPhDiff);
+    assertNotEquals(localPh.hashCode(), localPhDiff.hashCode());
+    
+    assertNotEquals(localPh, nullPrimaryPh);
+    assertNotEquals(localPh.hashCode(), nullPrimaryPh.hashCode());
+    
+    
+    PhoneNumber globalPh = new GlobalPhoneNumberBuilder("+683-5791").build();
+    globalPh.setPrimary(true);
+    
+    PhoneNumber globalPhSame = new GlobalPhoneNumberBuilder("+683-5791").build();
+    globalPhSame.setPrimary(true);
+    
+    PhoneNumber globalPhDiff = new GlobalPhoneNumberBuilder("+683-5791").build();
+    globalPhDiff.setPrimary(false);
+    
+    PhoneNumber nullPrimaryGlobalPh = new GlobalPhoneNumberBuilder("+683-5791").build();
+    nullPrimaryGlobalPh.setPrimary(null);
+    
+    assertEquals(globalPh, globalPhSame);
+    assertEquals(globalPh.hashCode(), globalPhSame.hashCode());
+    
+    assertNotEquals(globalPh, globalPhDiff);
+    assertNotEquals(globalPh.hashCode(), globalPhDiff.hashCode());
+    
+    assertNotEquals(globalPh, nullPrimaryGlobalPh);
+    assertNotEquals(globalPh.hashCode(), nullPrimaryGlobalPh.hashCode());
+  }
+  
+  @Test
+  public void test_equalsAndHashCode_phoneContext_type() throws PhoneNumberParseException {
+    PhoneNumber localPh = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    localPh.setType("work");
+    
+    PhoneNumber localPhSame = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    localPhSame.setType("WORK");
+    
+    PhoneNumber localPhDiff = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    localPhDiff.setType("HOME");
+    
+    PhoneNumber nullTypePh = new LocalPhoneNumberBuilder("888-5555", "+1", "888").build();
+    assertNull(nullTypePh.getType());
+    
+    assertEquals(localPh, localPhSame);
+    assertEquals(localPh.hashCode(), localPhSame.hashCode());
+    
+    assertNotEquals(localPh, localPhDiff);
+    assertNotEquals(localPh.hashCode(), localPhDiff.hashCode());
+    
+    assertNotEquals(localPh, nullTypePh);
+    assertNotEquals(localPh.hashCode(), nullTypePh.hashCode());
+    
+    
+    PhoneNumber globalPh = new GlobalPhoneNumberBuilder("+683-5791").build();
+    globalPh.setType("mobile");
+    
+    PhoneNumber globalPhSame = new GlobalPhoneNumberBuilder("+683-5791").build();
+    globalPhSame.setType("MOBILE");
+    
+    PhoneNumber globalPhDiff = new GlobalPhoneNumberBuilder("+683-5791").build();
+    globalPhDiff.setType("fax");
+    
+    PhoneNumber nullTypeGlobalPh = new GlobalPhoneNumberBuilder("+683-5791").build();
+    assertNull(nullTypeGlobalPh.getType());
+    
+    assertEquals(globalPh, globalPhSame);
+    assertEquals(globalPh.hashCode(), globalPhSame.hashCode());
+    
+    assertNotEquals(globalPh, globalPhDiff);
+    assertNotEquals(globalPh.hashCode(), globalPhDiff.hashCode());
+    
+    assertNotEquals(globalPh, nullTypeGlobalPh);
+    assertNotEquals(globalPh.hashCode(), nullTypeGlobalPh.hashCode());
+  }
+  
+  
 
 }

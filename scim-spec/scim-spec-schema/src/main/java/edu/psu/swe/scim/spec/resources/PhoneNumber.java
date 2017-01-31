@@ -65,7 +65,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
 
   @XmlElement
   @ScimAttribute(description = "A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
-  Boolean primary = false;
+  Boolean primary;
 
   String rawValue;
   boolean isGlobalNumber = false;
@@ -199,7 +199,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
     if (type == null) {
       if (other.type != null)
         return false;
-    } else if (!type.equals(other.type))
+    } else if (!type.equalsIgnoreCase(other.type))
       return false;
     
     
@@ -221,7 +221,7 @@ public class PhoneNumber extends KeyedResource implements Serializable {
     result = prime * result + ((phoneContext == null) ? 0 : (isDomainPhoneContext ? phoneContext.toLowerCase().hashCode() : phoneContext.replaceAll(VISUAL_SEPARATORS, "").hashCode()));
     result = prime * result + ((params == null) ? 0 : paramsToLowerCase().hashCode());
     result = prime * result + ((primary == null) ? 0 : primary.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.toLowerCase().hashCode());
     return result;
   }
   
