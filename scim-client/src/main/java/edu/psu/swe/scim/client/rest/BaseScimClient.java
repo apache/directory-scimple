@@ -11,6 +11,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import lombok.extern.slf4j.Slf4j;
 import edu.psu.swe.commons.jaxrs.RestCall;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
@@ -28,6 +29,7 @@ import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 
+@Slf4j
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {
 
   private final Client client;
@@ -94,14 +96,15 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return listResponse;
   }
 
-  public void create(T resource) throws ScimException {
-    this.create(resource, null, null);
+  public T create(T resource) throws ScimException {
+    return this.create(resource, null, null);
   }
 
-  public void create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+  public T create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     Response response = this.scimClient.create(resource, attributes, excludedAttributes);
-
     handleResponse(response);
+    T t = response.readEntity(scimResourceClass);
+    return t;
   }
 
   public ListResponse<T> find(SearchRequest searchRequest) throws ScimException {
