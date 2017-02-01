@@ -6,7 +6,7 @@ import lombok.Data;
 
 /**
  * A DTO that represents the wire format of a SCIM ResourceType's SchemaExtension
- * according to section 6 of the SCIM Protocol Specification.  See:
+ * according to section 6 of the SCIM Schema Specification.  See:
  * 
  * https://tools.ietf.org/html/rfc7643#section-6
  * 
