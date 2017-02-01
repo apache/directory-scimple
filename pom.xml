@@ -13,7 +13,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
-    <version.errai>4.0.0.Beta4</version.errai>
+    <version.errai>4.0.0.CR1</version.errai>
     <version.gwt>2.8.0</version.gwt>
     <version.lombok>1.16.10</version.lombok>
     <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
