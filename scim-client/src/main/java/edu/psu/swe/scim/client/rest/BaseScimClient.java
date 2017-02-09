@@ -27,9 +27,7 @@ import edu.psu.swe.scim.spec.protocol.exception.ScimException;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {
 
   private final Client client;
@@ -39,7 +37,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
   private final ScimClient scimClient;
   private RestCall invoke = Invocation::invoke;
 
-  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType) throws IllegalArgumentException {
+  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType) {
     ScimResourceType scimResourceType = scimResourceClass.getAnnotation(ScimResourceType.class);
     String endpoint = scimResourceType != null ? scimResourceType.endpoint() : null;
 
@@ -53,7 +51,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     this.scimClient = new ScimClient();
   }
 
-  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType, RestCall invoke) throws IllegalArgumentException {
+  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType, RestCall invoke) {
     this(client, baseUrl, scimResourceClass, scimResourceListGenericType);
 
     this.invoke = invoke;
@@ -89,7 +87,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
   }
 
   public ListResponse<T> query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws ScimException {
-    ListResponse<T> listResponse;;
+    ListResponse<T> listResponse;
     Response response = this.scimClient.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
     listResponse = handleResponse(response, scimResourceListResponseGenericType, response::readEntity);
 
@@ -102,8 +100,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
 
   public T create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     Response response = this.scimClient.create(resource, attributes, excludedAttributes);
-    T t = handleResponse(response, scimResourceClass, response::readEntity);
-    return t;
+    
+    return handleResponse(response, scimResourceClass, response::readEntity);
   }
 
   public ListResponse<T> find(SearchRequest searchRequest) throws ScimException {
@@ -114,24 +112,24 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return listResponse;
   }
 
-  public void update(String id, T resource) throws ScimException {
-    this.update(id, resource, null, null);
+  public T update(String id, T resource) throws ScimException {
+    return this.update(id, resource, null, null);
   }
 
-  public void update(String id, T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+  public T update(String id, T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     Response response = this.scimClient.update(resource, id, attributes, excludedAttributes);
 
-    handleResponse(response);
+    return handleResponse(response, scimResourceClass, response::readEntity);
   }
 
-  public void patch(String id, PatchRequest patchRequest) throws ScimException {
-    this.patch(id, patchRequest, null, null);
+  public T patch(String id, PatchRequest patchRequest) throws ScimException {
+    return this.patch(id, patchRequest, null, null);
   }
   
-  public void patch(String id, PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+  public T patch(String id, PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     Response response = this.scimClient.patch(patchRequest, id, attributes, excludedAttributes);
 
-    handleResponse(response);
+    return handleResponse(response, scimResourceClass, response::readEntity);
   }
 
   public void delete(String id) throws ScimException {
@@ -179,20 +177,6 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     this.invoke = invoke;
   }
 
-  private static ScimException toScimException(RestClientException restClientException) {
-    ScimException scimException;
-    ErrorResponse errorResponse = new ErrorResponse();
-    Status status = restClientException.getErrorMessage().getStatus();
-    String statusCode = Integer.toString(status.getStatusCode());
-
-    errorResponse.setDetail(String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
-    errorResponse.setStatus(statusCode);
-
-    scimException = new ScimException(errorResponse, status);
-
-    return scimException;
-  }
-
   private class ScimClient implements BaseResourceTypeResource<T> {
 
     private static final String ATTRIBUTES_QUERY_PARAM = "attributes";
@@ -203,6 +187,20 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     private static final String START_INDEX_QUERY_PARAM = "startIndex";
     private static final String COUNT_QUERY_PARAM = "count";
 
+    private ScimException toScimException(RestClientException restClientException) {
+      ScimException scimException;
+      ErrorResponse errorResponse = new ErrorResponse();
+      Status status = restClientException.getErrorMessage().getStatus();
+      String statusCode = Integer.toString(status.getStatusCode());
+
+      errorResponse.setDetail(String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
+      errorResponse.setStatus(statusCode);
+
+      scimException = new ScimException(errorResponse, status);
+
+      return scimException;
+    }
+    
     @Override
     public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
       Response response;
