@@ -385,19 +385,19 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
 
     if (evaluatePreconditionsResponse != null) {
-      return createPreconditionFailedResponse(resource, evaluatePreconditionsResponse);
+      return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
     }
 
     T updated;
     try {
-      updated = provider.update(new UpdateRequest<T>(id, resource));
+      updated = provider.update(new UpdateRequest<T>(id, stored, resource));
     } catch (UnableToUpdateResourceException e1) {
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
     // Process Attributes
     try {
-      stored = processFilterAttributeExtensions(provider, stored, attributeReferences, excludedAttributeReferences);
+      updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -461,16 +461,30 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       return createNotFoundResponse(id);
     }
 
+    EntityTag backingETag = null;
+    try {
+      backingETag = etagGenerator.generateEtag(stored);
+    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+      return createETagErrorResponse();
+    }
+
+    ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+
+    if (evaluatePreconditionsResponse != null) {
+      return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
+    }
+
+    
     T updated;
     try {
-      updated = provider.update(new UpdateRequest<T>(id, patchRequest.getPatchOperationList()));
+      updated = provider.update(new UpdateRequest<T>(id, stored, patchRequest.getPatchOperationList()));
     } catch (UnableToUpdateResourceException e1) {
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
     // Process Attributes
     try {
-      stored = processFilterAttributeExtensions(provider, stored, attributeReferences, excludedAttributeReferences);
+      updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -608,11 +622,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
   }
 
-  private Response createPreconditionFailedResponse(T resource, ResponseBuilder evaluatePreconditionsResponse) {
+  private Response createPreconditionFailedResponse(String id, ResponseBuilder evaluatePreconditionsResponse) {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("412");
-    er.setDetail("Failed to update record, backing record has changed - " + resource.getId());
-    log.warn("Failed to update record, backing record has changed - " + resource.getId());
+    er.setDetail("Failed to update record, backing record has changed - " + id);
+    log.warn("Failed to update record, backing record has changed - " + id);
     return evaluatePreconditionsResponse.entity(er).build();
   }
 }
