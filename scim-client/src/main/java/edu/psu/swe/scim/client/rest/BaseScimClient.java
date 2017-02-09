@@ -122,8 +122,12 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     handleResponse(response);
   }
 
-  public void patch(PatchRequest patchRequest) throws ScimException {
-    Response response = this.scimClient.patch(patchRequest);
+  public void patch(String id, PatchRequest patchRequest) throws ScimException {
+    this.patch(id, patchRequest, null, null);
+  }
+  
+  public void patch(String id, PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+    Response response = this.scimClient.patch(patchRequest, id, attributes, excludedAttributes);
 
     handleResponse(response);
   }
@@ -294,9 +298,12 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     }
 
     @Override
-    public Response patch(PatchRequest patchRequest) throws ScimException {
+    public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
       Response response;
       Invocation request = BaseScimClient.this.target
+          .path(id)
+          .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
+          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
           .request(Constants.SCIM_CONTENT_TYPE)
           .build("PATCH", Entity.entity(patchRequest, Constants.SCIM_CONTENT_TYPE));
 

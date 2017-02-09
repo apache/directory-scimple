@@ -37,6 +37,7 @@ import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.UpdateRequest;
 import edu.psu.swe.scim.server.provider.annotations.ScimProcessingExtension;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
@@ -136,7 +137,7 @@ public class ScimRdbmsService implements Provider<ScimUser> {
   }
 
   @Override
-  public ScimUser update(String id, ScimUser resource) throws UnableToUpdateResourceException {
+  public ScimUser update(UpdateRequest<ScimUser> updateRequest) throws UnableToUpdateResourceException {
     // TODO Auto-generated method stub
     return null;
   }

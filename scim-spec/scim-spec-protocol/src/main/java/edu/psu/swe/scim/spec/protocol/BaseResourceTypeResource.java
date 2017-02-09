@@ -125,11 +125,15 @@ public interface BaseResourceTypeResource<T> {
   }
 
   @PATCH
+  @Path("{id}")
   @Consumes(Constants.SCIM_CONTENT_TYPE)
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Patch a portion of the backing store", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response patch(PatchRequest patchRequest) throws Exception {
+  default Response patch(PatchRequest patchRequest,
+                         @PathParam("id") String id,
+                         @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                         @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
