@@ -15,7 +15,7 @@
 
     <version.errai>4.0.0.CR1</version.errai>
     <version.gwt>2.8.0</version.gwt>
-    <version.lombok>1.16.10</version.lombok>
+    <version.lombok>1.16.14</version.lombok>
     <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
   </properties>
