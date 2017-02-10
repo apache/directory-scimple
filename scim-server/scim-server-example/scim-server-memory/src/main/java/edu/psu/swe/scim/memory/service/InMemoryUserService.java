@@ -11,7 +11,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
 import edu.psu.swe.scim.memory.extensions.LuckyNumberExtension;
+import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.UpdateRequest;
 import edu.psu.swe.scim.spec.exception.InvalidExtensionException;
 import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
@@ -19,6 +21,7 @@ import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.Email;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
+import edu.psu.swe.scim.spec.resources.ScimGroup;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 
 /**
@@ -84,7 +87,9 @@ public class InMemoryUserService implements Provider<ScimUser> {
    * @see edu.psu.swe.scim.server.provider.Provider#update(java.lang.Object)
    */
   @Override
-  public ScimUser update(String id, ScimUser resource) {
+  public ScimUser update(UpdateRequest<ScimUser> updateRequest) throws UnableToUpdateResourceException {
+    String id = updateRequest.getId();
+    ScimUser resource = updateRequest.getResource();
     users.put(id, resource);
     return resource;
   }

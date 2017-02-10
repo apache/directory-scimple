@@ -21,6 +21,7 @@ import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
+import edu.psu.swe.scim.server.provider.UpdateRequest;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.BulkResource;
 import edu.psu.swe.scim.spec.protocol.data.BulkOperation;
@@ -259,7 +260,7 @@ public class BulkResourceImpl implements BulkResource {
         Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
         Provider<ScimResource> provider = providerRegistry.getProvider(scimResourceClass);
 
-        provider.update(scimResourceId, scimResource);
+        provider.update(new UpdateRequest<ScimResource>(scimResourceId, scimResource));
       } catch (UnresolvableOperationException unresolvableOperationException) {
         log.error("Could not complete final resolution pass, unresolvable bulkId", unresolvableOperationException);
 
@@ -406,7 +407,7 @@ public class BulkResourceImpl implements BulkResource {
       this.resolveTopLevel(unresolveds, operationResult, bulkIdKeyToOperationResult);
       String id = operationResult.getPath().substring(operationResult.getPath().lastIndexOf("/") + 1);
 
-      provider.update(id, scimResource);
+      provider.update(new UpdateRequest<ScimResource>(id, scimResource));
       operationResult.setStatus(OKAY_STATUS);
     } break;
 
