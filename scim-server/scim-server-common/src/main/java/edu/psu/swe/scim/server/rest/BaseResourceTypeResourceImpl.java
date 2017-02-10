@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -81,6 +82,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   
   @Inject
   EtagGenerator etagGenerator;
+  
+  @Inject
+  Instance<UpdateRequest<T>> updateRequestInstance;
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -390,7 +394,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T updated;
     try {
-      updated = provider.update(new UpdateRequest<T>(id, stored, resource));
+      UpdateRequest<T> updateRequest = updateRequestInstance.get();
+      updateRequest.initWithResource(id, stored, resource);
+      updated = provider.update(updateRequest);
     } catch (UnableToUpdateResourceException e1) {
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
@@ -477,7 +483,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     
     T updated;
     try {
-      updated = provider.update(new UpdateRequest<T>(id, stored, patchRequest.getPatchOperationList()));
+      UpdateRequest<T> updateRequest = updateRequestInstance.get();
+      updateRequest.initWithPatch(id, stored, patchRequest.getPatchOperationList());
+      updated = provider.update(updateRequest);
     } catch (UnableToUpdateResourceException e1) {
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
