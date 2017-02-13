@@ -5,7 +5,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import lombok.Data;
 
 /**
- * An abstract super-class for configuration objects that include
+ * A super-class for configuration objects that include
  * the supports sub-attribute within a sub-object of the SCIM
  * ServiceProviderConfig according to section 5 of the SCIM Schema
  * Specification.  See:
@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Data
 @Portable
-public abstract class SupportedConfig {
+public class SupportedConfig {
   
   boolean supported;
 
