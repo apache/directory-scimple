@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseException;
+
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation;
@@ -16,6 +18,7 @@ import edu.psu.swe.scim.spec.resources.Address;
 import edu.psu.swe.scim.spec.resources.Email;
 import edu.psu.swe.scim.spec.resources.Name;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UpdateRequestTest {
 
   @Test
-  public void testResourcePassthrough() {
+  public void testResourcePassthrough() throws PhoneNumberParseException {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
     updateRequest.initWithResource("1234", createUser1(), createUser2());
     ScimUser result = updateRequest.getResource();
@@ -33,7 +36,7 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testPatchPassthrough() {
+  public void testPatchPassthrough() throws PhoneNumberParseException {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
     List<PatchOperation> result = updateRequest.getPatchOperations();
@@ -43,7 +46,7 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testPatchToUpdate() {
+  public void testPatchToUpdate() throws PhoneNumberParseException {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
     ScimUser result = updateRequest.getResource();
@@ -53,7 +56,7 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testResourceToPatch() {
+  public void testResourceToPatch() throws PhoneNumberParseException {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
     updateRequest.initWithResource("1234", createUser1(), createUser2());
     List<PatchOperation> result = updateRequest.getPatchOperations();
@@ -62,7 +65,7 @@ public class UpdateRequestTest {
               .isNotNull();
   }
 
-  public static ScimUser createUser1() {
+  public static ScimUser createUser1() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
     user.setId("912345678");
     user.setExternalId("912345678");
@@ -121,14 +124,12 @@ public class UpdateRequestTest {
                                .collect(Collectors.toList());
     user.setEmails(emails);
 
-    PhoneNumber homePhone = new PhoneNumber();
-    homePhone.setValue("+1 (814)867-5309");
+    PhoneNumber homePhone = new GlobalPhoneNumberBuilder("+1(814)867-5309").build();
     homePhone.setType("home");
     homePhone.setPrimary(true);
 
-    PhoneNumber workPhone = new PhoneNumber();
-    workPhone.setValue("+1 (814)867-5309");
-    workPhone.setType("home");
+    PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5309").build();
+    workPhone.setType("work");
     workPhone.setPrimary(true);
 
     List<PhoneNumber> phones = Stream.of(homePhone, workPhone)
@@ -147,7 +148,7 @@ public class UpdateRequestTest {
     return user;
   }
 
-  public static ScimUser createUser2() {
+  public static ScimUser createUser2() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
     user.setId("912345678");
     user.setExternalId("912345678");
@@ -202,14 +203,12 @@ public class UpdateRequestTest {
                                .collect(Collectors.toList());
     user.setEmails(emails);
 
-    PhoneNumber homePhone = new PhoneNumber();
-    homePhone.setValue("+1 (814)867-5309");
+    PhoneNumber homePhone = new GlobalPhoneNumberBuilder("+1(814)867-5309").build();
     homePhone.setType("home");
     homePhone.setPrimary(true);
 
-    PhoneNumber workPhone = new PhoneNumber();
-    workPhone.setValue("+1 (814)867-5309");
-    workPhone.setType("home");
+    PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5309").build();
+    workPhone.setType("work");
     workPhone.setPrimary(true);
 
     List<PhoneNumber> phones = Stream.of(homePhone, workPhone)
