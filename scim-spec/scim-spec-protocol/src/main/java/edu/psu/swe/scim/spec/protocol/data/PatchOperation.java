@@ -25,7 +25,7 @@ public class PatchOperation {
   private Type opreration;
   
   @XmlElement(name="path")
-  private String path;
+  private PatchOperationPath path;
   
   @XmlElement
   private PatchValue value;

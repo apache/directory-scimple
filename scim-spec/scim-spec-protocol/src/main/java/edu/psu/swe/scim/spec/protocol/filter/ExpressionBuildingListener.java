@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.spec.protocol.filter;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -16,6 +17,7 @@ import edu.psu.swe.scim.server.filter.FilterParser.FilterAttrExpContext;
 import edu.psu.swe.scim.server.filter.FilterParser.FilterGroupExpContext;
 import edu.psu.swe.scim.server.filter.FilterParser.FilterLogicExpContext;
 import edu.psu.swe.scim.server.filter.FilterParser.FilterValuePathContext;
+import edu.psu.swe.scim.server.filter.FilterParser.PatchPathContext;
 import edu.psu.swe.scim.server.filter.FilterParser.ValFilterAttrExpContext;
 import edu.psu.swe.scim.server.filter.FilterParser.ValFilterGroupExpContext;
 import edu.psu.swe.scim.server.filter.FilterParser.ValFilterLogicExpContext;
@@ -26,7 +28,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ExpressionBuildingListener.class);
 
-  private Stack<FilterExpression> expressionStack = new Stack<>();
+  protected Deque<FilterExpression> expressionStack = new ArrayDeque<>();
 
   private int indent = -1;
 
@@ -46,6 +48,17 @@ public class ExpressionBuildingListener extends FilterBaseListener {
     LogicalExpression expression = new LogicalExpression(left, logicalOperator, right);
     expressionStack.push(expression);
   }
+  
+  @Override
+  public void enterPatchPath(PatchPathContext ctx) {
+    LOG.debug(indent("--- Enter PatchPath -->"));
+  }
+
+  @Override
+  public void exitPatchPath(PatchPathContext ctx) {
+    LOG.debug(indent("<-- Exit PatchPath ---"));
+  }
+
 
   @Override
   public void enterFilterValuePath(FilterValuePathContext ctx) {
@@ -201,7 +214,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
     LOG.error(indent(node.getText()));
   }
 
-  private String indent(String s) {
+  protected String indent(String s) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < indent; i++) {
       sb.append("    ");
@@ -225,8 +238,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
       return false;
     } else {
       try {
-        Double d = Double.parseDouble(jsonValue);
-        return d;
+        return Double.parseDouble(jsonValue);
       } catch (NumberFormatException e) {
         LOG.warn("Unable to parse a json number: " + jsonValue);
       }

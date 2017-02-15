@@ -17,7 +17,7 @@ import lombok.Data;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
-public class X509Certificate implements Serializable {
+public class X509Certificate implements Serializable, TypedAttribute {
   
   private static final long serialVersionUID = 374273508404129850L;
 

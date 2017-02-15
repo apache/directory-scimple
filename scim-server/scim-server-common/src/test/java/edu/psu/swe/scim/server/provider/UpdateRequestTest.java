@@ -1,19 +1,31 @@
 package edu.psu.swe.scim.server.provider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.enterprise.inject.Instance;
+
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
-import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseException;
-
+import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
+import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseException;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation.Type;
+import edu.psu.swe.scim.spec.protocol.data.PatchOperationPath;
+import edu.psu.swe.scim.spec.protocol.filter.FilterParseException;
 import edu.psu.swe.scim.spec.resources.Address;
 import edu.psu.swe.scim.spec.resources.Email;
 import edu.psu.swe.scim.spec.resources.Name;
@@ -25,9 +37,35 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UpdateRequestTest {
 
+  @Rule
+  public MockitoRule mockito = MockitoJUnit.rule();
+  private Registry registry;
+  
+  @Mock
+  Provider<ScimUser> provider;
+  
+  @Mock
+  Instance<Provider<ScimUser>> providerInstance;
+  
+  ProviderRegistry providerRegistry;
+
+  @Before
+  public void initialize() throws Exception {
+    providerRegistry = new ProviderRegistry();
+    registry = new Registry();
+
+    providerRegistry.registry = registry;
+    providerRegistry.scimExtensionRegistry = ScimExtensionRegistry.getInstance();
+    
+    Mockito.when(providerInstance.get()).thenReturn(provider);
+    Mockito.when(provider.getExtensionList()).thenReturn(Collections.singletonList(EnterpriseExtension.class));
+
+    providerRegistry.registerProvider(ScimUser.class, providerInstance);
+  }
+  
   @Test
-  public void testResourcePassthrough() throws PhoneNumberParseException {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
+  public void testResourcePassthrough() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithResource("1234", createUser1(), createUser2());
     ScimUser result = updateRequest.getResource();
     log.info("testResourcePassthrough: " + result);
@@ -36,8 +74,8 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testPatchPassthrough() throws PhoneNumberParseException {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
+  public void testPatchPassthrough() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
     List<PatchOperation> result = updateRequest.getPatchOperations();
     log.info("testPatchPassthrough: " + result);
@@ -46,8 +84,8 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testPatchToUpdate() throws PhoneNumberParseException {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
+  public void testPatchToUpdate() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
     ScimUser result = updateRequest.getResource();
     log.info("testPatchToUpdate: " + result);
@@ -56,8 +94,8 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testResourceToPatch() throws PhoneNumberParseException {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>();
+  public void testResourceToPatch() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithResource("1234", createUser1(), createUser2());
     List<PatchOperation> result = updateRequest.getPatchOperations();
     log.info("testResourceToPatch: " + result);
@@ -227,11 +265,11 @@ public class UpdateRequestTest {
     return user;
   }
 
-  private List<PatchOperation> createUser1PatchOps() {
+  private List<PatchOperation> createUser1PatchOps() throws FilterParseException {
     List<PatchOperation> patchOperations = new ArrayList<>();
     PatchOperation removePhoneNumberOp = new PatchOperation();
     removePhoneNumberOp.setOpreration(Type.REMOVE);
-    removePhoneNumberOp.setPath("phoneNumbers[type eq \"home\"]");
+    removePhoneNumberOp.setPath(new PatchOperationPath("phoneNumbers[type eq \"home\"]"));
     patchOperations.add(removePhoneNumberOp);
     return patchOperations;
   }
