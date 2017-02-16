@@ -35,7 +35,7 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
 
     AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
     AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
+    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jaxbIntrospector, jacksonIntrospector);
     objectMapper.setAnnotationIntrospector(pair);
 
     objectMapper.setSerializationInclusion(Include.NON_NULL);

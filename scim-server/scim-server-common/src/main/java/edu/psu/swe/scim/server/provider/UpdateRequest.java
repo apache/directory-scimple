@@ -14,7 +14,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.flipkart.zjsonpatch.JsonDiff;
 
@@ -22,8 +28,8 @@ import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation;
+import edu.psu.swe.scim.spec.protocol.data.PatchOperation.Type;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperationPath;
-import edu.psu.swe.scim.spec.protocol.data.PatchValue;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
 import edu.psu.swe.scim.spec.protocol.filter.ValueFilterExpression;
@@ -33,7 +39,6 @@ import edu.psu.swe.scim.spec.resources.TypedAttribute;
 import edu.psu.swe.scim.spec.schema.AttributeContainer;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
-import edu.psu.swe.scim.spec.schema.Schema.Attribute.Type;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -111,7 +116,11 @@ public class UpdateRequest<T extends ScimResource> {
       return patchOperations;
     }
 
-    return createPatchOperations();
+    try {
+      return createPatchOperations();
+    } catch (IllegalArgumentException | IllegalAccessException e) {
+      throw new IllegalStateException("Error creating the patch list", e);
+    }
   }
 
   private void sortMultiValuedCollections(Object t, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
@@ -138,7 +147,7 @@ public class UpdateRequest<T extends ScimResource> {
             return 0;
           });
         }
-      } else if (attribute.getType() == Type.COMPLEX) {
+      } else if (attribute.getType() == Attribute.Type.COMPLEX) {
         sortMultiValuedCollections(field.get(t), attribute);
       }
     }
@@ -149,7 +158,7 @@ public class UpdateRequest<T extends ScimResource> {
     return original;
   }
 
-  private List<PatchOperation> createPatchOperations() {
+  private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException {
     ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
     ObjectMapper objMapper = ctxResolver.getContext(null); // TODO is there a
                                                            // better way?
@@ -184,7 +193,7 @@ public class UpdateRequest<T extends ScimResource> {
     return JsonDiff.asJson(node1, node2);
   }
 
-  List<PatchOperation> convertToPatch(JsonNode node) {
+  List<PatchOperation> convertToPatch(JsonNode node) throws IllegalArgumentException, IllegalAccessException {
     List<PatchOperation> operations = new ArrayList<>();
     if (node == null) {
       return Collections.emptyList();
@@ -202,24 +211,33 @@ public class UpdateRequest<T extends ScimResource> {
       JsonNode valueNode = patchNode.get(VALUE);
 
       PatchOperation operation = new PatchOperation();
-      operation.setOpreration(PatchOperation.Type.valueOf(operationNode.asText()
-                                                                       .toUpperCase()));
-      operation.setPath(convertPath(pathNode.asText()));
+      PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.asText()
+                                                                       .toUpperCase());
+      operation.setOpreration(patchOpType);
+      operation.setPath(convertPath(pathNode.asText(), patchOpType));
       if (valueNode != null) {
-        PatchValue patchValue = new PatchValue();
         if (valueNode instanceof TextNode) {
-          patchValue.setValue(valueNode.asText());
-        } else {
-          patchValue.setValue(valueNode.toString());
+          operation.setValue(valueNode.asText());
+        } else if (valueNode instanceof BooleanNode) {
+          operation.setValue(valueNode.asBoolean());
+        } else if (valueNode instanceof DoubleNode || valueNode instanceof FloatNode) {
+          operation.setValue(valueNode.asDouble());
+        } else if (valueNode instanceof IntNode) {
+          operation.setValue(valueNode.asInt());
+        } else if (valueNode instanceof NullNode) {
+          operation.setValue(null);
+        } else if (valueNode instanceof POJONode) {
+          POJONode pojoNode = (POJONode) valueNode;
+          operation.setValue(pojoNode.getPojo());
         }
-        operation.setValue(patchValue);
       }
       operations.add(operation);
     }
     return operations;
+
   }
 
-  private PatchOperationPath convertPath(final String diffPath) {
+  private PatchOperationPath convertPath(final String diffPath, PatchOperation.Type patchOpType) throws IllegalArgumentException, IllegalAccessException {
     PatchOperationPath patchOperationPath = new PatchOperationPath();
     if (diffPath == null || diffPath.length() < 1) {
       return null;
@@ -238,10 +256,16 @@ public class UpdateRequest<T extends ScimResource> {
     }
 
     AttributeContainer ac;
+    Object originalObject;
+    Object resourceObject;
     if (pathUri != null) {
       ac = registry.getSchema(pathUri);
+      originalObject = original.getExtension(pathUri);
+      resourceObject = resource.getExtension(pathUri);
     } else {
       ac = schema;
+      originalObject = original;
+      resourceObject = resource;
     }
 
     List<String> attributeReferenceList = new ArrayList<>();
@@ -252,11 +276,28 @@ public class UpdateRequest<T extends ScimResource> {
     boolean processedMultiValued = false;
     boolean done = false;
 
-    for (String pathPart : pathParts) {
+    int numPathParts = pathParts.size();
+    for (int i = 0; i < numPathParts; i++) {
+      String pathPart = pathParts.get(i);
       if (done) {
         throw new RuntimeException("Path should be done... Attribute not supported by the schema: " + pathPart);
       } else if (processingMultiValued) {
         // TODO generate value path expression
+
+        switch (patchOpType) {
+        case ADD:
+          if (i == numPathParts-1) {
+            done = true;
+            break;
+          }
+        case REMOVE:
+        case REPLACE:
+          originalObject = ((List)originalObject).get(Integer.parseInt(pathPart));
+          resourceObject = ((List)resourceObject).get(Integer.parseInt(pathPart));
+          break;
+        default:
+          log.warn("Unknown case: " + patchOpType);
+        }
         AttributeComparisonExpression ace = new AttributeComparisonExpression(new AttributeReference("field"), CompareOperator.EQ, "value");
         valueFilterExpression = ace;
         processingMultiValued = false;
@@ -274,8 +315,14 @@ public class UpdateRequest<T extends ScimResource> {
         }
 
         if (attribute.isMultiValued()) {
+          originalObject = lookupAttribute(originalObject, ac, pathPart);
+          resourceObject = lookupAttribute(resourceObject, ac, pathPart);
           ac = attribute;
           processingMultiValued = true;
+        } else if (attribute.getType() == Attribute.Type.COMPLEX) { 
+          originalObject = lookupAttribute(originalObject, ac, pathPart);
+          resourceObject = lookupAttribute(resourceObject, ac, pathPart);
+          ac = attribute;
         } else {
           done = true;
         }
@@ -289,6 +336,16 @@ public class UpdateRequest<T extends ScimResource> {
     patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
 
     return patchOperationPath;
+  }
+
+  private Object lookupAttribute(Object object, AttributeContainer ac, String attributeName) throws IllegalArgumentException, IllegalAccessException {
+    if (object == null) {
+      return null;
+    }
+    
+    Attribute attribute = ac.getAttribute(attributeName);
+    Field field = attribute.getField();
+    return field.get(object);
   }
 
 }

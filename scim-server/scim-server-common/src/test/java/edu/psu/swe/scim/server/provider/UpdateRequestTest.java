@@ -199,7 +199,7 @@ public class UpdateRequestTest {
     Name name = new Name();
     name.setGivenName("John");
     name.setMiddleName("Xander");
-    name.setFamilyName("Anyman");
+    name.setFamilyName("Noman");
     name.setHonorificSuffix("Jr.");
     user.setName(name);
 
