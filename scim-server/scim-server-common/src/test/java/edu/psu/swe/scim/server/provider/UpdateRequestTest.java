@@ -1,5 +1,6 @@
 package edu.psu.swe.scim.server.provider;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +18,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
@@ -91,6 +96,34 @@ public class UpdateRequestTest {
     log.info("testPatchToUpdate: " + result);
     Assertions.assertThat(result)
               .isNotNull();
+  }
+  
+  @Test
+  public void testPatchUpdateSingleAttribute() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+    
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    user2.setActive(false);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+    
+    log.info("testPatchUpdateSingleAttribute: " + result);
+    Assertions.assertThat(result)
+              .isNotNull();
+    Assertions.assertThat(result).hasSize(1);
+    
+    PatchOperation expected = new PatchOperation();
+    expected.setOpreration(Type.REPLACE);
+    expected.setPath(new PatchOperationPath("active"));
+    expected.setValue(false);
+    
+    PatchOperation actual = result.get(0);
+    Assertions.assertThat(actual.getOpreration()).isEqualTo(expected.getOpreration());
+    Assertions.assertThat(actual.getPath().toString()).isEqualTo(expected.getPath().toString());
+    Assertions.assertThat(actual.getValue()).isEqualTo(expected.getValue());
+    
   }
 
   @Test
@@ -184,6 +217,13 @@ public class UpdateRequestTest {
     user.addExtension(enterpriseExtension);
 
     return user;
+  }
+  
+  private ScimUser copy(ScimUser scimUser) throws IOException {
+    ObjectMapperContextResolver omcr = new ObjectMapperContextResolver();
+    ObjectMapper objMapper = omcr.getContext(null);
+    String json = objMapper.writeValueAsString(scimUser);
+    return objMapper.readValue(json, ScimUser.class);
   }
 
   public static ScimUser createUser2() throws PhoneNumberParseException {
