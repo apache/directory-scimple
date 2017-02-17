@@ -86,13 +86,6 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
   public void setValue(String value) throws PhoneNumberParseException {
     PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
-
-    List<? extends Token> allTokens = phoneNumberLexer.getAllTokens();
-    allTokens.stream()
-             .forEach(System.out::println);
-
-    phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
-
     PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
     p.setBuildParseTree(true);
 
