@@ -166,9 +166,9 @@ public class UpdateRequestTest {
     homePhone.setType("home");
     homePhone.setPrimary(true);
 
-    PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5309").build();
+    PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5307").build();
     workPhone.setType("work");
-    workPhone.setPrimary(true);
+    workPhone.setPrimary(false);
 
     List<PhoneNumber> phones = Stream.of(homePhone, workPhone)
                                      .collect(Collectors.toList());
@@ -245,11 +245,15 @@ public class UpdateRequestTest {
     homePhone.setType("home");
     homePhone.setPrimary(true);
 
-    PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5309").build();
+    PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5307").build();
     workPhone.setType("work");
-    workPhone.setPrimary(true);
+    workPhone.setPrimary(false);
+    
+    PhoneNumber mobilePhone = new GlobalPhoneNumberBuilder("+1(814)867-5308").build();
+    mobilePhone.setType("mobile");
+    mobilePhone.setPrimary(false);
 
-    List<PhoneNumber> phones = Stream.of(homePhone, workPhone)
+    List<PhoneNumber> phones = Stream.of(homePhone, mobilePhone, workPhone)
                                      .collect(Collectors.toList());
     user.setPhoneNumbers(phones);
 

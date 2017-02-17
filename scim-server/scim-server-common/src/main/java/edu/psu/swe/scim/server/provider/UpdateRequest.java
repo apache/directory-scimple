@@ -39,6 +39,7 @@ import edu.psu.swe.scim.spec.resources.TypedAttribute;
 import edu.psu.swe.scim.spec.schema.AttributeContainer;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -174,7 +175,7 @@ public class UpdateRequest<T extends ScimResource> {
       log.info("Unable to debug differences: ", e);
     }
 
-    List<PatchOperation> patchOps = convertToPatch(differences);
+    List<PatchOperation> patchOps = convertToPatchOperations(differences);
 
     try {
       log.info("Patch Ops: " + objMapper.writerWithDefaultPrettyPrinter()
@@ -193,7 +194,7 @@ public class UpdateRequest<T extends ScimResource> {
     return JsonDiff.asJson(node1, node2);
   }
 
-  List<PatchOperation> convertToPatch(JsonNode node) throws IllegalArgumentException, IllegalAccessException {
+  List<PatchOperation> convertToPatchOperations(JsonNode node) throws IllegalArgumentException, IllegalAccessException {
     List<PatchOperation> operations = new ArrayList<>();
     if (node == null) {
       return Collections.emptyList();
@@ -210,63 +211,25 @@ public class UpdateRequest<T extends ScimResource> {
       JsonNode pathNode = patchNode.get(PATH);
       JsonNode valueNode = patchNode.get(VALUE);
 
-      PatchOperation operation = new PatchOperation();
-      PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.asText()
-                                                                       .toUpperCase());
-      operation.setOpreration(patchOpType);
-      operation.setPath(convertPath(pathNode.asText(), patchOpType));
-      if (valueNode != null) {
-        if (valueNode instanceof TextNode) {
-          operation.setValue(valueNode.asText());
-        } else if (valueNode instanceof BooleanNode) {
-          operation.setValue(valueNode.asBoolean());
-        } else if (valueNode instanceof DoubleNode || valueNode instanceof FloatNode) {
-          operation.setValue(valueNode.asDouble());
-        } else if (valueNode instanceof IntNode) {
-          operation.setValue(valueNode.asInt());
-        } else if (valueNode instanceof NullNode) {
-          operation.setValue(null);
-        } else if (valueNode instanceof POJONode) {
-          POJONode pojoNode = (POJONode) valueNode;
-          operation.setValue(pojoNode.getPojo());
-        }
-      }
+      PatchOperation operation = convertToPatchOperation(operationNode.asText(), pathNode.asText(), valueNode);
       operations.add(operation);
     }
     return operations;
 
   }
 
-  private PatchOperationPath convertPath(final String diffPath, PatchOperation.Type patchOpType) throws IllegalArgumentException, IllegalAccessException {
+  private PatchOperation convertToPatchOperation(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException {
+    PatchOperation operation = new PatchOperation();
+
+    PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
+    operation.setOpreration(patchOpType);
+
     PatchOperationPath patchOperationPath = new PatchOperationPath();
     if (diffPath == null || diffPath.length() < 1) {
       return null;
     }
 
-    String path = diffPath.substring(1);
-    List<String> pathParts = new ArrayList<>(Arrays.asList(path.split("/")));
-
-    // Extract namespace
-    String pathUri = null;
-
-    String firstPathPart = pathParts.get(0);
-    if (firstPathPart.contains(":")) {
-      pathUri = firstPathPart;
-      pathParts.remove(0);
-    }
-
-    AttributeContainer ac;
-    Object originalObject;
-    Object resourceObject;
-    if (pathUri != null) {
-      ac = registry.getSchema(pathUri);
-      originalObject = original.getExtension(pathUri);
-      resourceObject = resource.getExtension(pathUri);
-    } else {
-      ac = schema;
-      originalObject = original;
-      resourceObject = resource;
-    }
+    ParseData parseData = new ParseData(diffPath);
 
     List<String> attributeReferenceList = new ArrayList<>();
     ValueFilterExpression valueFilterExpression = null;
@@ -276,34 +239,24 @@ public class UpdateRequest<T extends ScimResource> {
     boolean processedMultiValued = false;
     boolean done = false;
 
-    int numPathParts = pathParts.size();
-    for (int i = 0; i < numPathParts; i++) {
-      String pathPart = pathParts.get(i);
+    int i = 0;
+    for (String pathPart : parseData.pathParts) {
       if (done) {
         throw new RuntimeException("Path should be done... Attribute not supported by the schema: " + pathPart);
       } else if (processingMultiValued) {
-        // TODO generate value path expression
+        parseData.traverseObjectsInArray(pathPart);
 
-        switch (patchOpType) {
-        case ADD:
-          if (i == numPathParts-1) {
-            done = true;
-            break;
-          }
-        case REMOVE:
-        case REPLACE:
-          originalObject = ((List)originalObject).get(Integer.parseInt(pathPart));
-          resourceObject = ((List)resourceObject).get(Integer.parseInt(pathPart));
+        if (parseData.isLastIndex(i) && patchOpType == PatchOperation.Type.ADD) {
           break;
-        default:
-          log.warn("Unknown case: " + patchOpType);
         }
+
+        // TODO generate value path expression
         AttributeComparisonExpression ace = new AttributeComparisonExpression(new AttributeReference("field"), CompareOperator.EQ, "value");
         valueFilterExpression = ace;
         processingMultiValued = false;
         processedMultiValued = true;
       } else {
-        Attribute attribute = ac.getAttribute(pathPart);
+        Attribute attribute = parseData.ac.getAttribute(pathPart);
         if (attribute == null) {
           throw new RuntimeException("Attribute not supported by the schema: " + pathPart);
         }
@@ -314,38 +267,127 @@ public class UpdateRequest<T extends ScimResource> {
           attributeReferenceList.add(pathPart);
         }
 
+        parseData.traverseObjects(pathPart, attribute);
+
         if (attribute.isMultiValued()) {
-          originalObject = lookupAttribute(originalObject, ac, pathPart);
-          resourceObject = lookupAttribute(resourceObject, ac, pathPart);
-          ac = attribute;
           processingMultiValued = true;
-        } else if (attribute.getType() == Attribute.Type.COMPLEX) { 
-          originalObject = lookupAttribute(originalObject, ac, pathPart);
-          resourceObject = lookupAttribute(resourceObject, ac, pathPart);
-          ac = attribute;
-        } else {
+        } else if (attribute.getType() != Attribute.Type.COMPLEX) {
           done = true;
         }
-
       }
+      i++;
     }
 
-    patchOperationPath.setAttributeReference(new AttributeReference(pathUri, attributeReferenceList.stream()
-                                                                                                   .collect(Collectors.joining("."))));
+    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream()
+                                                                                                            .collect(Collectors.joining(".")));
+    patchOperationPath.setAttributeReference(attributeReference);
     patchOperationPath.setValueFilterExpression(valueFilterExpression);
     patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
 
-    return patchOperationPath;
+    operation.setPath(patchOperationPath);
+    operation.setValue(determineValue(patchOpType, valueNode, parseData));
+
+    return operation;
   }
 
-  private Object lookupAttribute(Object object, AttributeContainer ac, String attributeName) throws IllegalArgumentException, IllegalAccessException {
-    if (object == null) {
+  private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) {
+    if (patchOpType == PatchOperation.Type.REMOVE) {
       return null;
     }
-    
-    Attribute attribute = ac.getAttribute(attributeName);
-    Field field = attribute.getField();
-    return field.get(object);
+
+    if (valueNode != null) {
+      if (valueNode instanceof TextNode) {
+        return valueNode.asText();
+      } else if (valueNode instanceof BooleanNode) {
+        return valueNode.asBoolean();
+      } else if (valueNode instanceof DoubleNode || valueNode instanceof FloatNode) {
+        return valueNode.asDouble();
+      } else if (valueNode instanceof IntNode) {
+        return valueNode.asInt();
+      } else if (valueNode instanceof NullNode) {
+        return null;
+      } else if (valueNode instanceof ObjectNode) {
+        return parseData.resourceObject;
+      } else if (valueNode instanceof POJONode) {
+        POJONode pojoNode = (POJONode) valueNode;
+        return pojoNode.getPojo();
+      }
+    }
+    return null;
+  }
+
+  private class ParseData {
+
+    List<String> pathParts;
+    Object originalObject;
+    Object resourceObject;
+    AttributeContainer ac;
+    String pathUri;
+
+    public ParseData(String diffPath) {
+      String path = diffPath.substring(1);
+      pathParts = new ArrayList<>(Arrays.asList(path.split("/")));
+
+      // Extract namespace
+      pathUri = null;
+
+      String firstPathPart = pathParts.get(0);
+      if (firstPathPart.contains(":")) {
+        pathUri = firstPathPart;
+        pathParts.remove(0);
+      }
+
+      if (pathUri != null) {
+        ac = registry.getSchema(pathUri);
+        originalObject = original.getExtension(pathUri);
+        resourceObject = resource.getExtension(pathUri);
+      } else {
+        ac = schema;
+        originalObject = original;
+        resourceObject = resource;
+      }
+    }
+
+    public void traverseObjects(String pathPart, Attribute attribute) throws IllegalArgumentException, IllegalAccessException {
+      originalObject = lookupAttribute(originalObject, ac, pathPart);
+      resourceObject = lookupAttribute(resourceObject, ac, pathPart);
+      ac = attribute;
+    }
+
+    public void traverseObjectsInArray(String pathPart) {
+      int index = Integer.parseInt(pathPart);
+
+      originalObject = lookupIndexInArray(originalObject, index);
+      resourceObject = lookupIndexInArray(resourceObject, index);
+    }
+
+    public boolean isLastIndex(int index) {
+      int numPathParts = pathParts.size();
+      return index == (numPathParts - 1);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Object lookupIndexInArray(Object object, int index) {
+      if (!(object instanceof List)) {
+        throw new RuntimeException("Unsupported collection type: " + object.getClass());
+      }
+      List list = (List) object;
+      if (index >= list.size()) {
+        return null;
+      }
+
+      return list.get(index);
+    }
+
+    private Object lookupAttribute(Object object, AttributeContainer ac, String attributeName) throws IllegalArgumentException, IllegalAccessException {
+      if (object == null) {
+        return null;
+      }
+
+      Attribute attribute = ac.getAttribute(attributeName);
+      Field field = attribute.getField();
+      return field.get(object);
+    }
   }
 
 }
