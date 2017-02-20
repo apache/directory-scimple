@@ -11,6 +11,7 @@ import javax.enterprise.inject.Instance;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -45,13 +46,13 @@ public class UpdateRequestTest {
   @Rule
   public MockitoRule mockito = MockitoJUnit.rule();
   private Registry registry;
-  
+
   @Mock
   Provider<ScimUser> provider;
-  
+
   @Mock
   Instance<Provider<ScimUser>> providerInstance;
-  
+
   ProviderRegistry providerRegistry;
 
   @Before
@@ -61,13 +62,15 @@ public class UpdateRequestTest {
 
     providerRegistry.registry = registry;
     providerRegistry.scimExtensionRegistry = ScimExtensionRegistry.getInstance();
-    
-    Mockito.when(providerInstance.get()).thenReturn(provider);
-    Mockito.when(provider.getExtensionList()).thenReturn(Collections.singletonList(EnterpriseExtension.class));
+
+    Mockito.when(providerInstance.get())
+           .thenReturn(provider);
+    Mockito.when(provider.getExtensionList())
+           .thenReturn(Collections.singletonList(EnterpriseExtension.class));
 
     providerRegistry.registerProvider(ScimUser.class, providerInstance);
   }
-  
+
   @Test
   public void testResourcePassthrough() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -97,33 +100,76 @@ public class UpdateRequestTest {
     Assertions.assertThat(result)
               .isNotNull();
   }
-  
+
   @Test
-  public void testPatchUpdateSingleAttribute() throws Exception {
+  public void testUpdateReplaceSingleAttribute() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
-    
+
     ScimUser user1 = createUser1();
     ScimUser user2 = copy(user1);
     user2.setActive(false);
-    
+
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> result = updateRequest.getPatchOperations();
-    
-    log.info("testPatchUpdateSingleAttribute: " + result);
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REPLACE, "active", false);
+  }
+
+  @Test
+  public void testUpdateReplaceComplexAttribute() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    user2.getName()
+         .setFamilyName("Nobody");
+
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REPLACE, "name.familyName", "Nobody");
+  }
+
+  @Test
+  public void testUpdateReplaceMultiValuedAttribute() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    user2.getEmails()
+         .stream()
+         .filter(e -> e.getType().equals("work"))
+         .forEach(e -> e.setValue("nobody@example.com"));
+
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REPLACE, "emails[type EQ \"work\"].value", "nobody@example.com");
+  }
+
+  private PatchOperation assertSingleResult(List<PatchOperation> result) {
     Assertions.assertThat(result)
               .isNotNull();
-    Assertions.assertThat(result).hasSize(1);
-    
-    PatchOperation expected = new PatchOperation();
-    expected.setOpreration(Type.REPLACE);
-    expected.setPath(new PatchOperationPath("active"));
-    expected.setValue(false);
-    
+    Assertions.assertThat(result)
+              .hasSize(1);
     PatchOperation actual = result.get(0);
-    Assertions.assertThat(actual.getOpreration()).isEqualTo(expected.getOpreration());
-    Assertions.assertThat(actual.getPath().toString()).isEqualTo(expected.getPath().toString());
-    Assertions.assertThat(actual.getValue()).isEqualTo(expected.getValue());
-    
+    return actual;
+  }
+
+  private void checkAssertions(PatchOperation actual, Type op, String path, Object value) throws FilterParseException {
+    Assertions.assertThat(actual.getOpreration())
+              .isEqualTo(op);
+    Assertions.assertThat(actual.getPath()
+                                .toString())
+              .isEqualTo(path);
+    Assertions.assertThat(actual.getValue())
+              .isEqualTo(value);
   }
 
   @Test
@@ -183,7 +229,7 @@ public class UpdateRequestTest {
     homeEmail.setPrimary(true);
     homeEmail.setType("home");
     homeEmail.setValue("john@gmail.com");
-    homeEmail.setDisplay("jxa123@psu.edu");
+    homeEmail.setDisplay("john@gmail.com");
 
     Email otherEmail = new Email();
     otherEmail.setPrimary(true);
@@ -218,7 +264,7 @@ public class UpdateRequestTest {
 
     return user;
   }
-  
+
   private ScimUser copy(ScimUser scimUser) throws IOException {
     ObjectMapperContextResolver omcr = new ObjectMapperContextResolver();
     ObjectMapper objMapper = omcr.getContext(null);
@@ -226,6 +272,7 @@ public class UpdateRequestTest {
     return objMapper.readValue(json, ScimUser.class);
   }
 
+  @Deprecated
   public static ScimUser createUser2() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
     user.setId("912345678");
@@ -288,7 +335,7 @@ public class UpdateRequestTest {
     PhoneNumber workPhone = new GlobalPhoneNumberBuilder("+1(814)867-5307").build();
     workPhone.setType("work");
     workPhone.setPrimary(false);
-    
+
     PhoneNumber mobilePhone = new GlobalPhoneNumberBuilder("+1(814)867-5308").build();
     mobilePhone.setType("mobile");
     mobilePhone.setPrimary(false);

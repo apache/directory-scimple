@@ -250,9 +250,14 @@ public class UpdateRequest<T extends ScimResource> {
           break;
         }
 
-        // TODO generate value path expression
-        AttributeComparisonExpression ace = new AttributeComparisonExpression(new AttributeReference("field"), CompareOperator.EQ, "value");
-        valueFilterExpression = ace;
+        if (parseData.originalObject instanceof TypedAttribute) {
+          TypedAttribute typedAttribute = (TypedAttribute) parseData.originalObject;
+          String type = typedAttribute.getType();
+          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, type);
+        } else {
+          log.warn("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, "?");
+        }
         processingMultiValued = false;
         processedMultiValued = true;
       } else {
