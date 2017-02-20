@@ -8,7 +8,9 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
+import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.UpdateRequest;
 import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
@@ -38,7 +40,9 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   }
 
   @Override
-  public ScimGroup update(String id, ScimGroup resource) {
+  public ScimGroup update(UpdateRequest<ScimGroup> updateRequest) throws UnableToUpdateResourceException {
+    String id = updateRequest.getId();
+    ScimGroup resource = updateRequest.getResource();
     groups.put(id, resource);
     return resource;
   }
@@ -62,4 +66,5 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   public List<Class<? extends ScimExtension>> getExtensionList() {
     return Collections.emptyList();
   }
+
 }

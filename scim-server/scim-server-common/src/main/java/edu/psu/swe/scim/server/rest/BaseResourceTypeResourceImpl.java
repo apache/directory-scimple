@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -32,6 +33,7 @@ import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.UpdateRequest;
 import edu.psu.swe.scim.server.provider.annotations.ScimProcessingExtension;
 import edu.psu.swe.scim.server.provider.extensions.AttributeFilterExtension;
 import edu.psu.swe.scim.server.provider.extensions.ProcessingExtension;
@@ -41,8 +43,10 @@ import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.server.utility.EtagGenerator;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
+import edu.psu.swe.scim.spec.protocol.ErrorMessageType;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import edu.psu.swe.scim.spec.protocol.data.ErrorResponse;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
@@ -52,7 +56,6 @@ import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimResource;
-import edu.psu.swe.scim.spec.schema.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -79,16 +82,17 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   
   @Inject
   EtagGenerator etagGenerator;
+  
+  @Inject
+  Instance<UpdateRequest<T>> updateRequestInstance;
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    Provider<T> provider = null;
-
     if (servletRequest.getParameter("filter") != null) {
       return Response.status(Status.FORBIDDEN).build();
     }
-
-    provider = getProvider();
+    
+    Provider<T> provider = getProvider();
     if (provider == null) {
       try {
         // does not throw an exception server side
@@ -185,9 +189,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    Provider<T> provider = null;
-
-    provider = getProvider();
+    Provider<T> provider = getProvider();
     if (provider == null) {
       try {
         // does not throw an exception server side
@@ -213,7 +215,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       Status status = e1.getStatus();
       if (e1.getStatus().equals(Status.CONFLICT)) {
         er.setStatus(e1.getStatus().toString());
-        er.setDetail("uniqueness");
+        er.setScimType(ErrorMessageType.UNIQUENESS);
       } else {
         er.setStatus(e1.getStatus().toString());
         er.setDetail(e1.getMessage());
@@ -231,7 +233,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     // Process Attributes
     try {
-      resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+      created = processFilterAttributeExtensions(provider, created, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -263,9 +265,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response find(SearchRequest request) {
-    Provider<T> provider = null;
-
-    provider = getProvider();
+    Provider<T> provider = getProvider();
     if (provider == null) {
       try {
         // does not throw an exception server side
@@ -350,9 +350,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    Provider<T> provider = null;
-
-    provider = getProvider();
+    Provider<T> provider = getProvider();
     if (provider == null) {
       try {
         // does not throw an exception server side
@@ -391,19 +389,21 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
 
     if (evaluatePreconditionsResponse != null) {
-      return createPreconditionFailedResponse(resource, evaluatePreconditionsResponse);
+      return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
     }
 
     T updated;
     try {
-      updated = provider.update(id, resource);
+      UpdateRequest<T> updateRequest = updateRequestInstance.get();
+      updateRequest.initWithResource(id, stored, resource);
+      updated = provider.update(updateRequest);
     } catch (UnableToUpdateResourceException e1) {
       return createGenericExceptionResponse(e1, e1.getStatus());
     }
 
     // Process Attributes
     try {
-      resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+      updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
       ErrorResponse er = new ErrorResponse();
       er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
@@ -437,14 +437,93 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response patch(PatchRequest patchRequest) {
-    // TODO Auto-generated method stub
-    try {
-      // does not throw an exception server side
-      return BaseResourceTypeResource.super.patch(patchRequest);
-    } catch (Exception e) {
-      throw new RuntimeException();
+  public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws Exception {
+    Provider<T> provider = getProvider();
+    if (provider == null) {
+      try {
+        // does not throw an exception server side
+        return BaseResourceTypeResource.super.patch(patchRequest, id, attributes, excludedAttributes);
+      } catch (Exception e) {
+        throw new RuntimeException();
+      }
     }
+
+    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
+    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
+
+    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+      return createAmbiguousAttributeParametersResponse();
+    }
+
+    endpointUtil.process(uriInfo);
+    T stored;
+    try {
+      stored = provider.get(id);
+    } catch (UnableToRetrieveResourceException e2) {
+      return createGenericExceptionResponse(e2, e2.getStatus());
+    }
+
+    if (stored == null) {
+      return createNotFoundResponse(id);
+    }
+
+    EntityTag backingETag = null;
+    try {
+      backingETag = etagGenerator.generateEtag(stored);
+    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+      return createETagErrorResponse();
+    }
+
+    ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+
+    if (evaluatePreconditionsResponse != null) {
+      return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
+    }
+
+    
+    T updated;
+    try {
+      UpdateRequest<T> updateRequest = updateRequestInstance.get();
+      updateRequest.initWithPatch(id, stored, patchRequest.getPatchOperationList());
+      updated = provider.update(updateRequest);
+    } catch (UnableToUpdateResourceException e1) {
+      return createGenericExceptionResponse(e1, e1.getStatus());
+    }
+
+    // Process Attributes
+    try {
+      updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
+    } catch (ClientFilterException e1) {
+      ErrorResponse er = new ErrorResponse();
+      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
+      er.setDetail(e1.getMessage());
+      return Response.status(e1.getStatus()).entity(er).build();
+    }
+
+    try {
+      if (!excludedAttributeReferences.isEmpty()) {
+        updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
+      } else {
+        updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
+      }
+    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+      log.error("Failed to handle attribute processing in update " + e.getMessage());
+    }
+
+    EntityTag etag = null;
+    try {
+      etag = etagGenerator.generateEtag(updated);
+    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+      log.error("Failed to generate etag for newly created entity " + e.getMessage());
+    }
+
+    // TODO - Is this correct or should we support roll back semantics
+    if (etag == null) {
+      return Response.ok(updated).location(buildLocationTag(updated)).build();
+    }
+
+    return Response.ok(updated).location(buildLocationTag(updated)).tag(etag).build();
+    
   }
 
   @Override
@@ -551,11 +630,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
   }
 
-  private Response createPreconditionFailedResponse(T resource, ResponseBuilder evaluatePreconditionsResponse) {
+  private Response createPreconditionFailedResponse(String id, ResponseBuilder evaluatePreconditionsResponse) {
     ErrorResponse er = new ErrorResponse();
     er.setStatus("412");
-    er.setDetail("Failed to update record, backing record has changed - " + resource.getId());
-    log.warn("Failed to update record, backing record has changed - " + resource.getId());
+    er.setDetail("Failed to update record, backing record has changed - " + id);
+    log.warn("Failed to update record, backing record has changed - " + id);
     return evaluatePreconditionsResponse.entity(er).build();
   }
 }

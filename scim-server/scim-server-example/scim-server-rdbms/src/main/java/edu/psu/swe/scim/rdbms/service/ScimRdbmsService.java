@@ -37,7 +37,9 @@ import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
 import edu.psu.swe.scim.server.provider.Provider;
+import edu.psu.swe.scim.server.provider.UpdateRequest;
 import edu.psu.swe.scim.server.provider.annotations.ScimProcessingExtension;
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseException;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
@@ -136,7 +138,7 @@ public class ScimRdbmsService implements Provider<ScimUser> {
   }
 
   @Override
-  public ScimUser update(String id, ScimUser resource) throws UnableToUpdateResourceException {
+  public ScimUser update(UpdateRequest<ScimUser> updateRequest) throws UnableToUpdateResourceException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -192,7 +194,11 @@ public class ScimRdbmsService implements Provider<ScimUser> {
       List<edu.psu.swe.scim.spec.resources.PhoneNumber> scimPhoneList = new ArrayList<>();
       for (Phone phone : p.getPhoneList()) {
         PhoneNumber pn = new PhoneNumber();
-        pn.setValue(phone.getNumber());
+        try {
+          pn.setValue(phone.getNumber());
+        } catch (PhoneNumberParseException e) {
+          throw new UnableToRetrieveResourceException(Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
         scimPhoneList.add(pn);
       }
 

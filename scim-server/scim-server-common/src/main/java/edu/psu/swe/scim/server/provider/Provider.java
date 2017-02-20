@@ -12,6 +12,7 @@ import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
 import edu.psu.swe.scim.spec.protocol.search.SortRequest;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
+import edu.psu.swe.scim.spec.resources.ScimResource;
 
 /**
  * Defines the interface between the SCIM protocol implementation and the
@@ -21,7 +22,7 @@ import edu.psu.swe.scim.spec.resources.ScimExtension;
  *
  * @param <T> a SCIM ResourceType that extends ScimResource
  */
-public interface Provider<T> {
+public interface Provider<T extends ScimResource> {
   
   /**
    * Allows the SCIM server's REST implementation to create a resource via
@@ -43,7 +44,7 @@ public interface Provider<T> {
    * @throws UnableToUpdateResourceException When the ScimResource cannot be
    *         updated.
    */
-  T update(String id, T resource) throws UnableToUpdateResourceException;
+  T update(UpdateRequest<T> updateRequest) throws UnableToUpdateResourceException;
   
   /**
    * Retrieves the ScimResource associated with the provided identifier.

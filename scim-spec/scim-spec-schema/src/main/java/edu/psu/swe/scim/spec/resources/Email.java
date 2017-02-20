@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class Email extends KeyedResource implements Serializable {
+public class Email extends KeyedResource implements Serializable, TypedAttribute {
 
   private static final long serialVersionUID = -7914234516870440784L;
 

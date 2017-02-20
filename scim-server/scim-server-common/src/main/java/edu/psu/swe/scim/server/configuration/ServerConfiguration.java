@@ -46,7 +46,8 @@ public class ServerConfiguration {
   boolean supportsFilter = false;
   int filterMaxResults = FILTER_MAXIMUM_RESULTS;
   
-  boolean supportsPatch = false;
+  @Setter(AccessLevel.NONE)
+  boolean supportsPatch = true;
   
   boolean supportsSort = false;
   
