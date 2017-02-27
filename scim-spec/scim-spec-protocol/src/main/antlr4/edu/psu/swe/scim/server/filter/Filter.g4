@@ -8,6 +8,10 @@ filter: attrExp                                     # filterAttrExp
       | not=NotOp? SP* '(' f=filter ')'             # filterGroupExp
       ;
 
+patchPath: attrPath=AttrPath
+         | valPath=valuePath (subAttr+=SubAttr)*
+         ;
+
 valuePath: attrPath=AttrPath '[' valueFilter=valFilter ']';
 valFilter: attrExp                                          # valFilterAttrExp
          | left=valFilter SP op=LogicOp SP right=valFilter  # valFilterLogicExp

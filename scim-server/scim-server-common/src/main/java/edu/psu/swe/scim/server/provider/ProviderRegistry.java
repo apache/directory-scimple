@@ -79,7 +79,7 @@ public class ProviderRegistry {
 
     ResourceType resourceType = generateResourceType(clazz, provider);
 
-    log.info("Calling addSchema on the base");
+    log.info("Calling addSchema on the base class: {}", clazz);
     registry.addSchema(generateBaseSchema(clazz));
     // NOTE generateResourceType() ensures ScimResourceType exists
     ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
@@ -92,15 +92,11 @@ public class ProviderRegistry {
 
     if (extensionList != null) {
       for (Class<? extends ScimExtension> scimExtension : extensionList) {
-        log.info("Registering a extension of type " + scimExtension);
+        log.info("Registering a extension of type: " + scimExtension);
         scimExtensionRegistry.registerExtension(clazz, scimExtension);
-      }
-
-      Iterator<Class<? extends ScimExtension>> iter = extensionList.iterator();
-
-      while (iter.hasNext()) {
-        log.info("Calling addSchema on an extension");
-        registry.addSchema(generateExtensionSchema(iter.next()));
+        
+        log.info("Calling addSchema on an extension: " + scimExtension);
+        registry.addSchema(generateExtensionSchema(scimExtension));
       }
     }
 
@@ -185,7 +181,7 @@ public class ProviderRegistry {
       log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
     }
 
-    log.info("calling set attributes with " + fieldList.size() + " fields");
+    log.debug("calling set attributes with " + fieldList.size() + " fields");
     Set<String> invalidAttributes = new HashSet<>();
     List<Attribute> createAttributes = createAttributes(fieldList, invalidAttributes, clazz.getSimpleName());
     schema.setAttributes(createAttributes);
@@ -222,7 +218,7 @@ public class ProviderRegistry {
     for (Field f : fieldList) {
       ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
 
-      log.info("++++++++++++++++++++ Processing field " + f.getName());
+      log.debug("++++++++++++++++++++ Processing field " + f.getName());
       if (sa == null) {
         log.debug("Attribute " + f.getName() + " did not have a ScimAttribute annotation");
         continue;
@@ -249,7 +245,7 @@ public class ProviderRegistry {
       
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
-      log.info("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
+      log.debug("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
       
       if (enumFields.length != 0) {
         
@@ -285,13 +281,13 @@ public class ProviderRegistry {
 
       String typeName = null;
       if (Collection.class.isAssignableFrom(f.getType())) {
-        log.info("We have a collection");
+        log.debug("We have a collection");
         ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
         Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
         typeName = attributeContainedClass.getTypeName();
         attribute.setMultiValued(true);
       } else if (f.getType().isArray()) {
-        log.info("We have an array");
+        log.debug("We have an array");
         Class<?> componentType = f.getType().getComponentType();
         typeName = componentType.getTypeName();
         attribute.setMultiValued(true);
@@ -302,49 +298,49 @@ public class ProviderRegistry {
 
       // attribute.setType(sa.type());
       boolean attributeIsAString = false;
-      log.info("Attempting to set the attribute type, raw value = " + typeName);
+      log.debug("Attempting to set the attribute type, raw value = " + typeName);
       switch (typeName) {
       case STRING_TYPE_IDENTIFIER:
       case CHARACTER_ARRAY_TYPE_IDENTIFIER:
       case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
-        log.info("Setting type to String");
+        log.debug("Setting type to String");
         attribute.setType(Type.STRING);
         attributeIsAString = true;
         break;
       case INT_TYPE_IDENTIFIER:
       case INTEGER_TYPE_IDENTIFIER:
-        log.info("Setting type to integer");
+        log.debug("Setting type to integer");
         attribute.setType(Type.INTEGER);
         break;
       case FLOAT_TYPE_IDENTIFIER:
       case BIG_F_FLOAT_TYPE_IDENTIFIER:
       case DOUBLE_TYPE_IDENTIFIER:
       case BIG_D_DOUBLE_TYPE_IDENTIFIER:
-        log.info("Setting type to decimal");
+        log.debug("Setting type to decimal");
         attribute.setType(Type.DECIMAL);
         break;
       case BOOLEAN_TYPE_IDENTIFIER:
       case BIG_B_BOOLEAN_TYPE_IDENTIFIER:
-        log.info("Setting type to boolean");
+        log.debug("Setting type to boolean");
         attribute.setType(Type.BOOLEAN);
         break;
       case BYTE_ARRAY_TYPE_IDENTIFIER:
-        log.info("Setting type to binary");
+        log.debug("Setting type to binary");
         attribute.setType(Type.BINARY);
         break;
       case DATE_TYPE_IDENTIFIER:
       case LOCAL_DATE_TIME_TYPE_IDENTIFIER:
       case LOCAL_TIME_TYPE_IDENTIFER:
       case LOCAL_DATE_TYPE_IDENTIFER:
-        log.info("Setting type to date time");
+        log.debug("Setting type to date time");
         attribute.setType(Type.DATE_TIME);
         break;
       case RESOURCE_REFERENCE_TYPE_IDENTIFIER:
-        log.info("Setting type to reference");
+        log.debug("Setting type to reference");
         attribute.setType(Type.REFERENCE);
         break;
       default:
-        log.info("Setting type to complex");
+        log.debug("Setting type to complex");
         attribute.setType(Type.COMPLEX);
       }
       if (f.getAnnotation(ScimResourceIdReference.class) != null) {
@@ -392,7 +388,7 @@ public class ProviderRegistry {
       attributeList.add(attribute);
     }
 
-    log.info("Returning " + attributeList.size() + " attributes");
+    log.debug("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }
 

@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
+import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseException;
+
 import edu.psu.swe.scim.common.ScimUtils;
 import edu.psu.swe.scim.server.provider.ProviderRegistry;
 import edu.psu.swe.scim.server.schema.Registry;
@@ -44,6 +46,8 @@ import edu.psu.swe.scim.spec.resources.Address;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.Name;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 import edu.psu.swe.scim.spec.schema.Schema;
 
@@ -220,7 +224,7 @@ public class AttributeUtilTest {
     LOG.info(sw.toString());
   }
   
-  private ScimUser getScimUser() {
+  private ScimUser getScimUser() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
 
     user.setActive(true);
@@ -273,16 +277,14 @@ public class AttributeUtilTest {
     user.setAddresses(addresses);
 
     List<PhoneNumber> phoneNumbers = new ArrayList<>();
-    PhoneNumber phoneNumber = new PhoneNumber();
-    phoneNumber.setValue("123-456-7890");
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("123-456-7890", "+1", null).build();
     phoneNumber.setDisplay("123-456-7890");
     phoneNumber.setPrimary(true);
     phoneNumber.setType("home");
 
     phoneNumbers.add(phoneNumber);
 
-    phoneNumber = new PhoneNumber();
-    phoneNumber.setValue("1-800-555-1234");
+    phoneNumber = new GlobalPhoneNumberBuilder("1-800-555-1234").build();
     phoneNumber.setDisplay("1-800-555-1234");
     phoneNumber.setPrimary(false);
     phoneNumber.setType("work");
