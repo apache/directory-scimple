@@ -212,7 +212,9 @@ public class UpdateRequest<T extends ScimResource> {
       JsonNode valueNode = patchNode.get(VALUE);
 
       PatchOperation operation = convertToPatchOperation(operationNode.asText(), pathNode.asText(), valueNode);
-      operations.add(operation);
+      if (operation != null) {
+        operations.add(operation);
+      }
     }
     return operations;
 
@@ -263,7 +265,8 @@ public class UpdateRequest<T extends ScimResource> {
       } else {
         Attribute attribute = parseData.ac.getAttribute(pathPart);
         if (attribute == null) {
-          throw new RuntimeException("Attribute not supported by the schema: " + pathPart);
+          //throw new RuntimeException("Attribute not supported by the schema: " + pathPart);
+          break;
         }
 
         if (processedMultiValued) {
@@ -283,16 +286,20 @@ public class UpdateRequest<T extends ScimResource> {
       i++;
     }
 
-    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream()
-                                                                                                            .collect(Collectors.joining(".")));
-    patchOperationPath.setAttributeReference(attributeReference);
-    patchOperationPath.setValueFilterExpression(valueFilterExpression);
-    patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
-
-    operation.setPath(patchOperationPath);
-    operation.setValue(determineValue(patchOpType, valueNode, parseData));
-
-    return operation;
+    if (!attributeReferenceList.isEmpty()) {
+      AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream()
+                                                                                                              .collect(Collectors.joining(".")));
+      patchOperationPath.setAttributeReference(attributeReference);
+      patchOperationPath.setValueFilterExpression(valueFilterExpression);
+      patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
+  
+      operation.setPath(patchOperationPath);
+      operation.setValue(determineValue(patchOpType, valueNode, parseData));
+  
+      return operation;
+    } else {
+      return null;
+    }
   }
 
   private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) {
