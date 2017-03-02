@@ -301,7 +301,7 @@ public class UpdateRequestTest {
   }
 
   private void checkAssertions(PatchOperation actual, Type op, String path, Object value) throws FilterParseException {
-    Assertions.assertThat(actual.getOpreration())
+    Assertions.assertThat(actual.getOperation())
               .isEqualTo(op);
     Assertions.assertThat(actual.getPath()
                                 .toString())
@@ -402,7 +402,7 @@ public class UpdateRequestTest {
   private List<PatchOperation> createUser1PatchOps() throws FilterParseException {
     List<PatchOperation> patchOperations = new ArrayList<>();
     PatchOperation removePhoneNumberOp = new PatchOperation();
-    removePhoneNumberOp.setOpreration(Type.REMOVE);
+    removePhoneNumberOp.setOperation(Type.REMOVE);
     removePhoneNumberOp.setPath(new PatchOperationPath("phoneNumbers[type eq \"home\"]"));
     patchOperations.add(removePhoneNumberOp);
     return patchOperations;

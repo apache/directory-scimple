@@ -224,7 +224,7 @@ public class UpdateRequest<T extends ScimResource> {
     PatchOperation operation = new PatchOperation();
 
     PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
-    operation.setOpreration(patchOpType);
+    operation.setOperation(patchOpType);
 
     PatchOperationPath patchOperationPath = new PatchOperationPath();
     if (diffPath == null || diffPath.length() < 1) {
