@@ -12,6 +12,29 @@
   <name>SCIM - Errai</name>
   <description>GWT/Errai components that can be used to display and edit SCIM resources.</description>
 
+  <repositories>
+    <repository>
+      <id>jboss</id>
+      <name>JBoss Public Repo</name>
+      <url>https://repository.jboss.org/nexus/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>google-snapshots</id>
+      <name>Google Snapshots Repo</name>
+      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sonatype-public</id>
+      <name>Sonatype Public Snapshots Repo</name>
+      <url>https://oss.sonatype.org/content/repositories/public</url>
+    </repository>
+  </repositories>
+  
   <build>
     <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
     <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
@@ -97,24 +120,20 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+<!--       <version>${gwt.version}</version> -->
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+<!--       <version>${gwt.version}</version> -->
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javaee-all</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.gwtmaterialdesign</groupId>
-      <artifactId>gwt-material</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.gwtmaterialdesign</groupId>
-      <artifactId>gwt-material-themes</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.gwtmaterialdesign</groupId>
-      <artifactId>gwt-material-addins</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.gwtmaterialdesign</groupId>
-      <artifactId>gwt-material-table</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>

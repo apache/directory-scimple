@@ -15,8 +15,6 @@
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <version.errai>4.0.0.CR1</version.errai>
-    <version.gmd>2.0-rc3</version.gmd>
-    <version.gmd-table>1.0-rc3</version.gmd-table>
     <version.gwt>2.8.0</version.gwt>
     <version.lombok>1.16.14</version.lombok>
     <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
@@ -162,26 +160,6 @@
         <version>${version.errai}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.github.gwtmaterialdesign</groupId>
-        <artifactId>gwt-material</artifactId>
-        <version>${version.gmd}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.gwtmaterialdesign</groupId>
-        <artifactId>gwt-material-themes</artifactId>
-        <version>${version.gmd}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.gwtmaterialdesign</groupId>
-        <artifactId>gwt-material-addins</artifactId>
-        <version>${version.gmd}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.gwtmaterialdesign</groupId>
-        <artifactId>gwt-material-table</artifactId>
-        <version>${version.gmd-table}</version>
       </dependency>
 
     </dependencies>
