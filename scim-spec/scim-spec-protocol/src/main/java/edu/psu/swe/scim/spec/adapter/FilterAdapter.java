@@ -3,7 +3,9 @@ package edu.psu.swe.scim.spec.adapter;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import edu.psu.swe.scim.spec.protocol.search.Filter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FilterAdapter extends XmlAdapter<String, Filter> {
 
   @Override

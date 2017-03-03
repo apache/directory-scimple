@@ -42,6 +42,7 @@ import edu.psu.swe.scim.server.provider.extensions.exceptions.ClientFilterExcept
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.server.utility.EtagGenerator;
+import edu.psu.swe.scim.spec.adapter.FilterWrapper;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.ErrorMessageType;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
@@ -170,12 +171,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) {
+  public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, FilterWrapper filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) {
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.setAttributes(Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
     searchRequest.setExcludedAttributes(Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
 
-    searchRequest.setFilter(filter);
+    searchRequest.setFilter(filter.getFilter());
 
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);

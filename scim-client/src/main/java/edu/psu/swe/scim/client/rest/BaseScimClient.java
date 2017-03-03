@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response.Status;
 import edu.psu.swe.commons.jaxrs.RestCall;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
+import edu.psu.swe.scim.spec.adapter.FilterWrapper;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.Constants;
@@ -88,7 +89,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
 
   public ListResponse<T> query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws ScimException {
     ListResponse<T> listResponse;
-    Response response = this.scimClient.query(attributes, excludedAttributes, filter, sortBy, sortOrder, startIndex, count);
+    FilterWrapper filterWrapper = new FilterWrapper(filter);
+    Response response = this.scimClient.query(attributes, excludedAttributes, filterWrapper, sortBy, sortOrder, startIndex, count);
     listResponse = handleResponse(response, scimResourceListResponseGenericType, response::readEntity);
 
     return listResponse;
@@ -218,12 +220,12 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     }
 
     @Override
-    public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws ScimException {
+    public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, FilterWrapper filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws ScimException {
       Response response;
       Invocation request = BaseScimClient.this.target
           .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
-          .queryParam(FILTER_QUERY_PARAM, filter)
+          .queryParam(FILTER_QUERY_PARAM, filter.getFilter())
           .queryParam(SORT_BY_QUERY_PARAM, sortBy)
           .queryParam(SORT_ORDER_QUERY_PARAM, sortOrder != null ? sortOrder.name() : null)
           .queryParam(START_INDEX_QUERY_PARAM, startIndex)
