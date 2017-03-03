@@ -85,9 +85,7 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
   }
   
   private Response createETagErrorResponse() {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("500");
-    er.setDetail("Failed to generate the etag");
-    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to generate the etag");
+    return er.toResponse();
   }
 }

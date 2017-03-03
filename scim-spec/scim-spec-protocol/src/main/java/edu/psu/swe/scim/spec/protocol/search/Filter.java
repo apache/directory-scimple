@@ -72,7 +72,7 @@ public class Filter {
       
       return expListener.getFilterExpression();
     } catch (IllegalStateException e) {
-      throw new FilterParseException(e);
+      throw new FilterParseException("Failed to parse filter: " + filter, e);
     }
   }
   

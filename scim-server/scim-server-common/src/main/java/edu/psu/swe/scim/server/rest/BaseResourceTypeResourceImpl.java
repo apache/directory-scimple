@@ -150,10 +150,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
+      ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+      return er.toResponse();
     }
 
     try {
@@ -211,17 +209,17 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       created = provider.create(resource);
     } catch (UnableToCreateResourceException e1) {
-      ErrorResponse er = new ErrorResponse();
       Status status = e1.getStatus();
-      if (e1.getStatus().equals(Status.CONFLICT)) {
-        er.setStatus(e1.getStatus().toString());
+      ErrorResponse er = new ErrorResponse(status,"Error");
+      
+      if (status == Status.CONFLICT) {
         er.setScimType(ErrorMessageType.UNIQUENESS);
+        er.setDetail(ErrorMessageType.UNIQUENESS.getDetail());
       } else {
-        er.setStatus(e1.getStatus().toString());
         er.setDetail(e1.getMessage());
       }
 
-      return Response.status(status).entity(er).build();
+      return er.toResponse();
     }
 
     EntityTag etag = null;
@@ -235,10 +233,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       created = processFilterAttributeExtensions(provider, created, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
+      ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+      return er.toResponse();
     }
 
     try {
@@ -323,10 +319,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           log.info("=== Calling processFilterAttributeExtensions");
           resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
         } catch (ClientFilterException e1) {
-          ErrorResponse er = new ErrorResponse();
-          er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-          er.setDetail(e1.getMessage());
-          return Response.status(e1.getStatus()).entity(er).build();
+          ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+          return er.toResponse();
         }
 
         try {
@@ -405,10 +399,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
+      ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+      return er.toResponse();
     }
 
     try {
@@ -494,10 +486,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
     } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
+      ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+      return er.toResponse();
     }
 
     try {
@@ -571,8 +561,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
             log.info("Resource now - " + resource.toString());
           }
         } catch (InstantiationException | IllegalAccessException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          log.error("Error processing filter attriute extensions", e);
         }
       }
     }
@@ -590,50 +579,37 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   private Response createGenericExceptionResponse(Exception e1, Status status) {
-    ErrorResponse er = new ErrorResponse();
-
-    er.setDetail(e1.getLocalizedMessage());
-    if (status != null) {
-      er.setStatus(Integer.toString(status.getStatusCode()));
-      return Response.status(status).entity(er).build();
-    } else {
-      er.setStatus("500");
-      return Response.status(Status.BAD_REQUEST).entity(er).build();
+    Status myStatus = status;
+    if (myStatus == null) {
+      myStatus = Status.INTERNAL_SERVER_ERROR;
     }
+    
+    ErrorResponse er = new ErrorResponse(myStatus, e1.getMessage());
+    return er.toResponse();
   }
 
   private Response createAmbiguousAttributeParametersResponse() {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("400");
-    er.setDetail("Cannot include both attributes and excluded attributes in a single request");
-    return Response.status(Status.BAD_REQUEST).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.BAD_REQUEST, "Cannot include both attributes and excluded attributes in a single request");
+    return er.toResponse();
   }
 
   private Response createNotFoundResponse(String id) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("404");
-    er.setDetail("Resource " + id + " not found");
-    return Response.status(Status.NOT_FOUND).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.NOT_FOUND, "Resource " + id + " not found");
+    return er.toResponse();
   }
 
   private Response createETagErrorResponse() {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("500");
-    er.setDetail("Failed to generate the etag");
-    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to generate the etag");
+    return er.toResponse();
   }
 
   private Response createAttriubteProcessingErrorResponse(Exception e) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("500");
-    er.setDetail("Failed to parse the attribute query value " + e.getMessage());
-    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to parse the attribute query value " + e.getMessage());
+    return er.toResponse();
   }
 
   private Response createPreconditionFailedResponse(String id, ResponseBuilder evaluatePreconditionsResponse) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("412");
-    er.setDetail("Failed to update record, backing record has changed - " + id);
+    ErrorResponse er = new ErrorResponse(Status.PRECONDITION_FAILED, "Failed to update record, backing record has changed - " + id);
     log.warn("Failed to update record, backing record has changed - " + id);
     return evaluatePreconditionsResponse.entity(er).build();
   }

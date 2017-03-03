@@ -189,12 +189,9 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
 
     private ScimException toScimException(RestClientException restClientException) {
       ScimException scimException;
-      ErrorResponse errorResponse = new ErrorResponse();
+      
       Status status = restClientException.getErrorMessage().getStatus();
-      String statusCode = Integer.toString(status.getStatusCode());
-
-      errorResponse.setDetail(String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
-      errorResponse.setStatus(statusCode);
+      ErrorResponse errorResponse = new ErrorResponse(status, String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
 
       scimException = new ScimException(errorResponse, status);
 
