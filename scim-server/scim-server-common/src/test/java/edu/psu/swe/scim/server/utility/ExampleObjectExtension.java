@@ -1,6 +1,7 @@
 package edu.psu.swe.scim.server.utility;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -62,6 +63,10 @@ public class ExampleObjectExtension implements ScimExtension {
   @ScimAttribute(returned = Returned.REQUEST)
   @XmlElement
   private ComplexObject valueComplex;
+  
+  @ScimAttribute
+  @XmlElement
+  private List<String> list;
 
 
   @Override
