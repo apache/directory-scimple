@@ -95,12 +95,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     
     Provider<T> provider = getProvider();
     if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
+      return createNoProviderException();
     }
 
     endpointUtil.process(uriInfo);
@@ -111,6 +106,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       if (e2.getStatus().getFamily().equals(Family.SERVER_ERROR)) {
         return createGenericExceptionResponse(e2, e2.getStatus());
       }
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
 
     if (resource != null) {
@@ -190,12 +188,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = getProvider();
     if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.create(resource, attributes, excludedAttributes);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
+      return createNoProviderException();
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
@@ -221,6 +214,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       }
 
       return er.toResponse();
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
 
     EntityTag etag = null;
@@ -264,12 +260,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response find(SearchRequest request) {
     Provider<T> provider = getProvider();
     if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.find(request);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
+      return createNoProviderException();
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
@@ -291,6 +282,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     } catch (UnableToRetrieveResourceException e1) {
       log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus().toString());
       return createGenericExceptionResponse(e1, e1.getStatus());
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
 
     // If no resources are found, we should still return a ListResponse with
@@ -347,12 +341,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     Provider<T> provider = getProvider();
     if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
+      return createNoProviderException();
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
@@ -367,7 +356,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       stored = provider.get(id);
     } catch (UnableToRetrieveResourceException e2) {
+      log.error("Unable to retrieve resource with id: {}", id, e2);
       return createGenericExceptionResponse(e2, e2.getStatus());
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
 
     if (stored == null) {
@@ -433,12 +426,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws Exception {
     Provider<T> provider = getProvider();
     if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.patch(patchRequest, id, attributes, excludedAttributes);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
+      return createNoProviderException();
     }
 
     Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
@@ -453,7 +441,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       stored = provider.get(id);
     } catch (UnableToRetrieveResourceException e2) {
+      log.error("Unable to retrieve resource with id: {}", id, e2);
       return createGenericExceptionResponse(e2, e2.getStatus());
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
 
     if (stored == null) {
@@ -522,20 +514,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       Response response;
       Provider<T> provider = getProvider();
-
       if (provider == null) {
-        try {
-          // does not throw an exception server side
-          response = BaseResourceTypeResource.super.delete(id);
-        } catch (Exception e) {
-          throw new RuntimeException();
-        }
-      } else {
-        endpointUtil.process(uriInfo);
-        response = Response.noContent().build();
-
-        provider.delete(id);
+        return createNoProviderException();
       }
+      
+
+      endpointUtil.process(uriInfo);
+      response = Response.noContent().build();
+
+      provider.delete(id);
       return response;
     } catch (UnableToDeleteResourceException e) {
       Status status = e.getStatus();
@@ -544,6 +531,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       log.error("Unable to delete resource", e);
 
       return response;
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -606,6 +596,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private Response createAttriubteProcessingErrorResponse(Exception e) {
     ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to parse the attribute query value " + e.getMessage());
+    return er.toResponse();
+  }
+  
+  private Response createNoProviderException() {
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
     return er.toResponse();
   }
 
