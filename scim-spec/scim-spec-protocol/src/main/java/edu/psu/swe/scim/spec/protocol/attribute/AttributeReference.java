@@ -29,7 +29,7 @@ public class AttributeReference implements Serializable {
       attributeName = parseAttributeName(substringAfterLast);
     }
   }
-  
+
   public AttributeReference(String urn, String attributeName) {
     this.urn = urn;
     this.attributeName = parseAttributeName(attributeName);
@@ -38,17 +38,27 @@ public class AttributeReference implements Serializable {
   private String[] parseAttributeName(String attributeName) {
     return StringUtils.split(attributeName, ".");
   }
-  
+
   public String getFullAttributeName() {
     return StringUtils.join(attributeName, ".");
   }
-  
+
   public String getFullyQualifiedAttributeName() {
-    return (urn != null ? (urn + ":") : "") + StringUtils.join(attributeName, ".");
+    StringBuilder sb = new StringBuilder();
+    if (urn != null) {
+      sb.append(urn);
+    }
+    if (urn != null && attributeName != null) {
+      sb.append(":");
+    }
+    if (attributeName != null) {
+      sb.append(StringUtils.join(attributeName, "."));
+    }
+    return sb.toString();
   }
-  
+
   public String getAttributeBase() {
-    return (urn != null ? (urn + ":") : "") + StringUtils.join(attributeName, ".", 0, attributeName.length - 1);
+    return (urn != null ? (urn + ":") : "") + (attributeName != null ? StringUtils.join(attributeName, ".", 0, attributeName.length - 1) : "");
   }
 
 }

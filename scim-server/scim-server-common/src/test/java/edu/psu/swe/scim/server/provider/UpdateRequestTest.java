@@ -114,6 +114,23 @@ public class UpdateRequestTest {
 
     checkAssertions(actual, Type.ADD, "nickName", "Jon");
   }
+  
+  @Test
+  public void testAddSingleExtension() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    EnterpriseExtension ext = user1.removeExtension(EnterpriseExtension.class);
+    ScimUser user2 = copy(user1);
+    user2.addExtension(ext);
+
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.ADD, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", ext);
+  }
 
   @Test
   public void testAddComplexAttribute() throws Exception {
@@ -235,6 +252,22 @@ public class UpdateRequestTest {
     PatchOperation actual = assertSingleResult(result);
 
     checkAssertions(actual, Type.REMOVE, "userName", null);
+  }
+  
+  @Test
+  public void testRemoveSingleExtension() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    user2.removeExtension(EnterpriseExtension.class);
+
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REMOVE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", null);
   }
 
   @Test
