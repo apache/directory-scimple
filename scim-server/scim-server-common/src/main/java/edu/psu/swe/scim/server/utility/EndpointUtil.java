@@ -20,6 +20,10 @@ public class EndpointUtil {
   
   public UriBuilder getEndpointUriBuilder(Class<? extends ScimResource> resource) {
     ScimResourceType[] sr = resource.getAnnotationsByType(ScimResourceType.class);
+    
+    if (baseUri == null) {
+      throw new IllegalStateException("BaseUri for Resource "+resource+" was null");
+    }
 
     if (sr.length == 0 || sr.length > 1) {
       throw new InvalidScimResourceException("ScimResource class must have a ScimResourceType annotation");

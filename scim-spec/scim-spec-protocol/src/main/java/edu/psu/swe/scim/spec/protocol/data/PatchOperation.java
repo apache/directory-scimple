@@ -26,7 +26,7 @@ public class PatchOperation {
   }
   
   @XmlElement(name="op")
-  private Type opreration;
+  private Type operation;
   
   @XmlElement
   @XmlJavaTypeAdapter(PatchOperationPathAdapter.class)

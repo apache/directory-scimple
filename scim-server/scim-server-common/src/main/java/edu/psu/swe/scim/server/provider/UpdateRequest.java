@@ -212,25 +212,43 @@ public class UpdateRequest<T extends ScimResource> {
       JsonNode valueNode = patchNode.get(VALUE);
 
       PatchOperation operation = convertToPatchOperation(operationNode.asText(), pathNode.asText(), valueNode);
-      operations.add(operation);
+      if (operation != null) {
+        operations.add(operation);
+      }
     }
     return operations;
 
   }
 
   private PatchOperation convertToPatchOperation(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException {
-    PatchOperation operation = new PatchOperation();
 
     PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
-    operation.setOpreration(patchOpType);
 
-    PatchOperationPath patchOperationPath = new PatchOperationPath();
     if (diffPath == null || diffPath.length() < 1) {
       return null;
     }
 
     ParseData parseData = new ParseData(diffPath);
 
+    if (parseData.pathParts.isEmpty()) {
+      return handleExtensions(valueNode, patchOpType, parseData);
+    } else {
+      return handleAttributes(valueNode, patchOpType, parseData);
+    }
+  }
+
+  private PatchOperation handleExtensions(JsonNode valueNode, Type patchOpType, ParseData parseData) {
+    PatchOperation operation = new PatchOperation();
+    operation.setOperation(patchOpType);
+    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, null);
+    PatchOperationPath patchOperationPath = new PatchOperationPath();
+    patchOperationPath.setAttributeReference(attributeReference);
+    operation.setPath(patchOperationPath);
+    operation.setValue(determineValue(patchOpType, valueNode, parseData));
+    return operation;
+  }
+
+  private PatchOperation handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException {
     List<String> attributeReferenceList = new ArrayList<>();
     ValueFilterExpression valueFilterExpression = null;
     List<String> subAttributes = new ArrayList<>();
@@ -263,7 +281,8 @@ public class UpdateRequest<T extends ScimResource> {
       } else {
         Attribute attribute = parseData.ac.getAttribute(pathPart);
         if (attribute == null) {
-          throw new RuntimeException("Attribute not supported by the schema: " + pathPart);
+          //throw new RuntimeException("Attribute not supported by the schema: " + pathPart);
+          break;
         }
 
         if (processedMultiValued) {
@@ -283,16 +302,23 @@ public class UpdateRequest<T extends ScimResource> {
       i++;
     }
 
-    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream()
-                                                                                                            .collect(Collectors.joining(".")));
-    patchOperationPath.setAttributeReference(attributeReference);
-    patchOperationPath.setValueFilterExpression(valueFilterExpression);
-    patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
-
-    operation.setPath(patchOperationPath);
-    operation.setValue(determineValue(patchOpType, valueNode, parseData));
-
-    return operation;
+    PatchOperation operation = new PatchOperation();
+    operation.setOperation(patchOpType);
+    if (!attributeReferenceList.isEmpty()) {
+      AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream()
+                                                                                                              .collect(Collectors.joining(".")));
+      PatchOperationPath patchOperationPath = new PatchOperationPath();
+      patchOperationPath.setAttributeReference(attributeReference);
+      patchOperationPath.setValueFilterExpression(valueFilterExpression);
+      patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
+  
+      operation.setPath(patchOperationPath);
+      operation.setValue(determineValue(patchOpType, valueNode, parseData));
+  
+      return operation;
+    } else {
+      return null;
+    }
   }
 
   private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) {

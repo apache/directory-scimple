@@ -1,14 +1,17 @@
 package edu.psu.swe.scim.spec.protocol.data;
 
+import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import lombok.Data;
 import edu.psu.swe.scim.spec.resources.BaseResource;
 import edu.psu.swe.scim.spec.resources.ScimResource;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @XmlType
@@ -23,10 +26,17 @@ public class BulkOperation {
   }
   
   @Data
+  @AllArgsConstructor
   @XmlAccessorType(XmlAccessType.NONE)
-  public static class Status {
+  public static class StatusWrapper {
+    
+    public static StatusWrapper wrap(Status code) {
+      return new StatusWrapper(code);
+    }
+    
     @XmlElement
-    String code;
+    @XmlJavaTypeAdapter(StatusAdapter.class)
+    Status code;
   }
 
   @XmlElement
@@ -51,5 +61,5 @@ public class BulkOperation {
   BaseResource response;
   
   @XmlElement
-  Status status;
+  StatusWrapper status;
 }

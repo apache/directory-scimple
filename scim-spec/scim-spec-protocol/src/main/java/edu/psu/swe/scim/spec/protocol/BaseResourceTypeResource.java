@@ -12,12 +12,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.psu.swe.scim.spec.adapter.FilterWrapper;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
-import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import io.swagger.annotations.Api;
@@ -68,7 +68,7 @@ public interface BaseResourceTypeResource<T> {
                 })
   default Response query(@ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
                                  @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes,
-                                 @ApiParam(value="filter", required=false) @QueryParam("filter") Filter filter,
+                                 @ApiParam(value="filter", required=false) @QueryParam("filter") FilterWrapper filterWrapper,
                                  @ApiParam(value="sortBy", required=false) @QueryParam("sortBy") AttributeReference sortBy,
                                  @ApiParam(value="sortOrder", required=false) @QueryParam("sortOrder") SortOrder sortOrder,
                                  @ApiParam(value="startIndex", required=false) @QueryParam("startIndex") Integer startIndex,

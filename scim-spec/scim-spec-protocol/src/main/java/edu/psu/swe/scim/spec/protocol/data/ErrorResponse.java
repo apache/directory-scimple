@@ -1,9 +1,12 @@
 package edu.psu.swe.scim.spec.protocol.data;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import edu.psu.swe.scim.spec.protocol.ErrorMessageType;
 import edu.psu.swe.scim.spec.resources.BaseResource;
@@ -24,18 +27,24 @@ public class ErrorResponse extends BaseResource {
   private String detail;
 
   @XmlElement
-  private String status;
-  
+  @XmlJavaTypeAdapter(StatusAdapter.class)
+  private Status status;
+
   @XmlElement
   private ErrorMessageType scimType;
 
-  public ErrorResponse() {
+  protected ErrorResponse() {
     super(SCHEMA_URI);
   }
 
-  public ErrorResponse(String status, String detail) {
+  public ErrorResponse(Status status, String detail) {
     super(SCHEMA_URI);
     this.status = status;
     this.detail = detail;
   }
+  
+  public Response toResponse() {
+    return Response.status(status).entity(this).build();
+  }
+
 }

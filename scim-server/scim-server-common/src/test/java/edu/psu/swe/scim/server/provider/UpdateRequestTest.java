@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
+import javax.xml.registry.infomodel.PersonName;
 
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
+import edu.psu.swe.scim.server.utility.ExampleObjectExtension;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
 import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
@@ -113,6 +116,23 @@ public class UpdateRequestTest {
     PatchOperation actual = assertSingleResult(result);
 
     checkAssertions(actual, Type.ADD, "nickName", "Jon");
+  }
+  
+  @Test
+  public void testAddSingleExtension() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    EnterpriseExtension ext = user1.removeExtension(EnterpriseExtension.class);
+    ScimUser user2 = copy(user1);
+    user2.addExtension(ext);
+
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.ADD, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", ext);
   }
 
   @Test
@@ -236,6 +256,22 @@ public class UpdateRequestTest {
 
     checkAssertions(actual, Type.REMOVE, "userName", null);
   }
+  
+  @Test
+  public void testRemoveSingleExtension() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    user2.removeExtension(EnterpriseExtension.class);
+
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REMOVE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", null);
+  }
 
   @Test
   public void testRemoveComplexAttribute() throws Exception {
@@ -290,6 +326,32 @@ public class UpdateRequestTest {
 
     checkAssertions(actual, Type.REMOVE, "emails[type EQ \"home\"]", null);
   }
+  
+  @Test
+  public void forceMoveError() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    user1.setPhotos(new ArrayList<>());
+    ExampleObjectExtension ext1 = new ExampleObjectExtension();
+    user1.addExtension(ext1);
+    
+    ExampleObjectExtension ext2 = new ExampleObjectExtension();
+    ext2.setList(new ArrayList<>());
+    user2.addExtension(ext2);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    try {
+      updateRequest.getPatchOperations();
+      Assert.fail("There should have been a runtime error where PatchOperation is a move");
+    } catch (IllegalStateException e) {
+      Assert.assertEquals("Error creating the patch list", e.getMessage());
+    }
+    
+    
+  }
 
   private PatchOperation assertSingleResult(List<PatchOperation> result) {
     Assertions.assertThat(result)
@@ -301,7 +363,7 @@ public class UpdateRequestTest {
   }
 
   private void checkAssertions(PatchOperation actual, Type op, String path, Object value) throws FilterParseException {
-    Assertions.assertThat(actual.getOpreration())
+    Assertions.assertThat(actual.getOperation())
               .isEqualTo(op);
     Assertions.assertThat(actual.getPath()
                                 .toString())
@@ -402,7 +464,7 @@ public class UpdateRequestTest {
   private List<PatchOperation> createUser1PatchOps() throws FilterParseException {
     List<PatchOperation> patchOperations = new ArrayList<>();
     PatchOperation removePhoneNumberOp = new PatchOperation();
-    removePhoneNumberOp.setOpreration(Type.REMOVE);
+    removePhoneNumberOp.setOperation(Type.REMOVE);
     removePhoneNumberOp.setPath(new PatchOperationPath("phoneNumbers[type eq \"home\"]"));
     patchOperations.add(removePhoneNumberOp);
     return patchOperations;

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.psu.swe.scim.server.exception.AttributeDoesNotExistException;
+import edu.psu.swe.scim.server.exception.ScimServerException;
 import edu.psu.swe.scim.server.exception.UnableToCreateResourceException;
 import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
@@ -42,6 +43,7 @@ import edu.psu.swe.scim.server.provider.extensions.exceptions.ClientFilterExcept
 import edu.psu.swe.scim.server.utility.AttributeUtil;
 import edu.psu.swe.scim.server.utility.EndpointUtil;
 import edu.psu.swe.scim.server.utility.EtagGenerator;
+import edu.psu.swe.scim.spec.adapter.FilterWrapper;
 import edu.psu.swe.scim.spec.protocol.BaseResourceTypeResource;
 import edu.psu.swe.scim.spec.protocol.ErrorMessageType;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
@@ -63,8 +65,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
-  public abstract Provider<T> getProvider();
-
   @Context
   UriInfo uriInfo;
 
@@ -75,109 +75,133 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   HttpServletRequest servletRequest;
 
   @Inject
-  AttributeUtil attributeUtil;
+  private AttributeUtil attributeUtil;
 
   @Inject
-  EndpointUtil endpointUtil;
-  
+  private EndpointUtil endpointUtil;
+
   @Inject
-  EtagGenerator etagGenerator;
-  
+  private EtagGenerator etagGenerator;
+
   @Inject
-  Instance<UpdateRequest<T>> updateRequestInstance;
+  private Instance<UpdateRequest<T>> updateRequestInstance;
+
+  public abstract Provider<T> getProvider();
+
+  private Provider<T> getProviderInternal() throws ScimServerException {
+    Provider<T> provider = getProvider();
+    if (provider == null) {
+      throw new ScimServerException(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
+    }
+    return provider;
+  }
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     if (servletRequest.getParameter("filter") != null) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
-    
-    Provider<T> provider = getProvider();
-    if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.getById(id, attributes, excludedAttributes);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
+      return Response.status(Status.FORBIDDEN)
+                     .build();
     }
 
-    endpointUtil.process(uriInfo);
-    T resource = null;
     try {
-      resource = provider.get(id);
-    } catch (UnableToRetrieveResourceException e2) {
-      if (e2.getStatus().getFamily().equals(Family.SERVER_ERROR)) {
-        return createGenericExceptionResponse(e2, e2.getStatus());
-      }
-    }
+      Provider<T> provider = getProviderInternal();
 
-    if (resource != null) {
-      EntityTag backingETag = null;
+      endpointUtil.process(uriInfo);
+      T resource = null;
       try {
-        backingETag = etagGenerator.generateEtag(resource);
-      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+        resource = provider.get(id);
+      } catch (UnableToRetrieveResourceException e2) {
+        if (e2.getStatus()
+              .getFamily()
+              .equals(Family.SERVER_ERROR)) {
+          return createGenericExceptionResponse(e2, e2.getStatus());
+        }
+      } catch (Exception e) {
+        throw new ScimServerException(Status.INTERNAL_SERVER_ERROR, "Uncaught provider exception: " + e.getMessage(), e);
+      }
+
+      if (resource != null) {
+        EntityTag backingETag = null;
+        try {
+          backingETag = etagGenerator.generateEtag(resource);
+        } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+          return createETagErrorResponse();
+        }
+
+        ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+
+        if (evaluatePreconditionsResponse != null) {
+          return Response.status(Status.NOT_MODIFIED)
+                         .build();
+        }
+      }
+
+      Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
+                                                            .map(wrapper -> wrapper.getAttributeReferences())
+                                                            .orElse(Collections.emptySet());
+      Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes)
+                                                                    .map(wrapper -> wrapper.getAttributeReferences())
+                                                                    .orElse(Collections.emptySet());
+
+      if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+        return createAmbiguousAttributeParametersResponse();
+      }
+
+      if (resource == null) {
+        return createNotFoundResponse(id);
+      }
+
+      EntityTag etag = null;
+
+      try {
+        etag = etagGenerator.generateEtag(resource);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
         return createETagErrorResponse();
       }
 
-      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
-
-      if (evaluatePreconditionsResponse != null) {
-        return Response.status(Status.NOT_MODIFIED).build();
-      }
-    }
-
-    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-
-    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
-      return createAmbiguousAttributeParametersResponse();
-    }
-
-    if (resource == null) {
-      return createNotFoundResponse(id);
-    }
-
-    EntityTag etag = null;
-
-    try {
-      etag = etagGenerator.generateEtag(resource);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-      return createETagErrorResponse();
-    }
-
-    // Process Attributes
-    try {
-      resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
-    } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
-    }
-
-    try {
-      if (!excludedAttributeReferences.isEmpty()) {
-        resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
-      } else {
-        resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
+      // Process Attributes
+      try {
+        resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+      } catch (ClientFilterException e1) {
+        ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+        return er.toResponse();
       }
 
-      return Response.ok().entity(resource).location(buildLocationTag(resource)).tag(etag).build();
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
-      e.printStackTrace();
-      return createAttriubteProcessingErrorResponse(e);
+      try {
+        if (!excludedAttributeReferences.isEmpty()) {
+          resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
+        } else {
+          resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
+        }
+
+        return Response.ok()
+                       .entity(resource)
+                       .location(buildLocationTag(resource))
+                       .tag(etag)
+                       .build();
+      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+        e.printStackTrace();
+        return createAttriubteProcessingErrorResponse(e);
+      }
+    } catch (ScimServerException sse) {
+      LOG.error("Error Processing SCIM Request", sse);
+      return sse.getErrorResponse()
+                .toResponse();
     }
 
   }
 
   @Override
-  public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Filter filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) {
+  public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, FilterWrapper filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) {
     SearchRequest searchRequest = new SearchRequest();
-    searchRequest.setAttributes(Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
-    searchRequest.setExcludedAttributes(Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet()));
+    searchRequest.setAttributes(Optional.ofNullable(attributes)
+                                        .map(wrapper -> wrapper.getAttributeReferences())
+                                        .orElse(Collections.emptySet()));
+    searchRequest.setExcludedAttributes(Optional.ofNullable(excludedAttributes)
+                                                .map(wrapper -> wrapper.getAttributeReferences())
+                                                .orElse(Collections.emptySet()));
 
-    searchRequest.setFilter(filter);
+    searchRequest.setFilter(filter.getFilter());
 
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
@@ -189,375 +213,416 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    Provider<T> provider = getProvider();
-    if (provider == null) {
+    try {
+      Provider<T> provider = getProviderInternal();
+
+      Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
+                                                            .map(wrapper -> wrapper.getAttributeReferences())
+                                                            .orElse(Collections.emptySet());
+      Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes)
+                                                                    .map(wrapper -> wrapper.getAttributeReferences())
+                                                                    .orElse(Collections.emptySet());
+
+      if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+        return createAmbiguousAttributeParametersResponse();
+      }
+
+      endpointUtil.process(uriInfo);
+      T created;
       try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.create(resource, attributes, excludedAttributes);
+        created = provider.create(resource);
+      } catch (UnableToCreateResourceException e1) {
+        Status status = e1.getStatus();
+        ErrorResponse er = new ErrorResponse(status, "Error");
+
+        if (status == Status.CONFLICT) {
+          er.setScimType(ErrorMessageType.UNIQUENESS);
+          er.setDetail(ErrorMessageType.UNIQUENESS.getDetail());
+        } else {
+          er.setDetail(e1.getMessage());
+        }
+
+        return er.toResponse();
       } catch (Exception e) {
-        throw new RuntimeException();
-      }
-    }
-
-    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-
-    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
-      return createAmbiguousAttributeParametersResponse();
-    }
-
-    endpointUtil.process(uriInfo);
-    T created;
-    try {
-      created = provider.create(resource);
-    } catch (UnableToCreateResourceException e1) {
-      ErrorResponse er = new ErrorResponse();
-      Status status = e1.getStatus();
-      if (e1.getStatus().equals(Status.CONFLICT)) {
-        er.setStatus(e1.getStatus().toString());
-        er.setScimType(ErrorMessageType.UNIQUENESS);
-      } else {
-        er.setStatus(e1.getStatus().toString());
-        er.setDetail(e1.getMessage());
+        log.error("Uncaught provider exception", e);
+        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
       }
 
-      return Response.status(status).entity(er).build();
-    }
-
-    EntityTag etag = null;
-    try {
-      etag = etagGenerator.generateEtag(created);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-      log.error("Failed to generate etag for newly created entity " + e.getMessage());
-    }
-
-    // Process Attributes
-    try {
-      created = processFilterAttributeExtensions(provider, created, attributeReferences, excludedAttributeReferences);
-    } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
-    }
-
-    try {
-      if (!excludedAttributeReferences.isEmpty()) {
-        created = attributeUtil.setExcludedAttributesForDisplay(created, excludedAttributeReferences);
-      } else {
-        created = attributeUtil.setAttributesForDisplay(created, attributeReferences);
+      EntityTag etag = null;
+      try {
+        etag = etagGenerator.generateEtag(created);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        log.error("Failed to generate etag for newly created entity " + e.getMessage());
       }
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+
+      // Process Attributes
+      try {
+        created = processFilterAttributeExtensions(provider, created, attributeReferences, excludedAttributeReferences);
+      } catch (ClientFilterException e1) {
+        ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+        return er.toResponse();
+      }
+
+      try {
+        if (!excludedAttributeReferences.isEmpty()) {
+          created = attributeUtil.setExcludedAttributesForDisplay(created, excludedAttributeReferences);
+        } else {
+          created = attributeUtil.setAttributesForDisplay(created, attributeReferences);
+        }
+      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+        if (etag == null) {
+          return Response.status(Status.CREATED)
+                         .location(buildLocationTag(created))
+                         .build();
+        } else {
+          Response.status(Status.CREATED)
+                  .location(buildLocationTag(created))
+                  .tag(etag)
+                  .build();
+        }
+      }
+
+      // TODO - Is this the right behavior?
       if (etag == null) {
-        return Response.status(Status.CREATED).location(buildLocationTag(created)).build();
-      } else {
-        Response.status(Status.CREATED).location(buildLocationTag(created)).tag(etag).build();
+        return Response.status(Status.CREATED)
+                       .location(buildLocationTag(created))
+                       .entity(created)
+                       .build();
       }
-    }
 
-    // TODO - Is this the right behavior?
-    if (etag == null) {
-      return Response.status(Status.CREATED).location(buildLocationTag(created)).entity(created).build();
+      return Response.status(Status.CREATED)
+                     .location(buildLocationTag(created))
+                     .tag(etag)
+                     .entity(created)
+                     .build();
+    } catch (ScimServerException sse) {
+      LOG.error("Error Processing SCIM Request", sse);
+      return sse.getErrorResponse()
+                .toResponse();
     }
-
-    return Response.status(Status.CREATED).location(buildLocationTag(created)).tag(etag).entity(created).build();
   }
 
   @Override
   public Response find(SearchRequest request) {
-    Provider<T> provider = getProvider();
-    if (provider == null) {
-      try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.find(request);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
-    }
-
-    Set<AttributeReference> attributeReferences = Optional.ofNullable(request.getAttributes()).orElse(Collections.emptySet());
-    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(request.getExcludedAttributes()).orElse(Collections.emptySet());
-    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
-      return createAmbiguousAttributeParametersResponse();
-    }
-
-    Filter filter = request.getFilter();
-    PageRequest pageRequest = request.getPageRequest();
-    SortRequest sortRequest = request.getSortRequest();
-
-    ListResponse<T> listResponse = new ListResponse<>();
-
-    endpointUtil.process(uriInfo);
-    FilterResponse<T> filterResp = null;
     try {
-      filterResp = provider.find(filter, pageRequest, sortRequest);
-    } catch (UnableToRetrieveResourceException e1) {
-      log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus().toString());
-      return createGenericExceptionResponse(e1, e1.getStatus());
-    }
+      Provider<T> provider = getProviderInternal();
 
-    // If no resources are found, we should still return a ListResponse with
-    // the totalResults set to 0;
-    // (https://tools.ietf.org/html/rfc7644#section-3.4.2)
-    if (filterResp == null || filterResp.getResources() == null || filterResp.getResources().isEmpty()) {
-      listResponse.setTotalResults(0);
-    } else {
-      log.info("Find returned " + filterResp.getResources().size());
-      listResponse.setItemsPerPage(filterResp.getResources().size());
-      listResponse.setStartIndex(1);
-      listResponse.setTotalResults(filterResp.getResources().size());
+      Set<AttributeReference> attributeReferences = Optional.ofNullable(request.getAttributes())
+                                                            .orElse(Collections.emptySet());
+      Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(request.getExcludedAttributes())
+                                                                    .orElse(Collections.emptySet());
+      if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+        return createAmbiguousAttributeParametersResponse();
+      }
 
-      List<T> results = new ArrayList<>();
+      Filter filter = request.getFilter();
+      PageRequest pageRequest = request.getPageRequest();
+      SortRequest sortRequest = request.getSortRequest();
 
-      for (T resource : filterResp.getResources()) {
-        EntityTag etag = null;
+      ListResponse<T> listResponse = new ListResponse<>();
 
-        try {
-          etag = etagGenerator.generateEtag(resource);
-        } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-          return createETagErrorResponse();
-        }
+      endpointUtil.process(uriInfo);
+      FilterResponse<T> filterResp = null;
+      try {
+        filterResp = provider.find(filter, pageRequest, sortRequest);
+      } catch (UnableToRetrieveResourceException e1) {
+        log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus()
+                                                                                              .toString());
+        return createGenericExceptionResponse(e1, e1.getStatus());
+      } catch (Exception e) {
+        log.error("Uncaught provider exception", e);
+        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
+      }
 
-        // Process Attributes
-        try {
-          log.info("=== Calling processFilterAttributeExtensions");
-          resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
-        } catch (ClientFilterException e1) {
-          ErrorResponse er = new ErrorResponse();
-          er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-          er.setDetail(e1.getMessage());
-          return Response.status(e1.getStatus()).entity(er).build();
-        }
+      // If no resources are found, we should still return a ListResponse with
+      // the totalResults set to 0;
+      // (https://tools.ietf.org/html/rfc7644#section-3.4.2)
+      if (filterResp == null || filterResp.getResources() == null || filterResp.getResources()
+                                                                               .isEmpty()) {
+        listResponse.setTotalResults(0);
+      } else {
+        log.info("Find returned " + filterResp.getResources()
+                                              .size());
+        listResponse.setItemsPerPage(filterResp.getResources()
+                                               .size());
+        listResponse.setStartIndex(1);
+        listResponse.setTotalResults(filterResp.getResources()
+                                               .size());
 
-        try {
-          if (!excludedAttributeReferences.isEmpty()) {
-            resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
-          } else {
-            resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
+        List<T> results = new ArrayList<>();
+
+        for (T resource : filterResp.getResources()) {
+          EntityTag etag = null;
+
+          try {
+            etag = etagGenerator.generateEtag(resource);
+          } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            return createETagErrorResponse();
           }
 
-          results.add(resource);
-        } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
-          return createAttriubteProcessingErrorResponse(e);
+          // Process Attributes
+          try {
+            log.info("=== Calling processFilterAttributeExtensions");
+            resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+          } catch (ClientFilterException e1) {
+            ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+            return er.toResponse();
+          }
+
+          try {
+            if (!excludedAttributeReferences.isEmpty()) {
+              resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributeReferences);
+            } else {
+              resource = attributeUtil.setAttributesForDisplay(resource, attributeReferences);
+            }
+
+            results.add(resource);
+          } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+            return createAttriubteProcessingErrorResponse(e);
+          }
         }
+
+        listResponse.setResources(results);
       }
 
-      listResponse.setResources(results);
+      return Response.ok()
+                     .entity(listResponse)
+                     .build();
+    } catch (ScimServerException sse) {
+      LOG.error("Error Processing SCIM Request", sse);
+      return sse.getErrorResponse()
+                .toResponse();
     }
-
-    return Response.ok().entity(listResponse).build();
   }
 
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    Provider<T> provider = getProvider();
-    if (provider == null) {
+    try {
+      Provider<T> provider = getProviderInternal();
+
+      Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
+                                                            .map(wrapper -> wrapper.getAttributeReferences())
+                                                            .orElse(Collections.emptySet());
+      Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes)
+                                                                    .map(wrapper -> wrapper.getAttributeReferences())
+                                                                    .orElse(Collections.emptySet());
+
+      if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+        return createAmbiguousAttributeParametersResponse();
+      }
+
+      endpointUtil.process(uriInfo);
+      T stored;
       try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.update(resource, id, attributes, excludedAttributes);
+        stored = provider.get(id);
+      } catch (UnableToRetrieveResourceException e2) {
+        log.error("Unable to retrieve resource with id: {}", id, e2);
+        return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
-        throw new RuntimeException();
+        log.error("Uncaught provider exception", e);
+        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
       }
-    }
 
-    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-
-    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
-      return createAmbiguousAttributeParametersResponse();
-    }
-
-    endpointUtil.process(uriInfo);
-    T stored;
-    try {
-      stored = provider.get(id);
-    } catch (UnableToRetrieveResourceException e2) {
-      return createGenericExceptionResponse(e2, e2.getStatus());
-    }
-
-    if (stored == null) {
-      return createNotFoundResponse(id);
-    }
-
-    EntityTag backingETag = null;
-    try {
-      backingETag = etagGenerator.generateEtag(stored);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
-      return createETagErrorResponse();
-    }
-
-    ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
-
-    if (evaluatePreconditionsResponse != null) {
-      return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
-    }
-
-    T updated;
-    try {
-      UpdateRequest<T> updateRequest = updateRequestInstance.get();
-      updateRequest.initWithResource(id, stored, resource);
-      updated = provider.update(updateRequest);
-    } catch (UnableToUpdateResourceException e1) {
-      return createGenericExceptionResponse(e1, e1.getStatus());
-    }
-
-    // Process Attributes
-    try {
-      updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
-    } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
-    }
-
-    try {
-      if (!excludedAttributeReferences.isEmpty()) {
-        updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
-      } else {
-        updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
+      if (stored == null) {
+        return createNotFoundResponse(id);
       }
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
-      log.error("Failed to handle attribute processing in update " + e.getMessage());
-    }
 
-    EntityTag etag = null;
-    try {
-      etag = etagGenerator.generateEtag(updated);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-      log.error("Failed to generate etag for newly created entity " + e.getMessage());
-    }
+      EntityTag backingETag = null;
+      try {
+        backingETag = etagGenerator.generateEtag(stored);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+        return createETagErrorResponse();
+      }
 
-    // TODO - Is this correct or should we support roll back semantics
-    if (etag == null) {
-      return Response.ok(updated).location(buildLocationTag(updated)).build();
-    }
+      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
 
-    return Response.ok(updated).location(buildLocationTag(updated)).tag(etag).build();
+      if (evaluatePreconditionsResponse != null) {
+        return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
+      }
+
+      T updated;
+      try {
+        UpdateRequest<T> updateRequest = updateRequestInstance.get();
+        updateRequest.initWithResource(id, stored, resource);
+        updated = provider.update(updateRequest);
+      } catch (UnableToUpdateResourceException e1) {
+        return createGenericExceptionResponse(e1, e1.getStatus());
+      }
+
+      // Process Attributes
+      try {
+        updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
+      } catch (ClientFilterException e1) {
+        ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+        return er.toResponse();
+      }
+
+      try {
+        if (!excludedAttributeReferences.isEmpty()) {
+          updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
+        } else {
+          updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
+        }
+      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+        log.error("Failed to handle attribute processing in update " + e.getMessage());
+      }
+
+      EntityTag etag = null;
+      try {
+        etag = etagGenerator.generateEtag(updated);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        log.error("Failed to generate etag for newly created entity " + e.getMessage());
+      }
+
+      // TODO - Is this correct or should we support roll back semantics
+      if (etag == null) {
+        return Response.ok(updated)
+                       .location(buildLocationTag(updated))
+                       .build();
+      }
+
+      return Response.ok(updated)
+                     .location(buildLocationTag(updated))
+                     .tag(etag)
+                     .build();
+    } catch (ScimServerException sse) {
+      LOG.error("Error Processing SCIM Request", sse);
+      return sse.getErrorResponse()
+                .toResponse();
+    }
   }
 
   @Override
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws Exception {
-    Provider<T> provider = getProvider();
-    if (provider == null) {
+    try {
+      Provider<T> provider = getProviderInternal();
+
+      Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
+                                                            .map(wrapper -> wrapper.getAttributeReferences())
+                                                            .orElse(Collections.emptySet());
+      Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes)
+                                                                    .map(wrapper -> wrapper.getAttributeReferences())
+                                                                    .orElse(Collections.emptySet());
+
+      if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
+        return createAmbiguousAttributeParametersResponse();
+      }
+
+      endpointUtil.process(uriInfo);
+      T stored;
       try {
-        // does not throw an exception server side
-        return BaseResourceTypeResource.super.patch(patchRequest, id, attributes, excludedAttributes);
+        stored = provider.get(id);
+      } catch (UnableToRetrieveResourceException e2) {
+        log.error("Unable to retrieve resource with id: {}", id, e2);
+        return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
-        throw new RuntimeException();
+        log.error("Uncaught provider exception", e);
+        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
       }
-    }
 
-    Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-    Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(excludedAttributes).map(wrapper -> wrapper.getAttributeReferences()).orElse(Collections.emptySet());
-
-    if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
-      return createAmbiguousAttributeParametersResponse();
-    }
-
-    endpointUtil.process(uriInfo);
-    T stored;
-    try {
-      stored = provider.get(id);
-    } catch (UnableToRetrieveResourceException e2) {
-      return createGenericExceptionResponse(e2, e2.getStatus());
-    }
-
-    if (stored == null) {
-      return createNotFoundResponse(id);
-    }
-
-    EntityTag backingETag = null;
-    try {
-      backingETag = etagGenerator.generateEtag(stored);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
-      return createETagErrorResponse();
-    }
-
-    ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
-
-    if (evaluatePreconditionsResponse != null) {
-      return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
-    }
-
-    
-    T updated;
-    try {
-      UpdateRequest<T> updateRequest = updateRequestInstance.get();
-      updateRequest.initWithPatch(id, stored, patchRequest.getPatchOperationList());
-      updated = provider.update(updateRequest);
-    } catch (UnableToUpdateResourceException e1) {
-      return createGenericExceptionResponse(e1, e1.getStatus());
-    }
-
-    // Process Attributes
-    try {
-      updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
-    } catch (ClientFilterException e1) {
-      ErrorResponse er = new ErrorResponse();
-      er.setStatus(Integer.toString(e1.getStatus().getStatusCode()));
-      er.setDetail(e1.getMessage());
-      return Response.status(e1.getStatus()).entity(er).build();
-    }
-
-    try {
-      if (!excludedAttributeReferences.isEmpty()) {
-        updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
-      } else {
-        updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
+      if (stored == null) {
+        return createNotFoundResponse(id);
       }
-    } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
-      log.error("Failed to handle attribute processing in update " + e.getMessage());
+
+      EntityTag backingETag = null;
+      try {
+        backingETag = etagGenerator.generateEtag(stored);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e1) {
+        return createETagErrorResponse();
+      }
+
+      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+
+      if (evaluatePreconditionsResponse != null) {
+        return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
+      }
+
+      T updated;
+      try {
+        UpdateRequest<T> updateRequest = updateRequestInstance.get();
+        updateRequest.initWithPatch(id, stored, patchRequest.getPatchOperationList());
+        updated = provider.update(updateRequest);
+      } catch (UnableToUpdateResourceException e1) {
+        return createGenericExceptionResponse(e1, e1.getStatus());
+      }
+
+      // Process Attributes
+      try {
+        updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
+      } catch (ClientFilterException e1) {
+        ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
+        return er.toResponse();
+      }
+
+      try {
+        if (!excludedAttributeReferences.isEmpty()) {
+          updated = attributeUtil.setExcludedAttributesForDisplay(updated, excludedAttributeReferences);
+        } else {
+          updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
+        }
+      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+        log.error("Failed to handle attribute processing in update " + e.getMessage());
+      }
+
+      EntityTag etag = null;
+      try {
+        etag = etagGenerator.generateEtag(updated);
+      } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        log.error("Failed to generate etag for newly created entity " + e.getMessage());
+      }
+
+      // TODO - Is this correct or should we support roll back semantics
+      if (etag == null) {
+        return Response.ok(updated)
+                       .location(buildLocationTag(updated))
+                       .build();
+      }
+
+      return Response.ok(updated)
+                     .location(buildLocationTag(updated))
+                     .tag(etag)
+                     .build();
+    } catch (ScimServerException sse) {
+      LOG.error("Error Processing SCIM Request", sse);
+      return sse.getErrorResponse()
+                .toResponse();
     }
 
-    EntityTag etag = null;
-    try {
-      etag = etagGenerator.generateEtag(updated);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-      log.error("Failed to generate etag for newly created entity " + e.getMessage());
-    }
-
-    // TODO - Is this correct or should we support roll back semantics
-    if (etag == null) {
-      return Response.ok(updated).location(buildLocationTag(updated)).build();
-    }
-
-    return Response.ok(updated).location(buildLocationTag(updated)).tag(etag).build();
-    
   }
 
   @Override
   public Response delete(String id) {
     try {
       Response response;
-      Provider<T> provider = getProvider();
+      Provider<T> provider = getProviderInternal();
 
-      if (provider == null) {
-        try {
-          // does not throw an exception server side
-          response = BaseResourceTypeResource.super.delete(id);
-        } catch (Exception e) {
-          throw new RuntimeException();
-        }
-      } else {
-        endpointUtil.process(uriInfo);
-        response = Response.noContent().build();
+      endpointUtil.process(uriInfo);
+      response = Response.noContent()
+                         .build();
 
-        provider.delete(id);
-      }
+      provider.delete(id);
       return response;
     } catch (UnableToDeleteResourceException e) {
       Status status = e.getStatus();
-      Response response = Response.status(status).build();
+      Response response = Response.status(status)
+                                  .build();
 
       log.error("Unable to delete resource", e);
 
       return response;
+    } catch (ScimServerException sse) {
+      LOG.error("Error Processing SCIM Request", sse);
+      return sse.getErrorResponse()
+                .toResponse();
+    } catch (Exception e) {
+      log.error("Uncaught provider exception", e);
+      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
   private T processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
-    ScimProcessingExtension annotation = provider.getClass().getAnnotation(ScimProcessingExtension.class);
+    ScimProcessingExtension annotation = provider.getClass()
+                                                 .getAnnotation(ScimProcessingExtension.class);
     if (annotation != null) {
       Class<? extends ProcessingExtension>[] value = annotation.value();
       for (Class<? extends ProcessingExtension> class1 : value) {
@@ -571,12 +636,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
             log.info("Resource now - " + resource.toString());
           }
         } catch (InstantiationException | IllegalAccessException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          log.error("Error processing filter attriute extensions", e);
         }
       }
     }
-    
+
     return resource;
   }
 
@@ -586,55 +650,50 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       LOG.warn("Provider must supply an id for a resource");
       id = "unknown";
     }
-    return uriInfo.getAbsolutePathBuilder().path(id).build();
+    return uriInfo.getAbsolutePathBuilder()
+                  .path(id)
+                  .build();
   }
 
   private Response createGenericExceptionResponse(Exception e1, Status status) {
-    ErrorResponse er = new ErrorResponse();
-
-    er.setDetail(e1.getLocalizedMessage());
-    if (status != null) {
-      er.setStatus(Integer.toString(status.getStatusCode()));
-      return Response.status(status).entity(er).build();
-    } else {
-      er.setStatus("500");
-      return Response.status(Status.BAD_REQUEST).entity(er).build();
+    Status myStatus = status;
+    if (myStatus == null) {
+      myStatus = Status.INTERNAL_SERVER_ERROR;
     }
+
+    ErrorResponse er = new ErrorResponse(myStatus, e1.getMessage());
+    return er.toResponse();
   }
 
   private Response createAmbiguousAttributeParametersResponse() {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("400");
-    er.setDetail("Cannot include both attributes and excluded attributes in a single request");
-    return Response.status(Status.BAD_REQUEST).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.BAD_REQUEST, "Cannot include both attributes and excluded attributes in a single request");
+    return er.toResponse();
   }
 
   private Response createNotFoundResponse(String id) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("404");
-    er.setDetail("Resource " + id + " not found");
-    return Response.status(Status.NOT_FOUND).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.NOT_FOUND, "Resource " + id + " not found");
+    return er.toResponse();
   }
 
   private Response createETagErrorResponse() {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("500");
-    er.setDetail("Failed to generate the etag");
-    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to generate the etag");
+    return er.toResponse();
   }
 
   private Response createAttriubteProcessingErrorResponse(Exception e) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("500");
-    er.setDetail("Failed to parse the attribute query value " + e.getMessage());
-    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(er).build();
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to parse the attribute query value " + e.getMessage());
+    return er.toResponse();
+  }
+
+  private Response createNoProviderException() {
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
+    return er.toResponse();
   }
 
   private Response createPreconditionFailedResponse(String id, ResponseBuilder evaluatePreconditionsResponse) {
-    ErrorResponse er = new ErrorResponse();
-    er.setStatus("412");
-    er.setDetail("Failed to update record, backing record has changed - " + id);
+    ErrorResponse er = new ErrorResponse(Status.PRECONDITION_FAILED, "Failed to update record, backing record has changed - " + id);
     log.warn("Failed to update record, backing record has changed - " + id);
-    return evaluatePreconditionsResponse.entity(er).build();
+    return evaluatePreconditionsResponse.entity(er)
+                                        .build();
   }
 }
