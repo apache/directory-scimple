@@ -3,6 +3,7 @@ package edu.psu.swe.scim.spec.resources;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -101,13 +102,19 @@ public abstract class ScimResource extends BaseResource implements Serializable 
    */
   @SuppressWarnings("unchecked")
   public <T> T getExtension(Class<T> extensionClass) {
+    ScimExtensionType se = lookupScimExtensionType(extensionClass);
+    
+    return (T) extensions.get(se.id());
+  }
+
+  private <T> ScimExtensionType lookupScimExtensionType(Class<T> extensionClass) {
     ScimExtensionType[] se = extensionClass.getAnnotationsByType(ScimExtensionType.class);
 
     if (se.length == 0 || se.length > 1) {
       throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
     }
-    
-    return (T) extensions.get(se[0].id());
+
+    return se[0];
   }
 
   public abstract String getResourceType();
@@ -150,6 +157,17 @@ public abstract class ScimResource extends BaseResource implements Serializable 
         extensions.put(key, extension);
       }
     }
+  }
+  
+  public ScimExtension removeExtension(String urn) {
+    return extensions.remove(urn);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T removeExtension(Class<T> extensionClass) {
+    ScimExtensionType se = lookupScimExtensionType(extensionClass);
+    
+    return (T) extensions.remove(se.id());
   }
 
 }
