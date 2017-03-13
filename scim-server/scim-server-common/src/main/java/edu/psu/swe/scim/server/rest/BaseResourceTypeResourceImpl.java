@@ -239,8 +239,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           er.setScimType(ErrorMessageType.UNIQUENESS);
           
           //only use default error message if the ErrorResponse does not already contain a message
-          if (er.getDetail() != null) {
+          if (e1.getMessage() == null) {
             er.setDetail(ErrorMessageType.UNIQUENESS.getDetail());
+          } else {
+            er.setDetail(e1.getMessage());
           }
         } else {
           er.setDetail(e1.getMessage());
