@@ -17,6 +17,9 @@ public class AttributeReference implements Serializable {
 
   String[] attributeName;
 
+  protected AttributeReference() {
+  }
+
   public AttributeReference(String attributeReference) {
     String substringBeforeLast = StringUtils.substringBeforeLast(attributeReference, ":");
     String substringAfterLast = StringUtils.substringAfterLast(attributeReference, ":");
