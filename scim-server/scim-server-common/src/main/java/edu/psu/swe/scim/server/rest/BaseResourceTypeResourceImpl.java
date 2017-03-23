@@ -237,7 +237,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
         if (status == Status.CONFLICT) {
           er.setScimType(ErrorMessageType.UNIQUENESS);
-          er.setDetail(ErrorMessageType.UNIQUENESS.getDetail());
+          
+          //only use default error message if the ErrorResponse does not already contain a message
+          if (e1.getMessage() == null) {
+            er.setDetail(ErrorMessageType.UNIQUENESS.getDetail());
+          } else {
+            er.setDetail(e1.getMessage());
+          }
         } else {
           er.setDetail(e1.getMessage());
         }
