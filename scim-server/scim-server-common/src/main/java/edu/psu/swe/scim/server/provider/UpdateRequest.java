@@ -337,6 +337,16 @@ public class UpdateRequest<T extends ScimResource> {
       } else if (valueNode instanceof POJONode) {
         POJONode pojoNode = (POJONode) valueNode;
         return pojoNode.getPojo();
+      } else if (valueNode instanceof ArrayNode) {
+        ArrayNode arrayNode = (ArrayNode) valueNode;
+        List<Object> objectList = new ArrayList<Object>();
+        for(int i = 0; i < arrayNode.size(); i++) {
+          Object subObject = determineValue(patchOpType, arrayNode.get(i), parseData);
+          if (subObject != null) {
+            objectList.add(subObject);
+          }
+        }
+        return objectList;
       }
     }
     return null;
