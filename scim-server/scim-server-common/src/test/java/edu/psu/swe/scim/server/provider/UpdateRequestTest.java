@@ -2,13 +2,13 @@ package edu.psu.swe.scim.server.provider;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
-import javax.xml.registry.infomodel.PersonName;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -39,7 +39,6 @@ import edu.psu.swe.scim.spec.resources.Name;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
 import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import edu.psu.swe.scim.spec.resources.ScimUser;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class UpdateRequestTest {
@@ -67,7 +66,7 @@ public class UpdateRequestTest {
     Mockito.when(providerInstance.get())
            .thenReturn(provider);
     Mockito.when(provider.getExtensionList())
-           .thenReturn(Collections.singletonList(EnterpriseExtension.class));
+           .thenReturn(Stream.of(EnterpriseExtension.class,ExampleObjectExtension.class).collect(Collectors.toList()));
 
     providerRegistry.registerProvider(ScimUser.class, providerInstance);
   }
@@ -349,8 +348,62 @@ public class UpdateRequestTest {
     } catch (IllegalStateException e) {
       Assert.assertEquals("Error creating the patch list", e.getMessage());
     }
+  }
+  
+  /**
+   * This unit test is to replicate the issue where
+   */
+  @Test
+  public void testAddArray() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    user1.setPhotos(new ArrayList<>());
+    ScimUser user2 = copy(user1);
     
     
+    ExampleObjectExtension ext1 = new ExampleObjectExtension();
+    ext1.setList(null);
+    user1.addExtension(ext1);
+    
+    ExampleObjectExtension ext2 = new ExampleObjectExtension();
+    ext2.setList(new ArrayList<String>());
+    user2.addExtension(ext2);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertNotNull(operations);
+    Assert.assertEquals(1, operations.size());
+    PatchOperation operation = operations.get(0);
+    Assert.assertNotNull(operation.getValue());
+    Assert.assertEquals(Type.ADD, operation.getOperation());
+    Assert.assertEquals(ArrayList.class, operation.getValue().getClass());
+  }
+  
+  @Test
+  public void testRemoveArray() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    user1.setPhotos(new ArrayList<>());
+    ScimUser user2 = copy(user1);
+    
+    
+    ExampleObjectExtension ext1 = new ExampleObjectExtension();
+    ext1.setList(new ArrayList<String>());
+    user1.addExtension(ext1);
+    
+    ExampleObjectExtension ext2 = new ExampleObjectExtension();
+    ext2.setList(null);
+    user2.addExtension(ext2);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertNotNull(operations);
+    Assert.assertEquals(1, operations.size());
+    PatchOperation operation = operations.get(0);
+    Assert.assertEquals(Type.REMOVE, operation.getOperation());
+    Assert.assertNull(operation.getValue());
   }
 
   private PatchOperation assertSingleResult(List<PatchOperation> result) {
