@@ -57,6 +57,7 @@ public class UpdateRequest<T extends ScimResource> {
   @Getter
   private String id;
   private T resource;
+  @Getter
   private T original;
   private List<PatchOperation> patchOperations;
   private boolean initialized = false;
@@ -149,7 +150,7 @@ public class UpdateRequest<T extends ScimResource> {
 
   private T applyPatchOperations() {
     // TODO Auto-generated method stub
-    return original;
+    return resource;
   }
 
   private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException {
