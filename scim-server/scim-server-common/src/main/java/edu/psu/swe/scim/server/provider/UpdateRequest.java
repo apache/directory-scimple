@@ -39,7 +39,6 @@ import edu.psu.swe.scim.spec.resources.TypedAttribute;
 import edu.psu.swe.scim.spec.schema.AttributeContainer;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -58,6 +57,7 @@ public class UpdateRequest<T extends ScimResource> {
   @Getter
   private String id;
   private T resource;
+  @Getter
   private T original;
   private List<PatchOperation> patchOperations;
   private boolean initialized = false;
@@ -75,14 +75,8 @@ public class UpdateRequest<T extends ScimResource> {
     this.id = id;
     schema = registry.getSchema(original.getBaseUrn());
 
-    try {
-      this.original = original;
-      this.resource = resource;
-      sortMultiValuedCollections(this.original, schema);
-      sortMultiValuedCollections(this.resource, schema);
-    } catch (IllegalArgumentException | IllegalAccessException e) {
-      log.warn("Unable to sort the collections within the ScimResource, Skipping sort", e);
-    }
+    this.original = original;
+    this.resource = resource;
 
     initialized = true;
   }
@@ -156,10 +150,14 @@ public class UpdateRequest<T extends ScimResource> {
 
   private T applyPatchOperations() {
     // TODO Auto-generated method stub
-    return original;
+    return resource;
   }
 
   private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException {
+
+    sortMultiValuedCollections(this.original, schema);
+    sortMultiValuedCollections(this.resource, schema);
+
     ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
     ObjectMapper objMapper = ctxResolver.getContext(null); // TODO is there a
                                                            // better way?
@@ -169,8 +167,7 @@ public class UpdateRequest<T extends ScimResource> {
     JsonNode differences = JsonDiff.asJson(node1, node2);
 
     try {
-      log.info("Differences: " + objMapper.writerWithDefaultPrettyPrinter()
-                                          .writeValueAsString(differences));
+      log.info("Differences: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(differences));
     } catch (JsonProcessingException e) {
       log.info("Unable to debug differences: ", e);
     }
@@ -178,8 +175,7 @@ public class UpdateRequest<T extends ScimResource> {
     List<PatchOperation> patchOps = convertToPatchOperations(differences);
 
     try {
-      log.info("Patch Ops: " + objMapper.writerWithDefaultPrettyPrinter()
-                                        .writeValueAsString(patchOps));
+      log.info("Patch Ops: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(patchOps));
     } catch (JsonProcessingException e) {
       log.info("Unable to debug patch ops: ", e);
     }
@@ -281,7 +277,8 @@ public class UpdateRequest<T extends ScimResource> {
       } else {
         Attribute attribute = parseData.ac.getAttribute(pathPart);
         if (attribute == null) {
-          //throw new RuntimeException("Attribute not supported by the schema: " + pathPart);
+          // throw new RuntimeException("Attribute not supported by the schema:
+          // " + pathPart);
           break;
         }
 
@@ -299,22 +296,21 @@ public class UpdateRequest<T extends ScimResource> {
           done = true;
         }
       }
-      i++;
+      ++i;
     }
 
     PatchOperation operation = new PatchOperation();
     operation.setOperation(patchOpType);
     if (!attributeReferenceList.isEmpty()) {
-      AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream()
-                                                                                                              .collect(Collectors.joining(".")));
+      AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream().collect(Collectors.joining(".")));
       PatchOperationPath patchOperationPath = new PatchOperationPath();
       patchOperationPath.setAttributeReference(attributeReference);
       patchOperationPath.setValueFilterExpression(valueFilterExpression);
       patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
-  
+
       operation.setPath(patchOperationPath);
       operation.setValue(determineValue(patchOpType, valueNode, parseData));
-  
+
       return operation;
     } else {
       return null;
@@ -342,6 +338,16 @@ public class UpdateRequest<T extends ScimResource> {
       } else if (valueNode instanceof POJONode) {
         POJONode pojoNode = (POJONode) valueNode;
         return pojoNode.getPojo();
+      } else if (valueNode instanceof ArrayNode) {
+        ArrayNode arrayNode = (ArrayNode) valueNode;
+        List<Object> objectList = new ArrayList<Object>();
+        for(int i = 0; i < arrayNode.size(); i++) {
+          Object subObject = determineValue(patchOpType, arrayNode.get(i), parseData);
+          if (subObject != null) {
+            objectList.add(subObject);
+          }
+        }
+        return objectList;
       }
     }
     return null;
