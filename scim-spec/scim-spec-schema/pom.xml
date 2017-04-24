@@ -56,7 +56,6 @@
 			<!-- TODO Remove this dependency -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>2.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
