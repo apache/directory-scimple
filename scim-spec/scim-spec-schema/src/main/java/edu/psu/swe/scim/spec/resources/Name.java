@@ -7,10 +7,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 
 @Data
+@EqualsAndHashCode(callSuper=false,exclude={"formatted"})
 @XmlType(name = "name", propOrder = {
     "formatted",
     "familyName",
