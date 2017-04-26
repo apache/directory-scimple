@@ -406,6 +406,37 @@ public class UpdateRequestTest {
     Assert.assertEquals(Type.REMOVE, operation.getOperation());
     Assert.assertNull(operation.getValue());
   }
+  
+  /**
+   * This is used to test an error condition. In this scenario a user has multiple phone numbers where home is marked primary and work is not. A SCIM update
+   * is performed in which the new user only contains a work phone number where the type is null. When this happens it should only only be a single DELETE 
+   * operation. Instead it creates four operations: replace value of the home number with the work number value, replace the home type to work,
+   * remove the primary flag, and remove the work number 
+   */
+  @Test
+  public void testShowBugWhereDeleteIsTreatedAsMultipleReplace() throws Exception {
+    final int expectedNumberOfOperationsWithoutBug = 1;
+    final int expectedNumberOfOperationsWithBug = 4;
+    
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    user2.getPhoneNumbers().removeIf(p -> p.getType().equals("home"));
+    PhoneNumber workNumber = user2.getPhoneNumbers().stream().filter(p -> p.getType().equals("work")).findFirst().orElse(null);
+    Assert.assertNotNull(workNumber);
+    workNumber.setPrimary(null);
+    workNumber.setPhoneContext(null);
+    workNumber.setNumber(null);
+    workNumber.setExtension(null);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertNotNull(operations);
+    Assert.assertEquals(expectedNumberOfOperationsWithBug, operations.size());
+    Assert.assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
+    
+    
+  }
 
   private PatchOperation assertSingleResult(List<PatchOperation> result) {
     Assertions.assertThat(result)
