@@ -88,7 +88,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   public abstract Provider<T> getProvider();
 
-  private Provider<T> getProviderInternal() throws ScimServerException {
+  Provider<T> getProviderInternal() throws ScimServerException {
     Provider<T> provider = getProvider();
     if (provider == null) {
       throw new ScimServerException(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
@@ -201,7 +201,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                                                 .map(wrapper -> wrapper.getAttributeReferences())
                                                 .orElse(Collections.emptySet()));
 
-    searchRequest.setFilter((filter != null) ? filter.getFilter() : null);
+    if (filter != null) {
+      searchRequest.setFilter(filter.getFilter());
+    }
+    else {
+      searchRequest.setFilter(null);
+    }
     
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
