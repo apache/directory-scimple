@@ -50,8 +50,6 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
   
   private static final String VISUAL_SEPARATORS = "[\\(\\)\\-\\.]";
 
-  @Setter(AccessLevel.NONE)
-  @XmlElement
   @ScimAttribute(description = "Phone number of the User")
   String value;
 
@@ -67,13 +65,19 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
   @ScimAttribute(description = "A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
   Boolean primary;
 
-  String rawValue;
+  @Setter(AccessLevel.NONE)
   boolean isGlobalNumber = false;
+  @Setter(AccessLevel.NONE)
   String number;
+  @Setter(AccessLevel.NONE)
   String extension;
+  @Setter(AccessLevel.NONE)
   String subAddress;
+  @Setter(AccessLevel.NONE)
   String phoneContext;
+  @Setter(AccessLevel.NONE)
   boolean isDomainPhoneContext = false;
+  @Setter(AccessLevel.NONE)
   Map<String, String> params;
   
   public void addParam(String name, String value) {
@@ -84,6 +88,11 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     this.params.put(name, value);
   }
 
+  @XmlElement
+  public String getValue() {
+    return value;
+  }
+  
   public void setValue(String value) throws PhoneNumberParseException {
     PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
     PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
@@ -106,8 +115,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       
     PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
     
-    this.value = value;
-    this.rawValue = value;
+    this.value = parsedPhoneNumber.getValue();
     this.number = parsedPhoneNumber.getNumber();
     this.extension = parsedPhoneNumber.getExtension();
     this.subAddress = parsedPhoneNumber.getSubAddress();
@@ -251,7 +259,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     return true;
   }
   
-  protected static class PhoneNumberBuilder {
+  public abstract static class PhoneNumberBuilder {
     
     static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberBuilder.class);
 
@@ -273,13 +281,42 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     String subAddress;
     String phoneContext;
     Map<String, String> params;
-
-    void setParam(String name, String value) {
+    
+    boolean isGlobalNumber = false;
+    boolean isDomainPhoneContext = false;
+    
+    public PhoneNumberBuilder number(String number) {
+      this.number = number;
+      return this;
+    }
+    
+    public PhoneNumberBuilder display(String display) {
+      this.display = display;
+      return this;
+    }
+    
+    public PhoneNumberBuilder extension(String extension) {
+      this.extension = extension;
+      return this;
+    }
+    
+    public PhoneNumberBuilder subAddress(String subAddress) {
+      this.subAddress = subAddress;
+      return this;
+    }
+    
+    public PhoneNumberBuilder phoneContext(String phoneContext) {
+      this.phoneContext = phoneContext;
+      return this;
+    }
+    
+    public PhoneNumberBuilder param(String name, String value) {
       if (this.params == null) {
         this.params = new HashMap<String, String>();
       }
 
       this.params.put(name, value);
+      return this;
     }
 
     String getFormattedExtension() {
@@ -344,7 +381,11 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       return !valueString.isEmpty() ? valueString : null;
     }
 
-    PhoneNumber build() throws PhoneNumberParseException {
+    public PhoneNumber build() throws PhoneNumberParseException {
+      return build(true);
+    }
+    
+    public PhoneNumber build(boolean validate) throws PhoneNumberParseException {
       if (!StringUtils.isBlank(extension) && !StringUtils.isBlank(subAddress)) {
         throw new IllegalArgumentException("PhoneNumberBuilder cannot have a value for both extension and subAddress.");
       }
@@ -365,9 +406,20 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       PhoneNumber phoneNumber = new PhoneNumber();
       
       String formattedValue = getFormattedValue();
-      LOGGER.info("" + formattedValue);
-      phoneNumber.setValue(formattedValue);
+      LOGGER.debug("" + formattedValue);
 
+      if (validate) {
+        phoneNumber.setValue(formattedValue);
+      } else {
+        phoneNumber.value = formattedValue;
+        phoneNumber.extension = this.extension;
+        phoneNumber.isDomainPhoneContext = this.isDomainPhoneContext;
+        phoneNumber.isGlobalNumber = this.isGlobalNumber;
+        phoneNumber.number = this.number;
+        phoneNumber.params = this.params;
+        phoneNumber.phoneContext = this.phoneContext;
+        phoneNumber.subAddress = this.subAddress;
+      }
       return phoneNumber;
     }
   }
@@ -378,32 +430,31 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     String areaCode;
     String domainName;
     
-    public LocalPhoneNumberBuilder(String subscriberNumber, String countryCode, String areaCode) {
+    public LocalPhoneNumberBuilder subscriberNumber(String subscriberNumber) {
       this.subscriberNumber = subscriberNumber;
-      this.countryCode = countryCode;
-      this.areaCode = areaCode;
-    }
-
-    public LocalPhoneNumberBuilder(String subscriberNumber, String domainName) {
-      this.subscriberNumber = subscriberNumber;
-      this.domainName = domainName;
-    }
-
-    public LocalPhoneNumberBuilder extension(String extension) {
-      this.extension = extension;
-      return this;
-    }
-
-    public LocalPhoneNumberBuilder subAddress(String subAddress) {
-      this.subAddress = subAddress;
-      return this;
-    }
-
-    public LocalPhoneNumberBuilder param(String name, String value) {
-      super.setParam(name, value);
       return this;
     }
     
+    public LocalPhoneNumberBuilder countryCode(String countryCode) {
+      this.countryCode = countryCode;
+      return this;
+    }
+    
+    public LocalPhoneNumberBuilder areaCode(String areaCode) {
+      this.areaCode = areaCode;
+      return this;
+    }
+    
+    public LocalPhoneNumberBuilder domainName(String domainName) {
+      this.domainName = domainName;
+      return this;
+    }
+    
+    public LocalPhoneNumberBuilder isDomainPhoneContext(boolean hasDomainPhoneContext) {
+      this.isDomainPhoneContext = hasDomainPhoneContext;
+      return this;
+    }
+    @Override
     public PhoneNumber build() throws PhoneNumberParseException {
       if (StringUtils.isBlank(subscriberNumber) || !subscriberNumber.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX) ) {
         throw new IllegalArgumentException("LocalPhoneNumberBuilder subscriberNumber must contain only numeric characters and optional ., -, (, ) visual separator characters.");
@@ -449,25 +500,16 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
   public static class GlobalPhoneNumberBuilder extends PhoneNumberBuilder {
     String globalNumber;
     
-    public GlobalPhoneNumberBuilder(String globalNumber) {
+    public GlobalPhoneNumberBuilder() {
+      this.isGlobalNumber = true;
+    }
+    
+    public GlobalPhoneNumberBuilder globalNumber(String globalNumber) {
       this.globalNumber = globalNumber;
-    }
-
-    public GlobalPhoneNumberBuilder extension(String extension) {
-      this.extension = extension;
-      return this;
-    }
-
-    public GlobalPhoneNumberBuilder subAddress(String subAddress) {
-      this.subAddress = subAddress;
-      return this;
-    }
-
-    public GlobalPhoneNumberBuilder param(String name, String value) {
-      super.setParam(name, value);
       return this;
     }
     
+    @Override
     public PhoneNumber build() throws PhoneNumberParseException {
       if (StringUtils.isBlank(globalNumber) || !globalNumber.matches(GLOBAL_NUMBER_REGEX)) {
         throw new IllegalArgumentException("GlobalPhoneNumberBuilder globalNumber must contain only numeric characters, optional ., -, (, ) visual separators, and an optional plus (+) prefix.");
