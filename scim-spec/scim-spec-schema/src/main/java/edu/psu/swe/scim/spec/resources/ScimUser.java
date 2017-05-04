@@ -134,9 +134,9 @@ public class ScimUser extends ScimResource implements Serializable {
                  .findFirst();
   }
   
-//  public Optional<PhoneNumber> getPrimaryPhoneNumber {
-//    return phoneNumbers.stream()
-//                       .filter(p -> p.)
-//                       .findFirst();
-//  }
+  public Optional<PhoneNumber> getPrimaryPhoneNumber() {
+    return phoneNumbers.stream()
+                       .filter(p -> p.getPrimary())
+                       .findFirst();
+  }
 }
