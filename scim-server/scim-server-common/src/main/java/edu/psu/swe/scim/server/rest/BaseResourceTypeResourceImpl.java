@@ -201,8 +201,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                                                 .map(wrapper -> wrapper.getAttributeReferences())
                                                 .orElse(Collections.emptySet()));
 
-    searchRequest.setFilter(filter.getFilter());
-
+    searchRequest.setFilter((filter != null) ? filter.getFilter() : null);
+    
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
     searchRequest.setStartIndex(startIndex);

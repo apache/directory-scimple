@@ -7,10 +7,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 
 @Data
+@EqualsAndHashCode(callSuper=false,exclude={"formatted"})
 @XmlType(name = "name", propOrder = {
     "formatted",
     "familyName",
@@ -20,7 +22,7 @@ import lombok.Data;
     "honorificSuffix"    
 })
 @XmlAccessorType(XmlAccessType.NONE)
-public class Name extends KeyedResource implements Serializable  {
+public class Name implements Serializable  {
 
   private static final long serialVersionUID = -2761413543859555141L;
 
