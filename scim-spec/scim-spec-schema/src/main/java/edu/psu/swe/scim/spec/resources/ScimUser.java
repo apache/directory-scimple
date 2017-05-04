@@ -2,11 +2,13 @@ package edu.psu.swe.scim.spec.resources;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.registry.infomodel.TelephoneNumber;
 
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimResourceType;
@@ -119,4 +121,22 @@ public class ScimUser extends ScimResource implements Serializable {
   public String getResourceType() {
     return RESOURCE_NAME;
   }
+  
+  public Optional<Address> getPrimaryAddress() {
+    return addresses.stream()
+                    .filter(a -> a.primary)
+                    .findFirst();
+  }
+  
+  public Optional<Email> getPrimaryEmailAddress() {
+    return emails.stream()
+                 .filter(e -> e.getPrimary())
+                 .findFirst();
+  }
+  
+//  public Optional<PhoneNumber> getPrimaryPhoneNumber {
+//    return phoneNumbers.stream()
+//                       .filter(p -> p.)
+//                       .findFirst();
+//  }
 }
