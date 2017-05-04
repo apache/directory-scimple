@@ -188,17 +188,6 @@ public class PhoneNumberBuilderTest {
     }
     
     @Test
-    public void test_invalid_padded_countryCode_for_LocalPhoneNumberBuilder() throws Exception {
-      try {
-        new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(" 23 ").build();
-        fail(FAILURE_MESSAGE);
-      } catch (IllegalArgumentException ex) {
-        LOGGER.info(ex.getMessage());
-        assert (ex.getMessage().contains(COUNTRY_CODE));
-      }
-    }
-    
-    @Test
     @Parameters(method = "getValidCountryCodes")
     public void test_valid_countryCode_for_LocalPhoneNumberBuilder(String validCountryCode) throws Exception {
 

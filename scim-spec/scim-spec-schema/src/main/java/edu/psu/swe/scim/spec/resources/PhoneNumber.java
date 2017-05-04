@@ -5,7 +5,6 @@ package edu.psu.swe.scim.spec.resources;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -19,7 +18,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +31,7 @@ import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParseTreeListener;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 
 /**
@@ -43,11 +42,10 @@ import lombok.Setter;
 
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-@Data
 public class PhoneNumber extends KeyedResource implements Serializable, TypedAttribute {
 
   private static final long serialVersionUID = 607319505715224096L;
-  
+
   private static final String VISUAL_SEPARATORS = "[\\(\\)\\-\\.]";
 
   @ScimAttribute(description = "Phone number of the User")
@@ -55,31 +53,50 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
   @XmlElement
   @ScimAttribute(description = "A human readable name, primarily used for display purposes. READ-ONLY.")
+  @Getter
+  @Setter
   String display;
 
   @XmlElement
   @ScimAttribute(canonicalValueList = { "work", "home", "mobile", "fax", "pager", "other" }, description = "A label indicating the attribute's function; e.g., 'work' or 'home' or 'mobile' etc.")
+  @Getter
+  @Setter
   String type;
 
   @XmlElement
   @ScimAttribute(description = "A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
+  @Getter
+  @Setter
   Boolean primary;
 
   @Setter(AccessLevel.NONE)
+  @Getter
   boolean isGlobalNumber = false;
+
+  @Getter
   @Setter(AccessLevel.NONE)
   String number;
+
   @Setter(AccessLevel.NONE)
+  @Getter
   String extension;
+
   @Setter(AccessLevel.NONE)
+  @Getter
   String subAddress;
+
   @Setter(AccessLevel.NONE)
+  @Getter
   String phoneContext;
+
   @Setter(AccessLevel.NONE)
+  @Getter
   boolean isDomainPhoneContext = false;
+
+  @Getter
   @Setter(AccessLevel.NONE)
   Map<String, String> params;
-  
+
   public void addParam(String name, String value) {
     if (this.params == null) {
       this.params = new HashMap<String, String>();
@@ -88,12 +105,20 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     this.params.put(name, value);
   }
 
+  // This is annotated here to ensure that JAXB uses the setter rather than
+  // reflection
+  // to assigned the value. Do not move the XmlElement annotation to the field
+  // please.
   @XmlElement
   public String getValue() {
     return value;
   }
-  
+
   public void setValue(String value) throws PhoneNumberParseException {
+    if (value == null) {
+      throw new PhoneNumberParseException("null values are illegal for phone numbers");
+    }
+
     PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
     PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
     p.setBuildParseTree(true);
@@ -112,9 +137,9 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     } catch (IllegalStateException e) {
       throw new PhoneNumberParseException(e);
     }
-      
+
     PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
-    
+
     this.value = parsedPhoneNumber.getValue();
     this.number = parsedPhoneNumber.getNumber();
     this.extension = parsedPhoneNumber.getExtension();
@@ -124,7 +149,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     this.isGlobalNumber = parsedPhoneNumber.isGlobalNumber();
     this.isDomainPhoneContext = parsedPhoneNumber.isDomainPhoneContext();
   }
-  
+
   /*
    * Implements RFC 3996 URI Equality for the value property
    * https://tools.ietf.org/html/rfc3966#section-3
@@ -138,11 +163,10 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     if (getClass() != obj.getClass())
       return false;
     PhoneNumber other = (PhoneNumber) obj;
-    
+
     if (isGlobalNumber != other.isGlobalNumber)
       return false;
-    
-    
+
     String numberWithoutVisualSeparators = number != null ? number.replaceAll(VISUAL_SEPARATORS, "") : null;
     String otherNumberWithoutVisualSeparators = other.number != null ? other.number.replaceAll(VISUAL_SEPARATORS, "") : null;
     if (numberWithoutVisualSeparators == null) {
@@ -150,8 +174,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
         return false;
     } else if (!numberWithoutVisualSeparators.equals(otherNumberWithoutVisualSeparators))
       return false;
-    
-    
+
     String extensionWithoutVisualSeparators = extension != null ? extension.replaceAll(VISUAL_SEPARATORS, "") : null;
     String otherExtensionWithoutVisualSeparators = other.extension != null ? other.extension.replaceAll(VISUAL_SEPARATORS, "") : null;
     if (extensionWithoutVisualSeparators == null) {
@@ -159,20 +182,18 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
         return false;
     } else if (!extensionWithoutVisualSeparators.equals(otherExtensionWithoutVisualSeparators))
       return false;
-    
-    
+
     if (subAddress == null) {
       if (other.subAddress != null)
         return false;
     } else if (!subAddress.equalsIgnoreCase(other.subAddress))
       return false;
 
-    
     String phoneContextTemp = phoneContext;
     if (!StringUtils.isBlank(phoneContext) && !isDomainPhoneContext) {
       phoneContextTemp = phoneContext.replaceAll(VISUAL_SEPARATORS, "");
     }
-    
+
     String otherPhoneContextTemp = other.phoneContext;
     if (!StringUtils.isBlank(other.phoneContext) && !other.isDomainPhoneContext) {
       otherPhoneContextTemp = other.phoneContext.replaceAll(VISUAL_SEPARATORS, "");
@@ -183,27 +204,23 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
         return false;
     } else if (!phoneContextTemp.equalsIgnoreCase(otherPhoneContextTemp))
       return false;
-    
-    
+
     if (!equalsIgnoreCaseAndOrderParams(other.params)) {
       return false;
     }
-        
-    
+
     if (primary == null) {
       if (other.primary != null)
         return false;
     } else if (!primary.equals(other.primary))
       return false;
-    
-    
+
     if (type == null) {
       if (other.type != null)
         return false;
     } else if (!type.equalsIgnoreCase(other.type))
       return false;
-    
-    
+
     return true;
   }
 
@@ -225,42 +242,41 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     result = prime * result + ((type == null) ? 0 : type.toLowerCase().hashCode());
     return result;
   }
-  
+
   HashMap<String, String> paramsToLowerCase() {
     HashMap<String, String> paramsLowercase = new HashMap<String, String>();
-    for(Entry<String, String> entry : params.entrySet()) {
+    for (Entry<String, String> entry : params.entrySet()) {
       paramsLowercase.put(entry.getKey().toLowerCase(), entry.getValue().toLowerCase());
     }
-    
+
     return paramsLowercase;
   }
-  
+
   boolean equalsIgnoreCaseAndOrderParams(Map<String, String> otherParams) {
     if (params == null && otherParams == null) {
       return true;
     }
-    
-    if ((params == null && otherParams != null) ||
-        (params != null && otherParams == null) ||
-        (params.size() != otherParams.size())) {
+
+    if ((params == null && otherParams != null) || (params != null && otherParams == null) || (params.size() != otherParams.size())) {
       return false;
     }
-    
-    HashMap<String, String> paramsLowercase = paramsToLowerCase(); 
-    
-    for(Entry<String, String> entry : otherParams.entrySet()) {
+
+    HashMap<String, String> paramsLowercase = paramsToLowerCase();
+
+    for (Entry<String, String> entry : otherParams.entrySet()) {
       String foundValue = paramsLowercase.get(entry.getKey().toLowerCase());
-      
+
       if (!entry.getValue().equalsIgnoreCase(foundValue)) {
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
+  @Data
   public abstract static class PhoneNumberBuilder {
-    
+
     static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberBuilder.class);
 
     final String HYPHEN = "-";
@@ -274,42 +290,42 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     final String DOMAIN_NAME_REGEX = "^[a-zA-Z0-9\\.\\-]+$";
     final String GLOBAL_NUMBER_REGEX = "^(\\+)?[\\d\\.\\-\\(\\)]+$";
     final String COUNTRY_CODE_REGEX = "^(\\+)?[1-9][0-9]{0,2}$";
-    
+
     String number;
     String display;
     String extension;
     String subAddress;
     String phoneContext;
     Map<String, String> params;
-    
+
     boolean isGlobalNumber = false;
     boolean isDomainPhoneContext = false;
-    
+
     public PhoneNumberBuilder number(String number) {
       this.number = number;
       return this;
     }
-    
+
     public PhoneNumberBuilder display(String display) {
       this.display = display;
       return this;
     }
-    
+
     public PhoneNumberBuilder extension(String extension) {
       this.extension = extension;
       return this;
     }
-    
+
     public PhoneNumberBuilder subAddress(String subAddress) {
       this.subAddress = subAddress;
       return this;
     }
-    
+
     public PhoneNumberBuilder phoneContext(String phoneContext) {
       this.phoneContext = phoneContext;
       return this;
     }
-    
+
     public PhoneNumberBuilder param(String name, String value) {
       if (this.params == null) {
         this.params = new HashMap<String, String>();
@@ -351,7 +367,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
           paramsFormatted += String.format(PARAMS_STRING, entry.getKey(), entry.getValue() != null ? entry.getValue() : "");
         }
       }
-      
+
       return !paramsFormatted.isEmpty() ? paramsFormatted : null;
     }
 
@@ -384,27 +400,24 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     public PhoneNumber build() throws PhoneNumberParseException {
       return build(true);
     }
-    
+
     public PhoneNumber build(boolean validate) throws PhoneNumberParseException {
       if (!StringUtils.isBlank(extension) && !StringUtils.isBlank(subAddress)) {
         throw new IllegalArgumentException("PhoneNumberBuilder cannot have a value for both extension and subAddress.");
       }
-      
+
       if (extension != null && !extension.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX)) {
         throw new IllegalArgumentException("PhoneNumberBuilder extension must contain only numeric characters and optional ., -, (, ) visual separator characters.");
       }
-      
+
       if (params != null && !params.isEmpty()) {
-        if (params.get("") != null ||
-            params.get(null) != null ||
-            params.values().contains(null) ||
-            params.values().contains("")) {
-          throw new IllegalArgumentException("PhoneNumberBuilder params names and values cannot be null or empty."); 
+        if (params.get("") != null || params.get(null) != null || params.values().contains(null) || params.values().contains("")) {
+          throw new IllegalArgumentException("PhoneNumberBuilder params names and values cannot be null or empty.");
         }
       }
-      
+
       PhoneNumber phoneNumber = new PhoneNumber();
-      
+
       String formattedValue = getFormattedValue();
       LOGGER.debug("" + formattedValue);
 
@@ -429,86 +442,96 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     String countryCode;
     String areaCode;
     String domainName;
-    
+
     public LocalPhoneNumberBuilder subscriberNumber(String subscriberNumber) {
       this.subscriberNumber = subscriberNumber;
       return this;
     }
-    
+
     public LocalPhoneNumberBuilder countryCode(String countryCode) {
-      this.countryCode = countryCode;
+
+      String localCode = countryCode;
+
+      if (localCode != null && !localCode.isEmpty()) {
+        localCode = localCode.trim();
+        if (localCode.length() > 0 && localCode.charAt(0) != '+') {
+          localCode = '+' + localCode;
+        }
+      }
+      this.countryCode = localCode;
       return this;
     }
-    
+
     public LocalPhoneNumberBuilder areaCode(String areaCode) {
       this.areaCode = areaCode;
       return this;
     }
-    
+
     public LocalPhoneNumberBuilder domainName(String domainName) {
       this.domainName = domainName;
       return this;
     }
-    
+
     public LocalPhoneNumberBuilder isDomainPhoneContext(boolean hasDomainPhoneContext) {
       this.isDomainPhoneContext = hasDomainPhoneContext;
       return this;
     }
+
     @Override
     public PhoneNumber build() throws PhoneNumberParseException {
-      if (StringUtils.isBlank(subscriberNumber) || !subscriberNumber.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX) ) {
+      if (StringUtils.isBlank(subscriberNumber) || !subscriberNumber.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX)) {
         throw new IllegalArgumentException("LocalPhoneNumberBuilder subscriberNumber must contain only numeric characters and optional ., -, (, ) visual separator characters.");
       }
-      
+
       this.number = subscriberNumber;
 
       if (StringUtils.isBlank(countryCode) && StringUtils.isBlank(domainName)) {
         throw new IllegalArgumentException("LocalPhoneNumberBuilder must have values for domainName or countryCode.");
       }
-      
+
       if (StringUtils.isBlank(domainName)) {
         if (StringUtils.isBlank(countryCode) || !countryCode.matches(COUNTRY_CODE_REGEX)) {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder countryCode must contain only numeric characters and an optional plus (+) prefix.");
         }
-  
+
         if (areaCode != null && !StringUtils.isNumeric(areaCode)) {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder areaCode must contain only numberic characters.");
         }
-        
+
         if (!countryCode.startsWith(INTERNATIONAL_PREFIX)) {
           this.phoneContext = INTERNATIONAL_PREFIX + countryCode;
         } else {
           this.phoneContext = countryCode;
         }
-                
+
         if (!StringUtils.isBlank(areaCode)) {
           this.phoneContext += (HYPHEN + areaCode);
         }
-        
+
       } else {
         if (!domainName.matches(DOMAIN_NAME_REGEX)) {
           throw new IllegalArgumentException("LocalPhoneNumberBuilder domainName must contain only alphanumeric, . and - characters.");
         }
-        
+
         this.phoneContext = domainName;
       }
-      
+
       return super.build();
     }
   }
 
   public static class GlobalPhoneNumberBuilder extends PhoneNumberBuilder {
     String globalNumber;
-    
+
     public GlobalPhoneNumberBuilder() {
       this.isGlobalNumber = true;
     }
-    
+
     public GlobalPhoneNumberBuilder globalNumber(String globalNumber) {
       this.globalNumber = globalNumber;
       return this;
     }
-    
+
     @Override
     public PhoneNumber build() throws PhoneNumberParseException {
       if (StringUtils.isBlank(globalNumber) || !globalNumber.matches(GLOBAL_NUMBER_REGEX)) {
@@ -520,7 +543,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       } else {
         this.number = INTERNATIONAL_PREFIX + globalNumber;
       }
-      
+
       return super.build();
     }
   }

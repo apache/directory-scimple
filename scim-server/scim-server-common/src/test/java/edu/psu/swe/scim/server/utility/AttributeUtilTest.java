@@ -277,14 +277,18 @@ public class AttributeUtilTest {
     user.setAddresses(addresses);
 
     List<PhoneNumber> phoneNumbers = new ArrayList<>();
-    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("123-456-7890", "+1", null).build();
+    
+    LocalPhoneNumberBuilder lpnb = new LocalPhoneNumberBuilder();
+    
+    PhoneNumber phoneNumber = lpnb.areaCode("123").countryCode("1").number("456-7890").build();
     phoneNumber.setDisplay("123-456-7890");
     phoneNumber.setPrimary(true);
     phoneNumber.setType("home");
 
     phoneNumbers.add(phoneNumber);
 
-    phoneNumber = new GlobalPhoneNumberBuilder("1-800-555-1234").build();
+    phoneNumber = new PhoneNumber();
+    phoneNumber.setValue("1-800-555-1234");
     phoneNumber.setDisplay("1-800-555-1234");
     phoneNumber.setPrimary(false);
     phoneNumber.setType("work");
