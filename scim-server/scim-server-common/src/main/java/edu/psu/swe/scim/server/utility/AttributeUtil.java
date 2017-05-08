@@ -72,14 +72,24 @@ public class AttributeUtil {
     objectMapper.registerModule(module);
   }
 
+  public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+    return setAttributesForDisplayInternal(resource, Returned.DEFAULT, Returned.REQUEST, Returned.NEVER);
+  }
+  
   public <T extends ScimResource> T setAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+    return setAttributesForDisplayInternal(resource, Returned.REQUEST, Returned.NEVER);
+  }
+  
+  private <T extends ScimResource> T setAttributesForDisplayInternal(T resource, Returned ... removeAttributesOfTypes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+
     T copy = cloneScimResource(resource);
     String resourceType = copy.getResourceType();
     Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
     // return always and default, exclude never and requested
-    removeAttributesOfType(copy, schema, Returned.REQUEST);
-    removeAttributesOfType(copy, schema, Returned.NEVER);
+    for (Returned removeAttributesOfType : removeAttributesOfTypes) {
+      removeAttributesOfType(copy, schema, removeAttributesOfType);
+    }
 
     for (Entry<String, ScimExtension> extensionEntry : copy.getExtensions().entrySet()) {
       String extensionUrn = extensionEntry.getKey();
@@ -87,8 +97,9 @@ public class AttributeUtil {
 
       Schema extensionSchema = registry.getSchema(extensionUrn);
 
-      removeAttributesOfType(scimExtension, extensionSchema, Returned.REQUEST);
-      removeAttributesOfType(scimExtension, extensionSchema, Returned.NEVER);
+      for (Returned removeAttributesOfType : removeAttributesOfTypes) {
+        removeAttributesOfType(scimExtension, extensionSchema, removeAttributesOfType);
+      }
     }
     return copy;
   }
