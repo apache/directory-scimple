@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
@@ -632,17 +633,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (annotation != null) {
       Class<? extends ProcessingExtension>[] value = annotation.value();
       for (Class<? extends ProcessingExtension> class1 : value) {
-        try {
-          ProcessingExtension processingExtension = class1.newInstance();
-          if (processingExtension instanceof AttributeFilterExtension) {
-            AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
-            ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
+        ProcessingExtension processingExtension = CDI.current().select(class1).get();
+        if (processingExtension instanceof AttributeFilterExtension) {
+          AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
+          ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
 
-            resource = (T) attributeFilterExtension.filterAttributes(resource, scimRequestContext);
-            log.info("Resource now - " + resource.toString());
-          }
-        } catch (InstantiationException | IllegalAccessException e) {
-          log.error("Error processing filter attriute extensions", e);
+          resource = (T) attributeFilterExtension.filterAttributes(resource, scimRequestContext);
+          log.info("Resource now - " + resource.toString());
         }
       }
     }
