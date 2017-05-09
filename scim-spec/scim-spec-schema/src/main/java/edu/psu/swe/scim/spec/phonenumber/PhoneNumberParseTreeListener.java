@@ -44,7 +44,7 @@ public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener 
   @Override
   public void exitLocalNumber(LocalNumberContext ctx) {
     LOGGER.debug(indent("<-- Exit LocalNumber ---"));
-    phoneNumberBuilder.number(ctx.localDigits.getText());
+    ((LocalPhoneNumberBuilder) phoneNumberBuilder).subscriberNumber(ctx.localDigits.getText());
     
     if (ctx.Ext() != null && !StringUtils.isBlank(ctx.Ext().getText())) {
       ((LocalPhoneNumberBuilder) phoneNumberBuilder).extension(ctx.Ext().getText());
@@ -106,7 +106,7 @@ public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener 
   @Override
   public void exitGlobalNumber(GlobalNumberContext ctx) {
     LOGGER.debug(indent("<-- Exit GlobalNumber ---"));
-    phoneNumberBuilder.number(ctx.globalDigits.getText() + ctx.GlobalNumberDigits().getText());
+    ((GlobalPhoneNumberBuilder) phoneNumberBuilder).globalNumber(ctx.globalDigits.getText() + ctx.GlobalNumberDigits().getText());
 
     if (ctx.Ext() != null && !StringUtils.isBlank(ctx.Ext().getText())) {
       phoneNumberBuilder.extension(ctx.Ext().getText());

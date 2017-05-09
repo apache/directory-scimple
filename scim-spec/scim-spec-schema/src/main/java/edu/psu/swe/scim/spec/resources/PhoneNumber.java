@@ -301,11 +301,6 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     boolean isGlobalNumber = false;
     boolean isDomainPhoneContext = false;
 
-    public PhoneNumberBuilder number(String number) {
-      this.number = number;
-      return this;
-    }
-
     public PhoneNumberBuilder display(String display) {
       this.display = display;
       return this;
