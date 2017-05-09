@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
@@ -325,12 +326,18 @@ public class AttributeUtil {
       }
 
       if (includeAttributeChain) {
-        attributes.add((Attribute) attributeContainer);
+        Attribute attribute = (Attribute) attributeContainer;
+        attributes.add(attribute);
       }
     }
-
-    attributes.add((Attribute) attributeContainer);
-
+    
+    Attribute attribute = (Attribute) attributeContainer;
+    attributes.add(attribute);
+    if (attribute.getType() == Type.COMPLEX && includeAttributeChain) {
+      List<Attribute> remaininAttributes = attribute.getAttributes();
+      attributes.addAll(remaininAttributes);
+    }
+    
     return attributes;
   }
 
