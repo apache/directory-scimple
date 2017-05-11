@@ -301,11 +301,6 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     boolean isGlobalNumber = false;
     boolean isDomainPhoneContext = false;
 
-    public PhoneNumberBuilder number(String number) {
-      this.number = number;
-      return this;
-    }
-
     public PhoneNumberBuilder display(String display) {
       this.display = display;
       return this;
@@ -417,7 +412,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       }
 
       PhoneNumber phoneNumber = new PhoneNumber();
-
+      
       String formattedValue = getFormattedValue();
       LOGGER.debug("" + formattedValue);
 
@@ -445,6 +440,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
     public LocalPhoneNumberBuilder subscriberNumber(String subscriberNumber) {
       this.subscriberNumber = subscriberNumber;
+      this.number = subscriberNumber;
       return this;
     }
 
@@ -482,8 +478,6 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       if (StringUtils.isBlank(subscriberNumber) || !subscriberNumber.matches(LOCAL_SUBSCRIBER_NUMBER_REGEX)) {
         throw new IllegalArgumentException("LocalPhoneNumberBuilder subscriberNumber must contain only numeric characters and optional ., -, (, ) visual separator characters.");
       }
-
-      this.number = subscriberNumber;
 
       if (StringUtils.isBlank(countryCode) && StringUtils.isBlank(domainName)) {
         throw new IllegalArgumentException("LocalPhoneNumberBuilder must have values for domainName or countryCode.");
@@ -529,6 +523,15 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
     public GlobalPhoneNumberBuilder globalNumber(String globalNumber) {
       this.globalNumber = globalNumber;
+     
+      if (globalNumber != null) { 
+        if (globalNumber.startsWith(INTERNATIONAL_PREFIX)) {
+          this.number = globalNumber;
+        } else {
+          this.number = INTERNATIONAL_PREFIX + globalNumber;
+        }
+      }
+      
       return this;
     }
 
@@ -536,12 +539,6 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     public PhoneNumber build() throws PhoneNumberParseException {
       if (StringUtils.isBlank(globalNumber) || !globalNumber.matches(GLOBAL_NUMBER_REGEX)) {
         throw new IllegalArgumentException("GlobalPhoneNumberBuilder globalNumber must contain only numeric characters, optional ., -, (, ) visual separators, and an optional plus (+) prefix.");
-      }
-
-      if (globalNumber.startsWith(INTERNATIONAL_PREFIX)) {
-        this.number = globalNumber;
-      } else {
-        this.number = INTERNATIONAL_PREFIX + globalNumber;
       }
 
       return super.build();
