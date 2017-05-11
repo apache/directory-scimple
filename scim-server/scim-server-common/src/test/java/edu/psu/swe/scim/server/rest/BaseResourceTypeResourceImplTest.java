@@ -250,14 +250,14 @@ public class BaseResourceTypeResourceImplTest {
     user.setAddresses(addresses);
 
     List<PhoneNumber> phoneNumbers = new ArrayList<>();
-    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder("123-456-7890", "+1", null).build();
+    PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-456-7890").countryCode("+1").build();
     phoneNumber.setDisplay("123-456-7890");
     phoneNumber.setPrimary(true);
     phoneNumber.setType("home");
 
     phoneNumbers.add(phoneNumber);
 
-    phoneNumber = new GlobalPhoneNumberBuilder("1-800-555-1234").build();
+    phoneNumber = new GlobalPhoneNumberBuilder().globalNumber("1-800-555-1234").build();
     phoneNumber.setDisplay("1-800-555-1234");
     phoneNumber.setPrimary(false);
     phoneNumber.setType("work");
