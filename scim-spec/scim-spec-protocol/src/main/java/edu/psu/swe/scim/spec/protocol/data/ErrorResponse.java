@@ -1,5 +1,8 @@
 package edu.psu.swe.scim.spec.protocol.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,6 +36,8 @@ public class ErrorResponse extends BaseResource {
   @XmlElement
   private ErrorMessageType scimType;
 
+  private List<String> errorMessageList;
+  
   protected ErrorResponse() {
     super(SCHEMA_URI);
   }
@@ -43,7 +48,23 @@ public class ErrorResponse extends BaseResource {
     this.detail = detail;
   }
   
+  public void addErrorMessage(String message) {
+    if (errorMessageList == null) {
+      errorMessageList = new ArrayList<>();
+    }
+    
+    errorMessageList.add(message);
+  }
+  
   public Response toResponse() {
+    if (errorMessageList != null) {
+      StringBuilder sb = new StringBuilder();
+      for (String s : errorMessageList) {
+        sb.append("\n").append(s);
+      }
+      detail += sb.toString();
+    }
+    
     return Response.status(status).entity(this).build();
   }
 
