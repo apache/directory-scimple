@@ -22,7 +22,7 @@ import edu.psu.swe.scim.spec.annotation.ScimAttribute;
     "honorificSuffix"    
 })
 @XmlAccessorType(XmlAccessType.NONE)
-public class Name extends KeyedResource implements Serializable  {
+public class Name implements Serializable  {
 
   private static final long serialVersionUID = -2761413543859555141L;
 

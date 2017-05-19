@@ -14,11 +14,14 @@ import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.ParameterContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneContextContext;
 import edu.psu.swe.scim.spec.phonenumber.PhoneNumberParser.PhoneNumberContext;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.PhoneNumberBuilder;
 
 public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberParserBaseListener.class);
 
-  private PhoneNumber phoneNumber = new PhoneNumber();
+  private PhoneNumberBuilder phoneNumberBuilder;
 
   private int indent = -1;
 
@@ -35,20 +38,20 @@ public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener 
   @Override
   public void enterLocalNumber(LocalNumberContext ctx) {
     LOGGER.debug(indent("--- Enter LocalNumber -->"));
+    phoneNumberBuilder = new LocalPhoneNumberBuilder();
   }
 
   @Override
   public void exitLocalNumber(LocalNumberContext ctx) {
     LOGGER.debug(indent("<-- Exit LocalNumber ---"));
-    phoneNumber.setNumber(ctx.localDigits.getText());
-    phoneNumber.setGlobalNumber(false);
+    ((LocalPhoneNumberBuilder) phoneNumberBuilder).subscriberNumber(ctx.localDigits.getText());
     
     if (ctx.Ext() != null && !StringUtils.isBlank(ctx.Ext().getText())) {
-      phoneNumber.setExtension(ctx.Ext().getText());
+      ((LocalPhoneNumberBuilder) phoneNumberBuilder).extension(ctx.Ext().getText());
     }
     
     if (ctx.Isub() != null && !StringUtils.isBlank(ctx.Isub().getText())) {
-      phoneNumber.setSubAddress(ctx.Isub().getText());
+      ((LocalPhoneNumberBuilder) phoneNumberBuilder).subAddress(ctx.Isub().getText());
     }
   }
 
@@ -72,11 +75,11 @@ public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener 
     LOGGER.debug(indent("<-- Exit PhoneContext ---"));
     if (!ctx.isEmpty()) {
       if (ctx.dig != null) {
-        phoneNumber.setDomainPhoneContext(false);
-        phoneNumber.setPhoneContext("+"+ctx.dig.getText());
+        ((LocalPhoneNumberBuilder) phoneNumberBuilder).isDomainPhoneContext(false);
+        phoneNumberBuilder.phoneContext("+"+ctx.dig.getText());
       } else if (ctx.dn != null) {
-        phoneNumber.setDomainPhoneContext(true);
-        phoneNumber.setPhoneContext(ctx.dn.getText());
+        ((LocalPhoneNumberBuilder) phoneNumberBuilder).isDomainPhoneContext(true);
+        phoneNumberBuilder.phoneContext(ctx.dn.getText());
       }
     }
   }
@@ -90,27 +93,27 @@ public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener 
   public void exitParameter(ParameterContext ctx) {
     LOGGER.debug(indent("<-- Exit Parameter ---"));
     if (!ctx.isEmpty()) {
-      phoneNumber.addParam(ctx.ParamName().getText(), ctx.ParamValue().getText());
+      phoneNumberBuilder.param(ctx.ParamName().getText(), ctx.ParamValue().getText());
     }
   }
 
   @Override
   public void enterGlobalNumber(GlobalNumberContext ctx) {
     LOGGER.debug(indent("--- Enter GlobalNumber -->"));
+    phoneNumberBuilder = new GlobalPhoneNumberBuilder();
   }
 
   @Override
   public void exitGlobalNumber(GlobalNumberContext ctx) {
     LOGGER.debug(indent("<-- Exit GlobalNumber ---"));
-    phoneNumber.setNumber(ctx.globalDigits.getText() + ctx.GlobalNumberDigits().getText());
-    phoneNumber.setGlobalNumber(true);
+    ((GlobalPhoneNumberBuilder) phoneNumberBuilder).globalNumber(ctx.globalDigits.getText() + ctx.GlobalNumberDigits().getText());
 
     if (ctx.Ext() != null && !StringUtils.isBlank(ctx.Ext().getText())) {
-      phoneNumber.setExtension(ctx.Ext().getText());
+      phoneNumberBuilder.extension(ctx.Ext().getText());
     }
     
     if (ctx.Isub() != null && !StringUtils.isBlank(ctx.Isub().getText())) {
-      phoneNumber.setSubAddress(ctx.Isub().getText());
+      phoneNumberBuilder.subAddress(ctx.Isub().getText());
     }
   }
 
@@ -146,8 +149,8 @@ public class PhoneNumberParseTreeListener extends PhoneNumberParserBaseListener 
     return sb.toString();
   }
 
-  public PhoneNumber getPhoneNumber() {
-    return phoneNumber;
+  public PhoneNumber getPhoneNumber() throws PhoneNumberParseException {
+    return phoneNumberBuilder.build(false);
   }
 	
 }
