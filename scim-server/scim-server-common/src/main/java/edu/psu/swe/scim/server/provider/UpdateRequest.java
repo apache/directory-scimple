@@ -123,36 +123,38 @@ public class UpdateRequest<T extends ScimResource> {
   }
 
   private void sortMultiValuedCollections(Object t, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
-    for (Attribute attribute : ac.getAttributes()) {
-      Field field = attribute.getField();
-      if (attribute.isMultiValued()) {
-        @SuppressWarnings("unchecked")
-        List<Object> collection = (List<Object>) field.get(t);
-        if (collection != null) {
-          Collections.sort(collection, (o1, o2) -> {
-            if (o1 instanceof TypedAttribute && o2 instanceof TypedAttribute) {
-              TypedAttribute t1 = (TypedAttribute) o1;
-              TypedAttribute t2 = (TypedAttribute) o2;
-              String type1 = t1.getType();
-              String type2 = t2.getType();
-              if (type1 == null) {
+    if (t != null) {
+      for (Attribute attribute : ac.getAttributes()) {
+        Field field = attribute.getField();
+        if (attribute.isMultiValued()) {
+          @SuppressWarnings("unchecked")
+          List<Object> collection = (List<Object>) field.get(t);
+          if (collection != null) {
+            Collections.sort(collection, (o1, o2) -> {
+              if (o1 == null) {
                 return -1;
               }
-              if (type2 == null) {
+              if (o2 == null) {
                 return 1;
               }
-              return type1.compareTo(type2);
-            }
-            if (o1 instanceof Comparable<?>) {
-              Comparable c1 = (Comparable)o1;
-              Comparable c2 = (Comparable)o2;
-              return c1.compareTo(c2);
-            }
-            return 0;
-          });
+              if (o1 instanceof TypedAttribute && o2 instanceof TypedAttribute) {
+                TypedAttribute t1 = (TypedAttribute) o1;
+                TypedAttribute t2 = (TypedAttribute) o2;
+                String type1 = t1.getType();
+                String type2 = t2.getType();
+                return type1.compareTo(type2);
+              }
+              if (o1 instanceof Comparable<?>) {
+                Comparable c1 = (Comparable)o1;
+                Comparable c2 = (Comparable)o2;
+                return c1.compareTo(c2);
+              }
+              return 0;
+            });
+          }
+        } else if (attribute.getType() == Attribute.Type.COMPLEX) {
+          sortMultiValuedCollections(field.get(t), attribute);
         }
-      } else if (attribute.getType() == Attribute.Type.COMPLEX) {
-        sortMultiValuedCollections(field.get(t), attribute);
       }
     }
   }
