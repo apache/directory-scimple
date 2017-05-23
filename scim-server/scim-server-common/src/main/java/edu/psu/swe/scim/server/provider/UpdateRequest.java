@@ -4,11 +4,18 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,16 +40,13 @@ import edu.psu.swe.scim.spec.protocol.data.PatchOperationPath;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
 import edu.psu.swe.scim.spec.protocol.filter.ValueFilterExpression;
+import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import edu.psu.swe.scim.spec.resources.ScimUser;
 import edu.psu.swe.scim.spec.resources.TypedAttribute;
 import edu.psu.swe.scim.spec.schema.AttributeContainer;
 import edu.psu.swe.scim.spec.schema.Schema;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 
 @Named
 @Slf4j
@@ -119,31 +123,38 @@ public class UpdateRequest<T extends ScimResource> {
   }
 
   private void sortMultiValuedCollections(Object t, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
-    for (Attribute attribute : ac.getAttributes()) {
-      Field field = attribute.getField();
-      if (attribute.isMultiValued()) {
-        @SuppressWarnings("unchecked")
-        List<Object> collection = (List<Object>) field.get(t);
-        if (collection != null) {
-          Collections.sort(collection, (o1, o2) -> {
-            if (o1 instanceof TypedAttribute && o2 instanceof TypedAttribute) {
-              TypedAttribute t1 = (TypedAttribute) o1;
-              TypedAttribute t2 = (TypedAttribute) o2;
-              String type1 = t1.getType();
-              String type2 = t2.getType();
-              if (type1 == null) {
+    if (t != null) {
+      for (Attribute attribute : ac.getAttributes()) {
+        Field field = attribute.getField();
+        if (attribute.isMultiValued()) {
+          @SuppressWarnings("unchecked")
+          List<Object> collection = (List<Object>) field.get(t);
+          if (collection != null) {
+            Collections.sort(collection, (o1, o2) -> {
+              if (o1 == null) {
                 return -1;
               }
-              if (type2 == null) {
+              if (o2 == null) {
                 return 1;
               }
-              return type1.compareTo(type2);
-            }
-            return 0;
-          });
+              if (o1 instanceof TypedAttribute && o2 instanceof TypedAttribute) {
+                TypedAttribute t1 = (TypedAttribute) o1;
+                TypedAttribute t2 = (TypedAttribute) o2;
+                String type1 = t1.getType();
+                String type2 = t2.getType();
+                return type1.compareTo(type2);
+              }
+              if (o1 instanceof Comparable<?>) {
+                Comparable c1 = (Comparable)o1;
+                Comparable c2 = (Comparable)o2;
+                return c1.compareTo(c2);
+              }
+              return 0;
+            });
+          }
+        } else if (attribute.getType() == Attribute.Type.COMPLEX) {
+          sortMultiValuedCollections(field.get(t), attribute);
         }
-      } else if (attribute.getType() == Attribute.Type.COMPLEX) {
-        sortMultiValuedCollections(field.get(t), attribute);
       }
     }
   }
@@ -156,7 +167,17 @@ public class UpdateRequest<T extends ScimResource> {
   private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException {
 
     sortMultiValuedCollections(this.original, schema);
+    Map<String, ScimExtension> extensions = this.original.getExtensions();
+    for(Map.Entry<String, ScimExtension> entry : extensions.entrySet()) {
+      Schema extSchema = registry.getSchema(entry.getKey());
+      sortMultiValuedCollections(entry.getValue(), extSchema);
+    }
     sortMultiValuedCollections(this.resource, schema);
+    extensions = this.resource.getExtensions();
+    for(Map.Entry<String, ScimExtension> entry : extensions.entrySet()) {
+      Schema extSchema = registry.getSchema(entry.getKey());
+      sortMultiValuedCollections(entry.getValue(), extSchema);
+    }
 
     ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
     ObjectMapper objMapper = ctxResolver.getContext(null); // TODO is there a
