@@ -40,6 +40,12 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
 
     objectMapper.setSerializationInclusion(Include.NON_NULL);
   }
+  
+  public ObjectMapperContextResolver(Registry registry) {
+    this();
+    this.registry = registry;
+    postConstruct();
+  }
 
   @PostConstruct
   protected void postConstruct() {
