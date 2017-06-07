@@ -29,7 +29,7 @@ public class ObjectMapperContextResolver extends edu.psu.swe.commons.jaxrs.serve
   //Called through normal injection and calls Post Construct
   public ObjectMapperContextResolver() {
     super();
-    objectMapper = getContext(null);
+    objectMapper = super.getContext(null);
   }
   
   //Not call through container context and therefore must manually call postConstruct method
