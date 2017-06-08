@@ -70,6 +70,13 @@ public class ProviderRegistry {
 
   @Inject
   ScimExtensionRegistry scimExtensionRegistry;
+  
+  public ProviderRegistry() {}
+  
+  public ProviderRegistry(Registry registry, ScimExtensionRegistry scimExtensionRegistry) {
+    this.registry = registry;
+    this.scimExtensionRegistry = scimExtensionRegistry;
+  }
 
   private Map<Class<? extends ScimResource>, Instance<? extends Provider<? extends ScimResource>>> providerMap = new HashMap<>();
 
