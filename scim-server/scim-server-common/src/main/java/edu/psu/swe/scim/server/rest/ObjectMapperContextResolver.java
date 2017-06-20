@@ -19,26 +19,24 @@ import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 
 @Provider
-public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
+public class ObjectMapperContextResolver extends edu.psu.swe.commons.jaxrs.server.ObjectMapperContextResolver {
 
   private final ObjectMapper objectMapper;
 
   @Inject
   Registry registry;
-
+  
+  //Called through normal injection and calls Post Construct
   public ObjectMapperContextResolver() {
-    objectMapper = new ObjectMapper();
-
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objectMapper.registerModule(jaxbAnnotationModule);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jaxbIntrospector, jacksonIntrospector);
-    objectMapper.setAnnotationIntrospector(pair);
-
-    objectMapper.setSerializationInclusion(Include.NON_NULL);
+    super();
+    objectMapper = super.getContext(null);
+  }
+  
+  //Not call through container context and therefore must manually call postConstruct method
+  public ObjectMapperContextResolver(Registry registry) {
+    this();
+    this.registry = registry;
+    postConstruct();
   }
 
   @PostConstruct
