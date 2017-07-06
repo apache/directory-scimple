@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.server.utility.ExampleObjectExtension;
+import edu.psu.swe.scim.server.utility.Subobject;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
 import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
 import edu.psu.swe.scim.spec.extension.ScimExtensionRegistry;
@@ -36,12 +39,15 @@ import edu.psu.swe.scim.spec.resources.Address;
 import edu.psu.swe.scim.spec.resources.Email;
 import edu.psu.swe.scim.spec.resources.Name;
 import edu.psu.swe.scim.spec.resources.PhoneNumber;
-import static edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
+import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
+import edu.psu.swe.scim.spec.resources.Photo;
 import edu.psu.swe.scim.spec.resources.ScimUser;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class UpdateRequestTest {
+  
+  private static final String FIRST = "first";
+  private static final String SECOND = "second";
 
   @Rule
   public MockitoRule mockito = MockitoJUnit.rule();
@@ -328,7 +334,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  public void forceMoveError() throws Exception {
+  public void verifyEmptyArraysDoNotCauseMove() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
     ScimUser user1 = createUser1();
@@ -343,12 +349,39 @@ public class UpdateRequestTest {
     user2.addExtension(ext2);
     
     updateRequest.initWithResource("1234", user1, user2);
-    try {
-      updateRequest.getPatchOperations();
-      Assert.fail("There should have been a runtime error where PatchOperation is a move");
-    } catch (IllegalStateException e) {
-      Assert.assertEquals("Error creating the patch list", e.getMessage());
-    }
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertTrue("Empty Arrays caused a diff", operations.isEmpty());
+  }
+  
+  @Test
+  public void verifyEmptyArraysAreNulled() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    //Set empty list on root object and verify no differences
+    user1.setPhotos(new ArrayList<>());
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertTrue("Empty Arrays are not being nulled out", operations.isEmpty());
+    
+    //Reset user 1 and empty list on Extension and verify no differences
+    user1 = createUser1();
+    ExampleObjectExtension ext = new ExampleObjectExtension();
+    ext.setList(new ArrayList<String>());
+    updateRequest.initWithResource("1234", user1, user2);
+    operations = updateRequest.getPatchOperations();
+    Assert.assertTrue("Empty Arrays are not being nulled out", operations.isEmpty());
+    
+    //Reset extension and set empty list on element of extension then verify no differences
+    Subobject subobject = new Subobject();
+    subobject.setList1(new ArrayList<String>());
+    ext = new ExampleObjectExtension();
+    ext.setSubobject(subobject);
+    updateRequest.initWithResource("1234", user1, user2);
+    operations = updateRequest.getPatchOperations();
+    Assert.assertTrue("Empty Arrays are not being nulled out", operations.isEmpty());
   }
   
   /**
@@ -359,8 +392,12 @@ public class UpdateRequestTest {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
     ScimUser user1 = createUser1();
-    user1.setPhotos(new ArrayList<>());
     ScimUser user2 = copy(user1);
+    
+    Photo photo = new Photo();
+    photo.setType("photo");
+    photo.setValue("photo1.png");
+    user2.setPhotos(Stream.of(photo).collect(Collectors.toList()));
     
     
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
@@ -368,13 +405,13 @@ public class UpdateRequestTest {
     user1.addExtension(ext1);
     
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
-    ext2.setList(new ArrayList<String>());
+    ext2.setList(Stream.of(FIRST,SECOND).collect(Collectors.toList()));
     user2.addExtension(ext2);
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     Assert.assertNotNull(operations);
-    Assert.assertEquals(1, operations.size());
+    Assert.assertEquals(2, operations.size());
     PatchOperation operation = operations.get(0);
     Assert.assertNotNull(operation.getValue());
     Assert.assertEquals(Type.ADD, operation.getOperation());
@@ -386,12 +423,16 @@ public class UpdateRequestTest {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
     ScimUser user1 = createUser1();
-    user1.setPhotos(new ArrayList<>());
     ScimUser user2 = copy(user1);
+    
+    Photo photo = new Photo();
+    photo.setType("photo");
+    photo.setValue("photo1.png");
+    user1.setPhotos(Stream.of(photo).collect(Collectors.toList()));
     
     
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
-    ext1.setList(new ArrayList<String>());
+    ext1.setList(Stream.of(FIRST,SECOND).collect(Collectors.toList()));
     user1.addExtension(ext1);
     
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
@@ -401,7 +442,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     Assert.assertNotNull(operations);
-    Assert.assertEquals(1, operations.size());
+    Assert.assertEquals(2, operations.size());
     PatchOperation operation = operations.get(0);
     Assert.assertEquals(Type.REMOVE, operation.getOperation());
     Assert.assertNull(operation.getValue());

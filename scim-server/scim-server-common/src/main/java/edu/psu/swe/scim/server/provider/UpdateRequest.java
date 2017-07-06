@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -163,6 +163,46 @@ public class UpdateRequest<T extends ScimResource> {
     // TODO Auto-generated method stub
     return resource;
   }
+  
+  /**
+   * There is a know issue with the diffing tool that the tool will attempt to move empty arrays. By
+   * nulling out the empty arrays during comparison, this will prevent that error from occurring. Because
+   * deleting requires the parent node
+   * @param node Parent node.
+   */
+  private static void nullEmptyLists(JsonNode node) {
+    List<String> objectsToDelete = new ArrayList<>();
+    
+    if (node != null) {
+      Iterator<Map.Entry<String, JsonNode>> children = node.fields();
+      while(children.hasNext()) {
+        Map.Entry<String, JsonNode> child = children.next();
+        String name = child.getKey();
+        JsonNode childNode = child.getValue();
+        
+        //Attempt to delete children before analyzing 
+        if (childNode.isContainerNode()) {
+          nullEmptyLists(childNode);
+        }
+        
+        if (childNode != null && childNode instanceof ArrayNode) {
+          ArrayNode ar = (ArrayNode)childNode;
+          if (ar.size() == 0) {
+            objectsToDelete.add(name);
+          }
+        }
+      }
+      
+      if (!objectsToDelete.isEmpty()) {
+        if (node instanceof ObjectNode) {
+          ObjectNode on = (ObjectNode)node;
+          for(String name : objectsToDelete) {
+            on.remove(name);
+          }
+        }
+      }
+    }
+  }
 
   private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException {
 
@@ -184,7 +224,9 @@ public class UpdateRequest<T extends ScimResource> {
                                                            // better way?
 
     JsonNode node1 = objMapper.valueToTree(original);
+    nullEmptyLists(node1);
     JsonNode node2 = objMapper.valueToTree(resource);
+    nullEmptyLists(node2);
     JsonNode differences = JsonDiff.asJson(node1, node2);
 
     try {
