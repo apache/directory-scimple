@@ -12,8 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 import lombok.Data;
 import edu.psu.swe.scim.spec.annotation.ScimAttribute;
 import edu.psu.swe.scim.spec.annotation.ScimExtensionType;
-import edu.psu.swe.scim.spec.extension.EnterpriseExtension;
-import edu.psu.swe.scim.spec.extension.EnterpriseExtension.Manager;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Mutability;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
@@ -67,7 +65,10 @@ public class ExampleObjectExtension implements ScimExtension {
   @ScimAttribute
   @XmlElement
   private List<String> list;
-
+  
+  @ScimAttribute
+  @XmlElement
+  private Subobject subobject;
 
   @Override
   public String getUrn() {
