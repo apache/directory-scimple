@@ -331,9 +331,10 @@ public class UpdateRequest<T extends ScimResource> {
           TypedAttribute typedAttribute = (TypedAttribute) parseData.originalObject;
           String type = typedAttribute.getType();
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, type);
-        } else {
-          log.warn("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
-          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, "?");
+        } else { // TODO add check for primitive types and Strings and maybe enums
+          log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+          Object originalObject = parseData.originalObject;
+          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, originalObject.toString());
         }
         processingMultiValued = false;
         processedMultiValued = true;
