@@ -250,14 +250,16 @@ public class UpdateRequest<T extends ScimResource> {
     nullEmptyLists(node2);
     JsonNode differences = JsonDiff.asJson(node1, node2);
     
-    ObjectWriter writer = objMapper.writerWithDefaultPrettyPrinter();
     
+    /*
+    Commenting out debug statement to prevent PII from appearing in log
+    ObjectWriter writer = objMapper.writerWithDefaultPrettyPrinter();
     try {
-      log.info("Original: "+writer.writeValueAsString(node1));
-      log.info("Resource: "+writer.writeValueAsString(node2));
+      log.debug("Original: "+writer.writeValueAsString(node1));
+      log.debug("Resource: "+writer.writeValueAsString(node2));
     } catch (IOException e) {
       
-    }
+    }*/
 
     try {
       log.info("Differences: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(differences));
@@ -365,7 +367,7 @@ public class UpdateRequest<T extends ScimResource> {
           String toString = parseData.originalObject.toString();
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, toString);
         } else if(parseData.originalObject instanceof Enum) {
-          Enum tempEnum = (Enum)parseData.originalObject;
+          Enum<?> tempEnum = (Enum<?>)parseData.originalObject;
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, tempEnum.name());
         } else {
           log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
