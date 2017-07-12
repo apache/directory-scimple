@@ -361,10 +361,12 @@ public class UpdateRequest<T extends ScimResource> {
           TypedAttribute typedAttribute = (TypedAttribute) parseData.originalObject;
           String type = typedAttribute.getType();
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, type);
-        } else if (parseData.originalObject instanceof String || parseData.originalObject instanceof Number ||
-            parseData.originalObject instanceof Enum) {
+        } else if (parseData.originalObject instanceof String || parseData.originalObject instanceof Number) {
           String toString = parseData.originalObject.toString();
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, toString);
+        } else if(parseData.originalObject instanceof Enum) {
+          Enum tempEnum = (Enum)parseData.originalObject;
+          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, tempEnum.name());
         } else {
           log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, "?");
