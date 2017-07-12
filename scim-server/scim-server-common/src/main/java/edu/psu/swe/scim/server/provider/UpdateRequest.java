@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -120,16 +121,16 @@ public class UpdateRequest<T extends ScimResource> {
     if (!initialized) {
       throw new IllegalStateException("UpdateRequest was not initialized");
     }
-
-    if (patchOperations != null) {
-      return patchOperations;
+    
+    if (patchOperations == null) {
+      try {
+        patchOperations = createPatchOperations(); 
+      } catch (IllegalArgumentException | IllegalAccessException e) {
+        throw new IllegalStateException("Error creating the patch list", e);
+      }
     }
-
-    try {
-      return createPatchOperations();
-    } catch (IllegalArgumentException | IllegalAccessException e) {
-      throw new IllegalStateException("Error creating the patch list", e);
-    }
+    
+    return patchOperations;
   }
 
   private void sortMultiValuedCollections(Object t, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
@@ -400,7 +401,8 @@ public class UpdateRequest<T extends ScimResource> {
       ++i;
     }
     
-    if (patchOpType == Type.REPLACE && parseData.resourceObject == null) {
+    if (patchOpType == Type.REPLACE && (parseData.resourceObject == null || 
+        (parseData.resourceObject instanceof Collection && ((Collection<?>)parseData.resourceObject).isEmpty()))) {
       patchOpType = Type.REMOVE;
       valueNode = null;
     }
@@ -471,7 +473,6 @@ public class UpdateRequest<T extends ScimResource> {
     Object resourceObject;
     AttributeContainer ac;
     String pathUri;
-    int addRemoveOffset = 0;
 
     public ParseData(String diffPath) {
       String path = diffPath.substring(1);
