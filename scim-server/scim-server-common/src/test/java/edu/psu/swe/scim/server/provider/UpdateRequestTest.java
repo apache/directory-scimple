@@ -48,6 +48,8 @@ public class UpdateRequestTest {
   
   private static final String FIRST = "first";
   private static final String SECOND = "second";
+  private static final String THIRD = "third";
+  private static final String FOURTH = "fourth";
 
   @Rule
   public MockitoRule mockito = MockitoJUnit.rule();
@@ -448,6 +450,183 @@ public class UpdateRequestTest {
     Assert.assertNull(operation.getValue());
   }
   
+  @Test
+  @Ignore
+  //TODO: do asserts
+  public void testNonTypedAttributeListGetUseablePath() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    ExampleObjectExtension ext1 = new ExampleObjectExtension();
+    ext1.setList(Stream.of(FIRST,SECOND,THIRD).collect(Collectors.toList()));
+    user1.addExtension(ext1);
+    
+    ExampleObjectExtension ext2 = new ExampleObjectExtension();
+    ext2.setList(Stream.of(FIRST,SECOND,FOURTH).collect(Collectors.toList()));
+    user2.addExtension(ext2);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+    
+    //TODO: perform assert that proper add and remove paths are correct
+  }
+  
+  @Test
+  @Ignore
+  //TODO: do asserts
+  public void testMoveFormatNameToNicknamePart1() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    String nickname = "John Xander Anyman";
+    user1.setNickName(nickname);
+    
+    user2.getName().setFormatted(nickname);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
+  @Test
+  @Ignore
+  //TODO: do asserts
+  public void testMoveFormatNameToNicknamePart2() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    String nickname = "John Xander Anyman";
+    user1.setNickName(nickname);
+    user2.setNickName("");
+    
+    user2.getName().setFormatted(nickname);
+    user1.getName().setFormatted("");
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
+  @Test
+  @Ignore
+  //TODO: do asserts
+  public void testMoveFormatNameToNicknamePart3() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    String nickname = "John Xander Anyman";
+    user1.setNickName(nickname);
+    user2.setNickName(null);
+    
+    user2.getName().setFormatted(nickname);
+    user1.getName().setFormatted("");
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
+  @Test
+  @Ignore
+  //TODO: do asserts
+  public void testMoveFormatNameToNicknamePart4() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    String nickname = "John Xander Anyman";
+    user1.setNickName(nickname);
+    user2.setNickName("");
+    
+    user2.getName().setFormatted(nickname);
+    user1.getName().setFormatted(null);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
+  @Test
+  @Ignore
+  //TODO: do asserts
+  public void testMoveFormatNameToNicknamePart5() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    String nickname = "John Xander Anyman";
+    user1.setNickName("");
+    user2.setNickName(nickname);
+    
+    user2.getName().setFormatted(null);
+    user1.getName().setFormatted(nickname);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
+  @Test
+  //TODO: do parameterized test
+  public void offsetTest1() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    ExampleObjectExtension ext1 = new ExampleObjectExtension();
+    ext1.setList(Stream.of("D","M","Y","Z","Z","Z","Z","Z").collect(Collectors.toList()));
+    user1.addExtension(ext1);
+    
+    ExampleObjectExtension ext2 = new ExampleObjectExtension();
+    //ext2.setList(Stream.of("A","A","B","B","D","F","N","Q","Z").collect(Collectors.toList()));
+    ext2.setList(Stream.of("A","Z").collect(Collectors.toList()));
+    user2.addExtension(ext2);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+    
+  }
+  
+  @Test
+  public void testMoveFormatNameToNicknamePart6() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    String nickname = "John Xander Anyman";
+    user1.setNickName(null);
+    user2.setNickName(nickname);
+    
+    user2.getName().setFormatted("");
+    user1.getName().setFormatted(nickname);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
   /**
    * This is used to test an error condition. In this scenario a user has multiple phone numbers where home is marked primary and work is not. A SCIM update
    * is performed in which the new user only contains a work phone number where the type is null. When this happens it should only only be a single DELETE 
@@ -464,20 +643,16 @@ public class UpdateRequestTest {
 //    ScimUser user1 = createUser1();
 //    ScimUser user2 = copy(user1);
 //    user2.getPhoneNumbers().removeIf(p -> p.getType().equals("home"));
+//    
 //    PhoneNumber workNumber = user2.getPhoneNumbers().stream().filter(p -> p.getType().equals("work")).findFirst().orElse(null);
+//    workNumber.setType("home");
 //    Assert.assertNotNull(workNumber);
-//    workNumber.setPrimary(null);
-//    workNumber.setPhoneContext(null);
-//    workNumber.setNumber(null);
-//    workNumber.setExtension(null);
 //    
 //    updateRequest.initWithResource("1234", user1, user2);
 //    List<PatchOperation> operations = updateRequest.getPatchOperations();
 //    Assert.assertNotNull(operations);
 //    Assert.assertEquals(expectedNumberOfOperationsWithBug, operations.size());
 //    Assert.assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
-//    
-//    
   }
 
   private PatchOperation assertSingleResult(List<PatchOperation> result) {
