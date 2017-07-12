@@ -1,9 +1,11 @@
 package edu.psu.swe.scim.server.provider;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,13 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
@@ -29,9 +36,10 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.flipkart.zjsonpatch.JsonDiff;
 
-import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation;
@@ -53,7 +61,7 @@ import edu.psu.swe.scim.spec.schema.Schema.Attribute;
 @EqualsAndHashCode
 @ToString
 public class UpdateRequest<T extends ScimResource> {
-
+  
   private static final String OPERATION = "op";
   private static final String PATH = "path";
   private static final String VALUE = "value";
@@ -70,6 +78,8 @@ public class UpdateRequest<T extends ScimResource> {
 
   private Registry registry;
 
+  private Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
+  
   @Inject
   public UpdateRequest(Registry registry) {
     this.registry = registry;
@@ -197,7 +207,7 @@ public class UpdateRequest<T extends ScimResource> {
         if (node instanceof ObjectNode) {
           ObjectNode on = (ObjectNode)node;
           for(String name : objectsToDelete) {
-            on.remove(name);
+            on.putNull(name);
           }
         }
       }
@@ -219,15 +229,35 @@ public class UpdateRequest<T extends ScimResource> {
       sortMultiValuedCollections(entry.getValue(), extSchema);
     }
 
-    ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
-    ObjectMapper objMapper = ctxResolver.getContext(null); // TODO is there a
-                                                           // better way?
+//    ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
+//    ObjectMapper objMapper = ctxResolver.getContext(null); // TODO is there a
+//                                                           // better way?
 
+    ObjectMapper objMapper = new ObjectMapper();
+
+    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
+    objMapper.registerModule(jaxbAnnotationModule);
+    objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objMapper.getTypeFactory());
+    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
+    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
+    objMapper.setAnnotationIntrospector(pair);
+    
     JsonNode node1 = objMapper.valueToTree(original);
     nullEmptyLists(node1);
     JsonNode node2 = objMapper.valueToTree(resource);
     nullEmptyLists(node2);
     JsonNode differences = JsonDiff.asJson(node1, node2);
+    
+    ObjectWriter writer = objMapper.writerWithDefaultPrettyPrinter();
+    
+    try {
+      log.info("Original: "+writer.writeValueAsString(node1));
+      log.info("Resource: "+writer.writeValueAsString(node2));
+    } catch (IOException e) {
+      
+    }
 
     try {
       log.info("Differences: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(differences));
@@ -286,7 +316,7 @@ public class UpdateRequest<T extends ScimResource> {
     if (diffPath == null || diffPath.length() < 1) {
       return null;
     }
-
+    
     ParseData parseData = new ParseData(diffPath);
 
     if (parseData.pathParts.isEmpty()) {
@@ -321,7 +351,7 @@ public class UpdateRequest<T extends ScimResource> {
       if (done) {
         throw new RuntimeException("Path should be done... Attribute not supported by the schema: " + pathPart);
       } else if (processingMultiValued) {
-        parseData.traverseObjectsInArray(pathPart);
+        parseData.traverseObjectsInArray(pathPart, patchOpType);
 
         if (parseData.isLastIndex(i) && patchOpType == PatchOperation.Type.ADD) {
           break;
@@ -331,10 +361,13 @@ public class UpdateRequest<T extends ScimResource> {
           TypedAttribute typedAttribute = (TypedAttribute) parseData.originalObject;
           String type = typedAttribute.getType();
           valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, type);
-        } else { // TODO add check for primitive types and Strings and maybe enums
+        } else if (parseData.originalObject instanceof String || parseData.originalObject instanceof Number ||
+            parseData.originalObject instanceof Enum) {
+          String toString = parseData.originalObject.toString();
+          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, toString);
+        } else {
           log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
-          Object originalObject = parseData.originalObject;
-          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, originalObject.toString());
+          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, "?");
         }
         processingMultiValued = false;
         processedMultiValued = true;
@@ -361,6 +394,16 @@ public class UpdateRequest<T extends ScimResource> {
         }
       }
       ++i;
+    }
+    
+    if (patchOpType == Type.REPLACE && parseData.resourceObject == null) {
+      patchOpType = Type.REMOVE;
+      valueNode = null;
+    }
+    
+    if (patchOpType == Type.REPLACE && parseData.originalObject == null) {
+      patchOpType = Type.ADD;
+      //valueNode = null;
     }
 
     PatchOperation operation = new PatchOperation();
@@ -424,6 +467,7 @@ public class UpdateRequest<T extends ScimResource> {
     Object resourceObject;
     AttributeContainer ac;
     String pathUri;
+    int addRemoveOffset = 0;
 
     public ParseData(String diffPath) {
       String path = diffPath.substring(1);
@@ -455,11 +499,27 @@ public class UpdateRequest<T extends ScimResource> {
       ac = attribute;
     }
 
-    public void traverseObjectsInArray(String pathPart) {
+    public void traverseObjectsInArray(String pathPart, Type patchOpType) {
       int index = Integer.parseInt(pathPart);
 
-      originalObject = lookupIndexInArray(originalObject, index);
-      resourceObject = lookupIndexInArray(resourceObject, index);
+      Attribute attr = (Attribute) ac;
+      
+      Integer addRemoveOffset = addRemoveOffsetMap.getOrDefault(attr, 0);
+      switch (patchOpType) {
+      case ADD:
+        addRemoveOffsetMap.put(attr, addRemoveOffset - 1);
+        break;
+      case REMOVE:
+        addRemoveOffsetMap.put(attr, addRemoveOffset + 1);
+        break;
+      case REPLACE:
+      default:
+        // Do Nothing
+        break;
+      }
+      
+      originalObject = lookupIndexInArray(originalObject, index + addRemoveOffset);
+      resourceObject = lookupIndexInArray(resourceObject, index + addRemoveOffset);
     }
 
     public boolean isLastIndex(int index) {

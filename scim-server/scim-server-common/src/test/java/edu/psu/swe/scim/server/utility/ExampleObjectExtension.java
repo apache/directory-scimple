@@ -68,6 +68,10 @@ public class ExampleObjectExtension implements ScimExtension {
   
   @ScimAttribute
   @XmlElement
+  private List<Order> enumList;
+  
+  @ScimAttribute
+  @XmlElement
   private Subobject subobject;
 
   @Override
