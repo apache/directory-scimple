@@ -452,10 +452,7 @@ public class UpdateRequest<T extends ScimResource> {
       } else if (valueNode instanceof NullNode) {
         return null;
       } else if (valueNode instanceof ObjectNode) {
-        ObjectNode objNode = (ObjectNode)valueNode;
-        ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
-        ObjectMapper objMapper = ctxResolver.getContext(null);
-        return objMapper.treeToValue(objNode, getClassOfResource(parseData));
+        return parseData.resourceObject;
       } else if (valueNode instanceof POJONode) {
         POJONode pojoNode = (POJONode) valueNode;
         return pojoNode.getPojo();
@@ -537,7 +534,7 @@ public class UpdateRequest<T extends ScimResource> {
       }
       
       originalObject = lookupIndexInArray(originalObject, newindex);
-      resourceObject = lookupIndexInArray(resourceObject, newindex);
+      resourceObject = lookupIndexInArray(resourceObject, index);
     }
 
     public boolean isLastIndex(int index) {
