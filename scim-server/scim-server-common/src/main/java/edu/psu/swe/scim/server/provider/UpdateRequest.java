@@ -523,8 +523,13 @@ public class UpdateRequest<T extends ScimResource> {
         break;
       }
       
-      originalObject = lookupIndexInArray(originalObject, index + addRemoveOffset);
-      resourceObject = lookupIndexInArray(resourceObject, index + addRemoveOffset);
+      int newindex = index + addRemoveOffset;
+      if (newindex < 0) {
+        log.error("Attempting to retrieve a negative index:{} on pathPath: {}", newindex, pathPart);
+      }
+      
+      originalObject = lookupIndexInArray(originalObject, newindex);
+      resourceObject = lookupIndexInArray(resourceObject, newindex);
     }
 
     public boolean isLastIndex(int index) {
