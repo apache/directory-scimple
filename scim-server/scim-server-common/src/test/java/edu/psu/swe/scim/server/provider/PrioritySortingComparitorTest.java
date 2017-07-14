@@ -23,5 +23,18 @@ public class PrioritySortingComparitorTest {
     
     Assertions.assertThat(list).hasSameElementsAs(Arrays.asList("1P", "2P", "1", "2", "3", "4"));
   }
+
+  @Test
+  public void testSorting2() throws Exception {
+    Set<Object> priorities = new HashSet<>();
+    priorities.add("home");
+    priorities.add("work");
+    PrioritySortingComparitor comparitor = new PrioritySortingComparitor(priorities);
+    List<String> list = Arrays.asList("work", "local", "home");
+    Collections.sort(list, comparitor);
+    System.out.println(list);
+    
+    Assertions.assertThat(list).hasSameElementsAs(Arrays.asList("home", "work", "local"));
+  }
   
 }

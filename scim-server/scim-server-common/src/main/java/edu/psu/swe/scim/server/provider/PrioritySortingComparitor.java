@@ -22,11 +22,11 @@ public class PrioritySortingComparitor implements Comparator<Object> {
       return 1;
     }
 
-    boolean o1Priority = priorities.contains(o1);
-    boolean o2Priority = priorities.contains(o2);
-
     Comparable c1 = getComparableValue(o1);
     Comparable c2 = getComparableValue(o2);
+    
+    boolean o1Priority = priorities.contains(c1);
+    boolean o2Priority = priorities.contains(c2);
 
     if (o1Priority == o2Priority) {
       return c1.compareTo(c2);
