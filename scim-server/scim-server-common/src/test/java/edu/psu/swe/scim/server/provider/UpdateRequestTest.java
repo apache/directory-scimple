@@ -336,6 +336,30 @@ public class UpdateRequestTest {
   }
   
   @Test
+  public void testRemoveMultiValuedAttributeWithSorting() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    Address localAddress = new Address();
+    localAddress.setStreetAddress("123 Main Street");
+    localAddress.setLocality("State College");
+    localAddress.setRegion("PA");
+    localAddress.setCountry("USA");
+    localAddress.setType("local");
+    
+    user1.getAddresses().add(localAddress);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REMOVE, "addresses[type EQ \"local\"]", null);
+  }
+  
+  @Test
   public void verifyEmptyArraysDoNotCauseMove() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
