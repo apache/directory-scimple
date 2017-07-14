@@ -1,5 +1,7 @@
 package edu.psu.swe.scim.server.provider;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -42,6 +42,7 @@ import edu.psu.swe.scim.spec.resources.PhoneNumber;
 import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import edu.psu.swe.scim.spec.resources.Photo;
 import edu.psu.swe.scim.spec.resources.ScimUser;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class UpdateRequestTest {
@@ -333,6 +334,55 @@ public class UpdateRequestTest {
     PatchOperation actual = assertSingleResult(result);
 
     checkAssertions(actual, Type.REMOVE, "emails[type EQ \"home\"]", null);
+  }
+  
+  @Test
+  public void testRemoveMultiValuedAttributeWithSorting() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    Address localAddress = new Address();
+    localAddress.setStreetAddress("123 Main Street");
+    localAddress.setLocality("State College");
+    localAddress.setRegion("PA");
+    localAddress.setCountry("USA");
+    localAddress.setType("local");
+    
+    user1.getAddresses().add(localAddress);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    PatchOperation actual = assertSingleResult(result);
+
+    checkAssertions(actual, Type.REMOVE, "addresses[type EQ \"local\"]", null);
+  }
+  
+  @Test
+  public void testAddMultiValuedAttributeWithSorting() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    Address localAddress = new Address();
+    localAddress.setStreetAddress("123 Main Street");
+    localAddress.setLocality("State College");
+    localAddress.setRegion("PA");
+    localAddress.setCountry("USA");
+    localAddress.setType("local");
+    
+    user2.getAddresses().add(localAddress);
+    user1.getAddresses().get(0).setKey("asdf");
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> result = updateRequest.getPatchOperations();
+
+    assertEquals(2, result.size());
+
+    checkAssertions(result.get(1), Type.ADD, "addresses", localAddress);
   }
   
   @Test
