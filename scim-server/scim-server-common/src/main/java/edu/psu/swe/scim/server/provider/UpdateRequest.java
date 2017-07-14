@@ -1,6 +1,5 @@
 package edu.psu.swe.scim.server.provider;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +24,6 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -41,6 +39,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.flipkart.zjsonpatch.JsonDiff;
 
+import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation;
@@ -125,7 +124,7 @@ public class UpdateRequest<T extends ScimResource> {
     if (patchOperations == null) {
       try {
         patchOperations = createPatchOperations(); 
-      } catch (IllegalArgumentException | IllegalAccessException e) {
+      } catch (IllegalArgumentException | IllegalAccessException | JsonProcessingException e) {
         throw new IllegalStateException("Error creating the patch list", e);
       }
     }
@@ -215,7 +214,7 @@ public class UpdateRequest<T extends ScimResource> {
     }
   }
 
-  private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException {
+  private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
 
     sortMultiValuedCollections(this.original, schema);
     Map<String, ScimExtension> extensions = this.original.getExtensions();
@@ -230,16 +229,11 @@ public class UpdateRequest<T extends ScimResource> {
       sortMultiValuedCollections(entry.getValue(), extSchema);
     }
 
-//    ObjectMapperContextResolver ctxResolver = new ObjectMapperContextResolver();
-//    ObjectMapper objMapper = ctxResolver.getContext(null); // TODO is there a
-//                                                           // better way?
-
+    //Create a Jackson ObjectMapper that reads JaxB annotations
     ObjectMapper objMapper = new ObjectMapper();
-
     JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
     objMapper.registerModule(jaxbAnnotationModule);
     objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
     AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objMapper.getTypeFactory());
     AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
     AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
@@ -286,7 +280,7 @@ public class UpdateRequest<T extends ScimResource> {
     return JsonDiff.asJson(node1, node2);
   }
 
-  List<PatchOperation> convertToPatchOperations(JsonNode node) throws IllegalArgumentException, IllegalAccessException {
+  List<PatchOperation> convertToPatchOperations(JsonNode node) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
     List<PatchOperation> operations = new ArrayList<>();
     if (node == null) {
       return Collections.emptyList();
@@ -312,7 +306,7 @@ public class UpdateRequest<T extends ScimResource> {
 
   }
 
-  private PatchOperation convertToPatchOperation(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException {
+  private PatchOperation convertToPatchOperation(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
 
     PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
 
@@ -329,7 +323,7 @@ public class UpdateRequest<T extends ScimResource> {
     }
   }
 
-  private PatchOperation handleExtensions(JsonNode valueNode, Type patchOpType, ParseData parseData) {
+  private PatchOperation handleExtensions(JsonNode valueNode, Type patchOpType, ParseData parseData) throws JsonProcessingException {
     PatchOperation operation = new PatchOperation();
     operation.setOperation(patchOpType);
     AttributeReference attributeReference = new AttributeReference(parseData.pathUri, null);
@@ -340,7 +334,7 @@ public class UpdateRequest<T extends ScimResource> {
     return operation;
   }
 
-  private PatchOperation handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException {
+  private PatchOperation handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException, JsonProcessingException {
     List<String> attributeReferenceList = new ArrayList<>();
     ValueFilterExpression valueFilterExpression = null;
     List<String> subAttributes = new ArrayList<>();
@@ -429,8 +423,19 @@ public class UpdateRequest<T extends ScimResource> {
       return null;
     }
   }
+  
+  private Class<?> getClassOfResource(ParseData parseData) {
+    if (parseData.originalObject != null) {
+      return parseData.originalObject.getClass();
+    }
+    if (parseData.resourceObject != null) {
+      return parseData.resourceObject.getClass();
+    }
+    
+    return null;
+  }
 
-  private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) {
+  private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) throws JsonProcessingException {
     if (patchOpType == PatchOperation.Type.REMOVE) {
       return null;
     }
@@ -523,8 +528,13 @@ public class UpdateRequest<T extends ScimResource> {
         break;
       }
       
-      originalObject = lookupIndexInArray(originalObject, index + addRemoveOffset);
-      resourceObject = lookupIndexInArray(resourceObject, index + addRemoveOffset);
+      int newindex = index + addRemoveOffset;
+      if (newindex < 0) {
+        log.error("Attempting to retrieve a negative index:{} on pathPath: {}", newindex, pathPart);
+      }
+      
+      originalObject = lookupIndexInArray(originalObject, newindex);
+      resourceObject = lookupIndexInArray(resourceObject, index);
     }
 
     public boolean isLastIndex(int index) {
