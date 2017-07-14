@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -132,41 +135,45 @@ public class UpdateRequest<T extends ScimResource> {
     return patchOperations;
   }
 
-  private void sortMultiValuedCollections(Object t, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
-    if (t != null) {
-      for (Attribute attribute : ac.getAttributes()) {
-        Field field = attribute.getField();
-        if (attribute.isMultiValued()) {
-          @SuppressWarnings("unchecked")
-          List<Object> collection = (List<Object>) field.get(t);
-          if (collection != null) {
-            Collections.sort(collection, (o1, o2) -> {
-              if (o1 == null) {
-                return -1;
-              }
-              if (o2 == null) {
-                return 1;
-              }
-              if (o1 instanceof TypedAttribute && o2 instanceof TypedAttribute) {
-                TypedAttribute t1 = (TypedAttribute) o1;
-                TypedAttribute t2 = (TypedAttribute) o2;
-                String type1 = t1.getType();
-                String type2 = t2.getType();
-                return type1.compareTo(type2);
-              }
-              if (o1 instanceof Comparable<?>) {
-                Comparable c1 = (Comparable)o1;
-                Comparable c2 = (Comparable)o2;
-                return c1.compareTo(c2);
-              }
-              return 0;
-            });
-          }
-        } else if (attribute.getType() == Attribute.Type.COMPLEX) {
-          sortMultiValuedCollections(field.get(t), attribute);
+  private void sortMultiValuedCollections(Object obj1, Object obj2, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
+    for (Attribute attribute : ac.getAttributes()) {
+      Field field = attribute.getField();
+      if (attribute.isMultiValued()) {
+        @SuppressWarnings("unchecked")
+        List<Object> collection1 = obj1 != null ? (List<Object>) field.get(obj1) : null;
+        @SuppressWarnings("unchecked")
+        List<Object> collection2 = obj2 != null ? (List<Object>) field.get(obj2) : null;
+        
+        Set<Object> priorities = findCommonElements(collection1, collection2);
+        PrioritySortingComparitor prioritySortingComparitor = new PrioritySortingComparitor(priorities);
+        if (collection1 != null) {
+          Collections.sort(collection1, prioritySortingComparitor);
         }
+        
+        if (collection2 != null) {
+          Collections.sort(collection2, prioritySortingComparitor);
+        }
+      } else if (attribute.getType() == Attribute.Type.COMPLEX) {
+        Object nextObj1 = obj1 != null ? field.get(obj1) : null;
+        Object nextObj2 = obj2 != null ? field.get(obj2) : null;
+        sortMultiValuedCollections(nextObj1, nextObj2, attribute);
       }
     }
+  }
+
+  private Set<Object> findCommonElements(List<Object> list1, List<Object> list2) {
+    if (list1 == null || list2 == null) {
+      return Collections.emptySet();
+    }
+    
+    Set<Object> set1 = new HashSet<>(list1);
+    Set<Object> set2 = new HashSet<>(list2);
+    
+    set1 = set1.stream().map(PrioritySortingComparitor::getComparableValue).collect(Collectors.toSet());
+    set2 = set2.stream().map(PrioritySortingComparitor::getComparableValue).collect(Collectors.toSet());
+    
+    set1.retainAll(set2);
+    return set1;
   }
 
   private T applyPatchOperations() {
@@ -216,17 +223,18 @@ public class UpdateRequest<T extends ScimResource> {
 
   private List<PatchOperation> createPatchOperations() throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
 
-    sortMultiValuedCollections(this.original, schema);
-    Map<String, ScimExtension> extensions = this.original.getExtensions();
-    for(Map.Entry<String, ScimExtension> entry : extensions.entrySet()) {
-      Schema extSchema = registry.getSchema(entry.getKey());
-      sortMultiValuedCollections(entry.getValue(), extSchema);
-    }
-    sortMultiValuedCollections(this.resource, schema);
-    extensions = this.resource.getExtensions();
-    for(Map.Entry<String, ScimExtension> entry : extensions.entrySet()) {
-      Schema extSchema = registry.getSchema(entry.getKey());
-      sortMultiValuedCollections(entry.getValue(), extSchema);
+    sortMultiValuedCollections(this.original, this.resource, schema);
+    Map<String, ScimExtension> originalExtensions = this.original.getExtensions();
+    Map<String, ScimExtension> resourceExtensions = this.resource.getExtensions();
+    Set<String> keys = new HashSet<>();
+    keys.addAll(originalExtensions.keySet());
+    keys.addAll(resourceExtensions.keySet());
+    
+    for(String key: keys) {
+      Schema extSchema = registry.getSchema(key);
+      ScimExtension originalExtension = originalExtensions.get(key);
+      ScimExtension resourceExtension = resourceExtensions.get(key);
+      sortMultiValuedCollections(originalExtension, resourceExtension, extSchema);
     }
 
     //Create a Jackson ObjectMapper that reads JaxB annotations
