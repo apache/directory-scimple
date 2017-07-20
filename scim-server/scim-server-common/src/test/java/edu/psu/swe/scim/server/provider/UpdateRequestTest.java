@@ -10,12 +10,19 @@ import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
@@ -42,15 +49,20 @@ import edu.psu.swe.scim.spec.resources.PhoneNumber;
 import edu.psu.swe.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import edu.psu.swe.scim.spec.resources.Photo;
 import edu.psu.swe.scim.spec.resources.ScimUser;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RunWith(JUnitParamsRunner.class)
 public class UpdateRequestTest {
   
   private static final String FIRST = "first";
   private static final String SECOND = "second";
   private static final String THIRD = "third";
   private static final String FOURTH = "fourth";
+  
+  private static final String A = "A";
+  private static final String B = "B";
+  private static final String C = "C";
+  private static final String D = "D";
 
   @Rule
   public MockitoRule mockito = MockitoJUnit.rule();
@@ -634,6 +646,74 @@ public class UpdateRequestTest {
   }
   
   @Test
+  @Parameters(method = "testListOfStringsParameters")
+  public void testListOfStringsParameterized(List<String> list1, List<String> list2, List<ExpectedPatchOperation> ops) throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    ScimUser user2 = copy(user1);
+    
+    ExampleObjectExtension ext1 = new ExampleObjectExtension();
+    ext1.setList(list1);
+    user1.addExtension(ext1);
+    
+    ExampleObjectExtension ext2 = new ExampleObjectExtension();
+    ext2.setList(list2);
+    user2.addExtension(ext2);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertEquals(ops.size(), operations.size());
+    for(int i = 0; i < operations.size(); i++) {
+      PatchOperation actualOp = operations.get(i);
+      ExpectedPatchOperation expectedOp = ops.get(i);
+      Assert.assertEquals(expectedOp.getOp(), actualOp.getOperation().toString());
+      Assert.assertEquals(expectedOp.getPath(), actualOp.getPath().toString());
+      if (expectedOp.getValue() == null) {
+        Assert.assertNull(actualOp.getValue());
+      } else {
+        Assert.assertEquals(expectedOp.getValue(), actualOp.getValue().toString());
+      }
+      
+    }
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+  }
+  
+  @SuppressWarnings("unused")
+  private Object[] testListOfStringsParameters() throws Exception {
+    List<Object> params = new ArrayList<>();
+    String nickName = "John Xander Anyman";
+    //Parameter order
+    //1 Original list of Strings
+    //2 Update list of Strings
+    //3 Array of Expected Operations
+    //  3a Operation
+    //  3b Path
+    //  3c Value
+    
+    params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
+    params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), null, Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
+    params.add(new Object[] {null, Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A]")).collect(Collectors.toList())});
+    params.add(new Object[] {null, Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
+    params.add(new Object[] {Stream.of(A,B,C).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
+    params.add(new Object[] {Stream.of(C,B,A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
+    params.add(new Object[] {new ArrayList<String>(), Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REPLACE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A]")).collect(Collectors.toList())});
+    params.add(new Object[] {new ArrayList<String>(), Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REPLACE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
+    
+    
+    params.add(new Object[] {Stream.of(A, B).collect(Collectors.toList()), Stream.of(B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list[value EQ \"A\"]", null)).collect(Collectors.toList())});
+    params.add(new Object[] {Stream.of(B, A).collect(Collectors.toList()), Stream.of(B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list[value EQ \"A\"]", null)).collect(Collectors.toList())});
+    
+    params.add(new Object[] {Stream.of(B).collect(Collectors.toList()), Stream.of(A,B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", A)).collect(Collectors.toList())});
+    params.add(new Object[] {Stream.of(B).collect(Collectors.toList()), Stream.of(B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", A)).collect(Collectors.toList())});
+    
+    params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), Stream.of(A,B,C).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", B),new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", C)).collect(Collectors.toList())});
+    
+    return params.toArray();
+  }
+  
+  @Test
   //TODO: do parameterized test
   public void offsetTest1() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -722,6 +802,27 @@ public class UpdateRequestTest {
               .isEqualTo(path);
     Assertions.assertThat(actual.getValue())
               .isEqualTo(value);
+  }
+  
+  @Data
+  @AllArgsConstructor
+  private class ExpectedPatchOperation {
+    private String op;
+    private String path;
+    private String value;
+    
+    
+  }
+  
+  public static final Address createHomeAddress() {
+    Address homeAddress = new Address();
+    homeAddress.setType("home");
+    homeAddress.setStreetAddress("123 Fake Street");
+    homeAddress.setLocality("State College");
+    homeAddress.setRegion("Pennsylvania");
+    homeAddress.setCountry("USA");
+    homeAddress.setPostalCode("16801");
+    return homeAddress;
   }
 
   public static ScimUser createUser1() throws PhoneNumberParseException {
