@@ -726,8 +726,8 @@ public class UpdateRequestTest {
     params.add(new Object[] {null, Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
     params.add(new Object[] {Stream.of(A,B,C).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
     params.add(new Object[] {Stream.of(C,B,A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {new ArrayList<String>(), Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REPLACE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A]")).collect(Collectors.toList())});
-    params.add(new Object[] {new ArrayList<String>(), Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REPLACE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
+    params.add(new Object[] {new ArrayList<String>(), Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A]")).collect(Collectors.toList())});
+    params.add(new Object[] {new ArrayList<String>(), Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
     
     
     params.add(new Object[] {Stream.of(A, B).collect(Collectors.toList()), Stream.of(B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list[value EQ \"A\"]", null)).collect(Collectors.toList())});
