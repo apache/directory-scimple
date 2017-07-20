@@ -179,8 +179,36 @@ public class UpdateRequestTest {
 
     checkAssertions(actual, Type.ADD, "phoneNumbers", mobilePhone);
   }
-
   
+  /**
+   * This unit test is to replicate the issue where a replace is sent back
+   * from the differencing engine for a collection that is currently empty
+   * but is having an object added to it. This should produce an ADD with an
+   * ArrayList of objects to add.
+   */
+  @Test
+  public void testAddObjectsToEmptyCollection() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    user1.setPhoneNumbers(new ArrayList<PhoneNumber>());
+    ScimUser user2 = copy(user1);
+    
+    PhoneNumber mobilePhone = new GlobalPhoneNumberBuilder().globalNumber("+1(814)867-5306").build();
+    mobilePhone.setType("mobile");
+    mobilePhone.setPrimary(true);
+    user2.getPhoneNumbers().add(mobilePhone);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertNotNull(operations);
+    Assert.assertEquals(1, operations.size());
+    PatchOperation operation = operations.get(0);
+    Assert.assertNotNull(operation.getValue());
+    Assert.assertEquals(Type.ADD, operation.getOperation());
+    Assert.assertEquals(ArrayList.class, operation.getValue().getClass());
+  }
+
   @Test
   public void testReplaceSingleAttribute() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);

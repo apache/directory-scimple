@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +41,6 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.flipkart.zjsonpatch.JsonDiff;
 
-import edu.psu.swe.scim.server.rest.ObjectMapperContextResolver;
 import edu.psu.swe.scim.server.schema.Registry;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperation;
@@ -323,6 +321,10 @@ public class UpdateRequest<T extends ScimResource> {
     }
     
     ParseData parseData = new ParseData(diffPath);
+    
+    if (patchOpType == Type.REPLACE && valueNode instanceof ArrayNode) {
+      patchOpType = Type.ADD;
+    }
 
     if (parseData.pathParts.isEmpty()) {
       return handleExtensions(valueNode, patchOpType, parseData);
@@ -411,7 +413,6 @@ public class UpdateRequest<T extends ScimResource> {
     
     if (patchOpType == Type.REPLACE && parseData.originalObject == null) {
       patchOpType = Type.ADD;
-      //valueNode = null;
     }
 
     PatchOperation operation = new PatchOperation();
@@ -432,17 +433,6 @@ public class UpdateRequest<T extends ScimResource> {
     }
   }
   
-  private Class<?> getClassOfResource(ParseData parseData) {
-    if (parseData.originalObject != null) {
-      return parseData.originalObject.getClass();
-    }
-    if (parseData.resourceObject != null) {
-      return parseData.resourceObject.getClass();
-    }
-    
-    return null;
-  }
-
   private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) throws JsonProcessingException {
     if (patchOpType == PatchOperation.Type.REMOVE) {
       return null;
