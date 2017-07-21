@@ -135,7 +135,7 @@ public class UpdateRequestTest {
 
     PatchOperation actual = assertSingleResult(result);
 
-    checkAssertions(actual, Type.REPLACE, "nickName", "Jon");
+    checkAssertions(actual, Type.ADD, "nickName", "Jon");
   }
   
   @Test
@@ -169,7 +169,7 @@ public class UpdateRequestTest {
 
     PatchOperation actual = assertSingleResult(result);
 
-    checkAssertions(actual, Type.REPLACE, "name.honorificPrefix", "Dr.");
+    checkAssertions(actual, Type.ADD, "name.honorificPrefix", "Dr.");
   }
 
   @Test
@@ -217,7 +217,7 @@ public class UpdateRequestTest {
     PatchOperation operation = operations.get(0);
     Assert.assertNotNull(operation.getValue());
     Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(ArrayList.class, operation.getValue().getClass());
+    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
   }
 
   @Test
