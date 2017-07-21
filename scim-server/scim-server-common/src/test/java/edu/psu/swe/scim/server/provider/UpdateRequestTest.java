@@ -62,7 +62,6 @@ public class UpdateRequestTest {
   private static final String A = "A";
   private static final String B = "B";
   private static final String C = "C";
-  private static final String D = "D";
 
   @Rule
   public MockitoRule mockito = MockitoJUnit.rule();
@@ -136,7 +135,7 @@ public class UpdateRequestTest {
 
     PatchOperation actual = assertSingleResult(result);
 
-    checkAssertions(actual, Type.ADD, "nickName", "Jon");
+    checkAssertions(actual, Type.REPLACE, "nickName", "Jon");
   }
   
   @Test
@@ -170,7 +169,7 @@ public class UpdateRequestTest {
 
     PatchOperation actual = assertSingleResult(result);
 
-    checkAssertions(actual, Type.ADD, "name.honorificPrefix", "Dr.");
+    checkAssertions(actual, Type.REPLACE, "name.honorificPrefix", "Dr.");
   }
 
   @Test
@@ -503,7 +502,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     Assert.assertNotNull(operations);
-    Assert.assertEquals(2, operations.size());
+    Assert.assertEquals(3, operations.size());
     PatchOperation operation = operations.get(0);
     Assert.assertNotNull(operation.getValue());
     Assert.assertEquals(Type.ADD, operation.getOperation());
@@ -720,14 +719,18 @@ public class UpdateRequestTest {
     //  3b Path
     //  3c Value
     
+    List<ExpectedPatchOperation> multipleOps = new ArrayList<ExpectedPatchOperation>();
+    multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A"));
+    multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "B"));
+    multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "C"));
     params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
     params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), null, Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {null, Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A]")).collect(Collectors.toList())});
-    params.add(new Object[] {null, Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
+    params.add(new Object[] {null, Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A")).collect(Collectors.toList())});
+    params.add(new Object[] {null, Stream.of(C,B,A).collect(Collectors.toList()), multipleOps});
     params.add(new Object[] {Stream.of(A,B,C).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
     params.add(new Object[] {Stream.of(C,B,A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {new ArrayList<String>(), Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A]")).collect(Collectors.toList())});
-    params.add(new Object[] {new ArrayList<String>(), Stream.of(C,B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "[A, B, C]")).collect(Collectors.toList())});
+    params.add(new Object[] {new ArrayList<String>(), Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A")).collect(Collectors.toList())});
+    params.add(new Object[] {new ArrayList<String>(), Stream.of(C,B,A).collect(Collectors.toList()), multipleOps});
     
     
     params.add(new Object[] {Stream.of(A, B).collect(Collectors.toList()), Stream.of(B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list[value EQ \"A\"]", null)).collect(Collectors.toList())});

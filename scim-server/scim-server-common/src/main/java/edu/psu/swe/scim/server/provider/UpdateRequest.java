@@ -200,7 +200,7 @@ public class UpdateRequest<T extends ScimResource> {
           nullEmptyLists(childNode);
         }
         
-        if (childNode != null && childNode instanceof ArrayNode) {
+        if (childNode instanceof ArrayNode) {
           ArrayNode ar = (ArrayNode)childNode;
           if (ar.size() == 0) {
             objectsToDelete.add(name);
@@ -208,12 +208,10 @@ public class UpdateRequest<T extends ScimResource> {
         }
       }
       
-      if (!objectsToDelete.isEmpty()) {
-        if (node instanceof ObjectNode) {
-          ObjectNode on = (ObjectNode)node;
-          for(String name : objectsToDelete) {
-            on.putNull(name);
-          }
+      if (!objectsToDelete.isEmpty() && node instanceof ObjectNode) {
+        ObjectNode on = (ObjectNode)node;
+        for(String name : objectsToDelete) {
+          on.putNull(name);
         }
       }
     }
@@ -303,48 +301,51 @@ public class UpdateRequest<T extends ScimResource> {
       JsonNode pathNode = patchNode.get(PATH);
       JsonNode valueNode = patchNode.get(VALUE);
 
-      PatchOperation operation = convertToPatchOperation(operationNode.asText(), pathNode.asText(), valueNode);
-      if (operation != null) {
-        operations.add(operation);
+      List<PatchOperation> nodeOperations = convertNodeToPatchOperations(operationNode.asText(), pathNode.asText(), valueNode);
+      if (!nodeOperations.isEmpty()) {
+        operations.addAll(nodeOperations);
       }
-    }
+    }    
+    
     return operations;
-
   }
 
-  private PatchOperation convertToPatchOperation(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
-
+  private List<PatchOperation> convertNodeToPatchOperations(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
+    log.info(operationNode + ", " + diffPath);
+    List<PatchOperation> operations = new ArrayList<>();
     PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
 
-    if (diffPath == null || diffPath.length() < 1) {
-      return null;
+    if (diffPath != null && diffPath.length() >= 1) {
+      ParseData parseData = new ParseData(diffPath);
+      
+      if (parseData.pathParts.isEmpty()) {
+        operations.add(handleExtensions(valueNode, patchOpType, parseData));
+      } else {
+        operations.addAll(handleAttributes(valueNode, patchOpType, parseData));
+      }
     }
     
-    ParseData parseData = new ParseData(diffPath);
-    
-    if (patchOpType == Type.REPLACE && valueNode instanceof ArrayNode) {
-      patchOpType = Type.ADD;
-    }
-
-    if (parseData.pathParts.isEmpty()) {
-      return handleExtensions(valueNode, patchOpType, parseData);
-    } else {
-      return handleAttributes(valueNode, patchOpType, parseData);
-    }
+    return operations;
   }
 
   private PatchOperation handleExtensions(JsonNode valueNode, Type patchOpType, ParseData parseData) throws JsonProcessingException {
     PatchOperation operation = new PatchOperation();
     operation.setOperation(patchOpType);
+    
     AttributeReference attributeReference = new AttributeReference(parseData.pathUri, null);
     PatchOperationPath patchOperationPath = new PatchOperationPath();
     patchOperationPath.setAttributeReference(attributeReference);
+    
     operation.setPath(patchOperationPath);
     operation.setValue(determineValue(patchOpType, valueNode, parseData));
+    
     return operation;
   }
 
-  private PatchOperation handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException, JsonProcessingException {
+  private List<PatchOperation> handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException, JsonProcessingException {
+    log.info("in handleAttributes");
+    List<PatchOperation> operations = new ArrayList<>();
+    
     List<String> attributeReferenceList = new ArrayList<>();
     ValueFilterExpression valueFilterExpression = null;
     List<String> subAttributes = new ArrayList<>();
@@ -352,54 +353,58 @@ public class UpdateRequest<T extends ScimResource> {
     boolean processingMultiValued = false;
     boolean processedMultiValued = false;
     boolean done = false;
-
+    
     int i = 0;
     for (String pathPart : parseData.pathParts) {
+      log.info(pathPart);
       if (done) {
         throw new RuntimeException("Path should be done... Attribute not supported by the schema: " + pathPart);
       } else if (processingMultiValued) {
         parseData.traverseObjectsInArray(pathPart, patchOpType);
 
-        if (parseData.isLastIndex(i) && patchOpType == PatchOperation.Type.ADD) {
-          break;
+        if (!parseData.isLastIndex(i) || patchOpType != PatchOperation.Type.ADD) {
+          if (parseData.originalObject instanceof TypedAttribute) {
+            TypedAttribute typedAttribute = (TypedAttribute) parseData.originalObject;
+            String type = typedAttribute.getType();
+            valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, type);
+          } else if (parseData.originalObject instanceof String || parseData.originalObject instanceof Number) {
+            String toString = parseData.originalObject.toString();
+            valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, toString);
+          } else if(parseData.originalObject instanceof Enum) {
+            Enum<?> tempEnum = (Enum<?>)parseData.originalObject;
+            valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, tempEnum.name());
+          } else {
+            log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+            valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, "?");
+          }
+          processingMultiValued = false;
+          processedMultiValued = true;
         }
-
-        if (parseData.originalObject instanceof TypedAttribute) {
-          TypedAttribute typedAttribute = (TypedAttribute) parseData.originalObject;
-          String type = typedAttribute.getType();
-          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("type"), CompareOperator.EQ, type);
-        } else if (parseData.originalObject instanceof String || parseData.originalObject instanceof Number) {
-          String toString = parseData.originalObject.toString();
-          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, toString);
-        } else if(parseData.originalObject instanceof Enum) {
-          Enum<?> tempEnum = (Enum<?>)parseData.originalObject;
-          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, tempEnum.name());
-        } else {
-          log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
-          valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, "?");
-        }
-        processingMultiValued = false;
-        processedMultiValued = true;
       } else {
         Attribute attribute = parseData.ac.getAttribute(pathPart);
-        if (attribute == null) {
-          // throw new RuntimeException("Attribute not supported by the schema:
-          // " + pathPart);
-          break;
-        }
-
-        if (processedMultiValued) {
-          subAttributes.add(pathPart);
-        } else {
-          attributeReferenceList.add(pathPart);
-        }
-
-        parseData.traverseObjects(pathPart, attribute);
-
-        if (attribute.isMultiValued()) {
-          processingMultiValued = true;
-        } else if (attribute.getType() != Attribute.Type.COMPLEX) {
-          done = true;
+        
+        if (attribute != null) {
+          if (processedMultiValued) {
+            subAttributes.add(pathPart);
+          } else {
+            log.info("Adding " + pathPart + " to attributeReferenceList");
+            attributeReferenceList.add(pathPart);
+          }
+  
+          parseData.traverseObjects(pathPart, attribute);
+  
+          if (patchOpType == Type.REPLACE && 
+              (parseData.resourceObject != null && parseData.resourceObject instanceof Collection && !((Collection<?>)parseData.resourceObject).isEmpty()) &&
+              (parseData.originalObject == null || 
+              (parseData.originalObject instanceof Collection && ((Collection<?>)parseData.originalObject).isEmpty()))) {
+            patchOpType = Type.ADD;
+          }
+          
+          if (attribute.isMultiValued()) {
+            processingMultiValued = true;
+          } else if (attribute.getType() != Attribute.Type.COMPLEX) {
+            done = true;
+          }
         }
       }
       ++i;
@@ -411,28 +416,46 @@ public class UpdateRequest<T extends ScimResource> {
       valueNode = null;
     }
     
-    if (patchOpType == Type.REPLACE && parseData.originalObject == null) {
-      patchOpType = Type.ADD;
-    }
-
-    PatchOperation operation = new PatchOperation();
-    operation.setOperation(patchOpType);
     if (!attributeReferenceList.isEmpty()) {
-      AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream().collect(Collectors.joining(".")));
-      PatchOperationPath patchOperationPath = new PatchOperationPath();
-      patchOperationPath.setAttributeReference(attributeReference);
-      patchOperationPath.setValueFilterExpression(valueFilterExpression);
-      patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
-
-      operation.setPath(patchOperationPath);
-      operation.setValue(determineValue(patchOpType, valueNode, parseData));
-
-      return operation;
-    } else {
-      return null;
+      Object value = determineValue(patchOpType, valueNode, parseData);
+      
+      if (value != null && value instanceof ArrayList) {
+        @SuppressWarnings("unchecked")
+        List<Object> objList = (List<Object>)value;
+        for (Object obj : objList) {
+          PatchOperation operation = buildPatchOperation(patchOpType, parseData, attributeReferenceList, valueFilterExpression, subAttributes, obj);
+          if (operation != null) {
+            operations.add(operation);
+          }
+        }
+      } else {
+        PatchOperation operation = buildPatchOperation(patchOpType, parseData, attributeReferenceList, valueFilterExpression, subAttributes, value);
+        if (operation != null) {
+          operations.add(operation);
+        }
+      }
     }
+    
+    return operations;
   }
   
+  private PatchOperation buildPatchOperation(PatchOperation.Type patchOpType, ParseData parseData, List<String> attributeReferenceList,
+                                             ValueFilterExpression valueFilterExpression, List<String> subAttributes, Object value) {
+    PatchOperation operation = new PatchOperation();
+    operation.setOperation(patchOpType);
+    
+    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attributeReferenceList.stream().collect(Collectors.joining(".")));
+    PatchOperationPath patchOperationPath = new PatchOperationPath();
+    patchOperationPath.setAttributeReference(attributeReference);
+    patchOperationPath.setValueFilterExpression(valueFilterExpression);
+    patchOperationPath.setSubAttributes(subAttributes.isEmpty() ? null : subAttributes.toArray(new String[subAttributes.size()]));
+
+    operation.setPath(patchOperationPath);
+    operation.setValue(value);
+    
+    return operation;
+  }
+    
   private Object determineValue(PatchOperation.Type patchOpType, JsonNode valueNode, ParseData parseData) throws JsonProcessingException {
     if (patchOpType == PatchOperation.Type.REMOVE) {
       return null;
@@ -456,7 +479,7 @@ public class UpdateRequest<T extends ScimResource> {
         return pojoNode.getPojo();
       } else if (valueNode instanceof ArrayNode) {
         ArrayNode arrayNode = (ArrayNode) valueNode;
-        List<Object> objectList = new ArrayList<Object>();
+        List<Object> objectList = new ArrayList<>();
         for(int i = 0; i < arrayNode.size(); i++) {
           Object subObject = determineValue(patchOpType, arrayNode.get(i), parseData);
           if (subObject != null) {
