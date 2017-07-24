@@ -238,7 +238,6 @@ public class UpdateRequestTest {
     
     user2.getPhoneNumbers().add(mobilePhone);
     user2.getPhoneNumbers().add(homePhone);
-
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
