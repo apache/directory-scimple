@@ -135,7 +135,7 @@ public class UpdateRequestTest {
 
     PatchOperation actual = assertSingleResult(result);
 
-    checkAssertions(actual, Type.REPLACE, "nickName", "Jon");
+    checkAssertions(actual, Type.ADD, "nickName", "Jon");
   }
   
   @Test
@@ -169,7 +169,7 @@ public class UpdateRequestTest {
 
     PatchOperation actual = assertSingleResult(result);
 
-    checkAssertions(actual, Type.REPLACE, "name.honorificPrefix", "Dr.");
+    checkAssertions(actual, Type.ADD, "name.honorificPrefix", "Dr.");
   }
 
   @Test
@@ -198,7 +198,7 @@ public class UpdateRequestTest {
    * ArrayList of objects to add.
    */
   @Test
-  public void testAddObjectsToEmptyCollection() throws Exception {
+  public void testAddObjectToEmptyCollection() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
     ScimUser user1 = createUser1();
@@ -217,7 +217,42 @@ public class UpdateRequestTest {
     PatchOperation operation = operations.get(0);
     Assert.assertNotNull(operation.getValue());
     Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(ArrayList.class, operation.getValue().getClass());
+    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
+  }
+  
+  @Test
+  public void testAddObjectsToEmptyCollection() throws Exception {
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
+
+    ScimUser user1 = createUser1();
+    user1.setPhoneNumbers(new ArrayList<PhoneNumber>());
+    ScimUser user2 = copy(user1);
+    
+    PhoneNumber mobilePhone = new GlobalPhoneNumberBuilder().globalNumber("+1(814)867-5306").build();
+    mobilePhone.setType("mobile");
+    mobilePhone.setPrimary(true);
+    
+    PhoneNumber homePhone = new GlobalPhoneNumberBuilder().globalNumber("+1(814)867-5307").build();
+    homePhone.setType("home");
+    homePhone.setPrimary(true);
+    
+    user2.getPhoneNumbers().add(mobilePhone);
+    user2.getPhoneNumbers().add(homePhone);
+    
+    updateRequest.initWithResource("1234", user1, user2);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    Assert.assertNotNull(operations);
+    Assert.assertEquals(2, operations.size());
+    
+    PatchOperation operation = operations.get(0);
+    Assert.assertNotNull(operation.getValue());
+    Assert.assertEquals(Type.ADD, operation.getOperation());
+    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
+    
+    operation = operations.get(1);
+    Assert.assertNotNull(operation.getValue());
+    Assert.assertEquals(Type.ADD, operation.getOperation());
+    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
   }
 
   @Test
@@ -506,7 +541,7 @@ public class UpdateRequestTest {
     PatchOperation operation = operations.get(0);
     Assert.assertNotNull(operation.getValue());
     Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(ArrayList.class, operation.getValue().getClass());
+    Assert.assertEquals(Photo.class, operation.getValue().getClass());
   }
   
   @Test

@@ -342,6 +342,7 @@ public class UpdateRequest<T extends ScimResource> {
     return operation;
   }
 
+  @SuppressWarnings("unchecked")
   private List<PatchOperation> handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException, JsonProcessingException {
     log.info("in handleAttributes");
     List<PatchOperation> operations = new ArrayList<>();
@@ -416,16 +417,27 @@ public class UpdateRequest<T extends ScimResource> {
       valueNode = null;
     }
     
+    if (patchOpType == Type.REPLACE && parseData.originalObject == null) {
+      patchOpType = Type.ADD;
+    }
+        
     if (!attributeReferenceList.isEmpty()) {
       Object value = determineValue(patchOpType, valueNode, parseData);
       
       if (value != null && value instanceof ArrayList) {
-        @SuppressWarnings("unchecked")
         List<Object> objList = (List<Object>)value;
-        for (Object obj : objList) {
-          PatchOperation operation = buildPatchOperation(patchOpType, parseData, attributeReferenceList, valueFilterExpression, subAttributes, obj);
-          if (operation != null) {
-            operations.add(operation);
+        
+        if (!objList.isEmpty()) {
+          Object firstElement = objList.get(0); 
+          if (firstElement instanceof ArrayList) {
+            objList = (List<Object>) firstElement;
+          }
+          
+          for (Object obj : objList) {
+            PatchOperation operation = buildPatchOperation(patchOpType, parseData, attributeReferenceList, valueFilterExpression, subAttributes, obj);
+            if (operation != null) {
+              operations.add(operation);
+            }
           }
         }
       } else {
