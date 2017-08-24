@@ -18,6 +18,7 @@ import edu.psu.swe.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import edu.psu.swe.scim.spec.protocol.data.ListResponse;
 import edu.psu.swe.scim.spec.protocol.data.PatchRequest;
 import edu.psu.swe.scim.spec.protocol.data.SearchRequest;
+import edu.psu.swe.scim.spec.protocol.exception.ScimException;
 import edu.psu.swe.scim.spec.protocol.search.SortOrder;
 import edu.psu.swe.scim.spec.resources.ScimResource;
 import io.swagger.annotations.Api;
@@ -34,6 +35,7 @@ public interface BaseResourceTypeResource<T> {
    * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.4.1">Scim spec,
    *      retrieving known resources</a>
    * @return
+   * @throws ScimException 
    * @throws UnableToRetrieveResourceException 
    */
   @GET
@@ -48,7 +50,7 @@ public interface BaseResourceTypeResource<T> {
                 })
     default Response getById(@ApiParam(value="id", required=true) @PathParam("id") String id, 
                              @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -72,7 +74,7 @@ public interface BaseResourceTypeResource<T> {
                                  @ApiParam(value="sortBy", required=false) @QueryParam("sortBy") AttributeReference sortBy,
                                  @ApiParam(value="sortOrder", required=false) @QueryParam("sortOrder") SortOrder sortOrder,
                                  @ApiParam(value="startIndex", required=false) @QueryParam("startIndex") Integer startIndex,
-                                 @ApiParam(value="count", required=false) @QueryParam("count") Integer count) throws Exception {
+                                 @ApiParam(value="count", required=false) @QueryParam("count") Integer count) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -88,7 +90,7 @@ public interface BaseResourceTypeResource<T> {
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 409, message = "Conflict"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response create(T resource,
                           @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -102,7 +104,7 @@ public interface BaseResourceTypeResource<T> {
   @Produces(Constants.SCIM_CONTENT_TYPE)
   @ApiOperation(value = "Search", produces=Constants.SCIM_CONTENT_TYPE, response = ListResponse.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response find(SearchRequest request) throws Exception {
+  default Response find(SearchRequest request) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -120,7 +122,7 @@ public interface BaseResourceTypeResource<T> {
   default Response update(T resource, 
                           @PathParam("id") String id,
                           @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -133,7 +135,7 @@ public interface BaseResourceTypeResource<T> {
   default Response patch(PatchRequest patchRequest,
                          @PathParam("id") String id,
                          @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                         @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                         @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -141,7 +143,7 @@ public interface BaseResourceTypeResource<T> {
   @Path("{id}")
   @ApiOperation(value = "Delete from the backing store", code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response delete(@ApiParam(value = "id", required = true) @PathParam("id") String id) throws Exception {
+  default Response delete(@ApiParam(value = "id", required = true) @PathParam("id") String id) throws ScimException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }
