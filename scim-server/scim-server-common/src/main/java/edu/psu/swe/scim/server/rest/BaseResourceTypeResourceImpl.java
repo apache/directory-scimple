@@ -505,7 +505,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @Override
-  public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws Exception {
+  public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     try {
       Provider<T> provider = getProviderInternal();
 
@@ -632,6 +632,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
   }
 
+  @SuppressWarnings("unchecked")
   private T processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
     ScimProcessingExtension annotation = provider.getClass()
                                                  .getAnnotation(ScimProcessingExtension.class);
