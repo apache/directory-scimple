@@ -261,17 +261,17 @@ public class UpdateRequest<T extends ScimResource> {
     }*/
 
     try {
-      log.info("Differences: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(differences));
+      log.debug("Differences: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(differences));
     } catch (JsonProcessingException e) {
-      log.info("Unable to debug differences: ", e);
+      log.error("Unable to debug differences: ", e);
     }
 
     List<PatchOperation> patchOps = convertToPatchOperations(differences);
 
     try {
-      log.info("Patch Ops: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(patchOps));
+      log.debug("Patch Ops: " + objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(patchOps));
     } catch (JsonProcessingException e) {
-      log.info("Unable to debug patch ops: ", e);
+      log.error("Unable to debug patch ops: ", e);
     }
 
     return patchOps;
