@@ -17,8 +17,10 @@ import edu.psu.swe.scim.spec.schema.Schema.Attribute.Returned;
 import edu.psu.swe.scim.spec.schema.Schema.Attribute.Uniqueness;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @ScimResourceType(id = ScimUser.RESOURCE_NAME, name = ScimUser.RESOURCE_NAME, schema = ScimUser.SCHEMA_URI, description = "Top level ScimUser", endpoint = "/Users")
 @XmlRootElement(name = ScimUser.RESOURCE_NAME)
@@ -123,20 +125,32 @@ public class ScimUser extends ScimResource implements Serializable {
   }
   
   public Optional<Address> getPrimaryAddress() {
+    if (addresses == null) {
+      return Optional.empty();
+    }
+    
     return addresses.stream()
-                    .filter(a -> a.primary)
+                    .filter(Address::getPrimary)
                     .findFirst();
   }
   
   public Optional<Email> getPrimaryEmailAddress() {
+    if (emails == null) {
+      return Optional.empty();
+    }
+    
     return emails.stream()
-                 .filter(e -> e.getPrimary())
+                 .filter(Email::getPrimary)
                  .findFirst();
   }
   
   public Optional<PhoneNumber> getPrimaryPhoneNumber() {
+    if (phoneNumbers == null) {
+      return Optional.empty();
+    }
+    
     return phoneNumbers.stream()
-                       .filter(p -> p.getPrimary())
+                       .filter(PhoneNumber::getPrimary)
                        .findFirst();
   }
 }
