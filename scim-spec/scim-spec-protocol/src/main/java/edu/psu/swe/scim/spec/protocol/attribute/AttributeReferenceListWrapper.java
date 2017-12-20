@@ -27,4 +27,10 @@ public class AttributeReferenceListWrapper {
       attributeReferences.add(attributeReference);
     }
   }
+  
+  public static AttributeReferenceListWrapper of(Set<AttributeReference> attributeReferences) {
+    AttributeReferenceListWrapper wrapper = new AttributeReferenceListWrapper("");
+    wrapper.attributeReferences = attributeReferences;
+    return wrapper;
+  }
 }
