@@ -35,7 +35,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
   private final Class<T> scimResourceClass;
   private final GenericType<ListResponse<T>> scimResourceListResponseGenericType;
   private final WebTarget target;
-  private final ScimClient scimClient;
+  private final InternalScimClient scimClient;
   private RestCall invoke = Invocation::invoke;
 
   public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType) {
@@ -49,7 +49,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     this.scimResourceClass = scimResourceClass;
     this.scimResourceListResponseGenericType = scimResourceListGenericType;
     this.target = this.client.target(baseUrl).path(endpoint);
-    this.scimClient = new ScimClient();
+    this.scimClient = new InternalScimClient();
   }
 
   public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType, RestCall invoke) {
@@ -179,7 +179,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     this.invoke = invoke;
   }
 
-  private class ScimClient implements BaseResourceTypeResource<T> {
+  private class InternalScimClient implements BaseResourceTypeResource<T> {
 
     private static final String ATTRIBUTES_QUERY_PARAM = "attributes";
     private static final String EXCLUDED_ATTRIBUTES_QUERY_PARAM = "excludedAttributes";
@@ -207,7 +207,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .path(id)
           .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
-          .request(Constants.SCIM_CONTENT_TYPE)
+          .request(getContentType())
           .buildGet();
 
       try {
@@ -230,7 +230,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .queryParam(SORT_ORDER_QUERY_PARAM, sortOrder != null ? sortOrder.name() : null)
           .queryParam(START_INDEX_QUERY_PARAM, startIndex)
           .queryParam(COUNT_QUERY_PARAM, count)
-          .request(Constants.SCIM_CONTENT_TYPE)
+          .request(getContentType())
           .buildGet();
 
       try {
@@ -248,8 +248,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       Invocation request = BaseScimClient.this.target
           .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
-          .request(Constants.SCIM_CONTENT_TYPE)
-          .buildPost(Entity.entity(resource, Constants.SCIM_CONTENT_TYPE));
+          .request(getContentType())
+          .buildPost(Entity.entity(resource, getContentType()));
 
       try {
         response = BaseScimClient.this.invoke.apply(request);
@@ -265,8 +265,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       Response response;
       Invocation request = BaseScimClient.this.target
           .path(".search")
-          .request(Constants.SCIM_CONTENT_TYPE)
-          .buildPost(Entity.entity(searchRequest, Constants.SCIM_CONTENT_TYPE));
+          .request(getContentType())
+          .buildPost(Entity.entity(searchRequest, getContentType()));
 
       try {
         response = BaseScimClient.this.invoke.apply(request);
@@ -284,8 +284,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .path(id)
           .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
-          .request(Constants.SCIM_CONTENT_TYPE)
-          .buildPut(Entity.entity(resource, Constants.SCIM_CONTENT_TYPE));
+          .request(getContentType())
+          .buildPut(Entity.entity(resource, getContentType()));
 
       try {
         response = BaseScimClient.this.invoke.apply(request);
@@ -303,8 +303,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .path(id)
           .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
-          .request(Constants.SCIM_CONTENT_TYPE)
-          .build("PATCH", Entity.entity(patchRequest, Constants.SCIM_CONTENT_TYPE));
+          .request(getContentType())
+          .build("PATCH", Entity.entity(patchRequest, getContentType()));
 
       try {
         response = BaseScimClient.this.invoke.apply(request);
@@ -320,7 +320,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
-          .request(Constants.SCIM_CONTENT_TYPE)
+          .request(getContentType())
           .buildDelete();
 
       try {
@@ -331,5 +331,9 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         throw toScimException(restClientException);
       }
     }
+  }
+
+  protected String getContentType() {
+    return Constants.SCIM_CONTENT_TYPE;
   }
 }
