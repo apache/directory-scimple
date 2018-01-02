@@ -38,6 +38,43 @@
     <url>https://github.com/PennState/scim</url>
   </scm>
 
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>ussmith</id>
+      <name>Shawn Smith</name>
+      <email>ses44@psu.edu</email>
+      <url>https://github.com/ussmith</url>
+      <timezone>-0500</timezone>
+      <organization>The Pennsylvania State University</organization>
+      <organizationUrl>https://www.psu.edu</organizationUrl>
+    </developer>
+    <developer>
+      <id>chrisharm</id>
+      <name>Christopher Harm</name>
+      <email>crh5255@psu.edu</email>
+      <url>https://github.com/chrisharm</url>
+      <timezone>-0500</timezone>
+      <organization>The Pennsylvania State University</organization>
+      <organizationUrl>https://www.psu.edu</organizationUrl>
+    </developer>
+    <developer>
+      <id>smoyer64</id>
+      <name>Steve Moyer</name>
+      <email>smoyer@psu.edu</email>
+      <url>https://github.com/smoyer64</url>
+      <timezone>-0500</timezone>
+      <organization>The Pennsylvania State University</organization>
+      <organizationUrl>https://www.psu.edu</organizationUrl>
+    </developer>
+  </developers>
+  
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
