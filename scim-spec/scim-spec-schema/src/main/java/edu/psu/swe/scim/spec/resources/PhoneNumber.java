@@ -48,6 +48,10 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
   private static final String VISUAL_SEPARATORS = "[\\(\\)\\-\\.]";
 
+  @Getter
+  @Setter
+  private static boolean strict = true;
+  
   @ScimAttribute(description = "Phone number of the User")
   String value;
 
@@ -119,35 +123,39 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       throw new PhoneNumberParseException("null values are illegal for phone numbers");
     }
 
-    PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
-    PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
-    p.setBuildParseTree(true);
-
-    p.addErrorListener(new BaseErrorListener() {
-      @Override
-      public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+    if (strict) {
+      PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
+      PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
+      p.setBuildParseTree(true);
+  
+      p.addErrorListener(new BaseErrorListener() {
+        @Override
+        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+          throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+        }
+      });
+  
+      PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
+      try {
+        ParseTree tree = p.phoneNumber();
+        ParseTreeWalker.DEFAULT.walk(tpl, tree);
+      } catch (IllegalStateException e) {
+        throw new PhoneNumberParseException(e);
       }
-    });
-
-    PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
-    try {
-      ParseTree tree = p.phoneNumber();
-      ParseTreeWalker.DEFAULT.walk(tpl, tree);
-    } catch (IllegalStateException e) {
-      throw new PhoneNumberParseException(e);
+  
+      PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
+  
+      this.value = parsedPhoneNumber.getValue();
+      this.number = parsedPhoneNumber.getNumber();
+      this.extension = parsedPhoneNumber.getExtension();
+      this.subAddress = parsedPhoneNumber.getSubAddress();
+      this.phoneContext = parsedPhoneNumber.getPhoneContext();
+      this.params = parsedPhoneNumber.getParams();
+      this.isGlobalNumber = parsedPhoneNumber.isGlobalNumber();
+      this.isDomainPhoneContext = parsedPhoneNumber.isDomainPhoneContext();
+    } else {
+      this.value = value;
     }
-
-    PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
-
-    this.value = parsedPhoneNumber.getValue();
-    this.number = parsedPhoneNumber.getNumber();
-    this.extension = parsedPhoneNumber.getExtension();
-    this.subAddress = parsedPhoneNumber.getSubAddress();
-    this.phoneContext = parsedPhoneNumber.getPhoneContext();
-    this.params = parsedPhoneNumber.getParams();
-    this.isGlobalNumber = parsedPhoneNumber.isGlobalNumber();
-    this.isDomainPhoneContext = parsedPhoneNumber.isDomainPhoneContext();
   }
 
   /*
