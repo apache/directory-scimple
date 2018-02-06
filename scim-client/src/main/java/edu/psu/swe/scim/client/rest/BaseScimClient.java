@@ -12,7 +12,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import edu.psu.swe.commons.jaxrs.ErrorMessage;
 import edu.psu.swe.commons.jaxrs.RestCall;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
