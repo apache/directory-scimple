@@ -3,6 +3,7 @@ package edu.psu.swe.scim.client.rest;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -11,6 +12,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.psu.swe.commons.jaxrs.ErrorMessage;
 import edu.psu.swe.commons.jaxrs.RestCall;
 import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
 import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
@@ -166,6 +168,9 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
 
         throw new ScimException(errorResponse, status);
       }
+    } catch (ProcessingException e) {
+      ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ScimException(er, Status.INTERNAL_SERVER_ERROR);
     } finally {
       RestClientUtil.close(response);
     }
