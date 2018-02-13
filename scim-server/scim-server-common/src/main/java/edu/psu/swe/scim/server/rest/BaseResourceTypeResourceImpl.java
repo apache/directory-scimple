@@ -459,6 +459,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         updated = provider.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
+      } catch (Exception e1) {
+        return createGenericExceptionResponse(e1, Status.INTERNAL_SERVER_ERROR);
       }
 
       // Process Attributes
@@ -556,6 +558,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         updated = provider.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
+      } catch (Exception e1) {
+        return createGenericExceptionResponse(e1, Status.INTERNAL_SERVER_ERROR);
       }
 
       // Process Attributes
