@@ -42,9 +42,11 @@ import io.swagger.jaxrs.PATCH;
  */
 //@formatter:on
 
-@Path("Me")
+@Path(SelfResource.PATH)
 @Api("SCIM")
 public interface SelfResource {
+
+  public static final String PATH = "Me";
 
   /**
    * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.4.1">Scim spec,
@@ -62,7 +64,7 @@ public interface SelfResource {
                   @ApiResponse(code=501, message="Not Implemented")
                 })
     default Response getSelf(@ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
+                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -78,7 +80,7 @@ public interface SelfResource {
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 409, message = "Conflict"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response create(ScimUser resource,
                           @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
+                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -94,7 +96,7 @@ public interface SelfResource {
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response update(ScimUser resource, 
                           @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) {
+                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -105,14 +107,14 @@ public interface SelfResource {
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response patch(PatchRequest patchRequest,
                          @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                         @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes)  {
+                         @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
   @DELETE
   @ApiOperation(value = "Delete self record", code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response delete() {
+  default Response delete() throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }
