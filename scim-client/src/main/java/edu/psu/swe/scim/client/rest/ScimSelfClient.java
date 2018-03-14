@@ -26,7 +26,7 @@ public class ScimSelfClient implements AutoCloseable {
 
   public ScimSelfClient(Client client, String baseUrl) {
     this.client = client;
-    this.target = this.client.target(SelfResource.PATH);
+    this.target = this.client.target(baseUrl).path(SelfResource.PATH);
     this.selfResourceClient = new SelfResourceClient();
   }
 
