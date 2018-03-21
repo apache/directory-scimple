@@ -14,12 +14,12 @@
     <dependency>
       <groupId>edu.psu.swe.scim</groupId>
       <artifactId>scim-spec-protocol</artifactId>
-      <version>2.21</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>edu.psu.swe.scim</groupId>
       <artifactId>scim-spec-schema</artifactId>
-      <version>2.21</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
