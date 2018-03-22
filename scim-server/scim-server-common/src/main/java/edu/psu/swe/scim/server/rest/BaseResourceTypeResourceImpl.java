@@ -257,7 +257,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return er.toResponse();
       } catch (Exception e) {
         log.error("Uncaught provider exception", e);
-        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
+
+        return provider.handleException(e);
       }
 
       EntityTag etag = null;
@@ -668,7 +669,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                   .build();
   }
 
-  private Response createGenericExceptionResponse(Exception e1, Status status) {
+  public static Response createGenericExceptionResponse(Throwable e1, Status status) {
     Status myStatus = status;
     if (myStatus == null) {
       myStatus = Status.INTERNAL_SERVER_ERROR;
