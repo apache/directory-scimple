@@ -118,7 +118,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           return createGenericExceptionResponse(e2, e2.getStatus());
         }
       } catch (Exception e) {
-        throw new ScimServerException(Status.INTERNAL_SERVER_ERROR, "Uncaught provider exception: " + e.getMessage(), e);
+        log.error("Uncaught provider exception", e);
+
+        return provider.handleException(e);
       }
 
       if (resource != null) {
@@ -344,7 +346,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e) {
         log.error("Uncaught provider exception", e);
-        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
+
+        return provider.handleException(e);
       }
 
       // If no resources are found, we should still return a ListResponse with
@@ -433,7 +436,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
         log.error("Uncaught provider exception", e);
-        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
+
+        return provider.handleException(e);
       }
 
       if (stored == null) {
@@ -461,7 +465,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e1) {
-        return createGenericExceptionResponse(e1, Status.INTERNAL_SERVER_ERROR);
+        log.error("Uncaught provider exception", e1);
+
+        return provider.handleException(e1);
       }
 
       // Process Attributes
@@ -532,7 +538,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
         log.error("Uncaught provider exception", e);
-        return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
+
+        return provider.handleException(e);
       }
 
       if (stored == null) {
@@ -560,7 +567,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e1) {
-        return createGenericExceptionResponse(e1, Status.INTERNAL_SERVER_ERROR);
+        log.error("Uncaught provider exception", e1);
+
+        return provider.handleException(e1);
       }
 
       // Process Attributes
@@ -609,31 +618,34 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response delete(String id) {
+    Response response;
     try {
-      Response response;
       Provider<T> provider = getProviderInternal();
 
-      endpointUtil.process(uriInfo);
-      response = Response.noContent()
-                         .build();
+      try {
+        endpointUtil.process(uriInfo);
+        response = Response.noContent()
+                           .build();
 
-      provider.delete(id);
-      return response;
-    } catch (UnableToDeleteResourceException e) {
-      Status status = e.getStatus();
-      Response response = Response.status(status)
-                                  .build();
+        provider.delete(id);
+        return response;
+      } catch (UnableToDeleteResourceException e) {
+        Status status = e.getStatus();
+        response = Response.status(status)
+                           .build();
 
-      log.error("Unable to delete resource", e);
+        log.error("Unable to delete resource", e);
 
-      return response;
+        return response;
+      } catch (Exception e) {
+        log.error("Uncaught provider exception", e);
+
+        return provider.handleException(e);
+      }
     } catch (ScimServerException sse) {
       LOG.error("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
-    } catch (Exception e) {
-      log.error("Uncaught provider exception", e);
-      return createGenericExceptionResponse(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
