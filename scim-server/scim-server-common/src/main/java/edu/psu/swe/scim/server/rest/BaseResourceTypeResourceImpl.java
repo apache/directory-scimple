@@ -566,6 +566,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         updated = provider.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
+      } catch (UnsupportedOperationException e2) {
+        return createGenericExceptionResponse(e2, Status.NOT_IMPLEMENTED);
       } catch (Exception e1) {
         log.error("Uncaught provider exception", e1);
 
