@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -82,7 +83,6 @@ public class AttributeUtil {
   }
   
   private <T extends ScimResource> T setAttributesForDisplayInternal(T resource, Returned ... removeAttributesOfTypes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
-
     T copy = cloneScimResource(resource);
     String resourceType = copy.getResourceType();
     Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
@@ -110,7 +110,7 @@ public class AttributeUtil {
       return setAttributesForDisplay(resource);
     } else {
       T copy = cloneScimResource(resource);
-
+      
       String resourceType = copy.getResourceType();
       Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
 
@@ -198,7 +198,6 @@ public class AttributeUtil {
   }
 
   private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
-
     if (attributeContainer != null && object != null) {
       for (Attribute attribute : attributeContainer.getAttributes()) {
         Field field = attribute.getField();
@@ -276,7 +275,9 @@ public class AttributeUtil {
 
     for (AttributeReference attributeReference : attributeReferences) {
       Set<Attribute> findAttributes = findAttribute(attributeReference, includeAttributeChain);
-      attributes.addAll(findAttributes);
+      if (!findAttributes.isEmpty()) {
+        attributes.addAll(findAttributes);
+      }
     }
 
     return attributes;
@@ -285,12 +286,14 @@ public class AttributeUtil {
   private Set<Attribute> findAttribute(AttributeReference attributeReference, boolean includeAttributeChain) throws AttributeDoesNotExistException {
     String schemaUrn = attributeReference.getUrn();
     Schema schema = null;
-
+    Set<Attribute> attributes;
+    
     if (!StringUtils.isEmpty(schemaUrn)) {
       schema = registry.getSchema(schemaUrn);
 
-      Set<Attribute> attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
-      if (attributes == null) {
+      attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
+      if (attributes.isEmpty()) {
+        log.error("Attribute " + attributeReference.getFullyQualifiedAttributeName() + "not found in schema " + schemaUrn);
         throw new AttributeDoesNotExistException(attributeReference.getFullyQualifiedAttributeName());
       }
       return attributes;
@@ -298,22 +301,27 @@ public class AttributeUtil {
 
     // Handle unqualified attributes, look in the core schemas
     schema = registry.getSchema(ScimUser.SCHEMA_URI);
-    Set<Attribute> attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
-    if (attributes != null) {
+    attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
+    if (!attributes.isEmpty()) {
       return attributes;
     }
 
     schema = registry.getSchema(ScimGroup.SCHEMA_URI);
     attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
-    if (attributes != null) {
+    if (!attributes.isEmpty()) {
       return attributes;
     }
 
+    log.error("Attribute " + attributeReference.getFullyQualifiedAttributeName() + "not found in any schema.");
     throw new AttributeDoesNotExistException(attributeReference.getFullyQualifiedAttributeName());
   }
 
   private Set<Attribute> findAttributeInSchema(Schema schema, AttributeReference attributeReference, boolean includeAttributeChain) {
     AttributeContainer attributeContainer = schema;
+    if (attributeContainer == null) {
+      return Collections.emptySet();
+    }
+    
     String[] attributeNames = attributeReference.getAttributeName();
 
     Set<Attribute> attributes = new HashSet<>();
@@ -322,7 +330,7 @@ public class AttributeUtil {
       attributeContainer = attributeContainer.getAttribute(attributeName);
 
       if (attributeContainer == null) {
-        return null;
+        return Collections.emptySet();
       }
 
       if (includeAttributeChain) {
