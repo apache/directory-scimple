@@ -32,6 +32,9 @@ import edu.psu.swe.scim.spec.resources.ScimResource;
 
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {
 
+  static final String ATTRIBUTES_QUERY_PARAM = "attributes";
+  static final String EXCLUDED_ATTRIBUTES_QUERY_PARAM = "excludedAttributes";
+
   private final Client client;
   private final Class<T> scimResourceClass;
   private final GenericType<ListResponse<T>> scimResourceListResponseGenericType;
@@ -141,7 +144,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     handleResponse(response);
   }
 
-  private static <E, T> E handleResponse(Response response, T type, Function<T, E> readEntity) throws ScimException {
+  static <E, T> E handleResponse(Response response, T type, Function<T, E> readEntity) throws ScimException {
     E entity;
 
     try {
@@ -159,7 +162,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return entity;
   }
 
-  private static void handleResponse(Response response) throws ScimException {
+  static void handleResponse(Response response) throws ScimException {
     try {
       if (!RestClientUtil.isSuccessful(response)) {
         Status status = Status.fromStatusCode(response.getStatus());
@@ -175,6 +178,15 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     }
   }
 
+  static ScimException toScimException(RestClientException restClientException) {
+    ScimException scimException;
+    Status status = restClientException.getErrorMessage().getStatus();
+    ErrorResponse errorResponse = new ErrorResponse(status, String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
+    scimException = new ScimException(errorResponse, status);
+
+    return scimException;
+  }
+
   public RestCall getInvoke() {
     return this.invoke;
   }
@@ -185,25 +197,12 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
 
   private class InternalScimClient implements BaseResourceTypeResource<T> {
 
-    private static final String ATTRIBUTES_QUERY_PARAM = "attributes";
-    private static final String EXCLUDED_ATTRIBUTES_QUERY_PARAM = "excludedAttributes";
     private static final String FILTER_QUERY_PARAM = "filter";
     private static final String SORT_BY_QUERY_PARAM = "sortBy";
     private static final String SORT_ORDER_QUERY_PARAM = "sortOrder";
     private static final String START_INDEX_QUERY_PARAM = "startIndex";
     private static final String COUNT_QUERY_PARAM = "count";
 
-    private ScimException toScimException(RestClientException restClientException) {
-      ScimException scimException;
-      
-      Status status = restClientException.getErrorMessage().getStatus();
-      ErrorResponse errorResponse = new ErrorResponse(status, String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
-
-      scimException = new ScimException(errorResponse, status);
-
-      return scimException;
-    }
-    
     @Override
     public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
       Response response;

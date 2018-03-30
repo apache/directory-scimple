@@ -6,4 +6,5 @@ public final class Constants {
   }
   
   public static final String SCIM_CONTENT_TYPE = "application/scim+json";
+  public static final String PATCH = "PATCH";
 }

@@ -111,15 +111,12 @@ public class UpdateRequestTest {
               .isNotNull();
   }
 
-  @Test
-  @Ignore
+  @Test(expected=UnsupportedOperationException.class)
   public void testPatchToUpdate() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
-    ScimUser result = updateRequest.getResource();
-    log.info("testPatchToUpdate: " + result);
-    Assertions.assertThat(result)
-              .isNotNull();
+        
+    updateRequest.getResource();
   }
 
   @Test
