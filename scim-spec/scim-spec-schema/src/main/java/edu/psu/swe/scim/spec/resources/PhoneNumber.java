@@ -71,7 +71,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
   @ScimAttribute(description = "A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
   @Getter
   @Setter
-  Boolean primary;
+  Boolean primary = false;
 
   @Setter(AccessLevel.NONE)
   @Getter
