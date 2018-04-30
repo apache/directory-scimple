@@ -4,7 +4,7 @@
   <parent>
     <groupId>edu.psu.swe.scim</groupId>
     <artifactId>scim-parent</artifactId>
-    <version>2.21</version>
+    <version>2.22</version>
   </parent>
 
   <artifactId>scim-errai</artifactId>
@@ -49,31 +49,6 @@
         <directory>target/generated-sources/delombok</directory>
       </resource>
     </resources>
-
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok-maven-plugin</artifactId>
-          <version>1.16.10.0</version>
-          <executions>
-            <execution>
-              <phase>generate-sources</phase>
-              <goals>
-                <goal>delombok</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <plugins>
-      <plugin>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
 
   </build>
 
@@ -137,6 +112,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

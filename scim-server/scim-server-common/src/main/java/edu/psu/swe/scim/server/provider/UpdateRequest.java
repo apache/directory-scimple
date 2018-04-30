@@ -175,8 +175,7 @@ public class UpdateRequest<T extends ScimResource> {
   }
 
   private T applyPatchOperations() {
-    // TODO Auto-generated method stub
-    return resource;
+    throw new java.lang.UnsupportedOperationException("PATCH operations are not implemented at this time.");
   }
   
   /**

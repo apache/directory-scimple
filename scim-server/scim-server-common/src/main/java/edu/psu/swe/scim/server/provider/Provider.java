@@ -2,11 +2,15 @@ package edu.psu.swe.scim.server.provider;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import edu.psu.swe.scim.server.exception.UnableToCreateResourceException;
 import edu.psu.swe.scim.server.exception.UnableToDeleteResourceException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveExtensionsException;
 import edu.psu.swe.scim.server.exception.UnableToRetrieveResourceException;
 import edu.psu.swe.scim.server.exception.UnableToUpdateResourceException;
+import edu.psu.swe.scim.server.rest.BaseResourceTypeResourceImpl;
 import edu.psu.swe.scim.spec.protocol.filter.FilterResponse;
 import edu.psu.swe.scim.spec.protocol.search.Filter;
 import edu.psu.swe.scim.spec.protocol.search.PageRequest;
@@ -97,5 +101,21 @@ public interface Provider<T extends ScimResource> {
    *         the appropriate list.
    */
   List<Class<? extends ScimExtension>> getExtensionList() throws UnableToRetrieveExtensionsException;
-  
+
+  /**
+   * <p>In the case where the provider throws an unhandled exception, this
+   * method will be passed that exception in order for the provider to convert
+   * it into the desired response.</p>
+   * <p>The returned response SHOULD fulfill the requirements for SCIM error
+   * responses as defined in <a
+   * href="https://tools.ietf.org/html/rfc7644#section-3.12">3.12. HTTP Status
+   * and Error Response Handling</a> of the SCIM specification.</p>
+   * <p>By default, exceptions are converted into a <code>500 Internal Server
+   * Error</code>.</p>
+   * @param unhandled
+   * @return
+   */
+  default Response handleException(Throwable unhandled) {
+    return BaseResourceTypeResourceImpl.createGenericExceptionResponse(unhandled, Status.INTERNAL_SERVER_ERROR);
+  }
 }
