@@ -60,11 +60,18 @@ public abstract class AbstractLexerParserTest {
 
   protected static final String[] VALUE_EXPRESSIONS = { VALUE_EXPRESSION_1, VALUE_EXPRESSION_2, VALUE_EXPRESSION_2_1, VALUE_EXPRESSION_3, VALUE_EXPRESSION_3_1};
 
+  protected static final String EXTENSION_1 = "urn:example:params:scim:schemas:extension:ExampleExtension:example pr";
+  protected static final String EXTENSION_2 = "urn:example:params:scim:schemas:extension:ExampleExtension:example.sub pr";
+  protected static final String EXTENSION_3 = "urn:example:params:scim:schemas:extension:ExampleExtension:examples[value eq true or type sw \"example\"]";
+  protected static final String EXTENSION_4 = "urn:example:params:scim:schemas:extension:ExampleExtension:example1 eq \"example1\" and urn:example:params:scim:schemas:extension:ExampleExtension:example2 eq \"example2\"";
+
+  protected static final String[] EXTENSIONS = { EXTENSION_1, EXTENSION_2, EXTENSION_3, EXTENSION_4 };
+
   protected static final String[] EXAMPLES_AND_EXTRAS = ArrayUtils.addAll(EXAMPLES, EXTRAS);
 
   protected static final String[] GROUPS_AND_VALUE_EXPRESSIONS = ArrayUtils.addAll(GROUPS, VALUE_EXPRESSIONS);
   
-  protected static final String[] ALL = ArrayUtils.addAll(EXAMPLES_AND_EXTRAS, GROUPS_AND_VALUE_EXPRESSIONS);
+  protected static final String[] ALL = ArrayUtils.addAll(ArrayUtils.addAll(EXAMPLES_AND_EXTRAS, GROUPS_AND_VALUE_EXPRESSIONS), EXTENSIONS);
 
   protected static final String[] MIXED_CASE = { JOHN_FILTER_MIXED_CASE_1, JOHN_FILTER_MIXED_CASE_2, JOHN_FILTER_MIXED_CASE_3, JOHN_FILTER_MIXED_CASE_4 };
 

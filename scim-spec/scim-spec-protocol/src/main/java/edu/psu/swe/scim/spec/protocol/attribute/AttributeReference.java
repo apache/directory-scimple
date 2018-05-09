@@ -2,8 +2,6 @@ package edu.psu.swe.scim.spec.protocol.attribute;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringUtils;
-
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 
@@ -15,53 +13,83 @@ public class AttributeReference implements Serializable {
   @Urn
   String urn;
 
-  String[] attributeName;
+  String parent;
 
-  protected AttributeReference() {
-  }
+  String attributeName;
 
-  public AttributeReference(String attributeReference) {
-    String substringBeforeLast = StringUtils.substringBeforeLast(attributeReference, ":");
-    String substringAfterLast = StringUtils.substringAfterLast(attributeReference, ":");
+  public AttributeReference(String name) {
+    int endOfUrn = name.lastIndexOf(':');
+    String[] attributes = name.substring(endOfUrn + 1).split("\\.");
 
-    if (StringUtils.isEmpty(substringAfterLast)) {
-      urn = null;
-      attributeName = parseAttributeName(substringBeforeLast);
+    if (endOfUrn > -1) {
+      this.urn = name.substring(0, endOfUrn);
+    }
+    if (attributes.length > 1) {
+      this.parent = attributes[0];
+      this.attributeName = attributes[1];
     } else {
-      urn = substringBeforeLast;
-      attributeName = parseAttributeName(substringAfterLast);
+      this.attributeName = attributes[0];
     }
   }
 
-  public AttributeReference(String urn, String attributeName) {
+  public AttributeReference(String urn, String name) {
     this.urn = urn;
-    this.attributeName = parseAttributeName(attributeName);
+    String[] attributes = name.split("\\.");
+
+    if (attributes.length > 1) {
+      this.parent = attributes[0];
+      this.attributeName = attributes[1];
+    } else {
+      this.attributeName = attributes[0];
+    }
   }
 
-  private String[] parseAttributeName(String attributeName) {
-    return StringUtils.split(attributeName, ".");
+  public AttributeReference(String urn, String parent, String name) {
+    this.urn = urn;
+    this.parent = parent;
+    this.attributeName = name;
   }
 
   public String getFullAttributeName() {
-    return StringUtils.join(attributeName, ".");
+    return (parent != null ? parent + "." : "") + this.attributeName;
   }
 
   public String getFullyQualifiedAttributeName() {
+    String fullyQualifiedAttributeName;
     StringBuilder sb = new StringBuilder();
-    if (urn != null) {
-      sb.append(urn);
-    }
-    if (urn != null && attributeName != null) {
+
+    if (this.urn != null) {
+      sb.append(this.urn);
       sb.append(":");
     }
-    if (attributeName != null) {
-      sb.append(StringUtils.join(attributeName, "."));
+    if (this.parent != null) {
+      sb.append(this.parent);
+      sb.append(".");
     }
-    return sb.toString();
+    sb.append(attributeName);
+
+    fullyQualifiedAttributeName = sb.toString();
+
+    return fullyQualifiedAttributeName;
   }
 
   public String getAttributeBase() {
-    return (urn != null ? (urn + ":") : "") + (attributeName != null ? StringUtils.join(attributeName, ".", 0, attributeName.length - 1) : "");
+    String attributeBase;
+    StringBuilder sb = new StringBuilder();
+
+    if (this.urn != null) {
+      sb.append(this.urn);
+
+      if (this.parent != null) {
+        sb.append(":");
+      }
+    }
+    if (this.parent != null) {
+      sb.append(this.parent);
+    }
+    attributeBase = sb.toString();
+
+    return attributeBase;
   }
 
 }

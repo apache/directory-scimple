@@ -19,22 +19,18 @@ public class PatchOperationPathTest {
         "name.familyName",
         "addresses[type eq \"work\"]",
         "members[value eq \"2819c223-7f76-453a-919d-413861904646\"]",
-        "members[value eq \"2819c223-7f76-453a-919d-413861904646\"].displayName",
-        "members[value eq \"2819c223-7f76-453a-919d-413861904646\"].displayName.value" };
+        "members[value eq \"2819c223-7f76-453a-919d-413861904646\"].displayName" };
   }
 
   @Test
   @Parameters(method = "pathValues")
   public void testPathParsing(String value) throws Exception {
     PatchOperationPath path = new PatchOperationPath(value);
-    log.info("AttributeReference: " + path.getAttributeReference());
-    log.info("ValueFilterExpression: " + path.getValueFilterExpression());
-    String[] subAttributes = path.getSubAttributes();
-    log.info("SubAttributes: " + (subAttributes != null ? Arrays.asList(subAttributes) : null));
+    log.info("ValuePathExpression: " + path.getValuePathExpression());
     
     String result = path.toString();
     log.info(result);
-    Assert.assertNotNull(path.getAttributeReference());
+    Assert.assertNotNull(path.getValuePathExpression());
     Assert.assertEquals(value.toLowerCase(), result.toLowerCase());
   }
 

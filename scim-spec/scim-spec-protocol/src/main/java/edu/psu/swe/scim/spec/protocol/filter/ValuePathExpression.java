@@ -9,46 +9,56 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ValuePathExpression implements FilterExpression {
+  // urn:parentAttribute[attributeExpression].subAttribute
+
   AttributeReference attributePath;
-  ValueFilterExpression valueFilter;
-  
-  public static ValuePathExpression fromFilterExpression(String attrRef, FilterExpression filterExpression) throws FilterParseException {
+  AttributeExpression attributeExpression;
+
+  public ValuePathExpression(AttributeReference attributePath) {
+    this.attributePath = attributePath;
+  }
+
+  public static ValuePathExpression fromAttributeExpression(String attrRef, AttributeExpression attributeExpression) throws FilterParseException {
     AttributeReference ref = new AttributeReference(attrRef);
-    return fromFilterExpression(ref, filterExpression);
+    return fromAttributeExpression(ref, attributeExpression);
   }
   
-  public static ValuePathExpression fromFilterExpression(AttributeReference attrRef, FilterExpression filterExpression) throws FilterParseException {
-        
+  public static ValuePathExpression fromAttributeExpression(AttributeReference attrRef, AttributeExpression attributeExpression) throws FilterParseException {
     ValuePathExpression vpe = new ValuePathExpression();
+
     vpe.setAttributePath(attrRef);
-    
-    if (filterExpression instanceof LogicalExpression) {
-      LogicalExpression le = (LogicalExpression) filterExpression;
-      vpe.setValueFilter(le); 
-      return vpe;
-    } else if (filterExpression instanceof GroupExpression) {
-      GroupExpression ge = (GroupExpression) filterExpression;
-      vpe.setValueFilter(ge);
-      return vpe;
-    } else if (filterExpression instanceof AttributePresentExpression) {
-      AttributePresentExpression ape = (AttributePresentExpression) filterExpression;
-      vpe.setValueFilter(ape);
-      return vpe;
-    } else if (filterExpression instanceof AttributeComparisonExpression) {
-      AttributeComparisonExpression ace = (AttributeComparisonExpression) filterExpression;
-      vpe.setValueFilter(ace);
-      return vpe;
-    } else if (filterExpression instanceof ValuePathExpression) {
-      throw new FilterParseException("Value path expressions can not own other value path expressions");
-    }
-      
+    vpe.setAttributeExpression(attributeExpression);
+
     return null;
   }
-  
-  
+
+  public static ValuePathExpression fromFilterExpression(String attribute, FilterExpression expression) throws FilterParseException {
+    if (!(expression instanceof AttributeExpression)) {
+      throw new FilterParseException(expression.getClass().getCanonicalName() + " is not an instance of " + AttributeExpression.class.getCanonicalName());
+    }
+    return fromAttributeExpression(attribute, (AttributeExpression) expression);
+  }
+
   @Override
   public String toFilter() {
-    return attributePath.getFullyQualifiedAttributeName() + "[" + valueFilter.toFilter() + "]";
+    String filter;
+
+    if (this.attributeExpression != null) {
+      String parentAttribute = this.attributePath.getParent();
+      String attributeExpressionFilter = this.attributeExpression.toUnqualifiedFilter();
+
+      if (parentAttribute != null) {
+        String base = this.attributePath.getAttributeBase();
+        String subAttribute = this.attributePath.getAttributeName();
+        filter = base + "[" + attributeExpressionFilter + "]." + subAttribute;
+      } else {
+        String attribute = this.attributePath.getFullyQualifiedAttributeName();
+        filter = attribute + "[" + attributeExpressionFilter + "]";
+      }
+    } else {
+      filter = this.attributePath.getFullyQualifiedAttributeName();
+    }
+    return filter;
   }
   
 }

@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import lombok.Value;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
+import lombok.Value;
 
 @Value
 public class AttributeComparisonExpression implements AttributeExpression, ValueFilterExpression {
@@ -21,10 +21,18 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
   
   @Override
   public String toFilter() {
-    String compareValueString = null;
-    if (compareValue == null) {
-      compareValueString = "null";
-    } else if (compareValue instanceof String) {
+    String filter;
+    String urn = this.attributePath.getUrn();
+    filter = (urn != null ? urn + ":" : "") + this.toUnqualifiedFilter();
+
+    return filter;
+  }
+
+  @Override
+  public String toUnqualifiedFilter() {
+    String compareValueString;
+
+    if (compareValue instanceof String) {
       compareValueString = QUOTE + compareValue + QUOTE;
     } else if (compareValue instanceof Number) {
       compareValueString = compareValue.toString();
@@ -34,10 +42,12 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
       compareValueString = QUOTE + toDateString((LocalDate) compareValue) + QUOTE;
     } else if (compareValue instanceof LocalDateTime) {
       compareValueString = QUOTE + toDateTimeString((LocalDateTime) compareValue) + QUOTE;
+    } else {
+      compareValueString = "null";
     }
-
-    return attributePath.getFullyQualifiedAttributeName() + " " + operation + " " + compareValueString;
+    return attributePath.getAttributeName() + " " + operation + " " + compareValueString;
   }
+
   public static String toDateString(Date date) {
     SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
     return dateFormat.format(date);
@@ -54,5 +64,11 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
   
   public static String toDateTimeString(LocalDateTime ldt) {
     return ldt.format(DateTimeFormatter.ISO_DATE_TIME);
+  }
+
+  @Override
+  public void setAttributePath(String urn, String parentAttributeName) {
+    this.attributePath.setUrn(urn);
+    this.attributePath.setParent(parentAttributeName);
   }
 }

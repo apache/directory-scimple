@@ -321,31 +321,34 @@ public class AttributeUtil {
     if (attributeContainer == null) {
       return Collections.emptySet();
     }
-    
-    String[] attributeNames = attributeReference.getAttributeName();
-
+    String parentAttributeName = attributeReference.getParent();
+    String attributeName = attributeReference.getAttributeName();
     Set<Attribute> attributes = new HashSet<>();
 
-    for (String attributeName : attributeNames) {
-      attributeContainer = attributeContainer.getAttribute(attributeName);
+    if (parentAttributeName != null) {
+      attributeContainer = attributeContainer.getAttribute(parentAttributeName);
 
       if (attributeContainer == null) {
         return Collections.emptySet();
       }
-
       if (includeAttributeChain) {
         Attribute attribute = (Attribute) attributeContainer;
         attributes.add(attribute);
       }
     }
-    
+    attributeContainer = attributeContainer.getAttribute(attributeName);
+
+    if (attributeContainer == null) {
+      return Collections.emptySet();
+    }
     Attribute attribute = (Attribute) attributeContainer;
+
     attributes.add(attribute);
+
     if (attribute.getType() == Type.COMPLEX && includeAttributeChain) {
       List<Attribute> remaininAttributes = attribute.getAttributes();
       attributes.addAll(remaininAttributes);
     }
-    
     return attributes;
   }
 

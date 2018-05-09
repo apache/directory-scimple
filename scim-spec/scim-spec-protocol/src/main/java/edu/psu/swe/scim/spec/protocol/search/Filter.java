@@ -1,7 +1,7 @@
 package edu.psu.swe.scim.spec.protocol.search;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -54,14 +54,14 @@ public class Filter {
   }
 
   protected FilterExpression parseFilter(String filter) throws FilterParseException {
-    FilterLexer l = new FilterLexer(new ANTLRInputStream(filter));
+    FilterLexer l = new FilterLexer(CharStreams.fromString(filter));
     FilterParser p = new FilterParser(new CommonTokenStream(l));
     p.setBuildParseTree(true);
 
     p.addErrorListener(new BaseErrorListener() {
       @Override
       public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+        throw new IllegalStateException("failed to parse at line " + line + ":" + charPositionInLine + " due to " + msg, e);
       }
     });
 
