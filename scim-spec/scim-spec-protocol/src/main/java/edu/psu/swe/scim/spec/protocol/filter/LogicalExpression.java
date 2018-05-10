@@ -23,4 +23,21 @@ public class LogicalExpression implements FilterExpression, ValueFilterExpressio
     
     return leftString + " " + operator + " " + rightString;
   }
+
+  @Override
+  public void setAttributePath(String urn, String parentAttributeName) {
+    this.left.setAttributePath(urn, parentAttributeName);
+    this.right.setAttributePath(urn, parentAttributeName);
+  }
+
+  @Override
+  public String toUnqualifiedFilter() {
+    boolean leftParens = this.left instanceof LogicalExpression;
+    boolean rightParens = this.right instanceof LogicalExpression;
+
+    String leftString = (leftParens ? "(" : "") + left.toUnqualifiedFilter() + (leftParens ? ")" : "");
+    String rightString = (rightParens ? "(" : "") + right.toUnqualifiedFilter() + (rightParens ? ")" : "");
+
+    return leftString + " " + operator + " " + rightString;
+  }
 }

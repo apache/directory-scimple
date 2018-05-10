@@ -4,4 +4,7 @@ public interface FilterExpression {
   
   public String toFilter();
 
+  void setAttributePath(String urn, String parentAttributeName);
+
+  String toUnqualifiedFilter();
 }

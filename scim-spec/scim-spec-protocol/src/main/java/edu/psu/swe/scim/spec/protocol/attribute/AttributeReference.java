@@ -27,20 +27,23 @@ public class AttributeReference implements Serializable {
     if (attributes.length > 1) {
       this.parent = attributes[0];
       this.attributeName = attributes[1];
-    } else {
+    } else if (attributes.length > 0) {
       this.attributeName = attributes[0];
     }
   }
 
   public AttributeReference(String urn, String name) {
     this.urn = urn;
-    String[] attributes = name.split("\\.");
 
-    if (attributes.length > 1) {
-      this.parent = attributes[0];
-      this.attributeName = attributes[1];
-    } else {
-      this.attributeName = attributes[0];
+    if (name != null) {
+      String[] attributes = name.split("\\.");
+
+      if (attributes.length > 1) {
+        this.parent = attributes[0];
+        this.attributeName = attributes[1];
+      } else {
+        this.attributeName = attributes[0];
+      }
     }
   }
 
@@ -60,14 +63,21 @@ public class AttributeReference implements Serializable {
 
     if (this.urn != null) {
       sb.append(this.urn);
-      sb.append(":");
+
+      if (this.parent != null || this.attributeName != null) {
+        sb.append(":");
+      }
     }
     if (this.parent != null) {
       sb.append(this.parent);
-      sb.append(".");
-    }
-    sb.append(attributeName);
 
+      if (this.attributeName != null) {
+        sb.append(".");
+      }
+    }
+    if (this.attributeName != null) {
+      sb.append(attributeName);
+    }
     fullyQualifiedAttributeName = sb.toString();
 
     return fullyQualifiedAttributeName;

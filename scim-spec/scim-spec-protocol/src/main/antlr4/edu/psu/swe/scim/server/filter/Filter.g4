@@ -4,7 +4,9 @@ import Json, Urn;
 
 filter: filterExpression;
 
-patchPath: attributePath=partialAttributePath ('[' attributeExpression ']')? ('.' subAttributeName=AttributeName)?;
+patchPath: attributePath=partialAttributePath '[' attributeExpression ']' ('.' subAttributeName=AttributeName)? # PatchPathFull
+         | attributePath=partialPatchPath                                                                       # PatchPathPartial
+         ;
 
 
 filterExpression: filterExpression SP op=LogicOp SP filterExpression                        # FilterLogicExpression
@@ -24,6 +26,8 @@ attributeExpression: attributeExpression SP op=LogicOp SP attributeExpression   
 fullAttributePath: FullAttributePath | ParentChildAttributePath | UrnAndNameAttributePath;
 
 partialAttributePath: UrnAndNameAttributePath | AttributeName;
+
+partialPatchPath: FullAttributePath | UrnAndNameAttributePath | ParentChildAttributePath | AttributeName;
 
 
 LogicOp: [aA][nN][dD]

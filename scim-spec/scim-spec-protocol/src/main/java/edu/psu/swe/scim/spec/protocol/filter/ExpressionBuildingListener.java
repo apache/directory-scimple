@@ -45,7 +45,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
     AttributeReference attributeReference = new AttributeReference(attributePath);
     String urn = attributeReference.getUrn();
     String parentAttributeName = attributeReference.getAttributeName();
-    AttributeExpression attributeExpression = (AttributeExpression) expressionStack.pop();
+    FilterExpression attributeExpression = (FilterExpression) expressionStack.pop();
     ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference, attributeExpression);
 
     attributeExpression.setAttributePath(urn, parentAttributeName);
@@ -91,9 +91,9 @@ public class ExpressionBuildingListener extends FilterBaseListener {
   public void exitAttributeLogicExpression(AttributeLogicExpressionContext ctx) {
     String op = ctx.op.getText().toUpperCase();
     LogicalOperator logicalOperator = LogicalOperator.valueOf(op);
-    AttributeExpression right = (AttributeExpression) expressionStack.pop();
-    AttributeExpression left = (AttributeExpression) expressionStack.pop();
-    AttributeLogicExpression attributeLogicExpression = new AttributeLogicExpression(left, logicalOperator, right);
+    FilterExpression right = expressionStack.pop();
+    FilterExpression left = expressionStack.pop();
+    LogicalExpression attributeLogicExpression = new LogicalExpression(left, logicalOperator, right);
 
     expressionStack.push(attributeLogicExpression);
   }
@@ -101,8 +101,8 @@ public class ExpressionBuildingListener extends FilterBaseListener {
   @Override
   public void exitAttributeGroupExpression(AttributeGroupExpressionContext ctx) {
     boolean not = ctx.not != null;
-    AttributeExpression attributeExpression = (AttributeExpression) expressionStack.pop();
-    AttributeGroupExpression attributeGroupExpression = new AttributeGroupExpression(not, attributeExpression);
+    FilterExpression attributeExpression = expressionStack.pop();
+    GroupExpression attributeGroupExpression = new GroupExpression(not, attributeExpression);
 
     expressionStack.push(attributeGroupExpression);
   }

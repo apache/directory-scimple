@@ -4,7 +4,7 @@ import lombok.Value;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 
 @Value
-public class AttributePresentExpression implements AttributeExpression, ValueFilterExpression {
+public class AttributePresentExpression implements FilterExpression, ValueFilterExpression {
   AttributeReference attributePath;
 
   @Override

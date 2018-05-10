@@ -1,7 +1,7 @@
 package edu.psu.swe.scim.spec.protocol.data;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -30,7 +30,7 @@ public class PatchOperationPath {
   }
 
   protected void parsePatchPath(String patchPath) throws FilterParseException {
-    FilterLexer l = new FilterLexer(CharStreams.fromString(patchPath));
+    FilterLexer l = new FilterLexer(new ANTLRInputStream(patchPath));
     FilterParser p = new FilterParser(new CommonTokenStream(l));
     p.setBuildParseTree(true);
 
@@ -54,7 +54,7 @@ public class PatchOperationPath {
 
   @Override
   public String toString() {
-    return valuePathExpression.toString();
+    return valuePathExpression.toFilter();
   }
 
 }

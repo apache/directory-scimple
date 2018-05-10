@@ -10,7 +10,7 @@ import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import lombok.Value;
 
 @Value
-public class AttributeComparisonExpression implements AttributeExpression, ValueFilterExpression {
+public class AttributeComparisonExpression implements FilterExpression, ValueFilterExpression {
   AttributeReference attributePath;
   CompareOperator operation;
   Object compareValue;
