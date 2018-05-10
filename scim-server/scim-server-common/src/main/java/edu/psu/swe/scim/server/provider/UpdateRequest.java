@@ -48,7 +48,7 @@ import edu.psu.swe.scim.spec.protocol.data.PatchOperation.Type;
 import edu.psu.swe.scim.spec.protocol.data.PatchOperationPath;
 import edu.psu.swe.scim.spec.protocol.filter.AttributeComparisonExpression;
 import edu.psu.swe.scim.spec.protocol.filter.CompareOperator;
-import edu.psu.swe.scim.spec.protocol.filter.ValueFilterExpression;
+import edu.psu.swe.scim.spec.protocol.filter.FilterExpression;
 import edu.psu.swe.scim.spec.protocol.filter.ValuePathExpression;
 import edu.psu.swe.scim.spec.resources.ScimExtension;
 import edu.psu.swe.scim.spec.resources.ScimResource;
@@ -349,7 +349,7 @@ public class UpdateRequest<T extends ScimResource> {
     List<PatchOperation> operations = new ArrayList<>();
     
     List<String> attributeReferenceList = new ArrayList<>();
-    ValueFilterExpression valueFilterExpression = null;
+    FilterExpression valueFilterExpression = null;
     List<String> subAttributes = new ArrayList<>();
 
     boolean processingMultiValued = false;
@@ -453,14 +453,19 @@ public class UpdateRequest<T extends ScimResource> {
   }
   
   private PatchOperation buildPatchOperation(PatchOperation.Type patchOpType, ParseData parseData, List<String> attributeReferenceList,
-                                             ValueFilterExpression valueFilterExpression, List<String> subAttributes, Object value) {
+                                             FilterExpression valueFilterExpression, List<String> subAttributes, Object value) {
     PatchOperation operation = new PatchOperation();
     operation.setOperation(patchOpType);
     String attribute = attributeReferenceList.size() > 1 ? attributeReferenceList.get(1) : attributeReferenceList.get(0);
     String parent = attributeReferenceList.size() > 1 ? attributeReferenceList.get(0) : null;
+
+    if (parent == null && !subAttributes.isEmpty()) {
+      parent = attribute;
+      attribute = subAttributes.get(0);
+    }
     AttributeReference attributeReference = new AttributeReference(parseData.pathUri, parent, attribute);
     PatchOperationPath patchOperationPath = new PatchOperationPath();
-    ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference);
+    ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference, valueFilterExpression);
     patchOperationPath.setValuePathExpression(valuePathExpression);
 
     operation.setPath(patchOperationPath);
