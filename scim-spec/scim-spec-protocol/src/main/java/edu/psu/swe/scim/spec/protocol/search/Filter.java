@@ -34,12 +34,12 @@ public class Filter {
   }
 
   public Filter(String filter) throws FilterParseException {
-    log.info("Creating a filter - " + filter);
+    log.debug("Creating a filter - " + filter);
     setFilter(filter);
   }
   
   public Filter(FilterExpression filterExpression) {
-    log.info("Creating a filter - " + filterExpression.toString());
+    log.debug("Creating a filter - " + filterExpression.toString());
     expression = filterExpression;
     this.filter = filterExpression.toString();
   }
