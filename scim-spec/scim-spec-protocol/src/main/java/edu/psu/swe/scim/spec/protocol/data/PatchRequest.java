@@ -22,6 +22,6 @@ public class PatchRequest extends BaseResource {
     super(SCHEMA_URI);
   }
   
-  @XmlElement
+  @XmlElement(name = "Operations")
   List<PatchOperation> patchOperationList;
 }
