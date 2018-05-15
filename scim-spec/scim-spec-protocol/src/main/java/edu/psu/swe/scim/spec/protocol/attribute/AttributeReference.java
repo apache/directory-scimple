@@ -13,22 +13,20 @@ public class AttributeReference implements Serializable {
   @Urn
   String urn;
 
-  String parent;
-
   String attributeName;
+
+  String subAttributeName;
 
   public AttributeReference(String name) {
     int endOfUrn = name.lastIndexOf(':');
     String[] attributes = name.substring(endOfUrn + 1).split("\\.");
+    this.attributeName = attributes[0];
 
     if (endOfUrn > -1) {
       this.urn = name.substring(0, endOfUrn);
     }
     if (attributes.length > 1) {
-      this.parent = attributes[0];
-      this.attributeName = attributes[1];
-    } else if (attributes.length > 0) {
-      this.attributeName = attributes[0];
+      this.subAttributeName = attributes[1];
     }
   }
 
@@ -37,24 +35,22 @@ public class AttributeReference implements Serializable {
 
     if (name != null) {
       String[] attributes = name.split("\\.");
+      this.attributeName = attributes[0];
 
       if (attributes.length > 1) {
-        this.parent = attributes[0];
-        this.attributeName = attributes[1];
-      } else {
-        this.attributeName = attributes[0];
+        this.subAttributeName = attributes[1];
       }
     }
   }
 
-  public AttributeReference(String urn, String parent, String name) {
+  public AttributeReference(String urn, String attributeName, String subAttributeName) {
     this.urn = urn;
-    this.parent = parent;
-    this.attributeName = name;
+    this.attributeName = attributeName;
+    this.subAttributeName = subAttributeName;
   }
 
   public String getFullAttributeName() {
-    return (parent != null ? parent + "." : "") + this.attributeName;
+    return this.attributeName + (this.subAttributeName != null ? "." + this.subAttributeName : "");
   }
 
   public String getFullyQualifiedAttributeName() {
@@ -64,19 +60,16 @@ public class AttributeReference implements Serializable {
     if (this.urn != null) {
       sb.append(this.urn);
 
-      if (this.parent != null || this.attributeName != null) {
+      if (this.attributeName != null) {
         sb.append(":");
       }
     }
-    if (this.parent != null) {
-      sb.append(this.parent);
-
-      if (this.attributeName != null) {
-        sb.append(".");
-      }
-    }
     if (this.attributeName != null) {
-      sb.append(attributeName);
+      sb.append(this.attributeName);
+    }
+    if (this.subAttributeName != null) {
+      sb.append(".");
+      sb.append(subAttributeName);
     }
     fullyQualifiedAttributeName = sb.toString();
 
@@ -90,12 +83,12 @@ public class AttributeReference implements Serializable {
     if (this.urn != null) {
       sb.append(this.urn);
 
-      if (this.parent != null) {
+      if (this.subAttributeName != null) {
         sb.append(":");
+        sb.append(this.attributeName);
       }
-    }
-    if (this.parent != null) {
-      sb.append(this.parent);
+    } else if (this.subAttributeName != null) {
+      sb.append(this.attributeName);
     }
     attributeBase = sb.toString();
 

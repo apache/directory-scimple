@@ -27,8 +27,8 @@ public class PatchPathListener extends ExpressionBuildingListener {
     attributeExpression.setAttributePath(urn, parentAttributeName);
 
     if (subAttributeName != null) {
-      attributePath.setParent(parentAttributeName);
-      attributePath.setAttributeName(subAttributeName);
+      attributePath.setAttributeName(parentAttributeName);
+      attributePath.setSubAttributeName(subAttributeName);
     }
     this.valuePathExpression = new ValuePathExpression(attributePath, attributeExpression);
   }

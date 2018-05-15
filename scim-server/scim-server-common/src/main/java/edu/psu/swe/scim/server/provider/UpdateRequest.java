@@ -456,14 +456,13 @@ public class UpdateRequest<T extends ScimResource> {
                                              FilterExpression valueFilterExpression, List<String> subAttributes, Object value) {
     PatchOperation operation = new PatchOperation();
     operation.setOperation(patchOpType);
-    String attribute = attributeReferenceList.size() > 1 ? attributeReferenceList.get(1) : attributeReferenceList.get(0);
-    String parent = attributeReferenceList.size() > 1 ? attributeReferenceList.get(0) : null;
+    String attribute = attributeReferenceList.get(0);
+    String subAttribute = attributeReferenceList.size() > 1 ? attributeReferenceList.get(1) : null;
 
-    if (parent == null && !subAttributes.isEmpty()) {
-      parent = attribute;
-      attribute = subAttributes.get(0);
+    if (subAttribute == null && !subAttributes.isEmpty()) {
+      subAttribute = subAttributes.get(0);
     }
-    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, parent, attribute);
+    AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attribute, subAttribute);
     PatchOperationPath patchOperationPath = new PatchOperationPath();
     ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference, valueFilterExpression);
     patchOperationPath.setValuePathExpression(valuePathExpression);

@@ -35,13 +35,12 @@ public class ValuePathExpression implements FilterExpression {
     String filter;
 
     if (this.attributeExpression != null) {
-      String parentAttribute = this.attributePath.getParent();
+      String subAttributeName = this.attributePath.getSubAttributeName();
       String attributeExpressionFilter = this.attributeExpression.toUnqualifiedFilter();
 
-      if (parentAttribute != null) {
+      if (subAttributeName != null) {
         String base = this.attributePath.getAttributeBase();
-        String subAttribute = this.attributePath.getAttributeName();
-        filter = base + "[" + attributeExpressionFilter + "]." + subAttribute;
+        filter = base + "[" + attributeExpressionFilter + "]." + subAttributeName;
       } else {
         String attribute = this.attributePath.getFullyQualifiedAttributeName();
         filter = attribute + "[" + attributeExpressionFilter + "]";
@@ -55,7 +54,9 @@ public class ValuePathExpression implements FilterExpression {
   @Override
   public void setAttributePath(String urn, String parentAttributeName) {
     this.attributePath.setUrn(urn);
-    this.attributePath.setParent(parentAttributeName);
+    String subAttributeName = this.attributePath.getAttributeName();
+    this.attributePath.setAttributeName(parentAttributeName);
+    this.attributePath.setSubAttributeName(subAttributeName);
     this.attributeExpression.setAttributePath(urn, parentAttributeName);
   }
 
@@ -64,19 +65,18 @@ public class ValuePathExpression implements FilterExpression {
     String filter;
 
     if (this.attributeExpression != null) {
-      String parentAttribute = this.attributePath.getParent();
+      String attributeName = this.attributePath.getAttributeName();
+      String subAttributeName = this.attributePath.getSubAttributeName();
       String attributeExpressionFilter = this.attributeExpression.toUnqualifiedFilter();
 
-      if (parentAttribute != null) {
-        String subAttribute = this.attributePath.getAttributeName();
-        filter = parentAttribute + "[" + attributeExpressionFilter + "]." + subAttribute;
+      if (subAttributeName != null) {
+        filter = attributeName + "[" + attributeExpressionFilter + "]." + subAttributeName;
       } else {
-        String attribute = this.attributePath.getAttributeName();
-        filter = attribute + "[" + attributeExpressionFilter + "]";
+        filter = attributeName + "[" + attributeExpressionFilter + "]";
       }
     } else {
-      String parent = this.attributePath.getParent();
-      filter = (parent != null ? parent + "." : "") + this.attributePath.getAttributeName();
+      String subAttributeName = this.attributePath.getSubAttributeName();
+      filter = this.attributePath.getAttributeName() + (subAttributeName != null ? "." + subAttributeName : "");
     }
     return filter;
   }

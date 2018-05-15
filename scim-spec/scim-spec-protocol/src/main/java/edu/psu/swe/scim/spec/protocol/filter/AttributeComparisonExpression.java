@@ -31,6 +31,8 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
   @Override
   public String toUnqualifiedFilter() {
     String compareValueString;
+    String subAttributeName = this.attributePath.getSubAttributeName();
+    String attributeName = subAttributeName != null ? subAttributeName : this.attributePath.getAttributeName();
 
     if (compareValue instanceof String) {
       compareValueString = QUOTE + compareValue + QUOTE;
@@ -45,7 +47,7 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     } else {
       compareValueString = "null";
     }
-    return attributePath.getAttributeName() + " " + operation + " " + compareValueString;
+    return attributeName + " " + operation + " " + compareValueString;
   }
 
   public static String toDateString(Date date) {
@@ -69,6 +71,8 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
   @Override
   public void setAttributePath(String urn, String parentAttributeName) {
     this.attributePath.setUrn(urn);
-    this.attributePath.setParent(parentAttributeName);
+    String subAttributeName = this.attributePath.getAttributeName();
+    this.attributePath.setAttributeName(parentAttributeName);
+    this.attributePath.setSubAttributeName(subAttributeName);
   }
 }

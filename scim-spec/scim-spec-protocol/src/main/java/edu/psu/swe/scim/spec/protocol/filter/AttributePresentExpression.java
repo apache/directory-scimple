@@ -14,12 +14,17 @@ public class AttributePresentExpression implements FilterExpression, ValueFilter
 
   @Override
   public String toUnqualifiedFilter() {
-    return attributePath.getAttributeName() + " PR";
+    String subAttributeName = this.attributePath.getSubAttributeName();
+    String attributeName = subAttributeName != null ? subAttributeName : this.attributePath.getAttributeName();
+
+    return attributeName + " PR";
   }
 
   @Override
   public void setAttributePath(String urn, String parentAttributeName) {
     this.attributePath.setUrn(urn);
-    this.attributePath.setParent(parentAttributeName);
+    String subAttributeName = this.attributePath.getAttributeName();
+    this.attributePath.setAttributeName(parentAttributeName);
+    this.attributePath.setSubAttributeName(subAttributeName);
   }
 }

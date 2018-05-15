@@ -321,30 +321,25 @@ public class AttributeUtil {
     if (attributeContainer == null) {
       return Collections.emptySet();
     }
-    String parentAttributeName = attributeReference.getParent();
-    String attributeName = attributeReference.getAttributeName();
     Set<Attribute> attributes = new HashSet<>();
+    String attributeName = attributeReference.getAttributeName();
+    String subAttributeName = attributeReference.getSubAttributeName();
+    Attribute attribute = attributeContainer.getAttribute(attributeName);
 
-    if (parentAttributeName != null) {
-      attributeContainer = attributeContainer.getAttribute(parentAttributeName);
-
-      if (attributeContainer == null) {
-        return Collections.emptySet();
-      }
-      if (includeAttributeChain) {
-        Attribute attribute = (Attribute) attributeContainer;
-        attributes.add(attribute);
-      }
-    }
-    attributeContainer = attributeContainer.getAttribute(attributeName);
-
-    if (attributeContainer == null) {
+    if (attribute == null) {
       return Collections.emptySet();
     }
-    Attribute attribute = (Attribute) attributeContainer;
+    if (includeAttributeChain || subAttributeName == null) {
+      attributes.add(attribute);
+    }
+    if (subAttributeName != null) {
+      attribute = attribute.getAttribute(subAttributeName);
 
-    attributes.add(attribute);
-
+      if (attribute == null) {
+        return Collections.emptySet();
+      }
+      attributes.add(attribute);
+    }
     if (attribute.getType() == Type.COMPLEX && includeAttributeChain) {
       List<Attribute> remaininAttributes = attribute.getAttributes();
       attributes.addAll(remaininAttributes);
