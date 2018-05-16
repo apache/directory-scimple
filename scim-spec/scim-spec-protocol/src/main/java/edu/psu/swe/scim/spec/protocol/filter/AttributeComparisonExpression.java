@@ -34,10 +34,10 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     String subAttributeName = this.attributePath.getSubAttributeName();
     String attributeName = subAttributeName != null ? subAttributeName : this.attributePath.getAttributeName();
 
-    if (compareValue instanceof String) {
+    if (compareValue == null) {
+      compareValueString = "null";
+    } else if (compareValue instanceof String) {
       compareValueString = QUOTE + compareValue + QUOTE;
-    } else if (compareValue instanceof Number) {
-      compareValueString = compareValue.toString();
     } else if (compareValue instanceof Date) {
       compareValueString = QUOTE + toDateTimeString((Date) compareValue) + QUOTE;
     } else if (compareValue instanceof LocalDate) {
@@ -45,7 +45,7 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     } else if (compareValue instanceof LocalDateTime) {
       compareValueString = QUOTE + toDateTimeString((LocalDateTime) compareValue) + QUOTE;
     } else {
-      compareValueString = "null";
+      compareValueString = compareValue.toString();
     }
     return attributeName + " " + operation + " " + compareValueString;
   }
