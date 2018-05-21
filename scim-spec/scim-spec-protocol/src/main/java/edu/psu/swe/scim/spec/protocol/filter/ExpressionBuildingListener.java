@@ -133,7 +133,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   private static Object parseJsonType(String jsonValue) {
     if (jsonValue.startsWith("\"")) {
-      return jsonValue.substring(1, jsonValue.length() - 1);
+      return jsonValue.substring(1, jsonValue.length() - 1).replaceAll("\\\\n", "\n");
     } else if ("null".equals(jsonValue)) {
       return null;
     } else if ("true".equals(jsonValue)) {

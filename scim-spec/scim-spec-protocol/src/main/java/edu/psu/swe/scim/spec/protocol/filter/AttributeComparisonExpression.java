@@ -18,36 +18,20 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
   private static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd";
   private static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SS";
   private static final String QUOTE = "\"";
-  
+
   @Override
   public String toFilter() {
-    String filter;
-    String urn = this.attributePath.getUrn();
-    filter = (urn != null ? urn + ":" : "") + this.toUnqualifiedFilter();
+    String filter = this.attributePath.getFullyQualifiedAttributeName() + " " + this.operation + " " + this.createCompareValueString();
 
     return filter;
   }
 
   @Override
   public String toUnqualifiedFilter() {
-    String compareValueString;
     String subAttributeName = this.attributePath.getSubAttributeName();
-    String attributeName = subAttributeName != null ? subAttributeName : this.attributePath.getAttributeName();
+    String unqualifiedAttributeName = subAttributeName != null ? subAttributeName : this.attributePath.getAttributeName();
 
-    if (compareValue == null) {
-      compareValueString = "null";
-    } else if (compareValue instanceof String) {
-      compareValueString = QUOTE + compareValue + QUOTE;
-    } else if (compareValue instanceof Date) {
-      compareValueString = QUOTE + toDateTimeString((Date) compareValue) + QUOTE;
-    } else if (compareValue instanceof LocalDate) {
-      compareValueString = QUOTE + toDateString((LocalDate) compareValue) + QUOTE;
-    } else if (compareValue instanceof LocalDateTime) {
-      compareValueString = QUOTE + toDateTimeString((LocalDateTime) compareValue) + QUOTE;
-    } else {
-      compareValueString = compareValue.toString();
-    }
-    return attributeName + " " + operation + " " + compareValueString;
+    return unqualifiedAttributeName + " " + operation + " " + this.createCompareValueString();
   }
 
   public static String toDateString(Date date) {
@@ -74,5 +58,26 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     String subAttributeName = this.attributePath.getAttributeName();
     this.attributePath.setAttributeName(parentAttributeName);
     this.attributePath.setSubAttributeName(subAttributeName);
+  }
+
+  private String createCompareValueString() {
+    String compareValueString;
+
+    if (this.compareValue == null) {
+      compareValueString = "null";
+    } else if (this.compareValue instanceof String) {
+      String escaped = ((String) this.compareValue).replaceAll("\n", "\\\\n");
+
+      compareValueString = QUOTE + escaped + QUOTE;
+    } else if (this.compareValue instanceof Date) {
+      compareValueString = QUOTE + toDateTimeString((Date) this.compareValue) + QUOTE;
+    } else if (this.compareValue instanceof LocalDate) {
+      compareValueString = QUOTE + toDateString((LocalDate) this.compareValue) + QUOTE;
+    } else if (this.compareValue instanceof LocalDateTime) {
+      compareValueString = QUOTE + toDateTimeString((LocalDateTime) this.compareValue) + QUOTE;
+    } else {
+      compareValueString = this.compareValue.toString();
+    }
+    return compareValueString;
   }
 }
