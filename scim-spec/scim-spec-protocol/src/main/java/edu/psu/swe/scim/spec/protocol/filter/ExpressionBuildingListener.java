@@ -3,6 +3,7 @@ package edu.psu.swe.scim.spec.protocol.filter;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +134,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   private static Object parseJsonType(String jsonValue) {
     if (jsonValue.startsWith("\"")) {
-      return jsonValue.substring(1, jsonValue.length() - 1).replaceAll("\\\\n", "\n");
+      return StringEscapeUtils.unescapeEcmaScript(jsonValue.substring(1, jsonValue.length() - 1));
     } else if ("null".equals(jsonValue)) {
       return null;
     } else if ("true".equals(jsonValue)) {

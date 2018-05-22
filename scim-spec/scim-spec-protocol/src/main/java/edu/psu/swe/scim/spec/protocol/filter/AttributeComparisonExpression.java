@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import lombok.Value;
 
@@ -66,7 +68,7 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     if (this.compareValue == null) {
       compareValueString = "null";
     } else if (this.compareValue instanceof String) {
-      String escaped = ((String) this.compareValue).replaceAll("\n", "\\\\n");
+      String escaped = StringEscapeUtils.escapeEcmaScript((String) this.compareValue);
 
       compareValueString = QUOTE + escaped + QUOTE;
     } else if (this.compareValue instanceof Date) {
