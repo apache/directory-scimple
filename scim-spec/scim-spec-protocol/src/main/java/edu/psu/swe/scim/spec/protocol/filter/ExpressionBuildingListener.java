@@ -134,7 +134,14 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   private static Object parseJsonType(String jsonValue) {
     if (jsonValue.startsWith("\"")) {
-      return StringEscapeUtils.unescapeEcmaScript(jsonValue.substring(1, jsonValue.length() - 1));
+      String doubleEscaped = jsonValue.substring(1, jsonValue.length() - 1)
+          // StringEscapeUtils follows the outdated JSON spec requiring "/" to be escaped, this could subtly break things
+          .replaceAll("\\\\/", "\\\\\\\\/")
+          // Just in case someone needs a single-quote with a backslash in front of it, this will be unnecessary with escapeJson()
+          .replaceAll("\\\\'", "\\\\\\\\'");
+
+      // TODO change this to escapeJson() when dependencies get upgraded
+      return StringEscapeUtils.unescapeEcmaScript(doubleEscaped);
     } else if ("null".equals(jsonValue)) {
       return null;
     } else if ("true".equals(jsonValue)) {

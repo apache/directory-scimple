@@ -68,7 +68,12 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     if (this.compareValue == null) {
       compareValueString = "null";
     } else if (this.compareValue instanceof String) {
-      String escaped = StringEscapeUtils.escapeEcmaScript((String) this.compareValue);
+      // TODO change this to escapeJson() when dependencies get upgraded
+      String escaped = StringEscapeUtils.escapeEcmaScript((String) this.compareValue)
+          // StringEscapeUtils follows the outdated JSON spec requiring "/" to be escaped, this could subtly break things
+          .replaceAll("\\\\/", "/")
+          // We don't want single-quotes escaped, this will be unnecessary with escapeJson()
+          .replaceAll("\\\\'", "'");
 
       compareValueString = QUOTE + escaped + QUOTE;
     } else if (this.compareValue instanceof Date) {
