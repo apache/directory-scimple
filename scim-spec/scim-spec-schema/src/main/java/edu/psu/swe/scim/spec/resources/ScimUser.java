@@ -20,8 +20,8 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"password"})
+@EqualsAndHashCode(callSuper = true, exclude = {"password"})
 @ScimResourceType(id = ScimUser.RESOURCE_NAME, name = ScimUser.RESOURCE_NAME, schema = ScimUser.SCHEMA_URI, description = "Top level ScimUser", endpoint = "/Users")
 @XmlRootElement(name = ScimUser.RESOURCE_NAME)
 @XmlAccessorType(XmlAccessType.NONE)
@@ -30,7 +30,7 @@ public class ScimUser extends ScimResource implements Serializable {
   private static final long serialVersionUID = -2306547717245071997L;
   public static final String RESOURCE_NAME = "User";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:User";
-  
+
   @XmlElement
   @ScimAttribute(description="A Boolean value indicating the User's administrative status.")
   Boolean active = true;
@@ -123,32 +123,32 @@ public class ScimUser extends ScimResource implements Serializable {
   public String getResourceType() {
     return RESOURCE_NAME;
   }
-  
+
   public Optional<Address> getPrimaryAddress() {
     if (addresses == null) {
       return Optional.empty();
     }
-    
+
     return addresses.stream()
                     .filter(Address::getPrimary)
                     .findFirst();
   }
-  
+
   public Optional<Email> getPrimaryEmailAddress() {
     if (emails == null) {
       return Optional.empty();
     }
-    
+
     return emails.stream()
                  .filter(Email::getPrimary)
                  .findFirst();
   }
-  
+
   public Optional<PhoneNumber> getPrimaryPhoneNumber() {
     if (phoneNumbers == null) {
       return Optional.empty();
     }
-    
+
     return phoneNumbers.stream()
                        .filter(PhoneNumber::getPrimary)
                        .findFirst();
