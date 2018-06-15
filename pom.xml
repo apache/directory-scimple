@@ -11,10 +11,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
 
-    <version.errai>4.0.0.CR1</version.errai>
     <version.gwt>2.8.0</version.gwt>
     <version.jackson>2.8.8</version.jackson>
     <version.lombok>1.16.14</version.lombok>
@@ -29,7 +28,6 @@
     <module>scim-tools</module>
     <module>scim-compliance</module>
     <module>scim-common</module>
-    <module>scim-errai</module>
   </modules>
 
   <scm>
@@ -224,14 +222,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>org.jboss.errai.bom</groupId>
-        <artifactId>errai-bom</artifactId>
-        <version>${version.errai}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
 

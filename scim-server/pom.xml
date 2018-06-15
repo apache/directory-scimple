@@ -13,7 +13,6 @@
 
   <modules>
     <module>scim-server-common</module>
-    <module>scim-server-example</module>
   </modules>
 
 </project>

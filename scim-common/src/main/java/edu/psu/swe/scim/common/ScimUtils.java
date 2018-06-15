@@ -8,9 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Lists;
 
 
@@ -36,7 +33,10 @@ public final class ScimUtils {
     return ldt.format(DateTimeFormatter.ISO_DATE_TIME);
   }
   
-  public static List<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
+  //Removing the @Nonnull & @Nullable annotations, they are GPL licensed and not compliant with Apache 2.0
+  //public static List<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
+
+  public static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
     List<Field> currentClassFields = Lists.newArrayList(startClass.getDeclaredFields());
     Class<?> parentClass = startClass.getSuperclass();
     if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {

@@ -12,9 +12,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>scim-tools-cli</module>
     <module>scim-tools-common</module>
-    <module>scim-tools-studio</module>
   </modules>
 
 </project>
