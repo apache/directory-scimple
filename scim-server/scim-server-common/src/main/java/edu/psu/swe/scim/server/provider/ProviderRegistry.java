@@ -189,8 +189,9 @@ public class ProviderRegistry {
     }
 
     log.debug("calling set attributes with " + fieldList.size() + " fields");
+    String urn = set != null ? set.id() : srt.schema();
     Set<String> invalidAttributes = new HashSet<>();
-    List<Attribute> createAttributes = createAttributes(fieldList, invalidAttributes, clazz.getSimpleName());
+    List<Attribute> createAttributes = createAttributes(urn, fieldList, invalidAttributes, clazz.getSimpleName());
     schema.setAttributes(createAttributes);
 
     if (!invalidAttributes.isEmpty()) {
@@ -219,7 +220,7 @@ public class ProviderRegistry {
     return schema;
   }
 
-  private static List<Attribute> createAttributes(List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws InvalidProviderException {
+  private static List<Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws InvalidProviderException {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -249,6 +250,7 @@ public class ProviderRegistry {
       Attribute attribute = new Attribute();
       attribute.setField(f);
       attribute.setName(attributeName);
+      attribute.setUrn(urn);
       
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
@@ -379,7 +381,7 @@ public class ProviderRegistry {
         Class<?> componentType;
         if (!attribute.isMultiValued()) {
           componentType = f.getType();
-          attribute.setSubAttributes(createAttributes(Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()), AddAction.APPEND);
+          attribute.setSubAttributes(createAttributes(urn, Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()), AddAction.APPEND);
         } else if (f.getType().isArray()) {
           componentType = f.getType().getComponentType();
         } else {
@@ -388,7 +390,7 @@ public class ProviderRegistry {
         }
         
         List<Field> fl = ScimUtils.getFieldsUpTo(componentType, Object.class);
-        List<Attribute> la = createAttributes(fl, invalidAttributes, nameBase + "." + f.getName());
+        List<Attribute> la = createAttributes(urn, fl, invalidAttributes, nameBase + "." + f.getName());
           
         attribute.setSubAttributes(la, AddAction.APPEND);
       }

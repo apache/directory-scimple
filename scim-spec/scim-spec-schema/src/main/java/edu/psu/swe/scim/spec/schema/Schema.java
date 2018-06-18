@@ -100,6 +100,8 @@ public class Schema implements AttributeContainer {
       APPEND
     }
 
+    String urn;
+
     // The attribute name must match the ABNF pattern defined in section 2.1 of
     // the SCIM Schema specification.
     @XmlElement
