@@ -3,25 +3,21 @@ package edu.psu.swe.scim.spec.protocol.filter;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.psu.swe.scim.server.filter.FilterBaseListener;
-import edu.psu.swe.scim.server.filter.FilterParser.AttrExpCompareOpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.AttrExpPresentContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterAttrExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterGroupExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterLogicExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterValuePathContext;
-import edu.psu.swe.scim.server.filter.FilterParser.PatchPathContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValFilterAttrExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValFilterGroupExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValFilterLogicExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValuePathContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributeCompareExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributeGroupExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributeLogicExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributePresentExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterAttributeCompareExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterAttributePresentExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterGroupExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterLogicExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterValuePathExpressionContext;
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 
 public class ExpressionBuildingListener extends FilterBaseListener {
@@ -30,206 +26,122 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   protected Deque<FilterExpression> expressionStack = new ArrayDeque<>();
 
-  private int indent = -1;
-
   @Override
-  public void enterFilterLogicExp(FilterLogicExpContext ctx) {
-    LOG.debug(indent("--- Enter FilterLogicExp -->"));
+  public void exitFilter(FilterContext ctx) {
+    assert expressionStack.size() == 1 : "wrong number (" + expressionStack.size() + ") of expressions on stack, should be 1";
   }
 
   @Override
-  public void exitFilterLogicExp(FilterLogicExpContext ctx) {
-    LOG.debug(indent("<-- Exit FilterLogicExp ---"));
-    
-    LogicalOperator logicalOperator = LogicalOperator.valueOf(ctx.op.getText().toUpperCase());
-    FilterExpression right = expressionStack.pop();
-    FilterExpression left = expressionStack.pop();
+  public void exitFilterGroupExpression(FilterGroupExpressionContext ctx) {
+    boolean not = ctx.not != null;
+    FilterExpression pop = expressionStack.pop();
+    GroupExpression expression = new GroupExpression(not, pop);
 
-    LogicalExpression expression = new LogicalExpression(left, logicalOperator, right);
-    expressionStack.push(expression);
-  }
-  
-  @Override
-  public void enterPatchPath(PatchPathContext ctx) {
-    LOG.debug(indent("--- Enter PatchPath -->"));
-  }
-
-  @Override
-  public void exitPatchPath(PatchPathContext ctx) {
-    LOG.debug(indent("<-- Exit PatchPath ---"));
-  }
-
-
-  @Override
-  public void enterFilterValuePath(FilterValuePathContext ctx) {
-    LOG.debug(indent("--- Enter FilterValuePath -->"));
-  }
-
-  @Override
-  public void exitFilterValuePath(FilterValuePathContext ctx) {
-    LOG.debug(indent("<-- Exit FilterValuePath ---"));
-  }
-
-  @Override
-  public void enterFilterAttrExp(FilterAttrExpContext ctx) {
-    LOG.debug(indent("--- Enter FilterAttrExp -->"));
-  }
-
-  @Override
-  public void exitFilterAttrExp(FilterAttrExpContext ctx) {
-    LOG.debug(indent("<-- Exit FilterAttrExp ---"));
-  }
-
-  @Override
-  public void enterFilterGroupExp(FilterGroupExpContext ctx) {
-    LOG.debug(indent("--- Enter FilterGroupExp -->"));
-  }
-
-  @Override
-  public void exitFilterGroupExp(FilterGroupExpContext ctx) {
-    LOG.debug(indent("<-- Exit FilterGroupExp ---"));
-    if (ctx.not != null) {
-      FilterExpression pop = expressionStack.pop();
-      
-      GroupExpression expression = new GroupExpression(true, pop);
-      expressionStack.push(expression);
-    }
-    
-  }
-
-  @Override
-  public void enterValuePath(ValuePathContext ctx) {
-    LOG.debug(indent("--- Enter ValuePath -->"));
-  }
-
-  @Override
-  public void exitValuePath(ValuePathContext ctx) {
-    LOG.debug(indent("<-- Exit ValuePath ---"));
-
-    String attrPath = ctx.attrPath.getText();
-    AttributeReference attrRef = new AttributeReference(attrPath);
-    ValueFilterExpression valueFilter = (ValueFilterExpression) expressionStack.pop();
-        
-    ValuePathExpression expression = new ValuePathExpression(attrRef, valueFilter);
     expressionStack.push(expression);
   }
 
   @Override
-  public void enterValFilterAttrExp(ValFilterAttrExpContext ctx) {
-    LOG.debug(indent("--- Enter ValFilterAttrExp -->"));
+  public void exitFilterValuePathExpression(FilterValuePathExpressionContext ctx) {
+    String attributePath = ctx.attributePath.getText();
+    AttributeReference attributeReference = new AttributeReference(attributePath);
+    String urn = attributeReference.getUrn();
+    String parentAttributeName = attributeReference.getAttributeName();
+    FilterExpression attributeExpression = (FilterExpression) expressionStack.pop();
+    ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference, attributeExpression);
+
+    attributeExpression.setAttributePath(urn, parentAttributeName);
+
+    expressionStack.push(valuePathExpression);
   }
 
   @Override
-  public void exitValFilterAttrExp(ValFilterAttrExpContext ctx) {
-    LOG.debug(indent("<-- Exit ValFilterAttrExp ---"));
+  public void exitFilterAttributePresentExpression(FilterAttributePresentExpressionContext ctx) {
+    AttributePresentExpression attributePresentExpression;
+    String attributePathText = ctx.attributePath.getText();
+    AttributeReference attributePath = new AttributeReference(attributePathText);
+    attributePresentExpression = new AttributePresentExpression(attributePath);
+
+    this.expressionStack.push(attributePresentExpression);
   }
 
   @Override
-  public void enterValFilterLogicExp(ValFilterLogicExpContext ctx) {
-    LOG.debug(indent("--- Enter ValFilterLogicExp -->"));
-  }
-
-  @Override
-  public void exitValFilterLogicExp(ValFilterLogicExpContext ctx) {
-    LOG.debug(indent("<-- Exit ValFilterLogicExp ---"));
-    
-    LogicalOperator logicalOperator = LogicalOperator.valueOf(ctx.op.getText().toUpperCase());
-    FilterExpression right = expressionStack.pop();
-    FilterExpression left = expressionStack.pop();
-
-    LogicalExpression expression = new LogicalExpression(left, logicalOperator, right);
-    expressionStack.push(expression);
-  }
-
-  @Override
-  public void enterValFilterGroupExp(ValFilterGroupExpContext ctx) {
-    LOG.debug(indent("--- Enter ValFilterGroupExp -->"));
-  }
-
-  @Override
-  public void exitValFilterGroupExp(ValFilterGroupExpContext ctx) {
-    LOG.debug(indent("<-- Exit ValFilterGroupExp ---"));
-    if (ctx.not != null) {
-      FilterExpression pop = expressionStack.pop();
-
-      GroupExpression expression = new GroupExpression(true, pop);
-      expressionStack.push(expression);
-    }
-  }
-
-  @Override
-  public void enterAttrExpPresent(AttrExpPresentContext ctx) {
-    LOG.debug(indent("--- Enter AttrExpPresent -->"));
-  }
-
-  @Override
-  public void exitAttrExpPresent(AttrExpPresentContext ctx) {
-    LOG.debug(indent("<-- Exit AttrExpPresent ---"));
-
-    String attrPath = ctx.attrPath.getText();
-    AttributeReference attrRef = new AttributeReference(attrPath);
-
-    AttributePresentExpression expression = new AttributePresentExpression(attrRef);
-    expressionStack.push(expression);
-  }
-
-  @Override
-  public void enterAttrExpCompareOp(AttrExpCompareOpContext ctx) {
-    LOG.debug(indent("--- Enter AttrExpCompareOp -->"));
-  }
-
-  @Override
-  public void exitAttrExpCompareOp(AttrExpCompareOpContext ctx) {
-    LOG.debug(indent("<-- Exit AttrExpCompareOp ---"));
-
-    String attrPath = ctx.attrPath.getText();
-    AttributeReference attrRef = new AttributeReference(attrPath);
+  public void exitFilterAttributeCompareExpression(FilterAttributeCompareExpressionContext ctx) {
+    AttributeComparisonExpression attributeComparisonExpression;
+    String attributePathText = ctx.attributePath.getText();
+    AttributeReference attributePath = new AttributeReference(attributePathText);
     CompareOperator compareOperator = CompareOperator.valueOf(ctx.op.getText().toUpperCase());
-    Object value = parseJsonType(ctx.compValue.getText());
+    String compareValueText = ctx.compareValue.getText();
+    Object compareValue = parseJsonType(compareValueText);
+    attributeComparisonExpression = new AttributeComparisonExpression(attributePath, compareOperator, compareValue);
 
-    AttributeComparisonExpression expression = new AttributeComparisonExpression(attrRef, compareOperator, value);
+    this.expressionStack.push(attributeComparisonExpression);
+  }
+
+  @Override
+  public void exitFilterLogicExpression(FilterLogicExpressionContext ctx) {
+    String op = ctx.op.getText().toUpperCase();
+    LogicalOperator logicalOperator = LogicalOperator.valueOf(op);
+    FilterExpression right = expressionStack.pop();
+    FilterExpression left = expressionStack.pop();
+    LogicalExpression expression = new LogicalExpression(left, logicalOperator, right);
+
     expressionStack.push(expression);
   }
 
   @Override
-  public void enterEveryRule(ParserRuleContext ctx) {
-    indent++;
+  public void exitAttributeLogicExpression(AttributeLogicExpressionContext ctx) {
+    String op = ctx.op.getText().toUpperCase();
+    LogicalOperator logicalOperator = LogicalOperator.valueOf(op);
+    FilterExpression right = expressionStack.pop();
+    FilterExpression left = expressionStack.pop();
+    LogicalExpression attributeLogicExpression = new LogicalExpression(left, logicalOperator, right);
+
+    expressionStack.push(attributeLogicExpression);
   }
 
   @Override
-  public void exitEveryRule(ParserRuleContext ctx) {
-    indent--;
+  public void exitAttributeGroupExpression(AttributeGroupExpressionContext ctx) {
+    boolean not = ctx.not != null;
+    FilterExpression attributeExpression = expressionStack.pop();
+    GroupExpression attributeGroupExpression = new GroupExpression(not, attributeExpression);
+
+    expressionStack.push(attributeGroupExpression);
   }
 
   @Override
-  public void visitTerminal(TerminalNode node) {
-    String text = node.getText();
-    if (StringUtils.isNotEmpty(text.trim())) {
-      LOG.debug(indent(text));
-    }
+  public void exitAttributeCompareExpression(AttributeCompareExpressionContext ctx) {
+    String attributeName = ctx.attributeName.getText();
+    CompareOperator compareOperator = CompareOperator.valueOf(ctx.op.getText().toUpperCase());
+    Object value = parseJsonType(ctx.compareValue.getText());
+    AttributeReference attributeReference = new AttributeReference(attributeName);
+    AttributeComparisonExpression expression = new AttributeComparisonExpression(attributeReference, compareOperator, value);
+
+    expressionStack.push(expression);
   }
 
   @Override
-  public void visitErrorNode(ErrorNode node) {
-    LOG.error(indent(node.getText()));
-  }
+  public void exitAttributePresentExpression(AttributePresentExpressionContext ctx) {
+    String attributeName = ctx.attributeName.getText();
+    AttributeReference attributeReference = new AttributeReference(attributeName);
+    AttributePresentExpression attributePresentExpression = new AttributePresentExpression(attributeReference);
 
-  protected String indent(String s) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < indent; i++) {
-      sb.append("    ");
-    }
-    sb.append(s);
-    return sb.toString();
+    expressionStack.push(attributePresentExpression);
   }
 
   public FilterExpression getFilterExpression() {
     return expressionStack.peek();
   }
 
-  private Object parseJsonType(String jsonValue) {
-    if (jsonValue.startsWith("\"") && jsonValue.endsWith("\"")) {
-      return jsonValue.substring(1, jsonValue.length() - 1);
+  private static Object parseJsonType(String jsonValue) {
+    if (jsonValue.startsWith("\"")) {
+      String doubleEscaped = jsonValue.substring(1, jsonValue.length() - 1)
+          // StringEscapeUtils follows the outdated JSON spec requiring "/" to be escaped, this could subtly break things
+          .replaceAll("\\\\/", "\\\\\\\\/")
+          // Just in case someone needs a single-quote with a backslash in front of it, this will be unnecessary with escapeJson()
+          .replaceAll("\\\\'", "\\\\\\\\'");
+
+      // TODO change this to escapeJson() when dependencies get upgraded
+      return StringEscapeUtils.unescapeEcmaScript(doubleEscaped);
     } else if ("null".equals(jsonValue)) {
       return null;
     } else if ("true".equals(jsonValue)) {

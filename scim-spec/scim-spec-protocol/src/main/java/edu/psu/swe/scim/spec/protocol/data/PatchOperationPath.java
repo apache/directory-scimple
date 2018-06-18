@@ -10,23 +10,17 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import edu.psu.swe.scim.server.filter.FilterLexer;
 import edu.psu.swe.scim.server.filter.FilterParser;
-import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
 import edu.psu.swe.scim.spec.protocol.filter.FilterParseException;
-import edu.psu.swe.scim.spec.protocol.filter.ValueFilterExpression;
+import edu.psu.swe.scim.spec.protocol.filter.ValuePathExpression;
 import lombok.Data;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Slf4j
 public class PatchOperationPath {
 
-  private AttributeReference attributeReference;
+  private ValuePathExpression valuePathExpression;
 
-  private ValueFilterExpression valueFilterExpression;
-
-  private String[] subAttributes;
-  
   public PatchOperationPath() {
     
   }
@@ -52,9 +46,7 @@ public class PatchOperationPath {
       PatchPathListener patchPathListener = new PatchPathListener();
       ParseTreeWalker.DEFAULT.walk(patchPathListener, tree);
 
-      this.attributeReference = patchPathListener.getAttributeReference();
-      this.valueFilterExpression = patchPathListener.getValueFilter();
-      this.subAttributes = patchPathListener.getSubAttributes();
+      this.valuePathExpression = patchPathListener.getValuePathExpression();
     } catch (IllegalStateException e) {
       throw new FilterParseException(e);
     }
@@ -62,20 +54,7 @@ public class PatchOperationPath {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(attributeReference.getFullyQualifiedAttributeName());
-    if (valueFilterExpression != null) {
-      sb.append("[")
-        .append(valueFilterExpression.toFilter())
-        .append("]");
-    }
-    if (subAttributes != null) {
-      for (String subAttribute : subAttributes) {
-        sb.append(".")
-          .append(subAttribute);
-      }
-    }
-    return sb.toString();
+    return valuePathExpression.toFilter();
   }
 
 }

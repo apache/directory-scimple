@@ -7,122 +7,180 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.psu.swe.scim.server.filter.FilterBaseListener;
-import edu.psu.swe.scim.server.filter.FilterParser.AttrExpCompareOpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.AttrExpPresentContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterAttrExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterGroupExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterLogicExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.FilterValuePathContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValFilterAttrExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValFilterGroupExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValFilterLogicExpContext;
-import edu.psu.swe.scim.server.filter.FilterParser.ValuePathContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributeCompareExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributeGroupExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributeLogicExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.AttributePresentExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterAttributeCompareExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterAttributeExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterAttributePresentExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterGroupExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterLogicExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FilterValuePathExpressionContext;
+import edu.psu.swe.scim.server.filter.FilterParser.FullAttributePathContext;
+import edu.psu.swe.scim.server.filter.FilterParser.PartialAttributePathContext;
 
-public class TreePrintingListener extends FilterBaseListener {
+public class TreePrintingListener extends ExpressionBuildingListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(TreePrintingListener.class);
 
   private int indent = -1;
-  
+
   @Override
-  public void enterFilterLogicExp(FilterLogicExpContext ctx) {
-    LOG.info(indent("--- Enter FilterLogicExp -->"));
+  public void enterFilter(FilterContext ctx) {
+    LOG.info(indent("--- Filter -->"));
+    super.enterFilter(ctx);
   }
 
   @Override
-  public void exitFilterLogicExp(FilterLogicExpContext ctx) {
-    LOG.info(indent("<-- Exit FilterLogicExp ---"));
+  public void exitFilter(FilterContext ctx) {
+    LOG.info(indent("<-- Filter ---"));
+    super.exitFilter(ctx);
   }
 
   @Override
-  public void enterFilterValuePath(FilterValuePathContext ctx) {
-    LOG.info(indent("--- Enter FilterValuePath -->"));
+  public void enterFilterLogicExpression(FilterLogicExpressionContext ctx) {
+    LOG.info(indent("--- FilterLogicExpression -->"));
+    super.enterFilterLogicExpression(ctx);
   }
 
   @Override
-  public void exitFilterValuePath(FilterValuePathContext ctx) {
-    LOG.info(indent("<-- Exit FilterValuePath ---"));
+  public void exitFilterLogicExpression(FilterLogicExpressionContext ctx) {
+    LOG.info(indent("<-- FilterLogicExpression ---"));
+    super.exitFilterLogicExpression(ctx);
   }
 
   @Override
-  public void enterFilterAttrExp(FilterAttrExpContext ctx) {
-    LOG.info(indent("--- Enter FilterAttrExp -->"));
+  public void enterFilterGroupExpression(FilterGroupExpressionContext ctx) {
+    LOG.info(indent("--- FilterGroupExpression -->"));
+    super.enterFilterGroupExpression(ctx);
   }
 
   @Override
-  public void exitFilterAttrExp(FilterAttrExpContext ctx) {
-    LOG.info(indent("<-- Exit FilterAttrExp ---"));
+  public void exitFilterGroupExpression(FilterGroupExpressionContext ctx) {
+    LOG.info(indent("<-- FilterGroupExpression ---"));
+    super.exitFilterGroupExpression(ctx);
   }
 
   @Override
-  public void enterFilterGroupExp(FilterGroupExpContext ctx) {
-    LOG.info(indent("--- Enter FilterGroupExp -->"));
+  public void enterFilterValuePathExpression(FilterValuePathExpressionContext ctx) {
+    LOG.info(indent("--- FilterValuePathContext -->"));
+    super.enterFilterValuePathExpression(ctx);
   }
 
   @Override
-  public void exitFilterGroupExp(FilterGroupExpContext ctx) {
-    LOG.info(indent("<-- Exit FilterGroupExp ---"));
+  public void exitFilterValuePathExpression(FilterValuePathExpressionContext ctx) {
+    LOG.info(indent("<-- FilterValuePath ---"));
+    super.exitFilterValuePathExpression(ctx);
   }
 
   @Override
-  public void enterValuePath(ValuePathContext ctx) {
-    LOG.info(indent("--- Enter ValuePath -->"));
+  public void enterFilterAttributePresentExpression(FilterAttributePresentExpressionContext ctx) {
+    LOG.info(indent("--- FilterAttributePresentExpression -->"));
+    super.enterFilterAttributePresentExpression(ctx);
   }
 
   @Override
-  public void exitValuePath(ValuePathContext ctx) {
-    LOG.info(indent("<-- Exit ValuePath ---"));
+  public void exitFilterAttributePresentExpression(FilterAttributePresentExpressionContext ctx) {
+    LOG.info(indent("<-- FilterAttributePresentExpression ---"));
+    super.exitFilterAttributePresentExpression(ctx);
   }
 
   @Override
-  public void enterValFilterAttrExp(ValFilterAttrExpContext ctx) {
-    LOG.info(indent("--- Enter ValFilterAttrExp -->"));
+  public void enterFilterAttributeCompareExpression(FilterAttributeCompareExpressionContext ctx) {
+    LOG.info(indent("--- FilterAttributeCompareExpression -->"));
+    super.enterFilterAttributeCompareExpression(ctx);
   }
 
   @Override
-  public void exitValFilterAttrExp(ValFilterAttrExpContext ctx) {
-    LOG.info(indent("<-- Exit ValFilterAttrExp ---"));
+  public void exitFilterAttributeCompareExpression(FilterAttributeCompareExpressionContext ctx) {
+    LOG.info(indent("<-- FilterAttributeCompareExpression ---"));
+    super.exitFilterAttributeCompareExpression(ctx);
   }
 
   @Override
-  public void enterValFilterLogicExp(ValFilterLogicExpContext ctx) {
-    LOG.info(indent("--- Enter ValFilterLogicExp -->"));
+  public void enterFilterAttributeExpression(FilterAttributeExpressionContext ctx) {
+    LOG.info(indent("--- FilterAttributeExpression -->"));
+    super.enterFilterAttributeExpression(ctx);
   }
 
   @Override
-  public void exitValFilterLogicExp(ValFilterLogicExpContext ctx) {
-    LOG.info(indent("<-- Exit ValFilterLogicExp ---"));
+  public void exitFilterAttributeExpression(FilterAttributeExpressionContext ctx) {
+    LOG.info(indent("<-- FilterAttributeExpression ---"));
+    super.exitFilterAttributeExpression(ctx);
   }
 
   @Override
-  public void enterValFilterGroupExp(ValFilterGroupExpContext ctx) {
-    LOG.info(indent("--- Enter ValFilterGroupExp -->"));
+  public void enterAttributeLogicExpression(AttributeLogicExpressionContext ctx) {
+    LOG.info(indent("--- AttributeLogicExpression -->"));
+    super.enterAttributeLogicExpression(ctx);
   }
 
   @Override
-  public void exitValFilterGroupExp(ValFilterGroupExpContext ctx) {
-    LOG.info(indent("<-- Exit ValFilterGroupExp ---"));
+  public void exitAttributeLogicExpression(AttributeLogicExpressionContext ctx) {
+    LOG.info(indent("<-- AttributeLogicExpression ---"));
+    super.exitAttributeLogicExpression(ctx);
   }
 
   @Override
-  public void enterAttrExpPresent(AttrExpPresentContext ctx) {
-    LOG.info(indent("--- Enter AttrExpPresent -->"));
+  public void enterAttributeGroupExpression(AttributeGroupExpressionContext ctx) {
+    LOG.info(indent("--- AttributeGroupExpression -->"));
+    super.enterAttributeGroupExpression(ctx);
   }
 
   @Override
-  public void exitAttrExpPresent(AttrExpPresentContext ctx) {
-    LOG.info(indent("<-- Exit AttrExpPresent ---"));
+  public void exitAttributeGroupExpression(AttributeGroupExpressionContext ctx) {
+    LOG.info(indent("<-- AttributeGroupExpression ---"));
+    super.exitAttributeGroupExpression(ctx);
   }
 
   @Override
-  public void enterAttrExpCompareOp(AttrExpCompareOpContext ctx) {
-    LOG.info(indent("--- Enter AttrExpCompareOp -->"));
+  public void enterAttributeCompareExpression(AttributeCompareExpressionContext ctx) {
+    LOG.info(indent("--- AttributeCompareExpression -->"));
+    super.enterAttributeCompareExpression(ctx);
   }
 
   @Override
-  public void exitAttrExpCompareOp(AttrExpCompareOpContext ctx) {
-    LOG.info(indent("<-- Exit AttrExpCompareOp ---"));
+  public void exitAttributeCompareExpression(AttributeCompareExpressionContext ctx) {
+    LOG.info(indent("<-- AttributeCompareExpression ---"));
+    super.exitAttributeCompareExpression(ctx);
+  }
+
+  @Override
+  public void enterAttributePresentExpression(AttributePresentExpressionContext ctx) {
+    LOG.info(indent("--- AttributePresentExpression -->"));
+    super.enterAttributePresentExpression(ctx);
+  }
+
+  @Override
+  public void exitAttributePresentExpression(AttributePresentExpressionContext ctx) {
+    LOG.info(indent("<-- AttributePresentExpression ---"));
+    super.exitAttributePresentExpression(ctx);
+  }
+
+  @Override
+  public void enterFullAttributePath(FullAttributePathContext ctx) {
+    LOG.info(indent("--- FullAttributePath -->"));
+    super.enterFullAttributePath(ctx);
+  }
+
+  @Override
+  public void exitFullAttributePath(FullAttributePathContext ctx) {
+    LOG.info(indent("<-- FullAttributePath ---"));
+    super.exitFullAttributePath(ctx);
+  }
+
+  @Override
+  public void enterPartialAttributePath(PartialAttributePathContext ctx) {
+    LOG.info(indent("--- PartialAttributePath -->"));
+    super.enterPartialAttributePath(ctx);
+  }
+
+  @Override
+  public void exitPartialAttributePath(PartialAttributePathContext ctx) {
+    LOG.info(indent("<-- PartialAttributePath ---"));
+    super.exitPartialAttributePath(ctx);
   }
 
   @Override

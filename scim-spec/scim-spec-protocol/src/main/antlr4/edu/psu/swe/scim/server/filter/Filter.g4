@@ -2,25 +2,33 @@ grammar Filter;
 
 import Json, Urn;
 
-filter: attrExp                                     # filterAttrExp
-      | left=filter SP op=LogicOp SP right=filter   # filterLogicExp
-      | valuePath                                   # filterValuePath
-      | not=NotOp? SP* '(' f=filter ')'             # filterGroupExp
-      ;
+filter: filterExpression;
 
-patchPath: attrPath=AttrPath
-         | valPath=valuePath (subAttr+=SubAttr)*
+patchPath: attributePath=partialAttributePath '[' attributeExpression ']' ('.' subAttributeName=AttributeName)? # PatchPathFull
+         | attributePath=partialPatchPath                                                                       # PatchPathPartial
          ;
 
-valuePath: attrPath=AttrPath '[' valueFilter=valFilter ']';
-valFilter: attrExp                                          # valFilterAttrExp
-         | left=valFilter SP op=LogicOp SP right=valFilter  # valFilterLogicExp
-         | not=NotOp? SP* '(' valueFilter=valFilter ')'     # valFilterGroupExp
-         ;
 
-attrExp: attrPath=AttrPath SP op=PresentOp                          # attrExpPresent
-       | attrPath=AttrPath SP op=CompareOp SP compValue=CompValue   # attrExpCompareOp
-       ;
+filterExpression: filterExpression SP op=LogicOp SP filterExpression                        # FilterLogicExpression
+                | not=NotOp? SP? '(' filterExpression ')'                                   # FilterGroupExpression
+                | attributePath=fullAttributePath SP PresentOp                              # FilterAttributePresentExpression
+                | attributePath=fullAttributePath SP op=CompareOp SP compareValue=CompValue # FilterAttributeCompareExpression
+                | attributePath=partialAttributePath '[' attributeExpression ']'            # FilterValuePathExpression
+                | attributeExpression                                                       # FilterAttributeExpression
+                ;
+
+attributeExpression: attributeExpression SP op=LogicOp SP attributeExpression              # AttributeLogicExpression
+                   | not=NotOp? SP? '(' attributeExpression ')'                            # AttributeGroupExpression
+                   | attributeName=AttributeName SP PresentOp                              # AttributePresentExpression
+                   | attributeName=AttributeName SP op=CompareOp SP compareValue=CompValue # AttributeCompareExpression
+                   ;
+
+fullAttributePath: FullAttributePath | ParentChildAttributePath | UrnAndNameAttributePath;
+
+partialAttributePath: UrnAndNameAttributePath | AttributeName;
+
+partialPatchPath: FullAttributePath | UrnAndNameAttributePath | ParentChildAttributePath | AttributeName;
+
 
 LogicOp: [aA][nN][dD]
        | [oO][rR]
@@ -43,15 +51,16 @@ CompareOp: [eE][qQ]
          | [gG][eE]
          | [lL][eE]
          ;
-         
+
 PresentOp: [pP][rR];
 
 NotOp: [nN][oO][tT];
 
-AttrPath: (URN ':')? AttrName (SubAttr)?;
-AttrName: ALPHA NAMECHAR*;
-NAMECHAR: ('-' | '_' | DIGIT | ALPHA);
+FullAttributePath: URN ':' AttributeName '.' AttributeName;
+UrnAndNameAttributePath: URN ':' AttributeName;
+ParentChildAttributePath: AttributeName '.' AttributeName;
+AttributeName: ALPHA NAMECHAR*;
+fragment NAMECHAR: '-' | '_' | DIGIT | ALPHA;
 fragment ALPHA : [a-zA-Z];
-SubAttr: '.' AttrName;
 
-SP: (' ')+;
+SP: ' '+;

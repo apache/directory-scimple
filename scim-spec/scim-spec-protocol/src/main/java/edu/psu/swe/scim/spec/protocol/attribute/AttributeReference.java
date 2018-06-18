@@ -2,8 +2,6 @@ package edu.psu.swe.scim.spec.protocol.attribute;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringUtils;
-
 import edu.psu.swe.scim.spec.validator.Urn;
 import lombok.Data;
 
@@ -15,53 +13,86 @@ public class AttributeReference implements Serializable {
   @Urn
   String urn;
 
-  String[] attributeName;
+  String attributeName;
 
-  protected AttributeReference() {
-  }
+  String subAttributeName;
 
-  public AttributeReference(String attributeReference) {
-    String substringBeforeLast = StringUtils.substringBeforeLast(attributeReference, ":");
-    String substringAfterLast = StringUtils.substringAfterLast(attributeReference, ":");
+  public AttributeReference(String name) {
+    int endOfUrn = name.lastIndexOf(':');
+    String[] attributes = name.substring(endOfUrn + 1).split("\\.");
+    this.attributeName = attributes[0];
 
-    if (StringUtils.isEmpty(substringAfterLast)) {
-      urn = null;
-      attributeName = parseAttributeName(substringBeforeLast);
-    } else {
-      urn = substringBeforeLast;
-      attributeName = parseAttributeName(substringAfterLast);
+    if (endOfUrn > -1) {
+      this.urn = name.substring(0, endOfUrn);
+    }
+    if (attributes.length > 1) {
+      this.subAttributeName = attributes[1];
     }
   }
 
-  public AttributeReference(String urn, String attributeName) {
+  public AttributeReference(String urn, String name) {
     this.urn = urn;
-    this.attributeName = parseAttributeName(attributeName);
+
+    if (name != null) {
+      String[] attributes = name.split("\\.");
+      this.attributeName = attributes[0];
+
+      if (attributes.length > 1) {
+        this.subAttributeName = attributes[1];
+      }
+    }
   }
 
-  private String[] parseAttributeName(String attributeName) {
-    return StringUtils.split(attributeName, ".");
+  public AttributeReference(String urn, String attributeName, String subAttributeName) {
+    this.urn = urn;
+    this.attributeName = attributeName;
+    this.subAttributeName = subAttributeName;
   }
 
   public String getFullAttributeName() {
-    return StringUtils.join(attributeName, ".");
+    return this.attributeName + (this.subAttributeName != null ? "." + this.subAttributeName : "");
   }
 
   public String getFullyQualifiedAttributeName() {
+    String fullyQualifiedAttributeName;
     StringBuilder sb = new StringBuilder();
-    if (urn != null) {
-      sb.append(urn);
+
+    if (this.urn != null) {
+      sb.append(this.urn);
+
+      if (this.attributeName != null) {
+        sb.append(":");
+      }
     }
-    if (urn != null && attributeName != null) {
-      sb.append(":");
+    if (this.attributeName != null) {
+      sb.append(this.attributeName);
     }
-    if (attributeName != null) {
-      sb.append(StringUtils.join(attributeName, "."));
+    if (this.subAttributeName != null) {
+      sb.append(".");
+      sb.append(subAttributeName);
     }
-    return sb.toString();
+    fullyQualifiedAttributeName = sb.toString();
+
+    return fullyQualifiedAttributeName;
   }
 
   public String getAttributeBase() {
-    return (urn != null ? (urn + ":") : "") + (attributeName != null ? StringUtils.join(attributeName, ".", 0, attributeName.length - 1) : "");
+    String attributeBase;
+    StringBuilder sb = new StringBuilder();
+
+    if (this.urn != null) {
+      sb.append(this.urn);
+
+      if (this.subAttributeName != null) {
+        sb.append(":");
+        sb.append(this.attributeName);
+      }
+    } else if (this.subAttributeName != null) {
+      sb.append(this.attributeName);
+    }
+    attributeBase = sb.toString();
+
+    return attributeBase;
   }
 
 }

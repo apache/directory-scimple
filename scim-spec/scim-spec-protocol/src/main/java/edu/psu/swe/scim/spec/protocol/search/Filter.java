@@ -34,12 +34,12 @@ public class Filter {
   }
 
   public Filter(String filter) throws FilterParseException {
-    log.debug("Creating a filter - " + filter);
+    log.debug("Creating a filter - {}", filter);
     setFilter(filter);
   }
   
   public Filter(FilterExpression filterExpression) {
-    log.debug("Creating a filter - " + filterExpression.toString());
+    log.debug("Creating a filter - {}", filterExpression);
     expression = filterExpression;
     this.filter = filterExpression.toString();
   }
@@ -61,7 +61,7 @@ public class Filter {
     p.addErrorListener(new BaseErrorListener() {
       @Override
       public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+        throw new IllegalStateException("failed to parse at line " + line + ":" + charPositionInLine + " due to " + msg, e);
       }
     });
 

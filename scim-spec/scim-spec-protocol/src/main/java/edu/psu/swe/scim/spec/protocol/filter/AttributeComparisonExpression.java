@@ -6,11 +6,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import lombok.Value;
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import edu.psu.swe.scim.spec.protocol.attribute.AttributeReference;
+import lombok.Value;
 
 @Value
-public class AttributeComparisonExpression implements AttributeExpression, ValueFilterExpression {
+public class AttributeComparisonExpression implements FilterExpression, ValueFilterExpression {
   AttributeReference attributePath;
   CompareOperator operation;
   Object compareValue;
@@ -18,26 +20,22 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
   private static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd";
   private static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SS";
   private static final String QUOTE = "\"";
-  
+
   @Override
   public String toFilter() {
-    String compareValueString = null;
-    if (compareValue == null) {
-      compareValueString = "null";
-    } else if (compareValue instanceof String) {
-      compareValueString = QUOTE + compareValue + QUOTE;
-    } else if (compareValue instanceof Number) {
-      compareValueString = compareValue.toString();
-    } else if (compareValue instanceof Date) {
-      compareValueString = QUOTE + toDateTimeString((Date) compareValue) + QUOTE;
-    } else if (compareValue instanceof LocalDate) {
-      compareValueString = QUOTE + toDateString((LocalDate) compareValue) + QUOTE;
-    } else if (compareValue instanceof LocalDateTime) {
-      compareValueString = QUOTE + toDateTimeString((LocalDateTime) compareValue) + QUOTE;
-    }
+    String filter = this.attributePath.getFullyQualifiedAttributeName() + " " + this.operation + " " + this.createCompareValueString();
 
-    return attributePath.getFullyQualifiedAttributeName() + " " + operation + " " + compareValueString;
+    return filter;
   }
+
+  @Override
+  public String toUnqualifiedFilter() {
+    String subAttributeName = this.attributePath.getSubAttributeName();
+    String unqualifiedAttributeName = subAttributeName != null ? subAttributeName : this.attributePath.getAttributeName();
+
+    return unqualifiedAttributeName + " " + operation + " " + this.createCompareValueString();
+  }
+
   public static String toDateString(Date date) {
     SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
     return dateFormat.format(date);
@@ -54,5 +52,39 @@ public class AttributeComparisonExpression implements AttributeExpression, Value
   
   public static String toDateTimeString(LocalDateTime ldt) {
     return ldt.format(DateTimeFormatter.ISO_DATE_TIME);
+  }
+
+  @Override
+  public void setAttributePath(String urn, String parentAttributeName) {
+    this.attributePath.setUrn(urn);
+    String subAttributeName = this.attributePath.getAttributeName();
+    this.attributePath.setAttributeName(parentAttributeName);
+    this.attributePath.setSubAttributeName(subAttributeName);
+  }
+
+  private String createCompareValueString() {
+    String compareValueString;
+
+    if (this.compareValue == null) {
+      compareValueString = "null";
+    } else if (this.compareValue instanceof String) {
+      // TODO change this to escapeJson() when dependencies get upgraded
+      String escaped = StringEscapeUtils.escapeEcmaScript((String) this.compareValue)
+          // StringEscapeUtils follows the outdated JSON spec requiring "/" to be escaped, this could subtly break things
+          .replaceAll("\\\\/", "/")
+          // We don't want single-quotes escaped, this will be unnecessary with escapeJson()
+          .replaceAll("\\\\'", "'");
+
+      compareValueString = QUOTE + escaped + QUOTE;
+    } else if (this.compareValue instanceof Date) {
+      compareValueString = QUOTE + toDateTimeString((Date) this.compareValue) + QUOTE;
+    } else if (this.compareValue instanceof LocalDate) {
+      compareValueString = QUOTE + toDateString((LocalDate) this.compareValue) + QUOTE;
+    } else if (this.compareValue instanceof LocalDateTime) {
+      compareValueString = QUOTE + toDateTimeString((LocalDateTime) this.compareValue) + QUOTE;
+    } else {
+      compareValueString = this.compareValue.toString();
+    }
+    return compareValueString;
   }
 }
