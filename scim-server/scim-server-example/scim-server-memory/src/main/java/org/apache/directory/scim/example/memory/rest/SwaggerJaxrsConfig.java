@@ -27,6 +27,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class SwaggerJaxrsConfig implements ServletContextListener {
     try {
       // BeanConfig beanConfig = new BeanConfig();
       beanConfig.setBasePath(event.getServletContext().getContextPath() + "/v2");
-      beanConfig.setResourcePackage("edu.psu.swe.scim");
+      beanConfig.setResourcePackage(ScimResourceHelper.class.getPackage().getName().replaceAll("server\\.rest$", ""));
       beanConfig.setScan(true);
       beanConfig.setTitle("In-Memory SCIM Server");
       beanConfig.setDescription("In Memory SCIM Server Example Implementation");
