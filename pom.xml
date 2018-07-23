@@ -51,6 +51,7 @@
     <module>scim-tools</module>
     <module>scim-compliance</module>
     <module>scim-common</module>
+    <module>scim-coverage</module>
   </modules>
 
   <scm>
@@ -122,6 +123,21 @@
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-server-common</artifactId>
+        <version>2.23-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-client</artifactId>
+        <version>2.23-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-compliance-client</artifactId>
+        <version>2.23-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-compliance-server</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
 
@@ -291,6 +307,21 @@
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <propertyName>jacoco.argline</propertyName>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -410,6 +441,19 @@
               <exclude>**/*.iml</exclude>
             </excludes>
           </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
+              <argLine>@{jacoco.argline}</argLine>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.1</version>
           </plugin>
       </plugins>
     </pluginManagement>
