@@ -18,19 +18,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>edu.psu.swe.scim</groupId>
+  <parent>
+    <groupId>org.apache.directory.project</groupId>
+    <artifactId>project</artifactId>
+    <version>42</version>
+  </parent>
+
+  <groupId>org.apache.directory.scim</groupId>
   <artifactId>scim-parent</artifactId>
   <version>2.23-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SCIM - Parent</name>
-  <description>Penn State's Open Source JavaEE implmentation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
-  <url>https://github.com/PennState/scim</url>
+  <description>Apache Directory SCIMple - JavaEE implementation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
+  <url>https://github.com/apache/directory-scimple</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
 
+    <!-- TODO: is this needed? -->
     <version.gwt>2.8.0</version.gwt>
     <version.jackson>2.8.8</version.jackson>
     <version.lombok>1.16.14</version.lombok>
@@ -99,26 +105,33 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Project Modules -->
       <dependency>
-        <groupId>edu.psu.swe.scim</groupId>
+        <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-spec-protocol</artifactId>
-        <version>${project.version}</version>
+        <version>2.23-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>edu.psu.swe.scim</groupId>
+        <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-spec-schema</artifactId>
-        <version>${project.version}</version>
+        <version>2.23-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>edu.psu.swe.scim</groupId>
+        <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-common</artifactId>
-        <version>${project.version}</version>
+        <version>2.23-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>edu.psu.swe.scim</groupId>
+        <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-tools-common</artifactId>
-        <version>${project.version}</version>
+        <version>2.23-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-server-common</artifactId>
+        <version>2.23-SNAPSHOT</version>
+      </dependency>
+
       <dependency>
         <groupId>edu.psu.swe.commons</groupId>
         <artifactId>commons-jaxrs</artifactId>
@@ -263,48 +276,37 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.owasp</groupId>
-        <artifactId>dependency-check-maven</artifactId>
-        <version>1.4.5</version>
-        <!-- <configuration> -->
-        <!-- <failBuildOnCVSS>10</failBuildOnCVSS> -->
-        <!-- </configuration> -->
-        <executions>
-          <execution>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.3</version>
+        <version>1.6.8</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <serverId>rao</serverId>
+          <nexusUrl>https://repository.apache.org/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
     </plugins>
+
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.17</version>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>3.1.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <configuration>
+            <!-- parent pom currently defines v1.7 -->
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>2.1.1</version>
           <configuration>
             <archive>
               <manifest>
@@ -323,7 +325,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.2</version>
           <configuration>
             <archive>
               <manifest>
@@ -357,23 +358,22 @@
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <flowInitContext>
-              <versionTagPrefix>SCIM-</versionTagPrefix>
+              <versionTagPrefix>SCIMple-</versionTagPrefix>
             </flowInitContext>
           </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
           <configuration>
             <additionalparam>-Xdoclint:none</additionalparam>
           </configuration>
@@ -391,11 +391,42 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>0.12</version>
+          <configuration>
+            <excludes>
+              <exclude>**/README.md</exclude>
+              <exclude>**/*.json</exclude>
+              <exclude>**/*.iml</exclude>
+            </excludes>
+          </configuration>
+          </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <profiles>
+    <profile>
+      <id>ci</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>acceptance-tests</id>
       <build>
@@ -457,7 +488,7 @@
         </plugins>
       </build>
     </profile>
-    
+
     <profile>
       <id>sign-artifacts</id>
       <activation>
