@@ -21,6 +21,7 @@ package org.apache.directory.scim.server.provider;
 
 import java.util.List;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -135,6 +136,10 @@ public interface Provider<T extends ScimResource> {
    * @return
    */
   default Response handleException(Throwable unhandled) {
+    // Allow for ErrorMessageViolationExceptionMapper to handle JAX-RS exceptions by default
+    if (unhandled instanceof WebApplicationException) {
+      throw (WebApplicationException) unhandled;
+    }
     return BaseResourceTypeResourceImpl.createGenericExceptionResponse(unhandled, Status.INTERNAL_SERVER_ERROR);
   }
 }
