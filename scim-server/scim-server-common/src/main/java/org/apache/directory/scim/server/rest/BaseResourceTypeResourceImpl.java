@@ -708,7 +708,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       myStatus = Status.INTERNAL_SERVER_ERROR;
     }
 
-    ErrorResponse er = new ErrorResponse(myStatus, e1.getMessage());
+    ErrorResponse er = new ErrorResponse(myStatus, e1 != null ? e1.getMessage() : "Unknown Server Error");
     return er.toResponse();
   }
 
