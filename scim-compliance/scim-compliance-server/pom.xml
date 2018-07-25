@@ -27,6 +27,19 @@
   <artifactId>scim-compliance-server</artifactId>
   <name>SCIM - Compliance - Server</name>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- update the version of jetty that restfuse uses, fixes CVE-2017-9735-->
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-bom</artifactId>
+        <version>9.4.8.v20180619</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>com.restfuse</groupId>
