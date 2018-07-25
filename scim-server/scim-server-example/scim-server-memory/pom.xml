@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>edu.psu.swe.scim</groupId>
+    <groupId>org.apache.directory.scim</groupId>
     <artifactId>scim-server-examples</artifactId>
     <version>2.23-SNAPSHOT</version>
   </parent>
@@ -34,9 +34,8 @@
       <version>2.1</version>
     </dependency>
     <dependency>
-      <groupId>edu.psu.swe.scim</groupId>
+      <groupId>org.apache.directory.scim</groupId>
       <artifactId>scim-server-common</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -48,6 +47,13 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.geronimo.genesis.plugins</groupId>
+        <artifactId>tools-maven-plugin</artifactId>
+        <configuration>
+          <requiredFiles></requiredFiles>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.openejb.maven</groupId>
         <artifactId>tomee-maven-plugin</artifactId>
         <version>1.7.1</version>
@@ -56,9 +62,45 @@
           <warFile>target/${project.artifactId}-${project.version}.war</warFile>
           <tomeeVersion>1.7.1</tomeeVersion>
           <tomeeClassifier>plus</tomeeClassifier>
+          <simpleLog>true</simpleLog>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.wildfly.plugins</groupId>
+        <artifactId>wildfly-maven-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
+          <filename>${project.artifactId}-${project.version}.war</filename>
+          <add-user>
+            <users>
+              <user>
+                <username>admin</username>
+                <password>admin.1234</password>
+              </user>
+            </users>
+          </add-user>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>debug</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <configuration>
+              <java-opts>
+                <java-opt>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</java-opt>
+              </java-opts>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
