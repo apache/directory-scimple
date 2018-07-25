@@ -54,7 +54,11 @@
     <dependency>
       <groupId>edu.psu.swe.commons</groupId>
       <artifactId>commons-jaxrs</artifactId>
-      <version>1.17</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   

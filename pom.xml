@@ -38,7 +38,7 @@
 
     <!-- TODO: is this needed? -->
     <version.gwt>2.8.0</version.gwt>
-    <version.jackson>2.8.8</version.jackson>
+    <version.jackson>2.9.5</version.jackson>
     <version.lombok>1.16.14</version.lombok>
     <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
@@ -287,6 +287,9 @@
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
           <version>3.1.1</version>
+          <configuration>
+            <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -411,7 +414,7 @@
             <executions>
               <execution>
                 <goals>
-                  <goal>aggregate</goal>
+                  <goal>check</goal>
                 </goals>
               </execution>
             </executions>
