@@ -37,7 +37,7 @@ Please visit our project page at https://directory.apache.org/scimple.
 Examples of the project's declarative syntax are shown below.  The first example
 shows how a SCIM resource is declared:
 
-```(java)
+```java
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ScimResourceType(
@@ -74,7 +74,7 @@ In the example above, annotations are used at the class level and member level
 to declare a new SCIM resource and its attributes respectively.  The example
 below shows the equivalent declaration for a resource Extension:
 
-```(java)
+```java
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 @ScimExtensionType(
@@ -115,7 +115,9 @@ suitably annotated inner classes.
 Implementations are fully customizable without altering the core server code.
 The example below shows how the implementation for a provider is declared:
 
-    public class InMemoryUserService implements Provider<ScimUser> {
+```java
+public class InMemoryUserService implements Provider<ScimUser> {
+```
 
 Implementing the provider interface allows the customization of create,
 retrieve, update and delete methods (as well as find).  Customization is
