@@ -144,7 +144,7 @@
       <dependency>
         <groupId>edu.psu.swe.commons</groupId>
         <artifactId>commons-jaxrs</artifactId>
-        <version>1.30</version>
+        <version>1.31</version>
       </dependency>
       <dependency>
         <groupId>javax</groupId>
@@ -382,7 +382,7 @@
         <plugin>
           <groupId>org.wildfly.plugins</groupId>
           <artifactId>wildfly-maven-plugin</artifactId>
-          <version>1.0.2.Final</version>
+          <version>1.2.2.Final</version>
           <inherited>true</inherited>
           <configuration>
             <id>${jbossServerId}</id>
