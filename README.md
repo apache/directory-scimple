@@ -126,3 +126,6 @@ retrieve, update and delete methods (as well as find).  Customization is
 flexible - if your system implements soft deletes, create a delete method that
 simply sets a flag and alter the find and retrieve methods to only return
 "undeleted" resources.
+
+
+DO NOT MERGE
