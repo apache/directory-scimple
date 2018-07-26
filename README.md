@@ -1,4 +1,6 @@
-# SCIMple
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+# Apache Directory SCIMple
 
 Apache's Java EE implmentation of the [Simple Cross-domain Identity
 Management](http://www.simplecloud.info/) (SCIM) version 2.0 specfification
