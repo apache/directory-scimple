@@ -1,3 +1,5 @@
+[<img src="https://directory.apache.org/fortress/gen-docs/1.0.1/apidocs/org/apache/directory/fortress/core/doc-files/apacheds-logo.jpeg" align="right" />](https://directory.apache.org/scimple/)
+
 # SCIMple
 
 Apache's Java EE implmentation of the [Simple Cross-domain Identity
