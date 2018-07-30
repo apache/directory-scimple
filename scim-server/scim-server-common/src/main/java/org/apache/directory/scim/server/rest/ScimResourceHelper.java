@@ -58,6 +58,7 @@ public final class ScimResourceHelper {
     clazzez.add(FilterParseExceptionMapper.class);
 
     clazzez.add(ObjectMapperContextResolver.class);
+    clazzez.add(DeserializerConfigurer.class);
 
     return clazzez;
   }

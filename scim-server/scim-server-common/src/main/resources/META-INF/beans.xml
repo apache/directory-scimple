@@ -18,5 +18,10 @@ under the License.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
        version="1.1" bean-discovery-mode="all">
-       
+
+  <!-- Not the cleanest way, but when using CXF, this alt class gets loaded before
+       edu.psu.swe.commons.jaxrs.exceptions.mappers.WebApplicationExceptionMapper  -->
+  <alternatives>
+    <class>org.apache.directory.scim.server.rest.WebApplicationExceptionMapper</class>
+  </alternatives>
 </beans>
