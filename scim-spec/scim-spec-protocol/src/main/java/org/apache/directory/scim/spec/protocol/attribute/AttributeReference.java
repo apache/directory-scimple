@@ -114,4 +114,7 @@ public class AttributeReference implements Serializable {
     return attributeBase;
   }
 
+  public String toString() {
+    return (this.urn != null ? this.urn + ":" : "") + this.attributeName + (this.subAttributeName != null ? "." + this.subAttributeName : "");
+  }
 }

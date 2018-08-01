@@ -21,6 +21,7 @@ package org.apache.directory.scim.spec.protocol.attribute;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -51,5 +52,9 @@ public class AttributeReferenceListWrapper {
     AttributeReferenceListWrapper wrapper = new AttributeReferenceListWrapper("");
     wrapper.attributeReferences = attributeReferences;
     return wrapper;
+  }
+
+  public String toString() {
+    return attributeReferences.stream().map(AttributeReference::toString).collect(Collectors.joining(","));
   }
 }
