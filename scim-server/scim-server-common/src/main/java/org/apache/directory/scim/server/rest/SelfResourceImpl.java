@@ -24,12 +24,12 @@ import java.security.Principal;
 import javax.annotation.Resource;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.server.exception.UnableToResolveIdException;
-import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.SelfResource;
 import org.apache.directory.scim.spec.protocol.UserResource;
@@ -45,13 +45,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SelfResourceImpl implements SelfResource {
 
   @Inject
-  ProviderRegistry providerRegistry;
-
-  @Inject
   UserResource userResource;
 
   @Inject
-  SelfIdResolver selfIdResolver;
+  Instance<SelfIdResolver> selfIdResolver;
 
   @Resource
   private SessionContext sessionContext;
@@ -133,7 +130,7 @@ public class SelfResourceImpl implements SelfResource {
       throw new UnableToResolveIdException(Status.UNAUTHORIZED, "Unauthorized");
     }
 
-    String internalId = selfIdResolver.resolveToInternalId(callerPrincipal);
+    String internalId = selfIdResolver.get().resolveToInternalId(callerPrincipal);
     return internalId;
   }
 
