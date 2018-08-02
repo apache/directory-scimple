@@ -1,8 +1,8 @@
 [<img src="https://directory.apache.org/fortress/gen-docs/1.0.1/apidocs/org/apache/directory/fortress/core/doc-files/apacheds-logo.jpeg" align="right" />](https://directory.apache.org/scimple/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# Apache Directory SCIMple
-==========================
+Apache Directory SCIMple
+========================
 
 Apache's Java EE implmentation of the [Simple Cross-domain Identity
 Management](http://www.simplecloud.info/) (SCIM) version 2.0 specfification
