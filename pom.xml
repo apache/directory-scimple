@@ -196,6 +196,14 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
+      <!-- update the version of jetty that restfuse uses, fixes CVE-2017-9735-->
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-bom</artifactId>
+        <version>9.4.8.v20180619</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>pl.pragmatists</groupId>
         <artifactId>JUnitParams</artifactId>
@@ -332,6 +340,7 @@
           <version>3.1.1</version>
           <configuration>
             <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+            <suppressionFile>${session.executionRootDirectory}/src/owasp/suppression.xml</suppressionFile>
           </configuration>
         </plugin>
         <plugin>
