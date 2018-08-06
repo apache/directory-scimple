@@ -45,10 +45,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SelfResourceImpl implements SelfResource {
 
   @Inject
-  UserResource userResource;
+  private UserResource userResource;
 
   @Inject
-  Instance<SelfIdResolver> selfIdResolver;
+  private Instance<SelfIdResolver> selfIdResolver;
 
   @Resource
   private SessionContext sessionContext;
@@ -125,13 +125,33 @@ public class SelfResourceImpl implements SelfResource {
     Principal callerPrincipal = sessionContext.getCallerPrincipal();
 
     if (callerPrincipal != null) {
-      log.info("Resolved SelfResource principal to : {}", callerPrincipal.getName());
+      log.debug("Resolved SelfResource principal to : {}", callerPrincipal.getName());
     } else {
       throw new UnableToResolveIdException(Status.UNAUTHORIZED, "Unauthorized");
     }
 
-    String internalId = selfIdResolver.get().resolveToInternalId(callerPrincipal);
-    return internalId;
+    if (selfIdResolver.isUnsatisfied()) {
+      throw new UnableToResolveIdException(Status.NOT_IMPLEMENTED, "Caller SelfIdResolver not available");
+    }
+
+    return selfIdResolver.get().resolveToInternalId(callerPrincipal);
   }
 
+  // exposed for testing
+  SelfResourceImpl setSessionContext(SessionContext sessionContext) {
+    this.sessionContext = sessionContext;
+    return this;
+  }
+
+  // exposed for testing
+  SelfResourceImpl setSelfIdResolver(Instance<SelfIdResolver> selfIdResolver) {
+    this.selfIdResolver = selfIdResolver;
+    return this;
+  }
+
+  // exposed for testing
+  public SelfResourceImpl setUserResource(UserResource userResource) {
+    this.userResource = userResource;
+    return this;
+  }
 }
