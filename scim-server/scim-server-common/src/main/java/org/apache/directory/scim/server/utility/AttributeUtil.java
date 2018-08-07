@@ -135,6 +135,7 @@ public class AttributeUtil {
 
       // return always and specified attributes, exclude never
       Set<Attribute> attributesToKeep = resolveAttributeReferences(attributes, true);
+      Set<String> extensionsToRemove = new HashSet<>();
       removeAttributesOfType(copy, schema, Returned.DEFAULT, attributesToKeep);
       removeAttributesOfType(copy, schema, Returned.REQUEST, attributesToKeep);
       removeAttributesOfType(copy, schema, Returned.NEVER);
@@ -142,12 +143,28 @@ public class AttributeUtil {
       for (Entry<String, ScimExtension> extensionEntry : copy.getExtensions().entrySet()) {
         String extensionUrn = extensionEntry.getKey();
         ScimExtension scimExtension = extensionEntry.getValue();
+        boolean removeExtension = true;
 
+        for (Attribute attributeToKeep : attributesToKeep) {
+          if (extensionUrn.equalsIgnoreCase(attributeToKeep.getUrn())) {
+            removeExtension = false;
+
+            break;
+          }
+        }
+        if (removeExtension) {
+          extensionsToRemove.add(extensionUrn);
+
+          continue;
+        }
         Schema extensionSchema = registry.getSchema(extensionUrn);
 
         removeAttributesOfType(scimExtension, extensionSchema, Returned.DEFAULT, attributesToKeep);
         removeAttributesOfType(scimExtension, extensionSchema, Returned.REQUEST, attributesToKeep);
         removeAttributesOfType(scimExtension, extensionSchema, Returned.NEVER);
+      }
+      for (String extensionUrn : extensionsToRemove) {
+        copy.removeExtension(extensionUrn);
       }
       return copy;
     }

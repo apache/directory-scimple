@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -167,7 +168,7 @@ public class AttributeUtilTest {
     
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
     
-    // TODO Assertions.assertThat(extension).isNull();
+    Assertions.assertThat(extension).as("%s should have been removed from extensions", EnterpriseExtension.URN).isNull();
   }
   
   @Test
@@ -196,8 +197,8 @@ public class AttributeUtilTest {
 
     
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
-    
-    // TODO Assertions.assertThat(extension).isNull();
+
+    Assertions.assertThat(extension).as("%s should have been removed from extensions", EnterpriseExtension.URN).isNull();
   }
   
   @Test
