@@ -45,13 +45,13 @@ import lombok.extern.slf4j.Slf4j;
 public class SelfResourceImpl implements SelfResource {
 
   @Inject
-  private UserResource userResource;
+  UserResource userResource;
 
   @Inject
-  private Instance<SelfIdResolver> selfIdResolver;
+  Instance<SelfIdResolver> selfIdResolver;
 
   @Resource
-  private SessionContext sessionContext;
+  SessionContext sessionContext;
 
   @Override
   public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -135,23 +135,5 @@ public class SelfResourceImpl implements SelfResource {
     }
 
     return selfIdResolver.get().resolveToInternalId(callerPrincipal);
-  }
-
-  // exposed for testing
-  SelfResourceImpl setSessionContext(SessionContext sessionContext) {
-    this.sessionContext = sessionContext;
-    return this;
-  }
-
-  // exposed for testing
-  SelfResourceImpl setSelfIdResolver(Instance<SelfIdResolver> selfIdResolver) {
-    this.selfIdResolver = selfIdResolver;
-    return this;
-  }
-
-  // exposed for testing
-  public SelfResourceImpl setUserResource(UserResource userResource) {
-    this.userResource = userResource;
-    return this;
   }
 }

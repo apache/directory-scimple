@@ -35,9 +35,9 @@ public class SelfResourceImplTest {
     when(principal.getName()).thenReturn("test-user");
     when(selfIdResolverInstance.isUnsatisfied()).thenReturn(true);
 
-    SelfResourceImpl selfResource = new SelfResourceImpl()
-        .setSelfIdResolver(selfIdResolverInstance)
-        .setSessionContext(sessionContext);
+    SelfResourceImpl selfResource = new SelfResourceImpl();
+    selfResource.selfIdResolver = selfIdResolverInstance;
+    selfResource.sessionContext = sessionContext;
 
     Response response = selfResource.getSelf(null, null);
     assertThat(response.getEntity(), instanceOf(ErrorResponse.class));
@@ -64,10 +64,10 @@ public class SelfResourceImplTest {
     when(selfIdResolver.resolveToInternalId(principal)).thenReturn(internalId);
     when(userResource.getById(internalId, null, null)).thenReturn(mockResponse);
 
-    SelfResourceImpl selfResource = new SelfResourceImpl()
-        .setSelfIdResolver(selfIdResolverInstance)
-        .setSessionContext(sessionContext)
-        .setUserResource(userResource);
+    SelfResourceImpl selfResource = new SelfResourceImpl();
+    selfResource.selfIdResolver = selfIdResolverInstance;
+    selfResource.sessionContext = sessionContext;
+    selfResource.userResource = userResource;
 
     // the response is just a passed along from the UserResource, so just validate it is the same instance.
     assertThat(selfResource.getSelf(null, null), sameInstance(mockResponse));
