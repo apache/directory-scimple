@@ -6,7 +6,7 @@
 * to you under the Apache License, Version 2.0 (the
 * "License"); you may not use this file except in compliance
 * with the License.  You may obtain a copy of the License at
- 
+
 * http://www.apache.org/licenses/LICENSE-2.0
 
 * Unless required by applicable law or agreed to in writing,
@@ -19,27 +19,25 @@
 
 package org.apache.directory.scim.server.rest;
 
-import javax.inject.Inject;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import org.apache.directory.scim.spec.protocol.Constants;
 
-import org.apache.directory.scim.server.schema.Registry;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.ext.Provider;
 
 /**
- * @deprecated Use {@link ScimJacksonJaxbJsonProvider} instead.
+ * Adds JacksonJaxbJsonProvider for custom MediaType {@code application/scim+json}.
  */
-@Deprecated
-public class ObjectMapperContextResolver extends edu.psu.swe.commons.jaxrs.server.ObjectMapperContextResolver {
-
-  private ObjectMapper objectMapper;
+@Provider
+@Consumes(Constants.SCIM_CONTENT_TYPE)
+@Produces(Constants.SCIM_CONTENT_TYPE)
+public class ScimJacksonJaxbJsonProvider extends JacksonJaxbJsonProvider {
 
   @Inject
-  public ObjectMapperContextResolver(Registry registry) {
-    objectMapper = new ObjectMapperFactory(registry).createObjectMapper();
-  }
-
-  @Override
-  public ObjectMapper getContext(Class<?> type) {
-    return objectMapper;
+  public ScimJacksonJaxbJsonProvider(ObjectMapper objectMapper) {
+    super(objectMapper, DEFAULT_ANNOTATIONS);
   }
 }

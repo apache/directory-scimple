@@ -35,6 +35,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.directory.scim.server.rest.ObjectMapperFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,7 +50,6 @@ import org.mockito.junit.MockitoRule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.directory.scim.server.rest.ObjectMapperContextResolver;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.Subobject;
@@ -993,8 +993,7 @@ public class UpdateRequestTest {
   }
 
   private ScimUser copy(ScimUser scimUser) throws IOException {
-    ObjectMapperContextResolver omcr = new ObjectMapperContextResolver();
-    ObjectMapper objMapper = omcr.getContext(null);
+    ObjectMapper objMapper = new ObjectMapperFactory(registry).createObjectMapper();
     String json = objMapper.writeValueAsString(scimUser);
     return objMapper.readValue(json, ScimUser.class);
   }

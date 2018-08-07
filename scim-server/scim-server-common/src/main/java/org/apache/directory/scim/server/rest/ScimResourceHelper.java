@@ -57,7 +57,8 @@ public final class ScimResourceHelper {
     clazzez.add(UserResourceImpl.class);
     clazzez.add(FilterParseExceptionMapper.class);
 
-    clazzez.add(ObjectMapperContextResolver.class);
+    // handle MediaType of application/scim+json
+    clazzez.add(ScimJacksonJaxbJsonProvider.class);
 
     return clazzez;
   }
