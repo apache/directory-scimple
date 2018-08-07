@@ -41,7 +41,7 @@
     <version.jackson>2.9.5</version.jackson>
     <version.lombok>1.16.14</version.lombok>
     <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
-    <version.restfuse>1.2.0</version.restfuse>
+    <version.restassured>3.1.0</version.restassured>
   </properties>
 
   <modules>
@@ -196,13 +196,15 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
-      <!-- update the version of jetty that restfuse uses, fixes CVE-2017-9735-->
       <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-bom</artifactId>
-        <version>9.4.8.v20180619</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>rest-assured</artifactId>
+        <version>${version.restassured}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>json-path</artifactId>
+        <version>${version.restassured}</version>
       </dependency>
       <dependency>
         <groupId>pl.pragmatists</groupId>
@@ -258,11 +260,6 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>com.restfuse</groupId>
-        <artifactId>com.eclipsesource.restfuse</artifactId>
-        <version>${version.restfuse}</version>
-      </dependency>
-      <dependency>
         <groupId>org.hamcrest</groupId>
         <artifactId>java-hamcrest</artifactId>
         <version>2.0.0.0</version>
@@ -273,13 +270,6 @@
         <artifactId>catch-exception</artifactId>
         <version>1.4.6</version>
         <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt</artifactId>
-        <version>${version.gwt}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

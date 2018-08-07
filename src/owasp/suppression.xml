@@ -28,5 +28,11 @@
    <gav regex="true">^org\.apache\.directory\.scim:.*$</gav>
    <cpe>cpe:/a:apache:http_server</cpe>
   </suppress>
+  <!-- https://github.com/jeremylong/DependencyCheck/issues/1004 -->
+  <suppress>
+   <notes><![CDATA[file name: groovy-*-*.jar]]></notes>
+   <gav regex="true">^org\.codehaus\.groovy:groovy-.*:2\.4.*$</gav>
+   <cve>CVE-2016-6497</cve>
+  </suppress>
 
 </suppressions>

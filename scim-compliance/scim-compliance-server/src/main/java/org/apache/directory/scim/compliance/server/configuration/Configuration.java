@@ -17,85 +17,81 @@
 * under the License.
 */
 
-/**
- * 
- */
 package org.apache.directory.scim.compliance.server.configuration;
 
-import com.eclipsesource.restfuse.Destination;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
- * Allows the Restfuse Destination to be specified via environment variables
+ * Allows the connection information to be specified via environment variables
  * or JVM properties so that tests can be executed against different
  * environments (dev, test, acc, sb, prod).
- * 
- * @author Steve Moyer &lt;smoyer@psu.edu&gt;
  */
-public final class Configuration {
+@Data
+@Accessors(chain = true)
+public class Configuration {
 
-  public static final String DEFAULT_DESTINATION = "http://localhost:8080/scim/v2";
-  public static final String DEFAULT_PROXY_HOST = "";
-  public static final String DEFAULT_PROXY_PORT = "";
+  private static final String DEFAULT_BASE_URL = "http://localhost:8080/scim/v2";
 
-  public static final String ENV_DESTINATION = "RESTFUSE_DESTINATION";
-  public static final String ENV_PROXY_HOST = "RESTFUSE_PROXY_HOST";
-  public static final String ENV_PROXY_PORT = "RESTFUSE_PROXY_PORT";
+  private static final String PROPERTY_BASE_URL = "scimtest.baseurl";
+  private static final String PROPERTY_PROXY_HOST = "scimtest.proxy.host";
+  private static final String PROPERTY_PROXY_PORT = "scimtest.proxy.port";
+  private static final String PROPERTY_AUTH_HEADER = "scimtest.auth.header";
 
-  public static final String PROPERTY_DESTINATION = "restfuse.destination";
-  public static final String PROPERTY_PROXY_HOST = "restfuse.proxy.host";
-  public static final String PROPERTY_PROXY_PORT = "restfuse.proxy.port";
+  private String baseUrl;
 
-  static String destinationUrl;
-  static String proxyHost;
-  static Integer proxyPort;
+  private String proxyHost;
 
-  /*
-  * Processes the environment variables and JVM properties statically so that
-  * this processing only happens once per test run.
-  */
-  static {
-    destinationUrl = getValue(DEFAULT_DESTINATION, ENV_DESTINATION, PROPERTY_DESTINATION);
-    proxyHost = getValue(DEFAULT_PROXY_HOST, ENV_PROXY_HOST, PROPERTY_PROXY_HOST);
-    String proxyPortString = getValue(DEFAULT_PROXY_PORT, ENV_PROXY_HOST, PROPERTY_PROXY_PORT);
-    
-    if (proxyPortString != null && !proxyPortString.isEmpty()) {
-      proxyPort = Integer.parseInt(proxyPortString);
-    }
-  }
+  private Integer proxyPort;
 
-  private Configuration() {
-    // Make this a utility class
-  }
+  private String authHeaderValue;
 
-  /**
-   * Creates a Restfuse Destination for the provided testObject using the URL
-   * proxy host and proxy port gleaned from the environment variables and/or
-   * JVM properties.
-   * 
-   * @param testObject the test
-   * @return
-   */
-  public static Destination getDestination(Object testObject) {
-    Destination destination = new Destination(testObject, destinationUrl);
+  private boolean debug;
 
-    if (proxyHost != null && proxyPort != null) {
-      destination = new Destination(testObject, destinationUrl, proxyHost, proxyPort);
+  private Map<String, String> resourcesSupported = new HashMap<>();
+
+  public static Configuration fromEnvironment() {
+    Configuration configuration = new Configuration()
+        .setBaseUrl(getValue(PROPERTY_BASE_URL, DEFAULT_BASE_URL))
+        .setAuthHeaderValue(getValue(PROPERTY_AUTH_HEADER))
+        .setProxyHost(getValue(PROPERTY_PROXY_HOST));
+
+    String rawPort = getValue(PROPERTY_PROXY_PORT);
+    if (StringUtils.isNotEmpty(rawPort)) {
+      configuration.setProxyPort(Integer.parseInt(rawPort));
     }
 
-    return destination;
+    return configuration;
   }
 
-  /*
-   * Generic way to get a default string value, environment variable value or
-   * property value in that order of priority.
-   */
-  private static String getValue(String defaultValue, String envName, String propertyName) {
-    String value = System.getenv(envName);
-    if (value == null) {
+  private static String getValue(String sysPropName) {
+    return getValue(sysPropName, null);
+  }
+
+  private static String getValue(String sysPropName, String defaultValue) {
+
+    // try sys props first
+    String value = System.getProperty(sysPropName);
+
+    // then environment variables
+    if (StringUtils.isEmpty(value)) {
+      value = System.getenv(toEnvVar(sysPropName));
+    }
+
+    // then the default value
+    if (StringUtils.isEmpty(value)) {
       value = defaultValue;
     }
-    value = System.getProperty(propertyName, value);
+
     return value;
   }
 
+  private static String toEnvVar(String sysPropName) {
+    return sysPropName.replaceAll("\\.", "_").toUpperCase(Locale.ENGLISH);
+  }
 }
