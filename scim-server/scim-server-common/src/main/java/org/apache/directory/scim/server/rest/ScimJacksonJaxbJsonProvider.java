@@ -26,7 +26,6 @@ import org.apache.directory.scim.spec.protocol.Constants;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
 /**
@@ -35,18 +34,10 @@ import javax.ws.rs.ext.Provider;
 @Provider
 @Consumes(Constants.SCIM_CONTENT_TYPE)
 @Produces(Constants.SCIM_CONTENT_TYPE)
-public class ScimJacksonJaxbJsonProvider extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
-
-  private final ObjectMapper objectMapper;
+public class ScimJacksonJaxbJsonProvider extends JacksonJaxbJsonProvider {
 
   @Inject
   public ScimJacksonJaxbJsonProvider(ObjectMapper objectMapper) {
     super(objectMapper, DEFAULT_ANNOTATIONS);
-    this.objectMapper = objectMapper;
-  }
-
-  @Override
-  public ObjectMapper getContext(Class<?> type) {
-    return objectMapper;
   }
 }
