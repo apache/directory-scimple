@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ResourceTypeTest extends ScimTestSupport {
+public class ResourceTypeIT extends ScimTestSupport {
 
   public static final String RESOURCE_PATH = "/ResourceTypes";
 

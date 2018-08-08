@@ -36,7 +36,7 @@ import java.util.Map;
 @Accessors(chain = true)
 public class Configuration {
 
-  private static final String DEFAULT_BASE_URL = "http://localhost:8080/scim/v2";
+  private static final String DEFAULT_BASE_URL = "http://localhost:8080/v2";
 
   private static final String PROPERTY_BASE_URL = "scimtest.baseurl";
   private static final String PROPERTY_PROXY_HOST = "scimtest.proxy.host";
@@ -56,8 +56,16 @@ public class Configuration {
   private Map<String, String> resourcesSupported = new HashMap<>();
 
   public static Configuration fromEnvironment() {
+
+    // allow for setting property via Arquillian or other
+    String serverPort = System.getProperty("server.http.port");
+    String defaultBaseUrl = DEFAULT_BASE_URL;
+    if (serverPort != null) {
+      defaultBaseUrl = "http://localhost:" + serverPort + "/v2";
+    }
+
     Configuration configuration = new Configuration()
-        .setBaseUrl(getValue(PROPERTY_BASE_URL, DEFAULT_BASE_URL))
+        .setBaseUrl(getValue(PROPERTY_BASE_URL, defaultBaseUrl))
         .setAuthHeaderValue(getValue(PROPERTY_AUTH_HEADER))
         .setProxyHost(getValue(PROPERTY_PROXY_HOST));
 

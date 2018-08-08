@@ -26,7 +26,7 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 
-public class ServiceProviderConfigTest extends ScimTestSupport {
+public class ServiceProviderConfigIT extends ScimTestSupport {
 
   @Test
   public void getToServiceProviderConfig() {

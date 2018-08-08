@@ -36,6 +36,11 @@ public abstract class ScimTestSupport {
 
   private final Configuration configuration = Configuration.fromEnvironment();
 
+  public ScimTestSupport() {
+    // enable logging on failures
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+  }
+
   protected Configuration getConfiguration() {
     return configuration;
   }
@@ -65,17 +70,18 @@ public abstract class ScimTestSupport {
 
     RestAssured.filters((requestSpec, responseSpec, ctx) -> {
 
-    requestSpec.baseUri(configuration.getBaseUrl())
+      Configuration config = getConfiguration();
+
+      requestSpec.baseUri(config.getBaseUrl())
         .accept(SCIM_MEDIA_TYPE)
-        .redirects()
-            .follow(false);
+        .redirects().follow(false);
 
       if (requestSpec.getBody() != null) {
         requestSpec.contentType(SCIM_MEDIA_TYPE);
       }
 
-      if (StringUtils.isNotEmpty(configuration.getAuthHeaderValue())) {
-        requestSpec.header("Authorization", configuration.getAuthHeaderValue());
+      if (StringUtils.isNotEmpty(config.getAuthHeaderValue())) {
+        requestSpec.header("Authorization", config.getAuthHeaderValue());
       }
 
       return ctx.next(requestSpec, responseSpec);
