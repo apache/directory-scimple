@@ -140,7 +140,6 @@
         <artifactId>scim-compliance-server</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
-
       <dependency>
         <groupId>edu.psu.swe.commons</groupId>
         <artifactId>commons-jaxrs</artifactId>
@@ -318,6 +317,25 @@
               <goal>prepare-agent</goal>
             </goals>
           </execution>
+          <execution>
+            <id>prepare-agent-integration</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -444,6 +462,15 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
+              <argLine>@{jacoco.argline}</argLine>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>2.20.1</version>
             <configuration>
               <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
               <argLine>@{jacoco.argline}</argLine>
