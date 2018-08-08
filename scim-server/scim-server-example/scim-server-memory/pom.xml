@@ -42,8 +42,10 @@
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
     </dependency>
-
-
+    <dependency>
+      <groupId>org.apache.directory.scim</groupId>
+      <artifactId>scim-compliance-server</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
