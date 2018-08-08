@@ -22,9 +22,7 @@ public class BasicIT {
 
   @Deployment(testable = false)
   public static WebArchive createDeployment() {
-    return ShrinkWrap.create(ZipImporter.class, "ROOT.war")
-        .importFrom(new File("target/scim-server-memory-2.23-SNAPSHOT.war"))
-        .as(WebArchive.class);
+    return Deployments.projectWar();
   }
 
   @Test
