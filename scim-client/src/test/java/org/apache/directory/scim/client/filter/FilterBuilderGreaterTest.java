@@ -25,17 +25,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
-@RunWith(JUnitParamsRunner.class)
 public class FilterBuilderGreaterTest {
 
   static final Integer[] INT_EXAMPLES = { -1, -10, -111, 1, 12, 123, 1234, 12345, 123456 };
@@ -59,32 +57,32 @@ public class FilterBuilderGreaterTest {
     return DOUBLE_EXAMPLES;
   }
   
-  @Test
-  @Parameters(method="getIntExamples")
+  @ParameterizedTest
+  @MethodSource("getIntExamples")
   public void testGreaterThanT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
     Filter filter = new Filter(decode(encoded));
   }
 
-  @Test
-  @Parameters(method="getLongExamples")
-  public void testGreaterThanT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
+  @ParameterizedTest
+  @MethodSource("getIntExamples")
+  public void getLongExamples(Long arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
     Filter filter = new Filter(decode(encoded));
   }
   
-  @Test
-  @Parameters(method="getFloatExamples")
+  @ParameterizedTest
+  @MethodSource("getFloatExamples")
   public void testGreaterThanT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
     Filter filter = new Filter(decode(encoded));
   }
   
-  @Test
-  @Parameters(method="getDoubleExamples")
+  @ParameterizedTest
+  @MethodSource("getDoubleExamples")
   public void testGreaterThanT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
@@ -109,32 +107,32 @@ public class FilterBuilderGreaterTest {
     Filter filter = new Filter(decode(encoded));
   }
 
-  @Test
-  @Parameters(method="getIntExamples")
+  @ParameterizedTest
+  @MethodSource("getIntExamples")
   public void testGreaterThanOrEqualsT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
     Filter filter = new Filter(decode(encoded));
   }
 
-  @Test
-  @Parameters(method="getLongExamples")
+  @ParameterizedTest
+  @MethodSource("getLongExamples")
   public void testGreaterThanOrEqualsT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
     Filter filter = new Filter(decode(encoded));
   }
   
-  @Test
-  @Parameters(method="getFloatExamples")
+  @ParameterizedTest
+  @MethodSource("getFloatExamples")
   public void testGreaterThanOrEqualsT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
     Filter filter = new Filter(decode(encoded));
   }
   
-  @Test
-  @Parameters(method="getDoubleExamples")
+  @ParameterizedTest
+  @MethodSource("getDoubleExamples")
   public void testGreaterThanOrEqualsT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();

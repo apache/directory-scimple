@@ -29,10 +29,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
       <groupId>pl.pragmatists</groupId>
       <artifactId>JUnitParams</artifactId>
     </dependency>
@@ -48,6 +44,11 @@
       <groupId>com.github.foodev</groupId>
       <artifactId>jsondiff</artifactId>
       <version>2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
