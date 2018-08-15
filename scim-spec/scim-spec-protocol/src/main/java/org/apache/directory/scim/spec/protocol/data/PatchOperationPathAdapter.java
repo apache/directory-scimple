@@ -28,7 +28,7 @@ public class PatchOperationPathAdapter extends XmlAdapter<String, PatchOperation
     if (v == null) {
       return null;
     }
-    return new PatchOperationPath();
+    return new PatchOperationPath(v);
   }
 
   @Override
