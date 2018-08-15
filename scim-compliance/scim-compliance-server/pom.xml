@@ -29,16 +29,24 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.restfuse</groupId>
-      <artifactId>com.eclipsesource.restfuse</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.directory.scim</groupId>
       <artifactId>scim-spec-schema</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.directory.scim</groupId>
       <artifactId>scim-spec-protocol</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>json-path</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>java-hamcrest</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -48,6 +56,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
