@@ -5,7 +5,7 @@ import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.ejb.SessionContext;
 import javax.enterprise.inject.Instance;

@@ -19,9 +19,6 @@
 
 package org.apache.directory.scim.spec.resources;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -32,6 +29,9 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class PhoneNumberJsonTest {
@@ -49,16 +49,16 @@ public class PhoneNumberJsonTest {
     
     PhoneNumber readValue = objectMapper.readValue(json, PhoneNumber.class);
     
-    Assert.assertEquals(phoneNumber.getNumber(), readValue.getNumber());
-    Assert.assertEquals(phoneNumber.getExtension(), readValue.getExtension());
-    Assert.assertEquals(phoneNumber.isDomainPhoneContext(), readValue.isDomainPhoneContext());
-    Assert.assertEquals(phoneNumber.isGlobalNumber(), readValue.isGlobalNumber());
-    Assert.assertEquals(phoneNumber.getPhoneContext(), readValue.getPhoneContext());
-    Assert.assertEquals(phoneNumber.getSubAddress(), readValue.getSubAddress());
-    Assert.assertEquals(phoneNumber.getPrimary(), readValue.getPrimary());
-    Assert.assertEquals(phoneNumber.getDisplay(), readValue.getDisplay());
-    Assert.assertEquals(phoneNumber.getType(), readValue.getType());
-    Assert.assertEquals(phoneNumber.getValue(), readValue.getValue());
+    assertEquals(phoneNumber.getNumber(), readValue.getNumber());
+    assertEquals(phoneNumber.getExtension(), readValue.getExtension());
+    assertEquals(phoneNumber.isDomainPhoneContext(), readValue.isDomainPhoneContext());
+    assertEquals(phoneNumber.isGlobalNumber(), readValue.isGlobalNumber());
+    assertEquals(phoneNumber.getPhoneContext(), readValue.getPhoneContext());
+    assertEquals(phoneNumber.getSubAddress(), readValue.getSubAddress());
+    assertEquals(phoneNumber.getPrimary(), readValue.getPrimary());
+    assertEquals(phoneNumber.getDisplay(), readValue.getDisplay());
+    assertEquals(phoneNumber.getType(), readValue.getType());
+    assertEquals(phoneNumber.getValue(), readValue.getValue());
 
     
     log.info("done");

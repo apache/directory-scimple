@@ -19,7 +19,9 @@
 
 package org.apache.directory.scim.server.rest;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -30,7 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -51,7 +54,9 @@ import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class BaseResourceTypeResourceImplTest {
   
   @Mock
@@ -60,7 +65,7 @@ public class BaseResourceTypeResourceImplTest {
   AttributeReferenceListWrapper includedAttributeList = new AttributeReferenceListWrapper("name.givenName, name.familyName");
   AttributeReferenceListWrapper excludedAttributeList = new AttributeReferenceListWrapper("emails, phoneNumbers");
   
-  @Test(expected=ScimServerException.class)
+  @Test
   public void testGetProviderInternal_ScimServerExceptionThrownWhenNoProvider() throws ScimServerException {
     // given
     @SuppressWarnings("rawtypes")
@@ -69,7 +74,7 @@ public class BaseResourceTypeResourceImplTest {
     when(baseResourceImpl.getProviderInternal()).thenCallRealMethod();
     
     // when
-    baseResourceImpl.getProviderInternal();
+    assertThrows(ScimServerException.class, () -> baseResourceImpl.getProviderInternal());
   }
   
   @SuppressWarnings("unchecked")
@@ -101,8 +106,7 @@ public class BaseResourceTypeResourceImplTest {
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.setAttributes(Collections.emptySet());
     searchRequest.setExcludedAttributes(Collections.emptySet());
-    
-    when(baseResourceImpl.getProvider()).thenReturn(provider);
+
     when(baseResourceImpl.find(searchRequest)).thenReturn(Response.ok().build());
     
     when(baseResourceImpl.query(null, null, null, null, null, null, null)).thenCallRealMethod();
@@ -129,8 +133,6 @@ public class BaseResourceTypeResourceImplTest {
       fail("Parsing phone number in getScimUser failed");
     }
     
-    when(baseResourceImpl.getProvider()).thenReturn(provider);
-    
     when(baseResourceImpl.create(scimUser, includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     
     // when
@@ -152,9 +154,7 @@ public class BaseResourceTypeResourceImplTest {
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.setAttributes(includedAttributeList.getAttributeReferences());
     searchRequest.setExcludedAttributes(excludedAttributeList.getAttributeReferences());
-    
-    when(baseResourceImpl.getProvider()).thenReturn(provider);
-    
+
     when(baseResourceImpl.find(searchRequest)).thenCallRealMethod();
     
     // when
@@ -180,8 +180,6 @@ public class BaseResourceTypeResourceImplTest {
       fail("Parsing phone number in getScimUser failed");
     }
     
-    when(baseResourceImpl.getProvider()).thenReturn(provider);
-    
     when(baseResourceImpl.update(scimUser, "1", includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     
     // when
@@ -201,8 +199,6 @@ public class BaseResourceTypeResourceImplTest {
     BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
     
     PatchRequest patchRequest = new PatchRequest();
-    
-    when(baseResourceImpl.getProvider()).thenReturn(provider);
     
     when(baseResourceImpl.patch(patchRequest, "1", includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     

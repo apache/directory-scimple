@@ -19,22 +19,21 @@
 
 package org.apache.directory.scim.spec.phonenumber;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.directory.scim.spec.resources.PhoneNumber;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
-@RunWith(JUnitParamsRunner.class)
 public class PhoneNumberTest {
   
   private static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberTest.class);
   
   @SuppressWarnings("unused")
-  private String[] getAllValidPhones() {
+  private static String[] getAllValidPhones() {
     return new String[] { 
       "tel:7042;phone-context=example.com",//local number
       "tel:863-1234;phone-context=+1-914-555",//local number
@@ -131,7 +130,7 @@ public class PhoneNumberTest {
   }
   
   @SuppressWarnings("unused")
-  private String[] getAllInvalidPhones() {
+  private static String[] getAllInvalidPhones() {
     return new String[] {
       "",//missing prefix and numbers
       "tel:",//missing numbers
@@ -159,20 +158,21 @@ public class PhoneNumberTest {
     };
   }
 	
-	@Test
-	@Parameters(method = "getAllValidPhones")
+	@ParameterizedTest
+	@MethodSource("getAllValidPhones")
 	public void test_parser_with_valid_phone_numbers(String phoneUri) throws Exception {
 	  LOGGER.info("valid phones (" + phoneUri + ") start");
 		PhoneNumber phoneNumber = new PhoneNumber();
 		phoneNumber.setValue(phoneUri);
 	}
 	
-	@Test(expected = PhoneNumberParseException.class)
-  @Parameters(method = "getAllInvalidPhones")
+	@ParameterizedTest
+  @MethodSource("getAllInvalidPhones")
   public void test_parser_with_invalid_phone_numbers(String phoneUri) throws PhoneNumberParseException {
 	  LOGGER.info("invalid phones (" + phoneUri + ") start");
     PhoneNumber phoneNumber = new PhoneNumber();
-    phoneNumber.setValue(phoneUri);
+
+    Assertions.assertThrows(PhoneNumberParseException.class, () -> phoneNumber.setValue(phoneUri));
   }
 
 }

@@ -7,7 +7,7 @@ import org.apache.directory.scim.spec.protocol.search.PageRequest;
 import org.apache.directory.scim.spec.protocol.search.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

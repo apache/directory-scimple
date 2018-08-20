@@ -41,19 +41,19 @@ public class FilterBuilderLessThanTest {
   static final Float [] FLOAT_EXAMPLES = {.14f, 3.14f, 2.1415f, 3.14E+10f, 333.14f};
   static final Double [] DOUBLE_EXAMPLES = {.14, 3.14, 2.1415, 3.14E+10, 333.14};
  
-  Integer [] getIntExamples() {
+  static Integer[] getIntExamples() {
     return INT_EXAMPLES;
   }
   
-  Long [] getLongExamples() {
+  static Long[] getLongExamples() {
     return LONG_EXAMPLES;
   }
   
-  Float [] getFloatExamples() {
+  static Float[] getFloatExamples() {
     return FLOAT_EXAMPLES;
   }
   
-  Double [] getDoubleExamples() {
+  static Double[] getDoubleExamples() {
     return DOUBLE_EXAMPLES;
   }
   
