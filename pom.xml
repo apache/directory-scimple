@@ -37,9 +37,6 @@
     <maven.compiler.target>8</maven.compiler.target>
 
     <version.jackson>2.9.5</version.jackson>
-    <version.junit5-minor>2.0</version.junit5-minor>
-    <version.junit5-platform>1.${version.junit5-minor}</version.junit5-platform>
-    <version.junit5-jupiter>5.${version.junit5-minor}</version.junit5-jupiter>
     <version.lombok>1.16.14</version.lombok>
     <version.lombok.plugin>${version.lombok}.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
@@ -185,16 +182,11 @@
       </dependency>
 
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.12</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>${version.junit5-jupiter}</version>
-        <scope>test</scope>
+        <version>5.2.0</version>
+        <scope>import</scope>
+        <type>pom</type>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
@@ -210,12 +202,6 @@
         <version>9.4.8.v20180619</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>pl.pragmatists</groupId>
-        <artifactId>JUnitParams</artifactId>
-        <version>1.0.4</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
@@ -254,8 +240,14 @@
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>1.10.19</version>
+        <artifactId>mockito-core</artifactId>
+        <version>2.21.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>2.21.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -281,6 +273,7 @@
         <version>1.4.6</version>
         <scope>test</scope>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -454,6 +447,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.22.0</version>
             <configuration>
               <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
               <argLine>@{jacoco.argline}</argLine>

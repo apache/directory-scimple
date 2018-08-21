@@ -19,22 +19,25 @@
 
 package org.apache.directory.scim.spec.resources;
 
-import static org.junit.Assert.*;
-
 import java.util.HashMap;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
-@RunWith(JUnitParamsRunner.class)
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class PhoneNumberBuilderTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberBuilderTest.class);
@@ -50,7 +53,7 @@ public class PhoneNumberBuilderTest {
   private static final String FAILED_TO_PARSE = "failed to parse";
 
   @SuppressWarnings("unused")
-  private String[] getInvalidSubscriberNumbers() {
+  private static String[] getInvalidSubscriberNumbers() {
     return new String[] { 
        null,
        "",
@@ -69,7 +72,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @SuppressWarnings("unused")
-  private String[] getValidSubscriberNumbers() {
+  private static String[] getValidSubscriberNumbers() {
     return new String[] { 
        "1",
        "1234",
@@ -95,8 +98,8 @@ public class PhoneNumberBuilderTest {
     };
   }
 
-  @Test
-	@Parameters(method = "getInvalidSubscriberNumbers")
+  @ParameterizedTest
+	@MethodSource("getInvalidSubscriberNumbers")
   public void test_invalid_subscriberNumber_for_LocalPhoneNumberBuilder(String invalidSubscriberNumber) throws Exception {
 
     LOGGER.info("invalid subscriber number '" + invalidSubscriberNumber + "' start");
@@ -129,8 +132,8 @@ public class PhoneNumberBuilderTest {
     }
   }
   
-  @Test
-  @Parameters(method = "getValidSubscriberNumbers")
+  @ParameterizedTest
+  @MethodSource("getValidSubscriberNumbers")
   public void test_valid_subscriberNumber_for_LocalPhoneNumberBuilder(String validSubscriberNumber) throws Exception {
 
     LOGGER.info("valid subscriber number '" + validSubscriberNumber + "' start");
@@ -138,12 +141,12 @@ public class PhoneNumberBuilderTest {
       new LocalPhoneNumberBuilder().subscriberNumber(validSubscriberNumber).build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assertTrue("Exception should have been for country code.", ex.getMessage().contains(COUNTRY_CODE));
+      assertTrue(ex.getMessage().contains(COUNTRY_CODE), "Exception should have been for country code.");
     }
   }
   
   @SuppressWarnings("unused")
-    private String[] getInvalidCountryCodes() {
+    private static String[] getInvalidCountryCodes() {
       return new String[] { 
          null,
          "",
@@ -170,7 +173,7 @@ public class PhoneNumberBuilderTest {
     }
     
     @SuppressWarnings("unused")
-    private String[] getValidCountryCodes() {
+    private static String[] getValidCountryCodes() {
       return new String[] { 
          "+1",
          "1",
@@ -183,8 +186,8 @@ public class PhoneNumberBuilderTest {
       };
     }
     
-    @Test
-    @Parameters(method = "getInvalidCountryCodes")
+    @ParameterizedTest
+    @MethodSource("getInvalidCountryCodes")
     public void test_invalid_countryCode_for_LocalPhoneNumberBuilder(String invalidCountryCode) throws Exception {
 
       LOGGER.info("invalid country code '" + invalidCountryCode + "' start");
@@ -206,15 +209,15 @@ public class PhoneNumberBuilderTest {
       }
     }
     
-    @Test
-    @Parameters(method = "getValidCountryCodes")
+    @ParameterizedTest
+    @MethodSource("getValidCountryCodes")
     public void test_valid_countryCode_for_LocalPhoneNumberBuilder(String validCountryCode) throws Exception {
 
       LOGGER.info("valid country code '" + validCountryCode + "' start");
 
       PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(validCountryCode).build();
-      assertNull("Extension should be null", phoneNumber.getExtension());
-      assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+      assertNull(phoneNumber.getExtension(), "Extension should be null");
+      assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
       assertEquals("123-4567", phoneNumber.getNumber());
       
       
@@ -225,7 +228,7 @@ public class PhoneNumberBuilderTest {
     }
     
     @SuppressWarnings("unused")
-    private String[] getInvalidAreaCodes() {
+    private static String[] getInvalidAreaCodes() {
       return new String[] { 
          "",
          "A",
@@ -243,7 +246,7 @@ public class PhoneNumberBuilderTest {
     }
     
     @SuppressWarnings("unused")
-    private String[] getValidAreaCodes() {
+    private static String[] getValidAreaCodes() {
       return new String[] { 
          "1",
          "30",
@@ -252,8 +255,8 @@ public class PhoneNumberBuilderTest {
       };
     }
     
-    @Test
-    @Parameters(method = "getInvalidAreaCodes")
+    @ParameterizedTest
+    @MethodSource("getInvalidAreaCodes")
     public void test_invalid_areaCode_for_LocalPhoneNumberBuilder(String invalidAreaCode) throws Exception {
 
     LOGGER.info("invalid area code '" + invalidAreaCode + "' start");
@@ -297,29 +300,29 @@ public class PhoneNumberBuilderTest {
   @Test
   public void test_areaCode_can_be_null_for_LocalPhoneNumberBuilder() throws Exception {
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").build();
-    assertNull("Extension should be null", phoneNumber.getExtension());
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertEquals("123-4567", phoneNumber.getNumber());
     assertEquals("+23", phoneNumber.getPhoneContext());
     assertEquals("tel:123-4567;phone-context=+23", phoneNumber.getValue());    
   } 
   
-  @Test
-  @Parameters(method = "getValidAreaCodes")
+  @ParameterizedTest
+  @MethodSource("getValidAreaCodes")
   public void test_valid_areaCode_for_LocalPhoneNumberBuilder(String validAreaCode) throws Exception {
 
     LOGGER.info("valid area code '" + validAreaCode + "' start");
     
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(validAreaCode).build();
-    assertNull("Extension should be null", phoneNumber.getExtension());
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertEquals("123-4567", phoneNumber.getNumber());
     assertEquals(("+23-" + validAreaCode), phoneNumber.getPhoneContext());
     assertEquals(("tel:123-4567;phone-context=+23-"+validAreaCode), phoneNumber.getValue());
   }
   
   @SuppressWarnings("unused")
-  private String[] getInvalidGlobalNumbers() {
+  private static String[] getInvalidGlobalNumbers() {
     return new String[] { 
        null,
        "",
@@ -338,7 +341,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @SuppressWarnings("unused")
-  private String[] getValidGlobalNumbers() {
+  private static String[] getValidGlobalNumbers() {
     return new String[] { 
       "+44-20-1234-5678",//global with visualSeparator -
       "+44.20.1234.5678",//global with visualSeparator .
@@ -421,8 +424,8 @@ public class PhoneNumberBuilderTest {
     };
   }
 
-  @Test
-  @Parameters(method = "getInvalidGlobalNumbers")
+  @ParameterizedTest
+  @MethodSource("getInvalidGlobalNumbers")
   public void test_invalid_globalNumber_for_GlobalPhoneNumberBuilder(String invalidGlobalNumber) throws Exception {
 
     LOGGER.info("invalid global number '" + invalidGlobalNumber + "' start");
@@ -455,39 +458,39 @@ public class PhoneNumberBuilderTest {
     }
   }
   
-  @Test
-  @Parameters(method = "getValidGlobalNumbers")
+  @ParameterizedTest
+  @MethodSource("getValidGlobalNumbers")
   public void test_valid_globalNumber_for_GlobalPhoneNumberBuilder(String validGlobalNumber) throws Exception {
 
     LOGGER.info("valid global number '" + validGlobalNumber + "' start");
     
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber(validGlobalNumber).build();
-    assertNull("Extension should be null", phoneNumber.getExtension());
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
-    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
+    assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
     
     assertEquals(validGlobalNumber, phoneNumber.getNumber());
     assertEquals(("tel:"+validGlobalNumber), phoneNumber.getValue());
 
   }
   
-  @Test
-  @Parameters(method = "getValidGlobalNumbers")
+  @ParameterizedTest
+  @MethodSource("getValidGlobalNumbers")
   public void test_valid_noPlusSymbol_globalNumber_for_GlobalPhoneNumberBuilder(String validGlobalNumber) throws Exception {
     String temp = validGlobalNumber.replace("+", "");
     LOGGER.info("valid global number '" + temp + "' start");
     
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber(temp).build();
-    assertNull("Extension should be null", phoneNumber.getExtension());
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
-    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
+    assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
     assertEquals("+" + temp, phoneNumber.getNumber());
     assertEquals(("tel:+" + temp), phoneNumber.getValue());
   }
   
   @SuppressWarnings("unused")
-  private String[] getInvalidDomainNames() {
+  private static String[] getInvalidDomainNames() {
     return new String[] { 
        "#1",
        "*1",
@@ -502,7 +505,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @SuppressWarnings("unused")
-  private String[] getValidDomainNames() {
+  private static String[] getValidDomainNames() {
     return new String[] { 
       "google.com",
       "2xkcd-ex.com",
@@ -511,8 +514,8 @@ public class PhoneNumberBuilderTest {
     };
   }
   
-  @Test
-  @Parameters(method = "getInvalidDomainNames")
+  @ParameterizedTest
+  @MethodSource("getInvalidDomainNames")
   public void test_invalid_domainName_for_LocalPhoneNumberBuilder(String invalidDomainName) throws Exception {
 
     LOGGER.info("invalid domain name '" + invalidDomainName + "' start");
@@ -590,15 +593,15 @@ public class PhoneNumberBuilderTest {
     }
   }
   
-  @Test
-  @Parameters(method = "getValidDomainNames")
+  @ParameterizedTest
+  @MethodSource("getValidDomainNames")
   public void test_valid_domainName_for_LocalPhoneNumberBuilder(String validDomainName) throws Exception {
 
     LOGGER.info("valid domain name '" + validDomainName + "' start");
     
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(validDomainName).build();
-    assertNull("Extension should be null", phoneNumber.getExtension());
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
    
     assertEquals("1707", phoneNumber.getNumber());
     assertEquals(validDomainName, phoneNumber.getPhoneContext());
@@ -643,8 +646,8 @@ public class PhoneNumberBuilderTest {
                               .extension("1234")
                               .build();
     
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
-    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
+    assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
     assertEquals("+1-888-888-5555", phoneNumber.getNumber());
     assertEquals("1234", phoneNumber.getExtension());
@@ -657,7 +660,7 @@ public class PhoneNumberBuilderTest {
                               .extension("1234")
                               .build();
     
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
 
     assertEquals("888-5555", phoneNumber.getNumber());
     assertEquals("+1-888", phoneNumber.getPhoneContext());
@@ -671,8 +674,8 @@ public class PhoneNumberBuilderTest {
                               .subAddress("example.a.com")
                               .build();
     
-    assertNull("Extension should be null", phoneNumber.getExtension());
-    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
+    assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
     assertEquals("+1-888-888-5555", phoneNumber.getNumber());
     assertEquals("example.a.com", phoneNumber.getSubAddress());
@@ -685,7 +688,7 @@ public class PhoneNumberBuilderTest {
                               .subAddress("example.a.com")
                               .build();
     
-    assertNull("Extension should be null", phoneNumber.getExtension());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
 
     assertEquals("888-5555", phoneNumber.getNumber());
     assertEquals("+1-888", phoneNumber.getPhoneContext());
@@ -701,8 +704,8 @@ public class PhoneNumberBuilderTest {
         .param("milhouse", "simpson")
         .build();
     
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
-    assertNull("PhoneContext should be null", phoneNumber.getPhoneContext());
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
+    assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
     assertEquals("+1-888-888-5555", phoneNumber.getNumber());
     assertEquals("1234", phoneNumber.getExtension());
@@ -717,7 +720,7 @@ public class PhoneNumberBuilderTest {
         .param("milhouse", "simpson")
         .build();
     
-    assertNull("Extension should be null", phoneNumber.getExtension());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
     
     assertEquals("888-5555", phoneNumber.getNumber());
     assertEquals("+1-888", phoneNumber.getPhoneContext());
@@ -825,7 +828,7 @@ public class PhoneNumberBuilderTest {
                               .subAddress("%20azAZ09?@=,+$&/:_!~.-()")
                               .build();
     
-    assertNull("Extension should be null", phoneNumber.getExtension());
+    assertNull(phoneNumber.getExtension(), "Extension should be null");
     
     assertEquals("1707", phoneNumber.getNumber());
     assertEquals("example.a.com", phoneNumber.getPhoneContext());
@@ -844,7 +847,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @SuppressWarnings("unused")
-  private String[] getInvalidExtensions() {
+  private static String[] getInvalidExtensions() {
     return new String[] { 
        "",
        "A",
@@ -862,7 +865,7 @@ public class PhoneNumberBuilderTest {
   }
   
   @SuppressWarnings("unused")
-  private String[] getValidExtensions() {
+  private static String[] getValidExtensions() {
     return new String[] { 
        "1",
        "1234",
@@ -888,8 +891,8 @@ public class PhoneNumberBuilderTest {
     };
   }
   
-  @Test
-  @Parameters(method = "getValidExtensions")
+  @ParameterizedTest
+  @MethodSource("getValidExtensions")
   public void test_valid_extension(String validExtension) throws PhoneNumberParseException {
     LOGGER.info("valid extension '" + validExtension + "' start");
     
@@ -898,15 +901,15 @@ public class PhoneNumberBuilderTest {
                               .build();
     
     assertEquals(validExtension, phoneNumber.getExtension());
-    assertNull("SubAddress should be null", phoneNumber.getSubAddress());
+    assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertEquals("1234-5678", phoneNumber.getNumber());
     assertEquals("+44-20", phoneNumber.getPhoneContext());
     
     assertEquals(("tel:1234-5678;ext=" + validExtension + ";phone-context=+44-20"), phoneNumber.getValue());
   }
   
-  @Test
-  @Parameters(method = "getInvalidExtensions")
+  @ParameterizedTest
+  @MethodSource("getInvalidExtensions")
   public void test_invalid_extension(String invalidExtension) throws PhoneNumberParseException {
     LOGGER.info("invalid extension " + invalidExtension);
     try {

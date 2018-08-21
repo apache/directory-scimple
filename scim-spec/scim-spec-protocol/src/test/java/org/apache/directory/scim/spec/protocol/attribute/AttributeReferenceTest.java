@@ -19,14 +19,11 @@
 
 package org.apache.directory.scim.spec.protocol.attribute;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(JUnitParamsRunner.class)
 public class AttributeReferenceTest {
   
   private static final String USER_NAME = "userName";
@@ -46,18 +43,18 @@ public class AttributeReferenceTest {
   protected static final String EXAMPLE_6 = CORE_USER_SCHEMA + ":" + NAME_GIVEN_NAME;
   protected static final String EXAMPLE_7 = ENTERPRISE_USER_SCHEMA + ":" + EMPLOYEE_NUMBER;
   
-  @Test
-  @Parameters(method = "getAttributeReferences")
+  @ParameterizedTest
+  @MethodSource("getAttributeReferences")
   public void testAttributeParsing(String attributeReferenceString, String expectedUrn, String expectedAttriubte) {
     AttributeReference attributeReference = new AttributeReference(attributeReferenceString);
     
-    Assert.assertEquals(expectedUrn, attributeReference.getUrn());
-    Assert.assertEquals(expectedAttriubte, attributeReference.getFullAttributeName());
+    assertEquals(expectedUrn, attributeReference.getUrn());
+    assertEquals(expectedAttriubte, attributeReference.getFullAttributeName());
     
   }
   
   @SuppressWarnings("unused")
-  private String[][] getAttributeReferences() {
+  private static String[][] getAttributeReferences() {
     return new String[][] {
         {EXAMPLE_1, null, USER_NAME},
         {EXAMPLE_2, null, USER_NAME.toLowerCase()},

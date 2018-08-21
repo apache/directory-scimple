@@ -23,20 +23,14 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +51,6 @@ import org.apache.directory.scim.common.ScimUtils;
 import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
-import org.apache.directory.scim.spec.exception.InvalidExtensionException;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
@@ -65,7 +58,6 @@ import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
-import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.Schema;
@@ -74,18 +66,15 @@ public class AttributeUtilTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(AttributeUtilTest.class);
 
-  @Rule
-  public MockitoRule mockito = MockitoJUnit.rule();
-
-  @Mock
   Registry registry;
 
   AttributeUtil attributeUtil;
 
   private ObjectMapper objectMapper;
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
+    registry = Mockito.mock(Registry.class);
     attributeUtil = new AttributeUtil();
     attributeUtil.registry = registry;
     Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class, ScimUtils.getFieldsUpTo(ScimUser.class, BaseResource.class));

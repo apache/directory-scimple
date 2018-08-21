@@ -25,11 +25,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import org.junit.Test;
-
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class FilterBuilderTestNotEquals {

@@ -22,18 +22,14 @@ package org.apache.directory.scim.client.filter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
-import junitparams.JUnitParamsRunner;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-@RunWith(JUnitParamsRunner.class)
 public class FilterBuilderTest {
 
 //  address.type EQ "work"
@@ -71,9 +67,6 @@ public class FilterBuilderTest {
 //  address,type EQ "work"
 //  address.2type EQ "work"
 
-  
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
   
   @Test
   public void testSimpleAnd() throws UnsupportedEncodingException, FilterParseException {
@@ -156,8 +149,7 @@ public class FilterBuilderTest {
   
   @Test
   public void testAttributeContainsEmbedded() throws UnsupportedEncodingException, FilterParseException {
-    
-    thrown.expect(FilterParseException.class);
+
     FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
     FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
     
@@ -166,22 +158,22 @@ public class FilterBuilderTest {
     String encoded = b3.toString();
     
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+
+    assertThrows(FilterParseException.class, () -> new Filter(decoded));
   }
   
   @Test
   public void testAttributeContainsDeeplyEmbedded() throws UnsupportedEncodingException, FilterParseException {
-    
-    thrown.expect(FilterParseException.class);
-    FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
-    FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
-    FilterClient.Builder b3 = FilterClient.builder().equalTo("name.giveName", "Gandalf").and(b2.filter());
-    FilterClient.Builder b4 = FilterClient.builder().attributeHas("address", b3.filter());
-   
-    String encoded = b4.toString();
-    
-    String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+
+      FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
+      FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
+      FilterClient.Builder b3 = FilterClient.builder().equalTo("name.giveName", "Gandalf").and(b2.filter());
+      FilterClient.Builder b4 = FilterClient.builder().attributeHas("address", b3.filter());
+
+      String encoded = b4.toString();
+
+      String decoded = decode(encoded);
+      assertThrows(FilterParseException.class, () -> new Filter(decoded));
   }
   //@Test
 //  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {

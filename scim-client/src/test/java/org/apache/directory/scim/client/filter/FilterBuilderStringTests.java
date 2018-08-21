@@ -22,12 +22,10 @@ package org.apache.directory.scim.client.filter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class FilterBuilderStringTests {

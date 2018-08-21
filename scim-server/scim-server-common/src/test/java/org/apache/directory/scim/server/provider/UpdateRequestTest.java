@@ -19,8 +19,6 @@
 
 package org.apache.directory.scim.server.provider;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,24 +27,20 @@ import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.directory.scim.server.rest.ObjectMapperFactory;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -68,9 +62,17 @@ import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.Photo;
 import org.apache.directory.scim.spec.resources.ScimUser;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-@RunWith(JUnitParamsRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UpdateRequestTest {
   
   private static final String FIRST = "first";
@@ -82,8 +84,6 @@ public class UpdateRequestTest {
   private static final String B = "B";
   private static final String C = "C";
 
-  @Rule
-  public MockitoRule mockito = MockitoJUnit.rule();
   private Registry registry;
 
   @Mock
@@ -94,7 +94,7 @@ public class UpdateRequestTest {
 
   ProviderRegistry providerRegistry;
 
-  @Before
+  @BeforeEach
   public void initialize() throws Exception {
     providerRegistry = new ProviderRegistry();
     registry = new Registry();
@@ -130,12 +130,12 @@ public class UpdateRequestTest {
               .isNotNull();
   }
 
-  @Test(expected=UnsupportedOperationException.class)
+  @Test
   public void testPatchToUpdate() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
         
-    updateRequest.getResource();
+    assertThrows(UnsupportedOperationException.class, () -> updateRequest.getResource());
   }
 
   @Test
@@ -228,12 +228,12 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertNotNull(operations);
-    Assert.assertEquals(1, operations.size());
+    assertNotNull(operations);
+    assertEquals(1, operations.size());
     PatchOperation operation = operations.get(0);
-    Assert.assertNotNull(operation.getValue());
-    Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
+    assertNotNull(operation.getValue());
+    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(PhoneNumber.class, operation.getValue().getClass());
   }
   
   @Test
@@ -257,18 +257,18 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertNotNull(operations);
-    Assert.assertEquals(2, operations.size());
+    assertNotNull(operations);
+    assertEquals(2, operations.size());
     
     PatchOperation operation = operations.get(0);
-    Assert.assertNotNull(operation.getValue());
-    Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
+    assertNotNull(operation.getValue());
+    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(PhoneNumber.class, operation.getValue().getClass());
     
     operation = operations.get(1);
-    Assert.assertNotNull(operation.getValue());
-    Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(PhoneNumber.class, operation.getValue().getClass());
+    assertNotNull(operation.getValue());
+    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(PhoneNumber.class, operation.getValue().getClass());
   }
 
   @Test
@@ -492,7 +492,7 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertTrue("Empty Arrays caused a diff", operations.isEmpty());
+    assertTrue(operations.isEmpty(), "Empty Arrays caused a diff");
   }
   
   @Test
@@ -506,7 +506,7 @@ public class UpdateRequestTest {
     user1.setPhotos(new ArrayList<>());
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertTrue("Empty Arrays are not being nulled out", operations.isEmpty());
+    assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
     
     //Reset user 1 and empty list on Extension and verify no differences
     user1 = createUser1();
@@ -514,7 +514,7 @@ public class UpdateRequestTest {
     ext.setList(new ArrayList<String>());
     updateRequest.initWithResource("1234", user1, user2);
     operations = updateRequest.getPatchOperations();
-    Assert.assertTrue("Empty Arrays are not being nulled out", operations.isEmpty());
+    assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
     
     //Reset extension and set empty list on element of extension then verify no differences
     Subobject subobject = new Subobject();
@@ -523,7 +523,7 @@ public class UpdateRequestTest {
     ext.setSubobject(subobject);
     updateRequest.initWithResource("1234", user1, user2);
     operations = updateRequest.getPatchOperations();
-    Assert.assertTrue("Empty Arrays are not being nulled out", operations.isEmpty());
+    assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
   }
   
   /**
@@ -552,12 +552,12 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertNotNull(operations);
-    Assert.assertEquals(3, operations.size());
+    assertNotNull(operations);
+    assertEquals(3, operations.size());
     PatchOperation operation = operations.get(0);
-    Assert.assertNotNull(operation.getValue());
-    Assert.assertEquals(Type.ADD, operation.getOperation());
-    Assert.assertEquals(Photo.class, operation.getValue().getClass());
+    assertNotNull(operation.getValue());
+    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(Photo.class, operation.getValue().getClass());
   }
   
   @Test
@@ -583,11 +583,11 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertNotNull(operations);
-    Assert.assertEquals(2, operations.size());
+    assertNotNull(operations);
+    assertEquals(2, operations.size());
     PatchOperation operation = operations.get(0);
-    Assert.assertEquals(Type.REMOVE, operation.getOperation());
-    Assert.assertNull(operation.getValue());
+    assertEquals(Type.REMOVE, operation.getOperation());
+    assertNull(operation.getValue());
   }
   
   @Test
@@ -723,8 +723,8 @@ public class UpdateRequestTest {
     operations.stream().forEach(op -> System.out.println(op));
   }
   
-  @Test
-  @Parameters(method = "testListOfStringsParameters")
+  @ParameterizedTest
+  @MethodSource("testListOfStringsParameters")
   public void testListOfStringsParameterized(List<String> list1, List<String> list2, List<ExpectedPatchOperation> ops) throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
@@ -741,16 +741,16 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    Assert.assertEquals(ops.size(), operations.size());
+    assertEquals(ops.size(), operations.size());
     for(int i = 0; i < operations.size(); i++) {
       PatchOperation actualOp = operations.get(i);
       ExpectedPatchOperation expectedOp = ops.get(i);
-      Assert.assertEquals(expectedOp.getOp(), actualOp.getOperation().toString());
-      Assert.assertEquals(expectedOp.getPath(), actualOp.getPath().toString());
+      assertEquals(expectedOp.getOp(), actualOp.getOperation().toString());
+      assertEquals(expectedOp.getPath(), actualOp.getPath().toString());
       if (expectedOp.getValue() == null) {
-        Assert.assertNull(actualOp.getValue());
+        assertNull(actualOp.getValue());
       } else {
-        Assert.assertEquals(expectedOp.getValue(), actualOp.getValue().toString());
+        assertEquals(expectedOp.getValue(), actualOp.getValue().toString());
       }
       
     }
@@ -759,7 +759,7 @@ public class UpdateRequestTest {
   }
   
   @SuppressWarnings("unused")
-  private Object[] testListOfStringsParameters() throws Exception {
+  private static Object[] testListOfStringsParameters() throws Exception {
     List<Object> params = new ArrayList<>();
     String nickName = "John Xander Anyman";
     //Parameter order
@@ -858,13 +858,13 @@ public class UpdateRequestTest {
 //    
 //    PhoneNumber workNumber = user2.getPhoneNumbers().stream().filter(p -> p.getType().equals("work")).findFirst().orElse(null);
 //    workNumber.setType("home");
-//    Assert.assertNotNull(workNumber);
+//    assertNotNull(workNumber);
 //    
 //    updateRequest.initWithResource("1234", user1, user2);
 //    List<PatchOperation> operations = updateRequest.getPatchOperations();
-//    Assert.assertNotNull(operations);
-//    Assert.assertEquals(expectedNumberOfOperationsWithBug, operations.size());
-//    Assert.assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
+//    assertNotNull(operations);
+//    assertEquals(expectedNumberOfOperationsWithBug, operations.size());
+//    assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
   }
 
   private PatchOperation assertSingleResult(List<PatchOperation> result) {
@@ -888,7 +888,7 @@ public class UpdateRequestTest {
   
   @Data
   @AllArgsConstructor
-  private class ExpectedPatchOperation {
+  private static class ExpectedPatchOperation {
     private String op;
     private String path;
     private String value;

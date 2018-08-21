@@ -19,10 +19,6 @@
 
 package org.apache.directory.scim.spec.schema;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.InputStream;
 import java.util.Set;
 
@@ -31,30 +27,29 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
-import org.apache.directory.scim.spec.schema.Meta;
-import org.apache.directory.scim.spec.schema.Schema;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@RunWith(JUnitParamsRunner.class)
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class SchemaTest {
 
   static ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();;
   Validator validator;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     validator = validatorFactory.getValidator();
   }
@@ -68,8 +63,8 @@ public class SchemaTest {
    *          the name of the resource on the classpath that contains the JSON
    *          representation of the schema.
    */
-  @Test
-  @Parameters({
+  @ParameterizedTest
+  @ValueSource( strings = {
       "schemas/urn:ietf:params:scim:schemas:core:2.0:User.json",
       "schemas/urn:ietf:params:scim:schemas:core:2.0:Group.json",
       "schemas/urn:ietf:params:scim:schemas:core:2.0:ResourceType.json",
@@ -117,50 +112,50 @@ public class SchemaTest {
     }
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testGetId() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testSetId() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testGetName() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testSetName() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testGetDescription() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testSetDescription() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testGetAttributes() {
     fail("Not yet implemented");
   }
 
-  @Ignore
   @Test
+  @Disabled
   public void testSetAttributes() {
     fail("Not yet implemented");
   }

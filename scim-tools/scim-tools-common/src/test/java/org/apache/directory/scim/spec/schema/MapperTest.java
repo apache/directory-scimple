@@ -19,12 +19,6 @@
 
 package org.apache.directory.scim.spec.schema;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeNotNull;
-import static org.junit.Assume.assumeTrue;
-
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,15 +28,18 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@RunWith(JUnitParamsRunner.class)
+
 public class MapperTest {
 
   static final String[] ISO_DATETIME_EXAMPLES = {
@@ -50,14 +47,7 @@ public class MapperTest {
       "2015-04-26T01:37:17Z"
   };
 
-  Mapper mapper;
-
-  @Before
-  public void setUp() {
-    mapper = new Mapper();
-  }
-
-  String[] getIsoDateTimeExamples() {
+  static String[] getIsoDateTimeExamples() {
     return ISO_DATETIME_EXAMPLES;
   }
 
@@ -67,8 +57,8 @@ public class MapperTest {
    * 
    * @param isoDateTime a String[] of examples to test.
    */
-  @Test
-  @Parameters(method = "getIsoDateTimeExamples")
+  @ParameterizedTest
+  @MethodSource("getIsoDateTimeExamples")
   public void testDateTimePatternWorksForIso8601Strings(String isoDateTime) {
     Pattern pattern = Pattern.compile(Mapper.ISO8601_PATTERN);
     assertNotNull(pattern);
@@ -82,11 +72,10 @@ public class MapperTest {
    * 
    * @param isoDateTime a String[] of examples to test.
    */
-  @Test
-  @Parameters(method = "getIsoDateTimeExamples")
+  @ParameterizedTest
+  @MethodSource("getIsoDateTimeExamples")
   public void testDateTimeGroupIndexesProvideCorrectSubstrings(String isoDateTime) {
     Pattern pattern = Pattern.compile(Mapper.ISO8601_PATTERN);
-    assumeNotNull(pattern);
     Matcher matcher = pattern.matcher(isoDateTime);
     assumeTrue(matcher.matches());
     assertEquals("2015", matcher.group(Mapper.DATE_COMPONENT_INDEX_YEAR));
@@ -99,9 +88,10 @@ public class MapperTest {
         "Z".equals(matcher.group(Mapper.TIMEZONE_COMPONENT_INDEX)));
   }
   
-  @Test
-  @Parameters(method = "getIsoDateTimeExamples")
+  @ParameterizedTest
+  @MethodSource("getIsoDateTimeExamples")
   public void testConvertDateTimeFromString(String isoDateTime) throws ParseException {
+    Mapper mapper = new Mapper();
     Date date = mapper.convertDateTime(isoDateTime);
     TimeZone timeZone = new SimpleTimeZone(0, "GMT");
     GregorianCalendar calendar = new GregorianCalendar(timeZone);
@@ -115,8 +105,9 @@ public class MapperTest {
   }
   
   @Test
-  @Ignore //TODO
-  public void testConvertDateTimeFromDate() {
+  @Disabled
+  public void convertDateTimeFromDate() {
+    Mapper mapper = new Mapper();
     TimeZone timeZone = new SimpleTimeZone(0, "GMT");
     GregorianCalendar calendar = new GregorianCalendar(timeZone);
     calendar.set(Calendar.YEAR, 2015);
@@ -138,8 +129,8 @@ public class MapperTest {
    * @param expectedHours the expected hours.
    * @param expectedMinutes the expected minutes.
    */
-  @Test
-  @Parameters({
+  @ParameterizedTest
+  @CsvSource({
       " 00:00,   0,    0",
       "+00:00,   0,    0",
       "-00:00,  -0,    0",
@@ -159,6 +150,7 @@ public class MapperTest {
       "-05,     -5,    0",
   })
   public void testConvertTimeZone(String isoTimeZone, int expectedHours, int expectedMinutes) {
+    Mapper mapper = new Mapper();
     TimeZone timeZone = mapper.convertTimeZone(isoTimeZone);
     int actualOffsetMinutes = timeZone.getRawOffset() / 1000;
     int actualHours = actualOffsetMinutes / 60;

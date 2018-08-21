@@ -19,39 +19,27 @@
 
 package org.apache.directory.scim.tools.common;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@RunWith(JUnitParamsRunner.class)
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class LintTest {
-  
-  Lint lint;
-  
-  @Before
-  public void setUp() {
-    lint = new Lint();
-  }
 
-  @Test
-  @Ignore // TODO - Change the file names to match those provided by the
+  @ParameterizedTest
+  @Disabled // TODO - Change the file names to match those provided by the
           //        scim-spec-schema module and figure out why some schemas
           //        don't have meta attributes.
-  @Parameters({
+  @ValueSource(strings = {
     "schemas/user-schema.json",
     "schemas/group-schema.json",
     "schemas/resource-type-schema.json",
@@ -60,6 +48,7 @@ public class LintTest {
     "schemas/enterprise-user-schema.json"
   })
   public void testConvertWithSchemas(String schemaFileName) throws IOException {
+    Lint lint = new Lint();
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     InputStream inputStream = classLoader.getResourceAsStream(schemaFileName);
 
@@ -73,8 +62,8 @@ public class LintTest {
     }
   }
 
-  @Test
-  @Parameters({
+  @ParameterizedTest
+  @ValueSource(strings = {
     "examples/enterprise-user-example.json",
     "examples/full-user-example.json",
     "examples/group-example.json",
@@ -83,6 +72,7 @@ public class LintTest {
     "examples/resource-type-user-example.json"
   })
   public void testConvertWithExamples(String exampleFileName) throws IOException {
+    Lint lint = new Lint();
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     InputStream inputStream = classLoader.getResourceAsStream(exampleFileName);
 

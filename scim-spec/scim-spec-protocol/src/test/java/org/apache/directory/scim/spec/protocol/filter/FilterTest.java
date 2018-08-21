@@ -19,34 +19,30 @@
 
 package org.apache.directory.scim.spec.protocol.filter;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.directory.scim.spec.protocol.search.Filter;
 
-@RunWith(JUnitParamsRunner.class)
 public class FilterTest extends AbstractLexerParserTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(FilterTest.class);
 
   @SuppressWarnings("unused")
-  private String[] getAllFilters() {
+  private static String[] getAllFilters() {
     return ALL;
   }
 
-  @Test
-  @Parameters(method = "getAllFilters")
+  @ParameterizedTest
+  @MethodSource("getAllFilters")
   public void test(String filterText) throws Exception {
     LOG.info("Running Filter Parser test on input: " + filterText);
     Filter filter = new Filter(filterText);
     FilterExpression expression = filter.getExpression();
     LOG.info("Parsed String: " + expression.toFilter());
-    Assert.assertNotNull(expression);
+    Assertions.assertNotNull(expression);
   }
 }
