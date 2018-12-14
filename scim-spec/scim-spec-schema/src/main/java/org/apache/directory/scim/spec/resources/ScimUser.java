@@ -67,7 +67,7 @@ public class ScimUser extends ScimResource implements Serializable {
   List<Email> emails;
 
   @XmlElement
-  @ScimAttribute(description="Get the description")
+  @ScimAttribute(description="An entitlement may be an additional right to a thing, object, or service")
   List<Entitlement> entitlements;
 
   @XmlElement
