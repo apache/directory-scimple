@@ -71,7 +71,6 @@ public class SchemaTest {
       "schemas/urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig.json",
       "schemas/urn:ietf:params:scim:schemas:extension:enterprise:2.0:User.json"
   })
-  @Disabled
   public void testUnmarshallingProvidedSchemas(String schemaFileName) {
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     InputStream inputStream = classLoader.getResourceAsStream(schemaFileName);
