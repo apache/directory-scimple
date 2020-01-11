@@ -24,8 +24,9 @@ import java.net.URLDecoder;
 
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FilterBuilderStringTests {
@@ -33,19 +34,19 @@ public class FilterBuilderStringTests {
   @Test
   public void testEndsWith() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().endsWith("address.streetAddress", "Way").toString();
-    Filter filter = new Filter(decode(encoded));
+     new Filter(decode(encoded));
   }
 
   @Test
   public void testStartsWith()  throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().startsWith("address.streetAddress", "133").toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testContains()  throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().contains("address.streetAddress", "MacDuff").toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   private String decode(String encoded) throws UnsupportedEncodingException {

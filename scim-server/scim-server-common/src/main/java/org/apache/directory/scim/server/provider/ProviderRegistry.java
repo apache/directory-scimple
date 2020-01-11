@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,8 +35,6 @@ import javax.ejb.Startup;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.xml.bind.annotation.XmlEnumValue;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.apache.directory.scim.common.ScimUtils;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
@@ -57,6 +54,9 @@ import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.AddAction;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

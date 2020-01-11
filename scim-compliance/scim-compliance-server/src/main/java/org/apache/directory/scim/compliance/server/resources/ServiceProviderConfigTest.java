@@ -30,8 +30,6 @@ import com.eclipsesource.restfuse.Response;
 import com.eclipsesource.restfuse.annotation.Context;
 import com.eclipsesource.restfuse.annotation.HttpTest;
 
-import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
-
 public class ServiceProviderConfigTest {
 
   @Rule

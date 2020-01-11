@@ -62,7 +62,7 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @ParameterizedTest
@@ -70,7 +70,7 @@ public class FilterBuilderGreaterTest {
   public void getLongExamples(Long arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   @ParameterizedTest
@@ -78,7 +78,7 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   @ParameterizedTest
@@ -86,25 +86,25 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThan("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   @Test
   public void testGreaterThanDate() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().greaterThan("dog.dob", new Date()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testGreaterThanLocalDate() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().greaterThan("dog.dob", LocalDate.now()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testGreaterThanLocalDateTime() throws UnsupportedEncodingException, FilterParseException  {
     String encoded = FilterClient.builder().greaterThan("dog.dob", LocalDateTime.now()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @ParameterizedTest
@@ -112,7 +112,7 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanOrEqualsT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @ParameterizedTest
@@ -120,7 +120,7 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanOrEqualsT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   @ParameterizedTest
@@ -128,7 +128,7 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanOrEqualsT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   @ParameterizedTest
@@ -136,25 +136,25 @@ public class FilterBuilderGreaterTest {
   public void testGreaterThanOrEqualsT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
     
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.weight", arg).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   @Test
   public void testGreaterThanOrEqualsDate() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.dob", new Date()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testGreaterThanOrEqualsLocalDate()  throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.dob", LocalDate.now()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testGreaterThanOrEqualsLocalDateTime() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().greaterThanOrEquals("dog.dob", LocalDateTime.now()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   private String decode(String encoded) throws UnsupportedEncodingException {

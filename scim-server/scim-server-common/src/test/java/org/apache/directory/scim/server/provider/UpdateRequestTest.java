@@ -19,6 +19,12 @@
 
 package org.apache.directory.scim.server.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,23 +33,7 @@ import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.directory.scim.server.rest.ObjectMapperFactory;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.Subobject;
@@ -62,14 +52,22 @@ import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.Photo;
 import org.apache.directory.scim.spec.resources.ScimUser;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -591,7 +589,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Ignore
+  @Disabled
   //TODO: do asserts
   public void testNonTypedAttributeListGetUseablePath() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -616,7 +614,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Ignore
+  @Disabled
   //TODO: do asserts
   public void testMoveFormatNameToNicknamePart1() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -636,7 +634,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Ignore
+  @Disabled
   //TODO: do asserts
   public void testMoveFormatNameToNicknamePart2() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -658,7 +656,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Ignore
+  @Disabled
   //TODO: do asserts
   public void testMoveFormatNameToNicknamePart3() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -680,7 +678,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Ignore
+  @Disabled
   //TODO: do asserts
   public void testMoveFormatNameToNicknamePart4() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -702,7 +700,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Ignore
+  @Disabled
   //TODO: do asserts
   public void testMoveFormatNameToNicknamePart5() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
@@ -846,7 +844,7 @@ public class UpdateRequestTest {
    * remove the primary flag, and remove the work number 
    */
   @Test
-  @Ignore
+  @Disabled
   public void testShowBugWhereDeleteIsTreatedAsMultipleReplace() throws Exception {
 //    final int expectedNumberOfOperationsWithoutBug = 1;
 //    final int expectedNumberOfOperationsWithBug = 4;

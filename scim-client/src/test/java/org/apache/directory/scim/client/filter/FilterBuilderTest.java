@@ -19,15 +19,16 @@
 
 package org.apache.directory.scim.client.filter;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FilterBuilderTest {
@@ -74,7 +75,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and().equalTo("name.familyName", "Baggins").toString();
   
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -83,7 +84,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.familyName", "Baggins").toString();
   
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -92,7 +93,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").toString();
   
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -101,7 +102,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).toString();
   
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -110,7 +111,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).toString();
   
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -122,7 +123,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().and(b1.filter(), b2.filter()).toString();
     
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -132,7 +133,7 @@ public class FilterBuilderTest {
     String encoded = FilterClient.builder().not(b1.filter()).toString();
     
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test
@@ -144,7 +145,7 @@ public class FilterBuilderTest {
     String encoded = b2.toString();
     
     String decoded = decode(encoded);
-    Filter filter = new Filter(decoded); 
+    new Filter(decoded); 
   }
   
   @Test

@@ -1,25 +1,26 @@
 package org.apache.directory.scim.server.rest;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.ejb.SessionContext;
+import javax.enterprise.inject.Instance;
+import javax.ws.rs.core.Response;
+
 import org.apache.directory.scim.server.exception.UnableToResolveIdException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.junit.jupiter.api.Test;
-
-import javax.ejb.SessionContext;
-import javax.enterprise.inject.Instance;
-import javax.ws.rs.core.Response;
-import java.security.Principal;
-import java.util.List;
-
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 public class SelfResourceImplTest {
@@ -29,7 +30,8 @@ public class SelfResourceImplTest {
 
     Principal principal = mock(Principal.class);
     SessionContext sessionContext = mock(SessionContext.class);
-    Instance selfIdResolverInstance = mock(Instance.class);
+    @SuppressWarnings("unchecked")
+	Instance<SelfIdResolver> selfIdResolverInstance = mock(Instance.class);
 
     when(sessionContext.getCallerPrincipal()).thenReturn(principal);
     when(principal.getName()).thenReturn("test-user");
@@ -52,7 +54,8 @@ public class SelfResourceImplTest {
     String internalId = "test-user-resolved";
     Principal principal = mock(Principal.class);
     SessionContext sessionContext = mock(SessionContext.class);
-    Instance selfIdResolverInstance = mock(Instance.class);
+    @SuppressWarnings("unchecked")
+	Instance<SelfIdResolver> selfIdResolverInstance = mock(Instance.class);
     SelfIdResolver selfIdResolver = mock(SelfIdResolver.class);
     UserResource userResource = mock(UserResource.class);
     Response mockResponse = mock(Response.class);
