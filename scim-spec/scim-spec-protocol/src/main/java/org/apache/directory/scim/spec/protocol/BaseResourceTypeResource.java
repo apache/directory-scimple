@@ -28,6 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -40,6 +41,7 @@ import org.apache.directory.scim.spec.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.search.SortOrder;
 import org.apache.directory.scim.spec.resources.ScimResource;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -59,7 +61,7 @@ public interface BaseResourceTypeResource<T> {
    */
   @GET
   @Path("{id}")
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Find by id", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, code=200)
   @ApiResponses(value={
                   @ApiResponse(code=400, message="Bad Request"),
@@ -79,7 +81,7 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @GET
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Find by a combination of query parameters", produces=Constants.SCIM_CONTENT_TYPE, response=ListResponse.class, code=200)
   @ApiResponses(value={
                   @ApiResponse(code=400, message="Bad Request"),
@@ -103,8 +105,8 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @POST
-  @Consumes(Constants.SCIM_CONTENT_TYPE)
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Create", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 201)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 409, message = "Conflict"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response create(T resource,
@@ -120,7 +122,7 @@ public interface BaseResourceTypeResource<T> {
    */
   @POST
   @Path("/.search")
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Search", produces=Constants.SCIM_CONTENT_TYPE, response = ListResponse.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response find(SearchRequest request) throws ScimException {
@@ -134,8 +136,8 @@ public interface BaseResourceTypeResource<T> {
    */
   @PUT
   @Path("{id}")
-  @Consumes(Constants.SCIM_CONTENT_TYPE)
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Update", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 200)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response update(T resource, 
@@ -147,8 +149,8 @@ public interface BaseResourceTypeResource<T> {
 
   @PATCH
   @Path("{id}")
-  @Consumes(Constants.SCIM_CONTENT_TYPE)
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Patch a portion of the backing store", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, code = 204)
   @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
   default Response patch(PatchRequest patchRequest,

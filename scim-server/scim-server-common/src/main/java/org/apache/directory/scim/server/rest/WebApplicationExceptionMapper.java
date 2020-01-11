@@ -19,23 +19,25 @@
 
 package org.apache.directory.scim.server.rest;
 
-import org.apache.directory.scim.spec.protocol.Constants;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
-
 import javax.enterprise.inject.Specializes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.directory.scim.spec.protocol.Constants;
+import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
+
 
 @Provider
 @Specializes
-@Produces(Constants.SCIM_CONTENT_TYPE)
+@Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
 public class WebApplicationExceptionMapper extends edu.psu.swe.commons.jaxrs.exceptions.mappers.WebApplicationExceptionMapper {
 
+  @Override
   public Response toResponse(WebApplicationException e) {
     ErrorResponse em = new ErrorResponse(Status.fromStatusCode(e.getResponse().getStatus()), e.getMessage());
 

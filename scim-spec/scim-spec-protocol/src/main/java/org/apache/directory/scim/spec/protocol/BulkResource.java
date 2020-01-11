@@ -24,12 +24,14 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.directory.scim.spec.protocol.data.BulkRequest;
 import org.apache.directory.scim.spec.protocol.data.BulkResponse;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -60,8 +62,8 @@ public interface BulkResource {
    * @return
    */
   @POST
-  @Produces(Constants.SCIM_CONTENT_TYPE)
-  @Consumes(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Bulk Operations", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response=BulkResponse.class, code=200)
   @ApiResponses(value={
       @ApiResponse(code=400, message="Bad Request"),

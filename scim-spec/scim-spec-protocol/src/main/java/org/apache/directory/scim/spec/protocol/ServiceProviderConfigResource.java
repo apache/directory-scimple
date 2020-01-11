@@ -23,6 +23,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -56,7 +57,7 @@ import io.swagger.annotations.ApiOperation;
 public interface ServiceProviderConfigResource {
 
   @GET
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Get Service Provider Configuration", produces=Constants.SCIM_CONTENT_TYPE)
   default public Response getServiceProviderConfiguration(@Context UriInfo context) {
     return Response.status(Status.NOT_IMPLEMENTED).build();

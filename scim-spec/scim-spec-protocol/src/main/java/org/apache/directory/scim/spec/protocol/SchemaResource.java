@@ -19,16 +19,17 @@
 
 package org.apache.directory.scim.spec.protocol;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * From SCIM Protocol Specification, section 4, page 74
@@ -66,7 +67,7 @@ import javax.ws.rs.core.Response.Status;
 public interface SchemaResource {
 
   @GET
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Get All Schemas", produces=Constants.SCIM_CONTENT_TYPE)
   default public Response getAllSchemas(@QueryParam("filter") String filter) {
 
@@ -79,7 +80,7 @@ public interface SchemaResource {
 
   @GET
   @Path("{uri}")
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Get Schemas by URN", produces=Constants.SCIM_CONTENT_TYPE)
   default public Response getSchema(@PathParam("uri") String uri) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
