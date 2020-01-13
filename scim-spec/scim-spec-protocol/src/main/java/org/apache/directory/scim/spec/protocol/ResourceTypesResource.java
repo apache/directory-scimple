@@ -24,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -62,7 +63,7 @@ import io.swagger.annotations.ApiOperation;
 public interface ResourceTypesResource {
 
   @GET
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Get All Resource Types", produces=Constants.SCIM_CONTENT_TYPE)
   default Response getAllResourceTypes(@QueryParam("filter") String filter) throws Exception {
 
@@ -75,7 +76,7 @@ public interface ResourceTypesResource {
 
   @GET
   @Path("{name}")
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Get Resource Type by URN", produces=Constants.SCIM_CONTENT_TYPE)
   default Response getResourceType(@PathParam("name") String name) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();

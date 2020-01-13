@@ -22,7 +22,6 @@ package org.apache.directory.scim.spec.resources;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -30,6 +29,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+import org.apache.directory.scim.spec.annotation.ScimAttribute;
+import org.apache.directory.scim.spec.annotation.ScimExtensionType;
+import org.apache.directory.scim.spec.exception.InvalidExtensionException;
+import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
+import org.apache.directory.scim.spec.schema.Meta;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +47,6 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
-import org.apache.directory.scim.spec.annotation.ScimAttribute;
-import org.apache.directory.scim.spec.annotation.ScimExtensionType;
-import org.apache.directory.scim.spec.exception.InvalidExtensionException;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
-import org.apache.directory.scim.spec.schema.Meta;
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

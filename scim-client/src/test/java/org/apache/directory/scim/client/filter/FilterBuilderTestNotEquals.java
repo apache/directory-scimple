@@ -27,8 +27,9 @@ import java.util.Date;
 
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FilterBuilderTestNotEquals {
@@ -36,65 +37,65 @@ public class FilterBuilderTestNotEquals {
   @Test
   public void testNotnotEqualStringString() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().notEqual("address.streetAddress", "7714 Sassafrass Way").toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringBoolean() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().notEqual("address.active", true).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringDate() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().notEqual("date.date", new Date()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringLocalDate() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().notEqual("date.date", LocalDate.now()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringLocalDateTime() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().notEqual("date.date", LocalDateTime.now()).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringInteger() throws UnsupportedEncodingException, FilterParseException {
     int i = 10;
     String encoded = FilterClient.builder().notEqual("int.int", i).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringLong() throws UnsupportedEncodingException, FilterParseException {
     long i = 10l;
     String encoded = FilterClient.builder().notEqual("long.long", i).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringFloat() throws UnsupportedEncodingException, FilterParseException {
     float i = 10.2f;
     String encoded = FilterClient.builder().notEqual("long.long", i).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotnotEqualStringDouble() throws UnsupportedEncodingException, FilterParseException {
     double i = 10.2;
     String encoded = FilterClient.builder().notEqual("long.long", i).toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
 
   @Test
   public void testNotEqualNull() throws UnsupportedEncodingException, FilterParseException {
     String encoded = FilterClient.builder().equalNull("null.null").toString();
-    Filter filter = new Filter(decode(encoded));
+    new Filter(decode(encoded));
   }
   
   private String decode(String encoded) throws UnsupportedEncodingException {

@@ -19,19 +19,20 @@
 
 package org.apache.directory.scim.spec.protocol;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 //@formatter:off
 /**
@@ -63,7 +64,7 @@ public interface SearchResource {
    * @return
    */
   @POST
-  @Produces(Constants.SCIM_CONTENT_TYPE)
+  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @ApiOperation(value="Search", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, responseContainer="List", code=200)
   @ApiResponses(value={
       @ApiResponse(code=400, message="Bad Request"),

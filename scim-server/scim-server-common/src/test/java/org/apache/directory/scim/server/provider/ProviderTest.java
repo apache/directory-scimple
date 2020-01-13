@@ -47,7 +47,7 @@ public class ProviderTest {
     assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("Unknown Server Error"));
   }
 
-  private class ProviderAdapter implements Provider {
+  private class ProviderAdapter implements Provider<ScimResource> {
 
     @Override
     public ScimResource create(ScimResource resource) {
@@ -55,7 +55,7 @@ public class ProviderTest {
     }
 
     @Override
-    public ScimResource update(UpdateRequest updateRequest) {
+    public ScimResource update(UpdateRequest<ScimResource> updateRequest) {
       return null;
     }
 
@@ -65,7 +65,7 @@ public class ProviderTest {
     }
 
     @Override
-    public FilterResponse find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
+    public FilterResponse<ScimResource> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
       return null;
     }
 

@@ -24,10 +24,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Mutability;
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Uniqueness;
-
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
