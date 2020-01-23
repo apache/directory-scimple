@@ -15,7 +15,7 @@
  KIND, either express or implied.  See the License for the
  specific language governing permissions and limitations
  under the License. -->
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
   <!-- Wrong GAV detection -->
   <suppress>
@@ -27,6 +27,19 @@
    <notes><![CDATA[file name: scim-server-common-*.jar]]></notes>
    <gav regex="true">^org\.apache\.directory\.scim:.*$</gav>
    <cpe>cpe:/a:apache:http_server</cpe>
+  </suppress>
+  <!-- Used by compliance test code. Jetty is a transitive dependency of Restfuse, which has not been updated. -->
+  <suppress>
+   <notes><![CDATA[file name: jetty-http-9.4.8.v20180619.jar]]>
+   <![CDATA[file name: jetty-server-9.4.8.v20180619.jar]]></notes>
+   <vulnerabilityName>CVE-2017-7656</vulnerabilityName>
+   <vulnerabilityName>CVE-2017-7657</vulnerabilityName>
+   <vulnerabilityName>CVE-2017-7658</vulnerabilityName>
+   <vulnerabilityName>CVE-2018-12536</vulnerabilityName>
+   <vulnerabilityName>CVE-2018-12538</vulnerabilityName>
+   <vulnerabilityName>CVE-2018-12545</vulnerabilityName>
+   <vulnerabilityName>CVE-2019-10241</vulnerabilityName>
+   <vulnerabilityName>CVE-2019-10247</vulnerabilityName>
   </suppress>
 
 </suppressions>
