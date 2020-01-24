@@ -20,6 +20,7 @@
 package org.apache.directory.scim.client.rest;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import javax.ws.rs.ProcessingException;
@@ -227,8 +228,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
-          .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
-          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
+          .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
+          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
           .request(getContentType())
           .buildGet();
 
@@ -245,8 +246,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, FilterWrapper filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws ScimException {
       Response response;
       Invocation request = BaseScimClient.this.target
-          .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
-          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
+          .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
+          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
           .queryParam(FILTER_QUERY_PARAM, filter.getFilter())
           .queryParam(SORT_BY_QUERY_PARAM, sortBy)
           .queryParam(SORT_ORDER_QUERY_PARAM, sortOrder != null ? sortOrder.name() : null)
@@ -268,8 +269,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
       Response response;
       Invocation request = BaseScimClient.this.target
-          .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
-          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
+          .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
+          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
           .request(getContentType())
           .buildPost(Entity.entity(resource, getContentType()));
 
@@ -304,8 +305,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
-          .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
-          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
+          .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
+          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
           .request(getContentType())
           .buildPut(Entity.entity(resource, getContentType()));
 
@@ -323,8 +324,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
-          .queryParam(ATTRIBUTES_QUERY_PARAM, attributes)
-          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, excludedAttributes)
+          .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
+          .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
           .request(getContentType())
           .build("PATCH", Entity.entity(patchRequest, getContentType()));
 
@@ -352,6 +353,18 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       } catch (RestClientException restClientException) {
         throw toScimException(restClientException);
       }
+    }
+    
+    private AttributeReferenceListWrapper nullOutQueryParamIfListIsNullOrEmpty(AttributeReferenceListWrapper wrapper) {
+      if (wrapper == null) {
+        return null;
+      }
+      Set<AttributeReference> attributeReferences = wrapper.getAttributeReferences();
+      if (attributeReferences == null || attributeReferences.isEmpty()) {
+        return null;
+      }
+      
+      return wrapper;
     }
   }
 
