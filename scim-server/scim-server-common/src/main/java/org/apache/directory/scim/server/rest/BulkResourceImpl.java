@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import javax.ejb.Stateless;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
