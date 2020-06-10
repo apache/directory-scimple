@@ -4,9 +4,7 @@
 Apache Directory SCIMple
 ========================
 
-Apache's Java EE implmentation of the [Simple Cross-domain Identity
-Management](http://www.simplecloud.info/) (SCIM) version 2.0 specfification
-as defined by the following RFCs:
+Apache's Java EE implementation of the [Simple Cross-domain Identity Management](http://www.simplecloud.info/) (SCIM) version 2.0 specification as defined by the following RFCs:
 
 * [RFC7643 - SCIM: Core Schema](https://tools.ietf.org/html/rfc7643)
 
@@ -16,9 +14,7 @@ as defined by the following RFCs:
 
 ## Project
 
-Please fork this project and contribute Pull-Requests via this project's
-Github page.  Issue tracking is being transitioned to the [Apache Foundation's
-Jira server](http://issues.apache.org/jira/browse/SCIMPLE).
+Please fork this project and contribute Pull-Requests via this project's Github page.  Issue tracking is being transitioned to the [Apache Foundation's Jira server](http://issues.apache.org/jira/browse/SCIMPLE).
 
 Please visit our project page at https://directory.apache.org/scimple.
 
@@ -27,19 +23,16 @@ Please visit our project page at https://directory.apache.org/scimple.
 * A full-featured Java SCIM client
 * Declarative creation of new ResourceTypes and Extensions
 * Dynamic generation of the Schema and ResourceType end-points.
-* A suite of tools to allow the creation of SCIM resources that can then be
-  verified against the appropriate schemas.
+* A suite of tools to allow the creation of SCIM resources that can then be verified against the appropriate schemas.
 
 ## Future features
 
 * Example implementations of the server with various persistence paradigms.
-* A set of verification tests to ensure the project meets the specification
-  and to allow inter-operability testing.
+* A set of verification tests to ensure the project meets the specification and to allow inter-operability testing.
 
 ## Example code
     
-Examples of the project's declarative syntax are shown below.  The first example
-shows how a SCIM resource is declared:
+Examples of the project's declarative syntax are shown below. The first example shows how a SCIM resource is declared:
 
 ```java
 @Data
@@ -74,9 +67,7 @@ public class ScimUser extends ScimResource {
     List<Address> addresses;
 ```
 
-In the example above, annotations are used at the class level and member level
-to declare a new SCIM resource and its attributes respectively.  The example
-below shows the equivalent declaration for a resource Extension:
+In the example above, annotations are used at the class level and member level to declare a new SCIM resource and its attributes respectively.  The example below shows the equivalent declaration for a resource Extension:
 
 ```java
 @XmlRootElement
@@ -112,19 +103,12 @@ public class EnterpriseExtension implements ScimExtension {
         private String $ref;
 ```
 
-This example shows how an extension is declared at the class level, but also
-provides an example of how complex SCIM types can be simply defined as
-suitably annotated inner classes.
+This example shows how an extension is declared at the class level, but also provides an example of how complex SCIM types can be simply defined as suitably annotated inner classes.
 
-Implementations are fully customizable without altering the core server code.
-The example below shows how the implementation for a provider is declared:
+Implementations are fully customizable without altering the core server code. The example below shows how the implementation for a provider is declared:
 
 ```java
 public class InMemoryUserService implements Provider<ScimUser> {
 ```
 
-Implementing the provider interface allows the customization of create,
-retrieve, update and delete methods (as well as find).  Customization is
-flexible - if your system implements soft deletes, create a delete method that
-simply sets a flag and alter the find and retrieve methods to only return
-"undeleted" resources.
+Implementing the provider interface allows the customization of create, retrieve, update, and delete methods (as well as find).  Customization is flexible - if your system implements soft deletes, create a delete method that simply sets a flag and alter the find and retrieve methods to only return "undeleted" resources.
