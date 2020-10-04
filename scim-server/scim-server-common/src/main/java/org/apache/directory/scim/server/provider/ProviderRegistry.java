@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Instance;
@@ -99,6 +101,7 @@ public class ProviderRegistry {
 
   private Map<Class<? extends ScimResource>, Instance<? extends Provider<? extends ScimResource>>> providerMap = new HashMap<>();
 
+  @Lock(LockType.WRITE)
   public <T extends ScimResource> void registerProvider(Class<T> clazz, Instance<? extends Provider<T>> providerInstance) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsException {
 
     Provider<T> provider = providerInstance.get();
@@ -130,6 +133,8 @@ public class ProviderRegistry {
     providerMap.put(clazz, providerInstance);
   }
 
+  @Deprecated
+  @Lock(LockType.READ)
   @SuppressWarnings("unchecked")
   public <T extends ScimResource> Provider<T> getProvider(Class<T> clazz) {
     Instance<? extends Provider<? extends ScimResource>> providerInstance = providerMap.get(clazz);
@@ -181,13 +186,13 @@ public class ProviderRegistry {
     return resourceType;
   }
 
-  public static Schema generateBaseSchema(Class<?> clazz) throws InvalidProviderException {
+  private static Schema generateBaseSchema(Class<?> clazz) throws InvalidProviderException {
     List<Field> fieldList = ScimUtils.getFieldsUpTo(clazz, BaseResource.class);
 
     return generateSchema(clazz, fieldList);
   }
   
-  public static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
+  private static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
     log.debug("----> In generateExtensionSchema");
     
     return generateSchema(clazz, ScimUtils.getFieldsUpTo(clazz, Object.class));
