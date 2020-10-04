@@ -55,6 +55,10 @@ public class AttributeReferenceListWrapper {
   }
 
   public String toString() {
+    if (attributeReferences == null || attributeReferences.isEmpty()) {
+      return "";
+    }
+    
     return attributeReferences.stream().map(AttributeReference::toString).collect(Collectors.joining(","));
   }
 }
