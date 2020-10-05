@@ -42,8 +42,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.UriInfo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -78,12 +77,9 @@ import org.apache.directory.scim.spec.protocol.search.PageRequest;
 import org.apache.directory.scim.spec.protocol.search.SortOrder;
 import org.apache.directory.scim.spec.protocol.search.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
-
-  private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
   @Context
   UriInfo uriInfo;
@@ -137,7 +133,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           return createGenericExceptionResponse(e2, e2.getStatus());
         }
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.debug("Uncaught provider exception", e);
 
         return provider.handleException(e);
       }
@@ -206,7 +202,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createAttriubteProcessingErrorResponse(e);
       }
     } catch (ScimServerException sse) {
-      LOG.error("Error Processing SCIM Request", sse);
+      log.debug("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
     }
@@ -277,7 +273,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
         return er.toResponse();
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.debug("Uncaught provider exception", e);
 
         return provider.handleException(e);
       }
@@ -330,7 +326,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                      .entity(created)
                      .build();
     } catch (ScimServerException sse) {
-      LOG.error("Error Processing SCIM Request", sse);
+      log.debug("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
     }
@@ -360,11 +356,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       try {
         filterResp = provider.find(filter, pageRequest, sortRequest);
       } catch (UnableToRetrieveResourceException e1) {
-        log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus()
+        log.debug("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus()
                                                                                               .toString());
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.debug("Uncaught provider exception", e);
 
         return provider.handleException(e);
       }
@@ -376,7 +372,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                                                                                .isEmpty()) {
         listResponse.setTotalResults(0);
       } else {
-        log.info("Find returned " + filterResp.getResources()
+        log.debug("Find returned " + filterResp.getResources()
                                               .size());
         listResponse.setItemsPerPage(filterResp.getResources()
                                                .size());
@@ -397,7 +393,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
           // Process Attributes
           try {
-            log.info("=== Calling processFilterAttributeExtensions");
+            log.trace("=== Calling processFilterAttributeExtensions");
             resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
           } catch (ClientFilterException e1) {
             ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
@@ -424,7 +420,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                      .entity(listResponse)
                      .build();
     } catch (ScimServerException sse) {
-      LOG.error("Error Processing SCIM Request", sse);
+      log.debug("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
     }
@@ -451,10 +447,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       try {
         stored = provider.get(id);
       } catch (UnableToRetrieveResourceException e2) {
-        log.error("Unable to retrieve resource with id: {}", id, e2);
+        log.debug("Unable to retrieve resource with id: {}", id, e2);
         return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.debug("Uncaught provider exception", e);
 
         return provider.handleException(e);
       }
@@ -484,7 +480,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e1) {
-        log.error("Uncaught provider exception", e1);
+        log.debug("Uncaught provider exception", e1);
 
         return provider.handleException(e1);
       }
@@ -526,7 +522,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                      .tag(etag)
                      .build();
     } catch (ScimServerException sse) {
-      LOG.error("Error Processing SCIM Request", sse);
+      log.debug("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
     }
@@ -553,10 +549,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       try {
         stored = provider.get(id);
       } catch (UnableToRetrieveResourceException e2) {
-        log.error("Unable to retrieve resource with id: {}", id, e2);
+        log.debug("Unable to retrieve resource with id: {}", id, e2);
         return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.debug("Uncaught provider exception", e);
 
         return provider.handleException(e);
       }
@@ -588,7 +584,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (UnsupportedOperationException e2) {
         return createGenericExceptionResponse(e2, Status.NOT_IMPLEMENTED);
       } catch (Exception e1) {
-        log.error("Uncaught provider exception", e1);
+        log.debug("Uncaught provider exception", e1);
 
         return provider.handleException(e1);
       }
@@ -630,7 +626,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                      .tag(etag)
                      .build();
     } catch (ScimServerException sse) {
-      LOG.error("Error Processing SCIM Request", sse);
+      log.debug("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
     }
@@ -659,12 +655,12 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
         return response;
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.debug("Uncaught provider exception", e);
 
         return provider.handleException(e);
       }
     } catch (ScimServerException sse) {
-      LOG.error("Error Processing SCIM Request", sse);
+      log.debug("Error Processing SCIM Request", sse);
       return sse.getErrorResponse()
                 .toResponse();
     }
@@ -683,7 +679,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
 
           resource = (T) attributeFilterExtension.filterAttributes(resource, scimRequestContext);
-          log.info("Resource now - " + resource.toString());
+          log.debug("Resource now - " + resource.toString());
         }
       }
     }
@@ -694,7 +690,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   private URI buildLocationTag(T resource) {
     String id = resource.getId();
     if (id == null) {
-      LOG.warn("Provider must supply an id for a resource");
+      log.warn("Provider must supply an id for a resource");
       id = "unknown";
     }
     return uriInfo.getAbsolutePathBuilder()
