@@ -19,27 +19,6 @@
 
 package org.apache.directory.scim.server.provider;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -47,24 +26,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.flipkart.zjsonpatch.JsonDiff;
-
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.utility.patch.PatchOperations;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation.Type;
 import org.apache.directory.scim.spec.protocol.data.PatchOperationPath;
+import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
 import org.apache.directory.scim.spec.protocol.filter.CompareOperator;
 import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
@@ -77,10 +54,16 @@ import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Named
 @Slf4j
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(doNotUseGetters = true)
+@ToString(doNotUseGetters = true)
 public class UpdateRequest<T extends ScimResource> {
   
   private static final String OPERATION = "op";
@@ -97,10 +80,10 @@ public class UpdateRequest<T extends ScimResource> {
 
   private Schema schema;
 
-  private Registry registry;
+  private final Registry registry;
 
   private Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
-  
+
   @Inject
   public UpdateRequest(Registry registry) {
     this.registry = registry;
@@ -125,7 +108,7 @@ public class UpdateRequest<T extends ScimResource> {
     initialized = true;
   }
 
-  public T getResource() {
+  public T getResource() throws UnableToUpdateResourceException {
     if (!initialized) {
       throw new IllegalStateException("UpdateRequest was not initialized");
     }
@@ -165,7 +148,7 @@ public class UpdateRequest<T extends ScimResource> {
         Set<Object> priorities = findCommonElements(collection1, collection2);
         PrioritySortingComparitor prioritySortingComparitor = new PrioritySortingComparitor(priorities);
         if (collection1 != null) {
-          Collections.sort(collection1, prioritySortingComparitor);
+          collection1.sort(prioritySortingComparitor);
         }
         
         if (collection2 != null) {
@@ -194,8 +177,12 @@ public class UpdateRequest<T extends ScimResource> {
     return set1;
   }
 
-  private T applyPatchOperations() {
-    throw new java.lang.UnsupportedOperationException("PATCH operations are not implemented at this time.");
+  private T applyPatchOperations() throws UnableToUpdateResourceException {
+    try {
+      return new PatchOperations(this.registry ).apply(resource, getPatchOperations());
+    } catch (ScimException e) {
+      throw new UnableToUpdateResourceException(e.getStatus(), e.getError().getDetail(), e);
+    }
   }
   
   /**
