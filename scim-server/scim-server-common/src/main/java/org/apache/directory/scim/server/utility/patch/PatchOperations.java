@@ -1,7 +1,6 @@
 package org.apache.directory.scim.server.utility.patch;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.ADD;
 import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.REMOVE;
 import static org.apache.directory.scim.spec.schema.Schema.Attribute;
 
@@ -444,10 +443,18 @@ public class PatchOperations {
                 if (Objects.nonNull(oldValue) && oldValue instanceof Map) {
                     Map<String, Object> subSourceMap = castToMap(oldValue);
                     addOrReplace(subSourceMap, attributeReference, newValue);
-                    source.replace(attributeReference.getAttributeName(), subSourceMap);
+                    if(!source.containsKey(attributeReference.getAttributeName())) {
+                      source.put(attributeReference.getAttributeName(), subSourceMap);
+                    } else {
+                      source.replace(attributeReference.getAttributeName(), subSourceMap);
+                    }
                 } else if (newValue instanceof Map) {
                     Map<String, Object> subSourceMap = castToMap(newValue);
+                  if(!source.containsKey(attributeReference.getAttributeName())) {
+                    source.put(attributeReference.getAttributeName(), subSourceMap);
+                  } else {
                     source.replace(attributeReference.getAttributeName(), subSourceMap);
+                  }
                 } else {
                     Map<String, Object> subSourceMap = new HashMap<>();
                     subSourceMap.put(attributeReference.getSubAttributeName(), newValue);
@@ -456,13 +463,13 @@ public class PatchOperations {
             } else {
                 if (!Objects.deepEquals(oldValue, newValue)) {
                     if (newValue instanceof Map) {
-                        if (patchOperation.getOperation().equals(ADD)) {
+                        if (!source.containsKey(attributeReference.getAttributeName())) {
                             source.put(attributeReference.getAttributeName(), castToMap(newValue));
                         } else {
                             source.replace(attributeReference.getAttributeName(), castToMap(newValue));
                         }
                     } else {
-                        if (patchOperation.getOperation().equals(ADD)) {
+                        if (!source.containsKey(attributeReference.getAttributeName())) {
                             source.put(attributeReference.getAttributeName(), newValue);
                         } else {
                             source.replace(attributeReference.getAttributeName(), newValue);
