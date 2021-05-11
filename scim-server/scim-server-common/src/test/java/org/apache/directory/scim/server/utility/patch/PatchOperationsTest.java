@@ -290,6 +290,44 @@ class PatchOperationsTest {
     assertThat(result.getName()).isEqualTo(name);
   }
 
+  @Test
+  void apply_complexNameAttributeIsEmptyAdd_successfullyPatched()
+    throws Exception {
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
+    user.setName(new Name());
+
+    PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.ADD)
+      .path("name.familyName")
+      .value("** Family Name **")
+      .build();
+
+    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getName()).isNotNull();
+    assertThat(result.getName().getFamilyName()).isEqualTo(patchOperation.getValue());
+  }
+
+  @Test
+  void apply_complexNameAttributeIsNotEmptyReplace_successfullyPatched()
+    throws Exception {
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
+    user.setName(NameBuilder.builder().familyName("## family name ##").build());
+
+    PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REPLACE)
+      .path("name.familyName")
+      .value("** Family Name **")
+      .build();
+
+    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getName()).isNotNull();
+    assertThat(result.getName().getFamilyName()).isEqualTo(patchOperation.getValue());
+  }
+
   @ParameterizedTest
   @CsvSource({EnterpriseExtension.URN + ":department, Department",
     EnterpriseExtension.URN + ":division, Division",

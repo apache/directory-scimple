@@ -1,10 +1,21 @@
 package org.apache.directory.scim.server.utility.patch;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import lombok.extern.slf4j.Slf4j;
+import static java.util.Objects.requireNonNull;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.ADD;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.REMOVE;
+import static org.apache.directory.scim.spec.schema.Schema.Attribute;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.ws.rs.core.Response;
+
 import org.antlr.v4.runtime.misc.Pair;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,14 +33,15 @@ import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 
-import javax.ws.rs.core.Response;
-import java.util.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
-import static java.util.Objects.requireNonNull;
-import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.ADD;
-import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.REMOVE;
-import static org.apache.directory.scim.spec.schema.Schema.Attribute;
+import lombok.extern.slf4j.Slf4j;
 
+@Singleton
+@Startup
 @Slf4j
 public class PatchOperations {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {
@@ -462,10 +474,17 @@ public class PatchOperations {
     }
 
     private void addOrReplace(Map<String, Object> subSource, final AttributeReference attributeReference, Object newValue) {
+      if(attributeReference.getSubAttributeName() != null) {
         Object oldValue = subSource.getOrDefault(attributeReference.getSubAttributeName(), null);
-        if(Objects.isNull(oldValue) || !Objects.deepEquals(oldValue, newValue) ) {
-            subSource.put(attributeReference.getAttributeName(), newValue);
+        if (Objects.isNull(oldValue) || !Objects.deepEquals(oldValue, newValue)) {
+          subSource.put(attributeReference.getSubAttributeName(), newValue);
         }
+      } else {
+        Object oldValue = subSource.getOrDefault(attributeReference.getAttributeName(), null);
+        if (Objects.isNull(oldValue) || !Objects.deepEquals(oldValue, newValue)) {
+          subSource.put(attributeReference.getAttributeName(), newValue);
+        }
+      }
     }
 
     private void addOrReplaceExtension(Class<? extends ScimResource> resourceClass,
