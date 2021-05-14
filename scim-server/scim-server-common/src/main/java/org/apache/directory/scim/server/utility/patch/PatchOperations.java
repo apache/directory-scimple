@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
 import org.antlr.v4.runtime.misc.Pair;
@@ -39,8 +39,7 @@ import com.google.common.collect.ImmutableSet;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Singleton
-@Startup
+@Named
 @Slf4j
 public class PatchOperations {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {
@@ -52,6 +51,7 @@ public class PatchOperations {
     private final Registry registry;
     private final ObjectMapper objectMapper;
 
+    @Inject
     public PatchOperations(Registry registry) {
         this.registry = registry;
         this.objectMapper = new ObjectMapperFactory(this.registry).createObjectMapper();
