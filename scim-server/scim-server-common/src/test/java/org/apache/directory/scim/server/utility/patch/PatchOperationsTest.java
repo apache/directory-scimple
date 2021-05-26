@@ -1,13 +1,14 @@
 package org.apache.directory.scim.server.utility.patch;
 
-import static org.apache.directory.scim.test.helpers.ScimTestHelper.createRegistry;
-import static org.apache.directory.scim.test.helpers.ScimTestHelper.validateExtensions;
+import static org.apache.directory.scim.test.helpers.ScimTestHelper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
 
@@ -20,12 +21,15 @@ import org.apache.directory.scim.spec.protocol.data.PatchOperation;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
+import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
+import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.test.helpers.ScimTestHelper;
 import org.apache.directory.scim.test.helpers.builder.AddressBuilder;
 import org.apache.directory.scim.test.helpers.builder.EmailBuilder;
 import org.apache.directory.scim.test.helpers.builder.NameBuilder;
 import org.apache.directory.scim.test.helpers.builder.PatchOperationBuilder;
+import org.apache.directory.scim.test.helpers.builder.ResourceReferenceBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -382,6 +386,47 @@ class PatchOperationsTest {
 
   // SCIM GROUP PATCH ADD -----------------------------------------------------------------------------
 
+  @ParameterizedTest
+  @CsvSource({"displayName, ** Display Name **"})
+  void apply_simpleScimGroupAttributeAdd_successfullyPatched(final String path, final Object value) throws Exception {
+    ScimGroup group = ScimTestHelper.generateMinimalScimGroup();
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.ADD)
+      .path(path)
+      .value(value)
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getDisplayName()).isEqualTo(value);
+  }
+
+  @Test
+  void apply_complexScimGroupAttributeAdd_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateMinimalScimGroup();
+
+    List<ResourceReference> referenceList = new ArrayList<>();
+    referenceList.add(ResourceReferenceBuilder.builder()
+      .type(ResourceReference.ReferenceType.DIRECT)
+      .display("Group Membership Direct")
+      .value(UUID.randomUUID().toString())
+      .build());
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.ADD)
+      .path("members")
+      .value(referenceList)
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getMembers()).hasSize(1);
+    validateMembers(result.getMembers(), referenceList);
+  }
+
   // SCIM USER PATCH REPLACE -----------------------------------------------------------------------------
   @ParameterizedTest
   @CsvSource({"displayName, DisplayName", "locale, Locale", "nickName, NickName",
@@ -506,6 +551,92 @@ class PatchOperationsTest {
   }
 
   // SCIM GROUP PATCH REPLACE -----------------------------------------------------------------------------
+
+  @ParameterizedTest
+  @CsvSource({"displayName, ** Display Name **"})
+  void apply_simpleScimGroupAttributeReplace_successfullyPatched(final String path, final Object value) throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REPLACE)
+      .path(path)
+      .value(value)
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getDisplayName()).isEqualTo(value);
+  }
+
+  @Test
+  void apply_complexScimGroupMembersAttributeReplace_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    List<ResourceReference> referenceList = new ArrayList<>();
+    referenceList.add(ResourceReferenceBuilder.builder()
+      .type(ResourceReference.ReferenceType.INDIRECT)
+      .display("** Display **")
+      .value(UUID.randomUUID().toString())
+      .build());
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REPLACE)
+      .path("members")
+      .value(referenceList)
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getMembers()).hasSize(1);
+    validateMembers(result.getMembers(), referenceList);
+  }
+
+  @ParameterizedTest
+  @CsvSource({"type, indirect", "value, ** VALUE **", "display, ** DISPLAY **"})
+  void apply_complexScimGroupMembersAttributeReplace_successfullyPatched(final String path, final Object value) throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REPLACE)
+      .path("members")
+      .value(ImmutableList.of(ImmutableMap.of(path, value)))
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getMembers()).hasSize(1);
+    assertThat(getValueByAttributeName(result.getMembers().get(0), path)).isEqualTo(value);
+  }
+
+  @Test
+  void apply_complexScimGroupAttributeReplace_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    final String id = UUID.randomUUID().toString();
+    final Map<String,Object> values = new HashMap<>();
+    values.put("id", id);
+    values.put("displayName", "** Display Name **");
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REPLACE)
+      .value(values)
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getMembers()).hasSize(1);
+
+    assertThat(result.getId()).isEqualTo(values.get("id"));
+    assertThat(result.getDisplayName()).isEqualTo(values.get("displayName"));
+  }
 
   // SCIM USER PATCH REMOVE -----------------------------------------------------------------------------
   @ParameterizedTest
@@ -721,6 +852,21 @@ class PatchOperationsTest {
   }
 
   // SCIM GROUP PATCH REMOVE -----------------------------------------------------------------------------
+
+  @Test
+  void apply_complexScimGroupAttributeRemove_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REMOVE)
+      .path("members")
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getMembers()).isNull();
+  }
 
   // HELPER METHODS -----------------------------------------------------------------------------
   private static Stream<Arguments> AddressArguments() {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import javax.ws.rs.core.Response;
 import org.apache.directory.scim.common.ScimUtils;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
 import org.apache.directory.scim.server.provider.ProviderRegistry;
+import org.apache.directory.scim.server.rest.ObjectMapperFactory;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.server.utility.EtagGenerator;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
@@ -52,6 +54,7 @@ import org.apache.directory.scim.test.helpers.builder.NameBuilder;
 import org.apache.directory.scim.test.helpers.builder.ResourceReferenceBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,26 +86,17 @@ public class ScimTestHelper {
   }
 
   public static ScimGroup generateScimGroup(final String initialGroupMemberId) throws Exception {
-    final String id = UUID.randomUUID().toString();
 
-    ScimGroup group = new ScimGroup();
-    group.setDisplayName("Group " + id);
-    group.setId(id);
-    group.setExternalId("e-" + id);
+    ScimGroup group = generateMinimalScimGroup();
+
+    group.setDisplayName("Group " + group.getId());
+    group.setExternalId("e-" +  group.getId());
 
     group.setMembers(new ArrayList<>());
     group.getMembers().add(ResourceReferenceBuilder.builder()
       .type(ResourceReference.ReferenceType.DIRECT)
       .display("Group Membership Direct")
       .value(initialGroupMemberId)
-      .build());
-
-    group.setMeta(MetaBuilder.builder()
-      .created(LocalDateTime.now())
-      .lastModified(LocalDateTime.now())
-      .resourceType("User")
-      .location("http://example.com/Groups/" + group.getId())
-      .version(etagGenerator.generateEtag(group).toString())
       .build());
 
     return group;
@@ -408,6 +402,26 @@ public class ScimTestHelper {
     }
   }
 
+  public static Object getValueByAttributeName(final ResourceReference resourceReference, final String attributeName)
+    throws Exception {
+    switch (attributeName) {
+      case "type":
+        return resourceReference.getType() != null ? resourceReference.getType().name().toLowerCase(Locale.ROOT) : null;
+      case "ref":
+        return resourceReference.getRef();
+      case "value":
+        return resourceReference.getValue();
+      case "display":
+        return resourceReference.getDisplay();
+    }
+
+    throw new Exception("Unknown attribute name '" + attributeName + "'");
+  }
+
+  public static void validateMembers(final List<ResourceReference> actual, final List<ResourceReference> expected) {
+    assertThat(actual).containsExactlyElementsOf(expected);
+  }
+
   public static void validateExtensions(final String attribute, final Object expectedValue,
                                         final ScimExtension extension) throws Exception {
 
@@ -432,10 +446,6 @@ public class ScimTestHelper {
     assertThat(getValueByAttributeName(extension, attribute)).isEqualTo(expectedValue);
   }
 
-  public static EtagGenerator createEtagGenerator() {
-    return new EtagGenerator();
-  }
-
   public static void assertScimException(Throwable t,
                                          Response.Status expectedStatus,
                                          ErrorMessageType expectedErrorMessageType,
@@ -450,6 +460,10 @@ public class ScimTestHelper {
 
     assertThat(errorResponse.getScimType()).isEqualTo(expectedErrorMessageType);
     assertThat(errorResponse.getDetail()).isEqualTo(expectedMessageFragment);
+  }
+
+  public static EtagGenerator createEtagGenerator() {
+    return new EtagGenerator();
   }
 
   public static Registry createRegistry()
@@ -479,6 +493,10 @@ public class ScimTestHelper {
     when(registry.getAllResourceTypes()).thenReturn(new HashSet<>(Arrays.asList(scimUserResourceType(), scimGroupResourceType())));
 
     return registry;
+  }
+
+  public static ObjectMapper getObjectMapper() throws Exception {
+    return new ObjectMapperFactory(createRegistry()).createObjectMapper();
   }
 
   private static ResourceType scimUserResourceType() throws InvalidProviderException {
