@@ -589,7 +589,7 @@ public class PatchOperations {
     return Objects.requireNonNull(
       Objects.requireNonNull(
         Objects.requireNonNull(operation, "Patch operation must not be null")
-          .getPath(), "Patch Operation Path must nul be null")
+          .getPath(), "Patch Operation Path must not be null")
         .getValuePathExpression(), "Value Path Expression must not be null")
       .getAttributePath();
   }
