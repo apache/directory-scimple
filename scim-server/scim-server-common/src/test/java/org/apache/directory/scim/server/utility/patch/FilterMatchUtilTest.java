@@ -4,6 +4,7 @@ import static org.apache.directory.scim.server.utility.patch.FilterMatchUtil.*;
 import static org.apache.directory.scim.test.helpers.ScimTestHelper.createRegistry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.apache.directory.scim.server.rest.ObjectMapperFactory;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.CompareOperator;
+import org.apache.directory.scim.spec.schema.Schema;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,43 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 
 class FilterMatchUtilTest {
+
+  /*
+   * TODO need to figure out the null pointer
+   *
+   * {
+   *    "schemas": [
+   *       "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+   *     ],
+   *     "Operations": [
+   *       {
+   *         "op": "Replace",
+   *         "path": "title",
+   *         "value": "Title 123456"
+   *       },
+   *       {
+   *         "op": "Replace",
+   *         "path": "name.givenName",
+   *         "value": "Chris-12"
+   *       },
+   *       {
+   *         "op": "Replace",
+   *         "path": "name.familyName",
+   *         "value": "Klein-12"
+   *       },
+   *       {
+   *         "op": "Replace",
+   *         "path": "addresses[type eq \"work\"].locality",
+   *         "value": "Stewartville"
+   *       },
+   *       {
+   *         "op": "Replace",
+   *         "path": "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department",
+   *         "value": "Department 123456"
+   *       }
+   *     ]
+   *   }
+   */
 
   Registry registry;
   ObjectMapper objectMapper;
@@ -35,6 +74,24 @@ class FilterMatchUtilTest {
 
   @AfterEach
   void tearDown() {
+  }
+
+  @Test
+  void testComparisonExpression_withNullValue() throws ScimException {
+    final Schema.Attribute attribute = mock(Schema.Attribute.class);
+    assertThat(comparisonExpression(attribute, null,  CompareOperator.EQ, new Object())).isFalse();
+  }
+
+  @Test
+  void testComparisonExpression_withNullCompareValue() throws ScimException {
+    final Schema.Attribute attribute = mock(Schema.Attribute.class);
+    assertThat(comparisonExpression(attribute, "string",  CompareOperator.EQ, null)).isFalse();
+  }
+
+  @Test
+  void testComparisonExpression_withNullValueAndNullCompareValue() throws ScimException {
+    final Schema.Attribute attribute = mock(Schema.Attribute.class);
+    assertThat(comparisonExpression(attribute, null,  CompareOperator.EQ, null)).isTrue();
   }
 
   @Test
@@ -241,21 +298,21 @@ class FilterMatchUtilTest {
 
   @Test
   void testReferenceCompare_equals() {
-    assertThat(referenceCompare(URI.create("http://example.com/Users/ProfileUrl"),
-      URI.create("http://example.com/Users/ProfileUrl"),
+    assertThat(referenceCompare(URI.create("https://example.com/Users/ProfileUrl"),
+      URI.create("https://example.com/Users/ProfileUrl"),
       CompareOperator.EQ)).isTrue();
   }
 
   @Test
   void testReferenceCompare_notEquals() {
-    assertThat(referenceCompare(URI.create("http://example.com/Users/JohnDoe"),
-      URI.create("http://example.com/Users/ProfileUrl"),
+    assertThat(referenceCompare(URI.create("https://example.com/Users/JohnDoe"),
+      URI.create("https://example.com/Users/ProfileUrl"),
       CompareOperator.NE)).isTrue();
   }
 
   @Test
   void testReferenceCompare_lessThan() {
-    assertThat(referenceCompare(URI.create("http://example.com/Users/JohnDoe"),
+    assertThat(referenceCompare(URI.create("https//example.com/Users/JohnDoe"),
       URI.create("https://example.com/Users/JohnDoe"),
       CompareOperator.LT)).isTrue();
   }
@@ -269,8 +326,8 @@ class FilterMatchUtilTest {
 
   @Test
   void testReferenceCompare_greaterThan() {
-    assertThat(referenceCompare(URI.create("https://example.com/Users/JohnDoe"),
-      URI.create("http://example.com/Users/JohnDoe"),
+    assertThat(referenceCompare(URI.create("https://example.com/Users/JohnDoeM"),
+      URI.create("https://example.com/Users/JohnDoe"),
       CompareOperator.GT)).isTrue();
   }
 

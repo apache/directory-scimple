@@ -141,7 +141,7 @@ public class PatchOperations {
       Pair<Boolean, String> pair = validateFilterPath(patchOperation);
       if (pair.a) {
         String valSelFilter = pair.b;
-        if (valSelFilter==null) {
+        if (StringUtils.isBlank(valSelFilter)) {
           throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER);
         } else {
           int i = path.indexOf("[");
@@ -244,7 +244,7 @@ public class PatchOperations {
         Object object = fromMap.getOrDefault(attribute, null);
         list = (object==null)
           ? null
-          :new ArrayList<>((Collection<Map<String, Object>>) object);
+          : new ArrayList<>((Collection<Map<String, Object>>) object);
       } else {
         throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER);
       }
@@ -253,7 +253,7 @@ public class PatchOperations {
     }
 
     if (Objects.isNull(list) || list.isEmpty()) {
-      log.info("List of values for attribute '{}' is empty. Operation will have no effect.", attribute);
+      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER);
     } else {
       List<Integer> matchingIndexes = new ArrayList<>();
       for (int i = 0; i < list.size(); i++) {
@@ -338,6 +338,7 @@ public class PatchOperations {
     log.info("Applying Patch Operation '{}' for attribute '{}'",
       patchOperation.getOperation(), patchOperation.getPath().toString());
 
+    checkSchema(patchOperation, (List<Schema>) this.registry.getAllSchemas());
     checkValue(patchOperation);
 
     Map<String, Object> sourceAsMap = resourceAsMap(source);
@@ -348,11 +349,11 @@ public class PatchOperations {
   }
 
   @SuppressWarnings("unchecked")
-  private <T extends ScimResource> T patchReplace(final PatchOperation patchOperation, T source) {
+  private <T extends ScimResource> T patchReplace(final PatchOperation patchOperation, T source) throws ScimException {
     log.info("Applying Patch Operation '{}' for attribute '{}'",
       patchOperation.getOperation(), patchOperation.getPath().toString());
 
-    // TODO Are there any SCIM spec checks that need to be applied here?
+    final Schema schema = checkSchema(patchOperation, (List<Schema>) this.registry.getAllSchemas());
 
     Map<String, Object> sourceAsMap = resourceAsMap(source);
 
@@ -370,7 +371,7 @@ public class PatchOperations {
       patchOperation.getOperation(),
       patchOperation.getPath().toString());
 
-    final Schema schema = this.registry.getSchema(source.getBaseUrn());
+    final Schema schema = checkSchema(patchOperation, (List<Schema>) this.registry.getAllSchemas());
 
     checkTarget(patchOperation);
     checkRequired(patchOperation, schema);
@@ -672,8 +673,31 @@ public class PatchOperations {
       log.error("The value is required to perform patch '{}' operation on '{}'.",
         patchOperation.getOperation(), patchOperation.getPath().toString());
 
-      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_SYNTAX);
+      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_VALUE);
     }
+  }
+
+  /**
+   * Check the path.
+   *
+   * @param operation the {@link PatchOperation}.
+   * @param schemas   a {@link List} of {@link Schema}s.
+   *
+   * @return Returns the {@link Schema} the {@code operation} is found in
+   * @throws ScimException if operation type isn't supported for the given attribute
+   */
+  private Schema checkSchema(PatchOperation operation, final List<Schema> schemas) throws ScimException {
+    AttributeReference reference = attributeReference(operation);
+    if (reference!=null) {
+      for (final Schema schema : schemas) {
+        if (schema.getAttribute(reference.getAttributeName()) != null) {
+          return schema;
+        }
+      }
+    }
+
+    log.error("Invalid attribute specified for {} operation.", operation.getOperation());
+    throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_PATH);
   }
 
   /**
@@ -685,7 +709,7 @@ public class PatchOperations {
   private void checkTarget(PatchOperation patchOperation) throws ScimException {
     if (patchOperation.getOperation().equals(REMOVE) &&
       Objects.isNull(patchOperation.getPath())) {
-      log.error("No path value specified for remove operation.");
+      log.error("No path value specified for {} operation.", patchOperation.getOperation());
       throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
     }
   }

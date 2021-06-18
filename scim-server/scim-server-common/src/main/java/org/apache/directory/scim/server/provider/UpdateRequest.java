@@ -151,7 +151,8 @@ public class UpdateRequest<T extends ScimResource> {
         throw new IllegalStateException("Error creating the patch list", e);
       }
     }
-    
+
+    log.info("Patch Operations: {}", patchOperations);
     return patchOperations;
   }
 
@@ -246,15 +247,21 @@ public class UpdateRequest<T extends ScimResource> {
 
     sortMultiValuedCollections(this.original, this.resource, schema);
     Map<String, ScimExtension> originalExtensions = this.original.getExtensions();
-    Map<String, ScimExtension> resourceExtensions = this.resource.getExtensions();
-    Set<String> keys = new HashSet<>();
-    keys.addAll(originalExtensions.keySet());
-    keys.addAll(resourceExtensions.keySet());
-    
+    Set<String> keys = new HashSet<>(originalExtensions.keySet());
+
+    Map<String, ScimExtension>  resourceExtensions = new HashMap<>();
+    if(this.resource != null) {
+      resourceExtensions = this.resource.getExtensions();
+      keys.addAll(resourceExtensions.keySet());
+    }
+
     for(String key: keys) {
       Schema extSchema = registry.getSchema(key);
       ScimExtension originalExtension = originalExtensions.get(key);
-      ScimExtension resourceExtension = resourceExtensions.get(key);
+      ScimExtension resourceExtension = null;
+      if(this.resource != null) {
+        resourceExtension = resourceExtensions.get(key);
+      }
       sortMultiValuedCollections(originalExtension, resourceExtension, extSchema);
     }
 

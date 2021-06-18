@@ -1,19 +1,25 @@
 package org.apache.directory.scim.server.utility.patch;
 
+import static java.util.Objects.requireNonNull;
+import static org.apache.directory.scim.server.utility.patch.PatchOperations.throwScimException;
+
+import java.util.Map;
+import java.util.Objects;
+import java.net.URI;
+import java.time.LocalDateTime;
+import javax.ws.rs.core.Response;
+
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
-import org.apache.directory.scim.spec.protocol.filter.*;
+import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
+import org.apache.directory.scim.spec.protocol.filter.AttributePresentExpression;
+import org.apache.directory.scim.spec.protocol.filter.CompareOperator;
+import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
+import org.apache.directory.scim.spec.protocol.filter.GroupExpression;
+import org.apache.directory.scim.spec.protocol.filter.LogicalExpression;
+import org.apache.directory.scim.spec.protocol.filter.ValuePathExpression;
 import org.apache.directory.scim.spec.schema.Schema;
-
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Objects;
-
-import static java.util.Objects.requireNonNull;
-import static org.apache.directory.scim.server.utility.patch.PatchOperations.throwScimException;
 
 class FilterMatchUtil {
     /**
@@ -110,24 +116,34 @@ class FilterMatchUtil {
                                         final Object value,
                                         final CompareOperator compareOperator,
                                         final Object compareValue) throws ScimException {
-        switch (subAttribute.getType()) {
-            case BINARY:
-                return binaryCompare((String) value, (String) compareValue, compareOperator);
-            case BOOLEAN:
-                return booleanCompare((Boolean) value, (Boolean) compareValue, compareOperator);
-            case COMPLEX:
-                return complexCompare((Map<String, Object>) value, (Map<String, Object>) compareValue, compareOperator);
-            case DATE_TIME:
-                return dateTimeCompare((LocalDateTime) value, (LocalDateTime) compareValue, compareOperator);
-            case DECIMAL:
-                return numberCompare((Double) value, (Double) compareValue, compareOperator);
-            case INTEGER:
-                return integerCompare((Integer) value, (Integer) compareValue, compareOperator);
-            case REFERENCE:
-                return referenceCompare((URI) value, (URI) compareValue, compareOperator);
-            case STRING:
-                return stringCompare((String) value, (String) compareValue, compareOperator,
-                        subAttribute.isCaseExact());
+        if((value==null) && (compareValue==null)) {
+            return true;
+        }
+
+        if((value!=null) && (compareValue==null)) {
+            return false;
+        }
+
+        if(value != null) {
+            switch (subAttribute.getType()) {
+                case BINARY:
+                    return binaryCompare((String) value, (String) compareValue, compareOperator);
+                case BOOLEAN:
+                    return booleanCompare((Boolean) value, (Boolean) compareValue, compareOperator);
+                case COMPLEX:
+                    return complexCompare((Map<String, Object>) value, (Map<String, Object>) compareValue, compareOperator);
+                case DATE_TIME:
+                    return dateTimeCompare((LocalDateTime) value, (LocalDateTime) compareValue, compareOperator);
+                case DECIMAL:
+                    return numberCompare((Double) value, (Double) compareValue, compareOperator);
+                case INTEGER:
+                    return integerCompare((Integer) value, (Integer) compareValue, compareOperator);
+                case REFERENCE:
+                    return referenceCompare((URI) value, (URI) compareValue, compareOperator);
+                case STRING:
+                    return stringCompare((String) value, (String) compareValue, compareOperator,
+                            subAttribute.isCaseExact());
+            }
         }
 
         return false;

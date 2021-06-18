@@ -68,6 +68,25 @@ class PatchOperationsTest {
   void tearDown() {
   }
 
+  @ParameterizedTest
+  @CsvSource({"ADD", "REPLACE", "REMOVE"})
+  void apply_invalidPath_exceptionThrow(final String operation) throws Exception {
+    ScimUser user = ScimTestHelper.generateMinimalScimUser();
+
+    PatchOperation patchOperation = PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.valueOf(operation))
+            .path("garbage")
+            .build();
+
+    Throwable t = catchThrowable(() -> this.patchOperations.apply(user,
+            ImmutableList.of(patchOperation)));
+
+    ScimTestHelper.assertScimException(t,
+            Response.Status.BAD_REQUEST,
+            ErrorMessageType.INVALID_PATH,
+            ErrorMessageType.INVALID_PATH.getDetail());
+  }
+
   // SCIM USER PATCH ADD -----------------------------------------------------------------------------
   @ParameterizedTest
   @CsvSource({"displayName, DisplayName", "locale, Locale", "nickName, NickName",
