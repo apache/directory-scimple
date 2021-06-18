@@ -235,7 +235,7 @@ public class PatchOperations {
 
     Schema schema = this.registry.getSchema(resource.getBaseUrn());
     Map<String, Object> fromMap = resourceAsMap(resource);
-    List<Map<String, Object>> list;
+    List<Map<String, Object>> list = null;
 
     final Attribute parentAttribute = schema.getAttribute(attribute);
     Map<String, Object> resourceAsMap = resourceAsMap(resource);
@@ -248,8 +248,6 @@ public class PatchOperations {
       } else {
         throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER);
       }
-    } else {
-      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_VALUE);
     }
 
     if (Objects.isNull(list) || list.isEmpty()) {
