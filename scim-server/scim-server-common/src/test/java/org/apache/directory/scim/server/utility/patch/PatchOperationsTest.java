@@ -571,6 +571,34 @@ class PatchOperationsTest {
 
   // SCIM GROUP PATCH REPLACE -----------------------------------------------------------------------------
 
+  /*
+   * [method=PATCH, uri=http://console.sso.test.core.cloud.code42.com/scim/v2/Groups/933868861859790973, hasEntity=true,
+   * contentType=application/scim+json;charset=utf-8, contentLanguage=null, acceptableTypes=[application/scim+json],
+   * acceptableLanguages=[*], requestBody={"schemas":["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+   * "Operations":[{"op":"replace","value":{"id":"933868861859790973","displayName":"TestGroup1 -- Update12345"}}]}]
+   */
+  @Test
+  void apply_groupReplaceForIdAndDisplayName_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    Map<String,Object> values = new HashMap<>();
+    values.put("id", group.getId());
+    final String expectedDisplayName = group.getDisplayName() + " -- Update12345";
+    values.put("displayName", expectedDisplayName);
+
+    PatchOperation patchOperation = PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .value(values)
+            .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getId()).isEqualTo(group.getId());
+    assertThat(result.getDisplayName()).isEqualTo(expectedDisplayName);
+  }
+
   @ParameterizedTest
   @CsvSource({"displayName, ** Display Name **"})
   void apply_simpleScimGroupAttributeReplace_successfullyPatched(final String path, final Object value) throws Exception {

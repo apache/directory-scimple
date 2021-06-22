@@ -336,7 +336,7 @@ public class PatchOperations {
     log.info("Applying Patch Operation '{}' for attribute '{}'",
       patchOperation.getOperation(), patchOperation.getPath().toString());
 
-    checkSchema(patchOperation, (List<Schema>) this.registry.getAllSchemas());
+    checkSchema(patchOperation, this.registry.getAllSchemas());
     checkValue(patchOperation);
 
     Map<String, Object> sourceAsMap = resourceAsMap(source);
@@ -351,7 +351,7 @@ public class PatchOperations {
     log.info("Applying Patch Operation '{}' for attribute '{}'",
       patchOperation.getOperation(), patchOperation.getPath().toString());
 
-    final Schema schema = checkSchema(patchOperation, (List<Schema>) this.registry.getAllSchemas());
+    checkSchema(patchOperation, this.registry.getAllSchemas());
 
     Map<String, Object> sourceAsMap = resourceAsMap(source);
 
@@ -369,7 +369,7 @@ public class PatchOperations {
       patchOperation.getOperation(),
       patchOperation.getPath().toString());
 
-    final Schema schema = checkSchema(patchOperation, (List<Schema>) this.registry.getAllSchemas());
+    final Schema schema = checkSchema(patchOperation, this.registry.getAllSchemas());
 
     checkTarget(patchOperation);
     checkRequired(patchOperation, schema);
@@ -679,12 +679,12 @@ public class PatchOperations {
    * Check the path.
    *
    * @param operation the {@link PatchOperation}.
-   * @param schemas   a {@link List} of {@link Schema}s.
+   * @param schemas   a {@link Collection} of {@link Schema}s.
    *
    * @return Returns the {@link Schema} the {@code operation} is found in
    * @throws ScimException if operation type isn't supported for the given attribute
    */
-  private Schema checkSchema(PatchOperation operation, final List<Schema> schemas) throws ScimException {
+  private Schema checkSchema(PatchOperation operation, final Collection<Schema> schemas) throws ScimException {
     AttributeReference reference = attributeReference(operation);
     if (reference!=null) {
       for (final Schema schema : schemas) {
