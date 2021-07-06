@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -54,6 +55,7 @@ import org.apache.directory.scim.test.helpers.builder.NameBuilder;
 import org.apache.directory.scim.test.helpers.builder.ResourceReferenceBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +63,8 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("unused")
 @Slf4j
 public class ScimTestHelper {
+
+  private static final TypeReference<List<Map<String,Object>>> LIST_MAP_TYPE = new TypeReference<List<Map<String,Object>>>(){};
 
   private static final EtagGenerator etagGenerator = createEtagGenerator();
 
@@ -95,7 +99,7 @@ public class ScimTestHelper {
     group.setMembers(new ArrayList<>());
     group.getMembers().add(ResourceReferenceBuilder.builder()
       .type(ResourceReference.ReferenceType.DIRECT)
-      .display("Group Membership Direct")
+      .display("First Group Membership")
       .value(initialGroupMemberId)
       .build());
 
@@ -242,6 +246,10 @@ public class ScimTestHelper {
       .build());
 
     return user;
+  }
+
+  public static void validateResourceReferences(final List<ResourceReference> actual, final List<ResourceReference> expected) throws Exception {
+    assertThat(getObjectMapper().convertValue(actual, LIST_MAP_TYPE)).containsAll(getObjectMapper().convertValue(expected, LIST_MAP_TYPE));
   }
 
   public static Object getValueByAttributeName(final ScimUser user, final String attributeName)

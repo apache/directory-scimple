@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -48,8 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class PatchOperationsTest {
-  private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {
-  };
+  private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {};
+  private static final TypeReference<List<Map<String, Object>>> LIST_MAP_TYPE = new TypeReference<List<Map<String, Object>>>() {};
 
   Registry registry;
   ObjectMapper objectMapper;
@@ -423,6 +424,26 @@ class PatchOperationsTest {
   }
 
   @Test
+  void apply_scimGroupAddGroupWithExisting_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+    ResourceReference resourceReference = new ResourceReference();
+    resourceReference.setDisplay( "Second Group Membership" );
+    resourceReference.setType( ResourceReference.ReferenceType.DIRECT );
+    resourceReference.setValue( UUID.randomUUID().toString() );
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+            .operation( PatchOperation.Type.ADD )
+            .path( "members" )
+            .value( objectMapper.convertValue( ImmutableList.of(resourceReference), LIST_MAP_TYPE ) )
+            .build();
+
+    final ScimGroup result = this.patchOperations.apply( group, ImmutableList.of( patchOperation ) );
+
+    assertThat( result ).isNotNull();
+    assertThat( result.getMembers() ).hasSize( 2 );
+  }
+
+  @Test
   void apply_complexScimGroupAttributeAdd_successfullyPatched() throws Exception {
     ScimGroup group = ScimTestHelper.generateMinimalScimGroup();
 
@@ -443,7 +464,7 @@ class PatchOperationsTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getMembers()).hasSize(1);
-    validateMembers(result.getMembers(), referenceList);
+    validateResourceReferences(result.getMembers(), referenceList);
   }
 
   // SCIM USER PATCH REPLACE -----------------------------------------------------------------------------
@@ -638,19 +659,19 @@ class PatchOperationsTest {
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
-    assertThat(result.getMembers()).hasSize(1);
-    validateMembers(result.getMembers(), referenceList);
+    assertThat(result.getMembers()).hasSize(2);
+    validateResourceReferences(result.getMembers(), referenceList);
   }
 
   @ParameterizedTest
-  @CsvSource({"type, indirect", "value, ** VALUE **", "display, ** DISPLAY **"})
+  @CsvSource({"value, ** VALUE **", "display, ** DISPLAY **"})
   void apply_complexScimGroupMembersAttributeReplace_successfullyPatched(final String path, final Object value) throws Exception {
     ScimGroup group = ScimTestHelper.generateScimGroup();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
       .operation(PatchOperation.Type.REPLACE)
-      .path("members")
-      .value(ImmutableList.of(ImmutableMap.of(path, value)))
+      .path("members[value EQ \"" + group.getMembers().get(0).getValue() + "\"]." + path)
+      .value(value)
       .build();
 
     final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
@@ -659,6 +680,25 @@ class PatchOperationsTest {
     assertThat(result).isNotEqualTo(group);
     assertThat(result.getMembers()).hasSize(1);
     assertThat(getValueByAttributeName(result.getMembers().get(0), path)).isEqualTo(value);
+  }
+
+  @Test
+  void apply_complexScimGroupMembersTypeReplace_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("members[value EQ \"" + group.getMembers().get(0).getValue() + "\"].type")
+            .value(ResourceReference.ReferenceType.INDIRECT)
+            .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getMembers()).hasSize(1);
+    assertThat(getValueByAttributeName(result.getMembers().get(0), "type"))
+            .isEqualTo(ResourceReference.ReferenceType.INDIRECT.name().toLowerCase(Locale.ROOT));
   }
 
   @Test

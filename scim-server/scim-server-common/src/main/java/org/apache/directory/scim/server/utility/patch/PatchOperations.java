@@ -76,6 +76,18 @@ public class PatchOperations {
       object.getClass().getName()));
   }
 
+  @SuppressWarnings( "unchecked" )
+  static List<Map<String,Object>> castToList( final Object object) {
+    requireNonNull(object, "object must not be null.");
+
+    if (object instanceof List) {
+      return (List<Map<String,Object>>) object;
+    }
+
+    throw new ClassCastException(String.format("Parameter \"value\" isn't a List, its \"%s\"",
+            object.getClass().getName()));
+  }
+
   static boolean isCollection(Class<?> clazz) {
     return Collection.class.isAssignableFrom(clazz);
   }
@@ -460,8 +472,8 @@ public class PatchOperations {
       });
   }
 
-  private <T extends ScimResource> void addOrReplace(final T resource, Map<String, Object> source, final PatchOperation patchOperation) {
-
+  @SuppressWarnings( "unchecked" )
+  private <T extends ScimResource> void addOrReplace( final T resource, Map<String, Object> source, final PatchOperation patchOperation) {
     final AttributeReference attributeReference = attributeReference(patchOperation);
 
     // are we dealing with Scim Extension?
@@ -495,7 +507,7 @@ public class PatchOperations {
           source.put(attributeReference.getAttributeName(), subSourceMap);
         }
       } else {
-        if (!Objects.deepEquals(oldValue, newValue)) {
+        if (!Objects.equals(oldValue, newValue)) {
           if (newValue instanceof Map) {
             if (!source.containsKey(attributeReference.getAttributeName())) {
               source.put(attributeReference.getAttributeName(), castToMap(newValue));
@@ -506,7 +518,18 @@ public class PatchOperations {
             if (!source.containsKey(attributeReference.getAttributeName())) {
               source.put(attributeReference.getAttributeName(), newValue);
             } else {
-              source.replace(attributeReference.getAttributeName(), newValue);
+              Object existing = source.get(attributeReference.getAttributeName());
+              if(existing instanceof List) {
+                List<Map<String,Object>> asList = (List<Map<String,Object>>) existing;
+                if(newValue instanceof List) {
+                  asList.addAll(castToList( newValue));
+                } else { // expecting a Map
+                  asList.add( castToMap( newValue ) );
+                }
+                source.replace( attributeReference.getAttributeName(), asList);
+              } else {
+                source.replace( attributeReference.getAttributeName(), newValue );
+              }
             }
           }
         }
@@ -515,14 +538,16 @@ public class PatchOperations {
   }
 
   private void addOrReplace(Map<String, Object> subSource, final AttributeReference attributeReference, Object newValue) {
+    log.info("SUB-RESOURCE:{}\n\tATT REF:{}\n\tNEW VALUE:{}", subSource, attributeReference, newValue);
+
     if (attributeReference.getSubAttributeName()!=null) {
       Object oldValue = subSource.getOrDefault(attributeReference.getSubAttributeName(), null);
-      if (Objects.isNull(oldValue) || !Objects.deepEquals(oldValue, newValue)) {
+      if (Objects.isNull(oldValue) || !Objects.equals(oldValue, newValue)) {
         subSource.put(attributeReference.getSubAttributeName(), newValue);
       }
     } else {
       Object oldValue = subSource.getOrDefault(attributeReference.getAttributeName(), null);
-      if (Objects.isNull(oldValue) || !Objects.deepEquals(oldValue, newValue)) {
+      if (Objects.isNull(oldValue) || !Objects.equals(oldValue, newValue)) {
         subSource.put(attributeReference.getAttributeName(), newValue);
       }
     }
