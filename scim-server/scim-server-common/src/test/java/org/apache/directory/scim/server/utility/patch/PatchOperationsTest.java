@@ -369,17 +369,13 @@ class PatchOperationsTest {
 
     assertThat(user.getExtension(EnterpriseExtension.URN)).isNotNull();
 
-    try {
-      final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
 
-      assertThat(result).isNotNull();
-      assertThat(result.getExtensions()).isNotNull();
-      assertThat(result.getExtensions()).hasSize(2);
+    assertThat(result).isNotNull();
+    assertThat(result.getExtensions()).isNotNull();
+    assertThat(result.getExtensions()).hasSize(2);
 
-      validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
   }
 
   @ParameterizedTest

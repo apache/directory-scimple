@@ -538,8 +538,6 @@ public class PatchOperations {
   }
 
   private void addOrReplace(Map<String, Object> subSource, final AttributeReference attributeReference, Object newValue) {
-    log.info("SUB-RESOURCE:{}\n\tATT REF:{}\n\tNEW VALUE:{}", subSource, attributeReference, newValue);
-
     if (attributeReference.getSubAttributeName()!=null) {
       Object oldValue = subSource.getOrDefault(attributeReference.getSubAttributeName(), null);
       if (Objects.isNull(oldValue) || !Objects.equals(oldValue, newValue)) {
