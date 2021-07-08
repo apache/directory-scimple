@@ -540,10 +540,12 @@ class PatchOperationsTest {
   @Test
   void apply_scimGroupRemoveGroupWithExisting_successfullyPatched() throws Exception {
     ScimGroup group = ScimTestHelper.generateScimGroup();
+    ResourceReference expected = group.getMembers().get(0);
+
     ResourceReference resourceReference = new ResourceReference();
-    resourceReference.setDisplay( "Second Group Membership" );
-    resourceReference.setType( ResourceReference.ReferenceType.DIRECT );
-    resourceReference.setValue( UUID.randomUUID().toString() );
+    resourceReference.setDisplay("Second Group Membership");
+    resourceReference.setType(ResourceReference.ReferenceType.DIRECT );
+    resourceReference.setValue(UUID.randomUUID().toString());
 
     group.getMembers().add(resourceReference);
 
@@ -554,8 +556,9 @@ class PatchOperationsTest {
 
     final ScimGroup result = this.patchOperations.apply( group, ImmutableList.of( patchOperation ) );
 
-    assertThat( result ).isNotNull();
-    assertThat( result.getMembers() ).hasSize( 1 );
+    assertThat(result ).isNotNull();
+    assertThat(result.getMembers()).hasSize(1);
+    assertThat(result.getMembers().get(0)).isEqualTo(expected);
   }
 
   @Test
