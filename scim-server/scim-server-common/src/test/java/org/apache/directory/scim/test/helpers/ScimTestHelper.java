@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import javax.ws.rs.core.Response;
 
@@ -29,7 +27,6 @@ import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
-import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
@@ -54,7 +51,6 @@ import org.apache.directory.scim.test.helpers.builder.MetaBuilder;
 import org.apache.directory.scim.test.helpers.builder.NameBuilder;
 import org.apache.directory.scim.test.helpers.builder.ResourceReferenceBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -125,7 +121,7 @@ public class ScimTestHelper {
     return user;
   }
 
-  public static ScimUser generateScimUser() throws PhoneNumberParseException, NoSuchAlgorithmException, UnsupportedEncodingException, JsonProcessingException {
+  public static ScimUser generateScimUser() throws Exception {
     ScimUser user = new ScimUser();
 
     final String id = UUID.randomUUID().toString();
@@ -175,7 +171,7 @@ public class ScimTestHelper {
       .postalCode("16801")
       .country("USA")
       .type("home")
-      .primary(true)
+      .primary(false)
       .display("123 Main St. State College, PA 16801")
       .formatted("123 Main St. State College, PA 16801")
       .build());
@@ -186,7 +182,7 @@ public class ScimTestHelper {
       .postalCode("16801")
       .country("USA")
       .type("work")
-      .primary(false)
+      .primary(true)
       .display("456 Main St. State College, PA 16801")
       .formatted("456 Main St. State College, PA 16801")
       .build());

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
@@ -86,6 +87,26 @@ class PatchOperationsTest {
             Response.Status.BAD_REQUEST,
             ErrorMessageType.INVALID_PATH,
             ErrorMessageType.INVALID_PATH.getDetail());
+  }
+
+  @Test
+  void apply_noFilterMatch_exceptionThrow() throws Exception {
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
+
+    List<PatchOperation> patchOperationList = new ArrayList<>();
+    patchOperationList.add(PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("addresses[type EQ \"work\"].locality")
+            .value("Rochester")
+            .build());
+
+    Throwable t = catchThrowable(() -> this.patchOperations.apply(user,
+            patchOperationList));
+
+    ScimTestHelper.assertScimException(t,
+            Response.Status.BAD_REQUEST,
+            ErrorMessageType.NO_TARGET,
+            ErrorMessageType.NO_TARGET.getDetail());
   }
 
   // SCIM USER PATCH ADD -----------------------------------------------------------------------------
@@ -200,6 +221,83 @@ class PatchOperationsTest {
     assertThat(address.getStreetAddress()).isEqualTo("2571 Wallingford Dr");
     assertThat(address.getType()).isEqualTo("home");
     assertThat(address.getPrimary()).isTrue();
+  }
+
+  /*
+   * {
+   *   "schemas": [
+   *     "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+   *   ],
+   *   "Operations": [
+   *     {
+   *       "op": "Replace",
+   *       "path": "active",
+   *       "value": "False"
+   *     },
+   *     {
+   *       "op": "Replace",
+   *       "path": "name.familyName",
+   *       "value": "User-001a"
+   *     },
+   *     {
+   *       "op": "Add",
+   *       "path": "addresses[type eq \"work\"].locality",
+   *       "value": "Rochester"
+   *     },
+   *     {
+   *       "op": "Add",
+   *       "path": "addresses[type eq \"work\"].region",
+   *       "value": "MN"
+   *     }
+   *   ]
+   * }
+   */
+  @Test
+  void apply_multiplePatchOperations_successfullyPatched() throws Exception {
+    final ScimUser user = ScimTestHelper.generateScimUser();
+    user.setName(NameBuilder.builder()
+            .givenName("Given Name")
+            .familyName("Family Name")
+            .build());
+
+    List<PatchOperation> patchOperationList = new ArrayList<>();
+    patchOperationList.add(PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("active")
+            .value(false)
+            .build());
+    patchOperationList.add(PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("name.familyName")
+            .value("User-001a")
+            .build());
+    patchOperationList.add(PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("addresses[type eq \"work\"].region")
+            .value("MN")
+            .build());
+    patchOperationList.add(PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("addresses[type EQ \"work\"].locality")
+            .value("Rochester")
+            .build());
+    patchOperationList.add(PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.REPLACE)
+            .path("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department")
+            .value("** Department **")
+            .build());
+
+    final ScimUser result = this.patchOperations.apply(user, patchOperationList);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getActive()).isFalse();
+    assertThat(result.getName().getFamilyName()).isEqualTo("User-001a");
+
+    Optional<Address> primaryAddress = result.getPrimaryAddress();
+    assertThat(primaryAddress).isPresent();
+    Address address = primaryAddress.get();
+    assertThat(address.getRegion()).isEqualTo("MN");
+    assertThat(address.getLocality()).isEqualTo("Rochester");
   }
 
   @Test
@@ -359,7 +457,7 @@ class PatchOperationsTest {
     EnterpriseExtension.URN + ":employeeNumber, EmployeeNumber",
     EnterpriseExtension.URN + ":organization, Organization"})
   void apply_enterpriseExtensionAttributeAdd_successfullyPatched(final String path, final Object value) throws Exception {
-    final ScimUser user = ScimTestHelper.generateScimUser();
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
       .operation(PatchOperation.Type.ADD)
@@ -367,13 +465,13 @@ class PatchOperationsTest {
       .value(value)
       .build();
 
-    assertThat(user.getExtension(EnterpriseExtension.URN)).isNotNull();
+    assertThat(user.getExtension(EnterpriseExtension.URN)).isNull();
 
     final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
-    assertThat(result.getExtensions()).hasSize(2);
+    assertThat(result.getExtensions()).hasSize(1);
 
     validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
   }
@@ -437,6 +535,27 @@ class PatchOperationsTest {
 
     assertThat( result ).isNotNull();
     assertThat( result.getMembers() ).hasSize( 2 );
+  }
+
+  @Test
+  void apply_scimGroupRemoveGroupWithExisting_successfullyPatched() throws Exception {
+    ScimGroup group = ScimTestHelper.generateScimGroup();
+    ResourceReference resourceReference = new ResourceReference();
+    resourceReference.setDisplay( "Second Group Membership" );
+    resourceReference.setType( ResourceReference.ReferenceType.DIRECT );
+    resourceReference.setValue( UUID.randomUUID().toString() );
+
+    group.getMembers().add(resourceReference);
+
+    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+            .operation( PatchOperation.Type.REMOVE )
+            .path( "members[value EQ \"" + resourceReference.getValue() + "\"]" )
+            .build();
+
+    final ScimGroup result = this.patchOperations.apply( group, ImmutableList.of( patchOperation ) );
+
+    assertThat( result ).isNotNull();
+    assertThat( result.getMembers() ).hasSize( 1 );
   }
 
   @Test
@@ -543,16 +662,17 @@ class PatchOperationsTest {
   }
 
   @ParameterizedTest
-  @CsvSource({EnterpriseExtension.URN + ":department",
-    EnterpriseExtension.URN + ":division",
-    EnterpriseExtension.URN + ":costCenter",
-    EnterpriseExtension.URN + ":employeeNumber",
-    EnterpriseExtension.URN + ":organization"})
-  void apply_enterpriseExtensionAttributeReplace_successfullyPatched(final String path) throws Exception {
+  @CsvSource({EnterpriseExtension.URN + ":department, ** DEPARTMENT **",
+    EnterpriseExtension.URN + ":division, ** division **",
+    EnterpriseExtension.URN + ":costCenter, ** costCenter **",
+    EnterpriseExtension.URN + ":employeeNumber, ** organization **",
+    EnterpriseExtension.URN + ":organization, ** DEPARTMENT **"})
+  void apply_enterpriseExtensionAttributeReplace_successfullyPatched(final String path, final String value) throws Exception {
     final ScimUser user = ScimTestHelper.generateScimUser();
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
       .operation(PatchOperation.Type.REPLACE)
       .path(path)
+      .value(value)
       .build();
 
     assertThat(user.getExtension(EnterpriseExtension.URN)).isNotNull();
@@ -563,27 +683,29 @@ class PatchOperationsTest {
     assertThat(result.getExtensions()).isNotNull();
     assertThat(result.getExtensions()).hasSize(2);
 
-    validateExtensions(path, null, result.getExtension(EnterpriseExtension.class));
+    validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
   }
 
   @ParameterizedTest
-  @CsvSource({EnterpriseExtension.URN + ":manager.displayName", EnterpriseExtension.URN + ":manager.value"})
-  void apply_complexExtensionAttributeReplace_successfullyPatched(final String path) throws Exception {
-    ScimUser user = ScimTestHelper.generateScimUser();
+  @CsvSource({EnterpriseExtension.URN + ":manager.displayName, ** DISPLAY NAME **",
+          EnterpriseExtension.URN + ":manager.value, ** VALUE **"})
+  void apply_complexExtensionAttributeReplace_successfullyPatched(final String path, final String value) throws Exception {
+    ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
       .operation(PatchOperation.Type.REPLACE)
       .path(path)
+      .value(value)
       .build();
 
     final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
-    assertThat(result.getExtensions()).hasSize(2);
+    assertThat(result.getExtensions()).hasSize(1);
     assertThat(result.getExtension(EnterpriseExtension.class)).isNotNull();
 
-    validateExtensions(path, null, result.getExtension(EnterpriseExtension.class));
+    validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
   }
 
   // SCIM GROUP PATCH REPLACE -----------------------------------------------------------------------------

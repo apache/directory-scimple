@@ -42,67 +42,67 @@ import lombok.extern.slf4j.Slf4j;
 @Stateless
 @Slf4j
 public class PatchOperations {
-  private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {
-  };
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {
+    };
 
-  private static final Map<PatchOperation.Type, Set<String>> UNSUPPORTED =
-    ImmutableMap.of(REMOVE, ImmutableSet.of("active"));
+    private static final Map<PatchOperation.Type, Set<String>> UNSUPPORTED =
+            ImmutableMap.of( REMOVE, ImmutableSet.of( "active" ) );
 
-  private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-  @Inject
-  Registry registry;
+    @Inject
+    Registry registry;
 
-  @Inject
-  public PatchOperations(Registry registry) {
-    this.registry = registry;
-    this.objectMapper = new ObjectMapperFactory(this.registry).createObjectMapper();
-  }
-
-  /**
-   * @param object the {@link Object} to {@link Map}
-   * @return Returns the {@link Map} representation of {@code object}, or a {@link ClassCastException} is thrown if
-   * the {@code object} isn't representable as a {@link Map}
-   */
-  @SuppressWarnings("unchecked")
-  static Map<String, Object> castToMap(final Object object) {
-    requireNonNull(object, "object must not be null.");
-
-    if (object instanceof Map) {
-      return (Map<String, Object>) object;
+    @Inject
+    public PatchOperations( Registry registry ) {
+        this.registry = registry;
+        this.objectMapper = new ObjectMapperFactory( this.registry ).createObjectMapper();
     }
 
-    throw new ClassCastException(String.format("Parameter \"value\" isn't a Map, its \"%s\"",
-      object.getClass().getName()));
-  }
+    /**
+     * @param object the {@link Object} to {@link Map}
+     * @return Returns the {@link Map} representation of {@code object}, or a {@link ClassCastException} is thrown if
+     * the {@code object} isn't representable as a {@link Map}
+     */
+    @SuppressWarnings( "unchecked" )
+    static Map<String, Object> castToMap( final Object object ) {
+        requireNonNull( object, "object must not be null." );
 
-  @SuppressWarnings( "unchecked" )
-  static List<Map<String,Object>> castToList( final Object object) {
-    requireNonNull(object, "object must not be null.");
+        if ( object instanceof Map ) {
+            return ( Map<String, Object> ) object;
+        }
 
-    if (object instanceof List) {
-      return (List<Map<String,Object>>) object;
+        throw new ClassCastException( String.format( "Parameter \"value\" isn't a Map, its \"%s\"",
+                object.getClass().getName() ) );
     }
 
-    throw new ClassCastException(String.format("Parameter \"value\" isn't a List, its \"%s\"",
-            object.getClass().getName()));
-  }
+    @SuppressWarnings( "unchecked" )
+    static List<Map<String, Object>> castToList( final Object object ) {
+        requireNonNull( object, "object must not be null." );
 
-  static boolean isCollection(Class<?> clazz) {
-    return Collection.class.isAssignableFrom(clazz);
-  }
+        if ( object instanceof List ) {
+            return ( List<Map<String, Object>> ) object;
+        }
 
-  /**
-   * @param status      the HTTP {@link Response.Status}
-   * @param messageType the {@link ErrorMessageType} type
-   * @return Returns a populated {@link ScimException}
-   */
-  static ScimException throwScimException(final Response.Status status, final ErrorMessageType messageType) {
-    final ErrorResponse errorResponse = new ErrorResponse(status, messageType.getDetail());
-    errorResponse.setScimType(messageType);
+        throw new ClassCastException( String.format( "Parameter \"value\" isn't a List, its \"%s\"",
+                object.getClass().getName() ) );
+    }
 
-    return new ScimException(errorResponse, status);
-  }
+    static boolean isCollection( Class<?> clazz ) {
+        return Collection.class.isAssignableFrom( clazz );
+    }
+
+    /**
+     * @param status      the HTTP {@link Response.Status}
+     * @param messageType the {@link ErrorMessageType} type
+     * @return Returns a populated {@link ScimException}
+     */
+    static ScimException throwScimException( final Response.Status status, final ErrorMessageType messageType ) {
+        final ErrorResponse errorResponse = new ErrorResponse( status, messageType.getDetail() );
+        errorResponse.setScimType( messageType );
+
+        return new ScimException( errorResponse, status );
+    }
 
   /**
    * @param source          the resource to be patched
@@ -116,16 +116,16 @@ public class PatchOperations {
 
     for (PatchOperation it : patchOperations) {
       if (it.getPath()==null && it.getValue() instanceof Map) {
-        Map<String, Object> properties = (Map<String, Object>) it.getValue();
+        Map<String, Object> properties = ( Map<String, Object> ) it.getValue();
 
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+        for ( Map.Entry<String, Object> entry : properties.entrySet() ) {
           // convert SCIM patch to RFC-6902 patch
           PatchOperation newPatchOperation = new PatchOperation();
-          newPatchOperation.setOperation(it.getOperation());
-          newPatchOperation.setPath(patchOperationPath(entry.getKey()));
-          newPatchOperation.setValue(entry.getValue());
+          newPatchOperation.setOperation( it.getOperation() );
+          newPatchOperation.setPath( patchOperationPath( entry.getKey() ) );
+          newPatchOperation.setValue( entry.getValue() );
 
-          scimResource = apply(scimResource, newPatchOperation);
+          scimResource = apply( scimResource, newPatchOperation );
         }
       } else if (it.getPath()==null && !(it.getValue() instanceof Map)) {
         throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_VALUE);
@@ -263,7 +263,7 @@ public class PatchOperations {
     }
 
     if (Objects.isNull(list) || list.isEmpty()) {
-      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER);
+      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
     } else {
       List<Integer> matchingIndexes = new ArrayList<>();
       for (int i = 0; i < list.size(); i++) {
@@ -387,10 +387,11 @@ public class PatchOperations {
     checkRequired(patchOperation, schema);
     checkSupported(patchOperation, schema);
 
-    return (T) mapAsResource(remove(source, attributeReference), source.getClass());
+    Map<String, Object> sourceAsMap = remove(source, attributeReference, patchOperation);
+    return (T) mapAsResource(sourceAsMap, source.getClass());
   }
 
-  private <T extends ScimResource> Map<String, Object> remove(T resource, final AttributeReference reference) {
+  private <T extends ScimResource> Map<String, Object> remove(T resource, final AttributeReference reference, final PatchOperation patchOperation) {
     Map<String, Object> sourceAsMap = resourceAsMap(resource);
 
     // are we dealing with Scim Extension?
@@ -398,14 +399,14 @@ public class PatchOperations {
       final List<ScimExtension> scimExtensions = getExtensions(resource);
       removeExtension(sourceAsMap, reference, scimExtensions);
     } else {
-      remove(sourceAsMap, reference);
+      remove(sourceAsMap, reference, patchOperation);
     }
 
     return sourceAsMap;
   }
 
   @SuppressWarnings("unchecked")
-  private void remove(Map<String, Object> sourceAsMap, final AttributeReference reference) {
+  private void remove(Map<String, Object> sourceAsMap, final AttributeReference reference, final PatchOperation patchOperation) {
     String path = reference.getFullAttributeName();
 
     int i = path.indexOf(".");
@@ -422,13 +423,13 @@ public class PatchOperations {
     if (value!=null) {
       try {
         // If it's a map we must recurse
-        remove(castToMap(value), new AttributeReference(path));
+        remove(castToMap(value), new AttributeReference(path), patchOperation);
       } catch (Exception e) {
         if (isCollection(value.getClass())) {
           Collection<Object> col = (Collection<Object>) value;
           for (Object item : col) {
             if (item instanceof Map) {
-              remove(castToMap(item), new AttributeReference(path));
+              remove(castToMap(item), new AttributeReference(path), patchOperation);
             }
           }
         }
@@ -584,7 +585,11 @@ public class PatchOperations {
           processedExtension.putAll(extensionMap);
 
           if (Objects.isNull(reference.getSubAttributeName())) {
-            processedExtension.replace(reference.getAttributeName(), newValue);
+            if(processedExtension.containsKey(reference.getAttributeName())) {
+              processedExtension.replace( reference.getAttributeName(), newValue );
+            } else {
+              processedExtension.put( reference.getAttributeName(), newValue );
+            }
           } else /* reference.getSubAttributeName() != null */ {
             Object subExtensionObject = extensionMap.get(reference.getAttributeName());
 
