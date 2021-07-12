@@ -1,8 +1,7 @@
 package org.apache.directory.scim.server.utility.patch;
 
 import static org.apache.directory.scim.test.helpers.ScimTestHelper.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +19,7 @@ import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
+import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
@@ -221,6 +221,40 @@ class PatchOperationsTest {
     assertThat(address.getStreetAddress()).isEqualTo("2571 Wallingford Dr");
     assertThat(address.getType()).isEqualTo("home");
     assertThat(address.getPrimary()).isTrue();
+  }
+
+  @Test
+  void apply_multiplePatchOperationsReplaceAdd_successfullyPatched() throws Exception {
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
+    user.setTitle("");
+
+    try {
+      List<PatchOperation> patchOperationList = ImmutableList.of(
+              PatchOperationBuilder.builder().operation(PatchOperation.Type.REPLACE)
+                      .path("title")
+                      .value("title -- 01")
+                      .build(),
+              // no address list entries are expected to exist
+              PatchOperationBuilder.builder()
+                      .operation(PatchOperation.Type.ADD)
+                      .path("addresses[type EQ \"work\"].region")
+                      .value("MN")
+                      .build()
+      );
+
+
+      final ScimUser result = this.patchOperations.apply(user, patchOperationList);
+
+      assertThat(result).isNotNull();
+      assertThat(result.getTitle()).isEqualTo("title -- 01");
+      assertThat(result.getAddresses()).hasSize(1);
+
+      final Address address = result.getAddresses().get(0);
+      assertThat(address).isNotNull();
+      assertThat(address.getRegion()).isEqualTo("MN");
+    } catch ( FilterParseException e ) {
+      fail(e.getMessage());
+    }
   }
 
   /*
@@ -497,6 +531,29 @@ class PatchOperationsTest {
 
     validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
   }
+
+// TODO research is this is a validate path operation
+//
+//  @Test
+//  void apply_complexExtensionAttributeAdd_successfullyPatched() throws Exception {
+//    ScimUser user = ScimTestHelper.generateMinimalScimUser();
+//
+//    final PatchOperation patchOperation = PatchOperationBuilder.builder()
+//            .operation(PatchOperation.Type.ADD)
+//            .path("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:manager")
+//            .value(UUID.randomUUID().toString())
+//            .build();
+//
+//    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+//
+//    assertThat(result).isNotNull();
+//    assertThat(result.getExtensions()).isNotNull();
+//    assertThat(result.getExtensions()).hasSize(1);
+//    assertThat(result.getExtension(EnterpriseExtension.class)).isNotNull();
+//
+//    validateExtensions("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:manager.value",
+//            patchOperation.getValue(), result.getExtension(EnterpriseExtension.class));
+//  }
 
   // SCIM GROUP PATCH ADD -----------------------------------------------------------------------------
 

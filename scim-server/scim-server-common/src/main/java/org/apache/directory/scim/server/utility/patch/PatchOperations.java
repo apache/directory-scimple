@@ -1,6 +1,7 @@
 package org.apache.directory.scim.server.utility.patch;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.ADD;
 import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.REMOVE;
 import static org.apache.directory.scim.spec.schema.Schema.Attribute;
 
@@ -34,6 +35,7 @@ import org.apache.directory.scim.spec.schema.Schema;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -262,15 +264,21 @@ public class PatchOperations {
       }
     }
 
-    if (Objects.isNull(list) || list.isEmpty()) {
-      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
+    if(list == null && operation.getOperation().equals(ADD) && attribute != null && subAttribute != null) {
+      list = ImmutableList.of(new HashMap<>());
+    }
+
+    if (list == null || list.isEmpty()) {
+        throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
     } else {
-      List<Integer> matchingIndexes = new ArrayList<>();
-      for (int i = 0; i < list.size(); i++) {
-        if (FilterMatchUtil.complexAttributeMatch(parentAttribute, list.get(i), operation)) {
-          matchingIndexes.add(0, i);
+        List<Integer> matchingIndexes = new ArrayList<>();
+        for ( int i = 0; i < list.size(); i++ ) {
+          if ( FilterMatchUtil.complexAttributeMatch( parentAttribute, list.get( i ), operation ) ) {
+            matchingIndexes.add( 0, i );
+          } else if ( operation.getOperation().equals( ADD ) && attribute != null && subAttribute != null ) {
+            matchingIndexes.add( 0, 0 );
+          }
         }
-      }
 
       /*
        * see section 3.5.2.3/4 of RFC7644
@@ -279,25 +287,25 @@ public class PatchOperations {
        * supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
        * code 400 and a "scimType" error code of "noTarget".
        */
-      if (matchingIndexes.isEmpty()) {
-        throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
-      }
-
-      log.info("There are {} entries matching the filter '{}'", matchingIndexes.size(), operation.getPath());
-
-      for (Integer index : matchingIndexes) {
-        if (operation.getOperation().equals(REMOVE)) {
-          if (Objects.isNull(subAttribute) || subAttribute.isEmpty()) {
-            // Remove the whole item
-            list.remove(index.intValue());  // If intValue is not used, the remove(Object) method is
-          } else {    // remove sub-attribute only
-            list.get(index).remove(subAttribute);
-          }
-        } else {
-          applyPartialUpdate(parentAttribute, parentAttribute.getAttribute(subAttribute),
-            list, index, operation.getValue());
+        if ( matchingIndexes.isEmpty() ) {
+          throw throwScimException( Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET );
         }
-      }
+
+        log.info( "There are {} entries matching the filter '{}'", matchingIndexes.size(), operation.getPath() );
+
+        for ( Integer index : matchingIndexes ) {
+          if ( operation.getOperation().equals( REMOVE ) ) {
+            if ( Objects.isNull( subAttribute ) || subAttribute.isEmpty() ) {
+              // Remove the whole item
+              list.remove( index.intValue() );  // If intValue is not used, the remove(Object) method is
+            } else {    // remove sub-attribute only
+              list.get( index ).remove( subAttribute );
+            }
+          } else {
+            applyPartialUpdate( parentAttribute, parentAttribute.getAttribute( subAttribute ),
+                    list, index, operation.getValue() );
+          }
+        }
 
       resourceAsMap.put(attribute, list.size()==0 ? null:list);
     }
@@ -338,7 +346,7 @@ public class PatchOperations {
     } else {
       log.debug("Full Attribute {}.{}", attribute.getName(), subAttribute.getName());
       checkMutability(attribute);
-      list.get(index).put(subAttribute.getName(), value);
+        list.get( index ).put( subAttribute.getName(), value );
     }
   }
 
@@ -694,7 +702,7 @@ public class PatchOperations {
    * @throws ScimException if {@link PatchOperation#getValue()} is null
    */
   private void checkValue(PatchOperation patchOperation) throws ScimException {
-    if (patchOperation.getOperation().equals(PatchOperation.Type.ADD) &&
+    if (patchOperation.getOperation().equals(ADD) &&
       Objects.isNull(patchOperation.getValue())) {
       log.error("The value is required to perform patch '{}' operation on '{}'.",
         patchOperation.getOperation(), patchOperation.getPath().toString());
