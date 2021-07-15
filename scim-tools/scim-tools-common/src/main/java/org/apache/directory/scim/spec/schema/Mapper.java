@@ -80,7 +80,7 @@ public class Mapper {
   /**
    * Converts an ISO 8601 DateTime string into the equivalent Java Date object.
    * 
-   * @param date the ISO 8601 DateTime to be converted.
+   * @param isodate the ISO 8601 DateTime to be converted.
    * @return the equivalent Java Date object.
    * @throws ParseException 
    */

@@ -19,11 +19,11 @@
 
 package org.apache.directory.scim.common.registries;
 
+import org.apache.directory.scim.spec.schema.ResourceType;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.directory.scim.spec.schema.ResourceType;
 
 /**
  * Provides a registry for ResourceTypes, whether defined in the schema
@@ -62,7 +62,7 @@ public class ResourceTypeRegistry {
    *          the ResourceType objects to register.
    */
   public void addAll(Set<ResourceType> resourceTypeSet) {
-    resourceTypeSet.forEach(r -> add(r));
+    resourceTypeSet.forEach(this::add);
   }
 
 }

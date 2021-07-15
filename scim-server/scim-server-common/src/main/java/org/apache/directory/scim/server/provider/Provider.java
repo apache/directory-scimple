@@ -20,7 +20,6 @@
 package org.apache.directory.scim.server.provider;
 
 import java.util.List;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -63,7 +62,7 @@ public interface Provider<T extends ScimResource> {
    * Allows the SCIM server's REST implementation to update and existing
    * resource via a PUT to a valid end-point.
    * 
-   * @param resource The ScimResource to update and persist.
+   * @param updateRequest The UpdateRequest to update and persist.
    * @return The newly updated ScimResource.
    * @throws UnableToUpdateResourceException When the ScimResource cannot be
    *         updated.
@@ -132,8 +131,8 @@ public interface Provider<T extends ScimResource> {
    * and Error Response Handling</a> of the SCIM specification.</p>
    * <p>By default, exceptions are converted into a <code>500 Internal Server
    * Error</code>.</p>
-   * @param unhandled
-   * @return
+   * @param unhandled A unhandled exception
+   * @return A Response representing the {@code unhandled}
    */
   default Response handleException(Throwable unhandled) {
     // Allow for ErrorMessageViolationExceptionMapper to handle JAX-RS exceptions by default
