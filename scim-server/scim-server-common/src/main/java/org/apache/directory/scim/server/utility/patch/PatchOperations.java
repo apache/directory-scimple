@@ -28,14 +28,16 @@ import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
 import org.apache.directory.scim.spec.protocol.data.PatchOperationPath;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
+import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
+import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
+import org.apache.directory.scim.spec.protocol.filter.ValuePathExpression;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -265,7 +267,21 @@ public class PatchOperations {
     }
 
     if(list == null && operation.getOperation().equals(ADD) && attribute != null && subAttribute != null) {
-      list = ImmutableList.of(new HashMap<>());
+      list = new ArrayList<>();
+
+
+      /*
+       * Based on the Spec complex filters aren't supported. So we should only care about AttributeComparisonExpression
+       */
+      PatchOperationPath patchOperationPath = operation.getPath();
+      ValuePathExpression vpe = patchOperationPath.getValuePathExpression();
+      FilterExpression fe = vpe.getAttributeExpression();
+      if(fe instanceof AttributeComparisonExpression) {
+        AttributeComparisonExpression ace = (AttributeComparisonExpression)fe;
+        list.add( new HashMap<>());
+
+        list.get(0).putIfAbsent(ace.getAttributePath().getSubAttributeName(), ace.getCompareValue());
+      }
     }
 
     if (list == null || list.isEmpty()) {
@@ -346,7 +362,7 @@ public class PatchOperations {
     } else {
       log.debug("Full Attribute {}.{}", attribute.getName(), subAttribute.getName());
       checkMutability(attribute);
-        list.get( index ).put( subAttribute.getName(), value );
+      list.get( index ).put( subAttribute.getName(), value );
     }
   }
 
@@ -730,7 +746,8 @@ public class PatchOperations {
       }
     }
 
-    log.error("Invalid attribute specified for {} operation.", operation.getOperation());
+    log.error("Invalid attribute specified for {} operation, path '{}' when examining schemas URNs {}.",
+            operation.getOperation(), operation.getPath(), registry.getAllSchemaUrns());
     throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_PATH);
   }
 

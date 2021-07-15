@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
@@ -19,6 +18,7 @@ import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
+import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
@@ -288,50 +288,61 @@ class PatchOperationsTest {
    */
   @Test
   void apply_multiplePatchOperations_successfullyPatched() throws Exception {
-    final ScimUser user = ScimTestHelper.generateScimUser();
-    user.setName(NameBuilder.builder()
-            .givenName("Given Name")
-            .familyName("Family Name")
-            .build());
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
+    final Name name = NameBuilder.builder()
+            .familyName("familyName")
+            .givenName( "givenName" )
+            .build();
+    user.setName( name );
 
-    List<PatchOperation> patchOperationList = new ArrayList<>();
-    patchOperationList.add(PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
-            .path("active")
+    List<PatchOperation> patchOperationList = ImmutableList.of(
+      PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.ADD)
+            .path("title")
             .value(false)
-            .build());
-    patchOperationList.add(PatchOperationBuilder.builder()
+            .build(),
+      PatchOperationBuilder.builder()
             .operation(PatchOperation.Type.REPLACE)
             .path("name.familyName")
             .value("User-001a")
-            .build());
-    patchOperationList.add(PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .build(),
+      PatchOperationBuilder.builder()
+                    .operation(PatchOperation.Type.REPLACE)
+                    .path("name.givenName")
+                    .value("a100-resU")
+                    .build(),
+      PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.ADD)
             .path("addresses[type eq \"work\"].region")
             .value("MN")
-            .build());
-    patchOperationList.add(PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .build(),
+      PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.ADD)
             .path("addresses[type EQ \"work\"].locality")
             .value("Rochester")
-            .build());
-    patchOperationList.add(PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .build(),
+      PatchOperationBuilder.builder()
+            .operation(PatchOperation.Type.ADD)
             .path("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department")
             .value("** Department **")
             .build());
 
-    final ScimUser result = this.patchOperations.apply(user, patchOperationList);
+    try {
+      ScimUser result = this.patchOperations.apply(user, patchOperationList);
+      assertThat(result).isNotNull();
+      assertThat(result.getName().getFamilyName()).isEqualTo("User-001a");
+      assertThat(result.getName().getGivenName()).isEqualTo("a100-resU");
 
-    assertThat(result).isNotNull();
-    assertThat(result.getActive()).isFalse();
-    assertThat(result.getName().getFamilyName()).isEqualTo("User-001a");
-
-    Optional<Address> primaryAddress = result.getPrimaryAddress();
-    assertThat(primaryAddress).isPresent();
-    Address address = primaryAddress.get();
-    assertThat(address.getRegion()).isEqualTo("MN");
-    assertThat(address.getLocality()).isEqualTo("Rochester");
+      List<Address> addresses = result.getAddresses();
+      assertThat(addresses).isNotEmpty();
+      assertThat(addresses).hasSize(1);
+      Address address = addresses.get(0);
+      assertThat(address.getType()).isEqualTo("work");
+      assertThat(address.getRegion()).isEqualTo("MN");
+      assertThat(address.getLocality()).isEqualTo("Rochester");
+    } catch ( ScimException e ) {
+      e.printStackTrace();
+    }
   }
 
   @Test
@@ -532,7 +543,7 @@ class PatchOperationsTest {
     validateExtensions(path, value, result.getExtension(EnterpriseExtension.class));
   }
 
-// TODO research is this is a validate path operation
+// TODO research if this is a validate path operation
 //
 //  @Test
 //  void apply_complexExtensionAttributeAdd_successfullyPatched() throws Exception {
