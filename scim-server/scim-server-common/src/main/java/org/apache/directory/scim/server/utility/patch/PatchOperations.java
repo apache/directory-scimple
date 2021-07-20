@@ -372,7 +372,7 @@ public class PatchOperations {
     log.info("Applying Patch Operation '{}' for attribute '{}'",
       patchOperation.getOperation(), patchOperation.getPath().toString());
 
-    checkSchema(patchOperation, this.registry.getAllSchemas());
+    checkSchema(patchOperation);
     checkValue(patchOperation);
 
     Map<String, Object> sourceAsMap = resourceAsMap(source);
@@ -387,7 +387,7 @@ public class PatchOperations {
     log.info("Applying Patch Operation '{}' for attribute '{}'",
       patchOperation.getOperation(), patchOperation.getPath().toString());
 
-    checkSchema(patchOperation, this.registry.getAllSchemas());
+    checkSchema(patchOperation);
 
     Map<String, Object> sourceAsMap = resourceAsMap(source);
 
@@ -405,7 +405,7 @@ public class PatchOperations {
       patchOperation.getOperation(),
       patchOperation.getPath().toString());
 
-    final Schema schema = checkSchema(patchOperation, this.registry.getAllSchemas());
+    final Schema schema = checkSchema(patchOperation);
 
     checkTarget(patchOperation);
     checkRequired(patchOperation, schema);
@@ -731,15 +731,14 @@ public class PatchOperations {
    * Check the path.
    *
    * @param operation the {@link PatchOperation}.
-   * @param schemas   a {@link Collection} of {@link Schema}s.
    *
    * @return Returns the {@link Schema} the {@code operation} is found in
    * @throws ScimException if operation type isn't supported for the given attribute
    */
-  private Schema checkSchema(PatchOperation operation, final Collection<Schema> schemas) throws ScimException {
+  private Schema checkSchema(PatchOperation operation) throws ScimException {
     AttributeReference reference = attributeReference(operation);
     if (reference!=null) {
-      for (final Schema schema : schemas) {
+      for (final Schema schema : this.registry.getAllSchemas()) {
         if (schema.getAttribute(reference.getAttributeName()) != null) {
           return schema;
         }
@@ -747,7 +746,7 @@ public class PatchOperations {
     }
 
     log.error("Invalid attribute specified for {} operation, path '{}' when examining schemas URNs {}.",
-            operation.getOperation(), operation.getPath(), registry.getAllSchemaUrns());
+            operation.getOperation(), operation.getPath(), this.registry.getAllSchemaUrns());
     throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_PATH);
   }
 
