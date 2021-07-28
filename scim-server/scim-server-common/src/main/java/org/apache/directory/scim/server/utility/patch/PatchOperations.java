@@ -7,7 +7,9 @@ import static org.apache.directory.scim.spec.schema.Schema.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -251,14 +253,14 @@ public class PatchOperations {
 
     Schema schema = this.registry.getSchema(resource.getBaseUrn());
     Map<String, Object> fromMap = resourceAsMap(resource);
-    List<Map<String, Object>> list = null;
+    List<Map<String, Object>> targetAttributes = null;
 
     final Attribute parentAttribute = schema.getAttribute(attribute);
     Map<String, Object> resourceAsMap = resourceAsMap(resource);
     if (Objects.nonNull(parentAttribute)) {
-      if (parentAttribute.isMultiValued() && parentAttribute.getType().equals(Attribute.Type.COMPLEX)) {
+      if (parentAttribute.isMultiValued() && Attribute.Type.COMPLEX.equals(parentAttribute.getType())) {
         Object object = fromMap.getOrDefault(attribute, null);
-        list = (object==null)
+        targetAttributes = (object==null)
           ? null
           : new ArrayList<>((Collection<Map<String, Object>>) object);
       } else {
@@ -266,67 +268,72 @@ public class PatchOperations {
       }
     }
 
-    if(list == null && operation.getOperation().equals(ADD) && attribute != null && subAttribute != null) {
-      list = new ArrayList<>();
+    if (!ADD.equals(operation.getOperation()) && (targetAttributes == null || targetAttributes.isEmpty())) {
+      // We can't replace or remove what isn't there. - see section 3.5.2.3/4 of RFC7644
+      throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
+    }
+    if (targetAttributes == null) {
+      targetAttributes = new ArrayList<>();
+    }
 
-
-      /*
-       * Based on the Spec complex filters aren't supported. So we should only care about AttributeComparisonExpression
-       */
-      PatchOperationPath patchOperationPath = operation.getPath();
-      ValuePathExpression vpe = patchOperationPath.getValuePathExpression();
-      FilterExpression fe = vpe.getAttributeExpression();
-      if(fe instanceof AttributeComparisonExpression) {
-        AttributeComparisonExpression ace = (AttributeComparisonExpression)fe;
-        list.add( new HashMap<>());
-
-        list.get(0).putIfAbsent(ace.getAttributePath().getSubAttributeName(), ace.getCompareValue());
+    Deque<Integer> matchingIndexes = new LinkedList<>();
+    for (int i = 0; i < targetAttributes.size(); i++) {
+      if (FilterMatchUtil.complexAttributeMatch(parentAttribute, targetAttributes.get(i), operation)) {
+        matchingIndexes.push(i);
       }
     }
 
-    if (list == null || list.isEmpty()) {
+    log.info("There are {} existing entries matching the filter '{}'", matchingIndexes.size(), operation.getPath());
+
+    if (matchingIndexes.isEmpty()) {
+      if(ADD.equals(operation.getOperation()) && attribute != null && subAttribute != null) {
+        /*
+         * Based on the Spec complex filters aren't supported. So we should only care about AttributeComparisonExpression
+         */
+        PatchOperationPath patchOperationPath = operation.getPath();
+        ValuePathExpression vpe = patchOperationPath.getValuePathExpression();
+        FilterExpression fe = vpe.getAttributeExpression();
+        if(fe instanceof AttributeComparisonExpression) {
+          AttributeComparisonExpression ace = (AttributeComparisonExpression)fe;
+          targetAttributes.add(createFromAddOperation(ace));
+          matchingIndexes.push(targetAttributes.size() - 1);
+          log.info("Entry added based on filter '{}'", operation.getPath());
+        }
+      } else {
+        /*
+         * see section 3.5.2.3/4 of RFC7644
+         *
+         * If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
+         * supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
+         * code 400 and a "scimType" error code of "noTarget".
+         */
         throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
-    } else {
-        List<Integer> matchingIndexes = new ArrayList<>();
-        for ( int i = 0; i < list.size(); i++ ) {
-          if ( FilterMatchUtil.complexAttributeMatch( parentAttribute, list.get( i ), operation ) ) {
-            matchingIndexes.add( 0, i );
-          } else if ( operation.getOperation().equals( ADD ) && attribute != null && subAttribute != null ) {
-            matchingIndexes.add( 0, 0 );
-          }
-        }
-
-      /*
-       * see section 3.5.2.3/4 of RFC7644
-       *
-       * If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
-       * supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
-       * code 400 and a "scimType" error code of "noTarget".
-       */
-        if ( matchingIndexes.isEmpty() ) {
-          throw throwScimException( Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET );
-        }
-
-        log.info( "There are {} entries matching the filter '{}'", matchingIndexes.size(), operation.getPath() );
-
-        for ( Integer index : matchingIndexes ) {
-          if ( operation.getOperation().equals( REMOVE ) ) {
-            if ( Objects.isNull( subAttribute ) || subAttribute.isEmpty() ) {
-              // Remove the whole item
-              list.remove( index.intValue() );  // If intValue is not used, the remove(Object) method is
-            } else {    // remove sub-attribute only
-              list.get( index ).remove( subAttribute );
-            }
-          } else {
-            applyPartialUpdate( parentAttribute, parentAttribute.getAttribute( subAttribute ),
-                    list, index, operation.getValue() );
-          }
-        }
-
-      resourceAsMap.put(attribute, list.size()==0 ? null:list);
+      }
     }
 
+    for (Integer index : matchingIndexes) {
+      if (REMOVE.equals(operation.getOperation())) {
+        if (Objects.isNull(subAttribute) || subAttribute.isEmpty()) {
+          // Remove the whole item
+          targetAttributes.remove(index.intValue());  // If intValue is not used, the remove(Object) method is
+        } else {    // remove sub-attribute only
+          targetAttributes.get(index).remove(subAttribute);
+        }
+      } else {
+        applyPartialUpdate(parentAttribute, parentAttribute.getAttribute(subAttribute),
+          targetAttributes, index, operation.getValue());
+      }
+    }
+
+    resourceAsMap.put(attribute, targetAttributes.size() == 0 ? null : targetAttributes);
+
     return (T) mapAsResource(resourceAsMap, resource.getClass());
+  }
+
+  private Map<String, Object> createFromAddOperation(AttributeComparisonExpression filter) {
+    final HashMap<String, Object> newAttribute = new HashMap<>();
+    newAttribute.put(filter.getAttributePath().getSubAttributeName(), filter.getCompareValue());
+    return newAttribute;
   }
 
   /**
@@ -539,17 +546,21 @@ public class PatchOperations {
             } else {
               source.replace(attributeReference.getAttributeName(), castToMap(newValue));
             }
-          } else {
-            if (!source.containsKey(attributeReference.getAttributeName())) {
+          } else if (!source.containsKey(attributeReference.getAttributeName())) {
               source.put(attributeReference.getAttributeName(), newValue);
             } else {
-              Object existing = source.get(attributeReference.getAttributeName());
-              if(existing instanceof List) {
-                List<Map<String,Object>> asList = (List<Map<String,Object>>) existing;
-                if(newValue instanceof List) {
-                  asList.addAll(castToList( newValue));
-                } else { // expecting a Map
-                  asList.add( castToMap( newValue ) );
+              Object oldValueObject = source.get(attributeReference.getAttributeName());
+              if(oldValueObject instanceof List) {
+                List<Map<String,Object>> asList = new ArrayList<>();
+
+                List<Map<String,Object>> oldList = (List<Map<String,Object>>) oldValueObject;
+                List<Map<String,Object>> newList = castToList(newValue);
+                switch (patchOperation.getOperation()) {
+                  case ADD:
+                    asList.addAll(oldList);
+                  case REPLACE:
+                    asList.addAll(newList);
+                    break;
                 }
                 source.replace( attributeReference.getAttributeName(), asList);
               } else {
@@ -560,7 +571,6 @@ public class PatchOperations {
         }
       }
     }
-  }
 
   private void addOrReplace(Map<String, Object> subSource, final AttributeReference attributeReference, Object newValue) {
     if (attributeReference.getSubAttributeName()!=null) {

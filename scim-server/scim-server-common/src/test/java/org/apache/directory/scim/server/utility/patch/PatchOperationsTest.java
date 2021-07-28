@@ -1,7 +1,13 @@
 package org.apache.directory.scim.server.utility.patch;
 
-import static org.apache.directory.scim.test.helpers.ScimTestHelper.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.apache.directory.scim.test.helpers.ScimTestHelper.createRegistry;
+import static org.apache.directory.scim.test.helpers.ScimTestHelper.generateMinimalScimGroup;
+import static org.apache.directory.scim.test.helpers.ScimTestHelper.getValueByAttributeName;
+import static org.apache.directory.scim.test.helpers.ScimTestHelper.validateExtensions;
+import static org.apache.directory.scim.test.helpers.ScimTestHelper.validateResourceReferences;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +78,7 @@ class PatchOperationsTest {
 
   @ParameterizedTest
   @CsvSource({"ADD", "REPLACE", "REMOVE"})
-  void apply_invalidPath_exceptionThrow(final String operation) throws Exception {
+  void apply_invalidPath_exceptionThrown(final String operation) throws Exception {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
@@ -90,7 +96,7 @@ class PatchOperationsTest {
   }
 
   @Test
-  void apply_noFilterMatch_exceptionThrow() throws Exception {
+  void apply_noFilterMatch_exceptionThrown() throws Exception {
     final ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     List<PatchOperation> patchOperationList = new ArrayList<>();
@@ -221,6 +227,47 @@ class PatchOperationsTest {
     assertThat(address.getStreetAddress()).isEqualTo("2571 Wallingford Dr");
     assertThat(address.getType()).isEqualTo("home");
     assertThat(address.getPrimary()).isTrue();
+  }
+
+  @Test
+  void apply_addNewElementToMultiValue_successfullyPatched() throws Exception {
+    final ScimUser user = ScimTestHelper.generateMinimalScimUser();
+    final Address address = AddressBuilder.builder()
+      .type("home")
+      .country("QZ")
+      .postalCode("90210")
+      .region("OH")
+      .primary(false)
+      .build();
+    user.setAddresses(Lists.newArrayList(address));
+
+    List<PatchOperation> patchOperationList = ImmutableList.of(
+      PatchOperationBuilder.builder().operation(PatchOperation.Type.REPLACE)
+        .path("addresses[type EQ \"home\"].primary")
+        .value("true")
+        .build(),
+      // One address list entry is expected to exist, add another.
+      PatchOperationBuilder.builder()
+        .operation(PatchOperation.Type.ADD)
+        .path("addresses[type EQ \"work\"].region")
+        .value("MN")
+        .build()
+    );
+
+
+    final ScimUser result = this.patchOperations.apply(user, patchOperationList);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getAddresses()).hasSize(2);
+
+    final Address address1 = result.getAddresses().get(0);
+    assertThat(address1.getType()).isEqualTo("home");
+    assertThat(address1.getCountry()).isEqualTo("QZ");
+    assertThat(address1.getRegion()).isEqualTo("OH");
+
+    final Address address2 = result.getAddresses().get(1);
+    assertThat(address2.getType()).isEqualTo("work");
+    assertThat(address2.getRegion()).isEqualTo("MN");
   }
 
   @Test
@@ -809,6 +856,56 @@ class PatchOperationsTest {
     assertThat(result.getDisplayName()).isEqualTo(expectedDisplayName);
   }
 
+  /*
+   * failing Patch Operation
+   * [PatchOperation(operation=REPLACE, path=members, value=[
+   *  {value=1017715644414275429, display=july2021.user04@oktaidp.com},
+   *  {value=1017715644363943781, display=july2021.user03@oktaidp.com}])
+   * ]
+   */
+  @Test
+  void apply_multiValuedComplexReplace_successfullyPatched() throws Exception {
+    final ScimGroup group = generateMinimalScimGroup();
+
+    List<ResourceReference> existingMembers = new ArrayList<>();
+    existingMembers.add(ResourceReferenceBuilder.builder()
+      .display("july2021.user04@oktaidp.com")
+      .value("1017715644414275429")
+      .build());
+    existingMembers.add(ResourceReferenceBuilder.builder()
+      .display("july2021.user03@oktaidp.com")
+      .value("1017715644363943781")
+      .build());
+    existingMembers.add(ResourceReferenceBuilder.builder()
+      .display("july2021.user01@oktaidp.com")
+      .value("1017715644123456789")
+      .build());
+    group.setMembers(existingMembers);
+
+    List<ResourceReference> expectedMembers = new ArrayList<>();
+    expectedMembers.add(ResourceReferenceBuilder.builder()
+      .display("july2021.user05@oktaidp.com")
+      .value("01234567890123456789")
+      .build());
+    expectedMembers.add(ResourceReferenceBuilder.builder()
+      .display("july2021.user02@oktaidp.com")
+      .value("98765432109876543210")
+      .build());
+
+    PatchOperation patchOperation = PatchOperationBuilder.builder()
+      .operation(PatchOperation.Type.REPLACE)
+      .path("members")
+      .value(objectMapper.convertValue(expectedMembers, LIST_MAP_TYPE))
+      .build();
+
+    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+
+    assertThat(result).isNotNull();
+//    assertThat(result).isNotEqualTo(group);
+    assertThat(result.getMembers()).hasSize(2);
+    assertThat(result.getMembers()).contains(expectedMembers.get(0), expectedMembers.get(1));
+  }
+
   @ParameterizedTest
   @CsvSource({"displayName, ** Display Name **"})
   void apply_simpleScimGroupAttributeReplace_successfullyPatched(final String path, final Object value) throws Exception {
@@ -848,7 +945,7 @@ class PatchOperationsTest {
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
-    assertThat(result.getMembers()).hasSize(2);
+    assertThat(result.getMembers()).hasSize(1);
     validateResourceReferences(result.getMembers(), referenceList);
   }
 
@@ -1091,7 +1188,7 @@ class PatchOperationsTest {
 
   @ParameterizedTest
   @CsvSource({"userName"})
-  void apply_removeMutableAttribute_exceptionThrow(final String path) throws Exception {
+  void apply_removeMutableAttribute_exceptionThrown(final String path) throws Exception {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
@@ -1110,7 +1207,7 @@ class PatchOperationsTest {
 
   @ParameterizedTest
   @CsvSource({"active"})
-  void apply_removeOperationOnAttributeNotSupported_exceptionThrow(final String path) throws Exception {
+  void apply_removeOperationOnAttributeNotSupported_exceptionThrown(final String path) throws Exception {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
