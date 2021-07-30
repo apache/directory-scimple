@@ -53,16 +53,7 @@ public class PatchOperations {
 
     private static final Map<PatchOperation.Type, Set<String>> UNSUPPORTED =
             ImmutableMap.of( REMOVE, ImmutableSet.of( "active" ) );
-  private static final Set<String> MULTIVALUED_KEYS = ImmutableSet.of(
-    // Scim User Resource multi-valued complex attribute names
-    "addresses",
-    "emails",
-    "entitlements",
-    "ims",
-    "phoneNumbers",
-    "photos",
-    "roles",
-    "x509Certificates");
+
   private static final String PRIMARY_ATTR_NAME = "primary";
   private static final String SUB_ATTR_NAME = "type";
 
@@ -846,49 +837,61 @@ public class PatchOperations {
    * @param patchOperation the {@link PatchOperation}
    */
   private void multiValuedPrimaryUniqueness(Map<String,Object> scimResourceAsMap, final PatchOperation patchOperation) {
-    final AttributeReference reference = attributeReference(patchOperation);
-    if(MULTIVALUED_KEYS.contains(reference.getAttributeName()) &&
-      (reference.getSubAttributeName() != null && reference.getSubAttributeName().equals(PRIMARY_ATTR_NAME)) &&
-      scimResourceAsMap.containsKey(reference.getAttributeName())) {
+    AttributeReference reference = attributeReference(patchOperation);
+    if (reference == null) {
+      return;
+    }
 
-      try {
-        Object multiValuedObject = scimResourceAsMap.get(reference.getAttributeName());
-        if(multiValuedObject instanceof List) {
-          PatchOperation searchPatchOps = new PatchOperation();
-          searchPatchOps.setPath(new PatchOperationPath(String.format("%s[primary EQ true]", reference.getAttributeName())));
+    final Schema schema = this.registry.getAllSchemas()
+      .stream()
+      .filter( s -> s.getAttribute(reference.getAttributeName()) != null)
+      .findFirst().orElse(null);
 
-          // throws exception is no matching schema is found.
-          final Schema schema = checkSchema(patchOperation);
+    if(schema == null) {
+      return;
+    }
 
-          final Attribute parent = schema.getAttribute(reference.getAttributeName());
-          if(parent == null) {
-            return;
+    Attribute attribute = schema.getAttribute(reference.getAttributeName());
+
+    if(attribute == null || (!scimResourceAsMap.containsKey(reference.getAttributeName()) &&
+      (!attribute.isMultiValued() && !attribute.getType().equals(Attribute.Type.COMPLEX)))) {
+      return;
+    }
+
+    if(reference.getSubAttributeName() == null || attribute.getAttribute(reference.getSubAttributeName()) == null) {
+      return;
+    }
+
+    try {
+      Object multiValuedObject = scimResourceAsMap.get(reference.getAttributeName());
+      if(multiValuedObject instanceof List) {
+        PatchOperation searchPatchOps = new PatchOperation();
+        searchPatchOps.setPath(new PatchOperationPath(String.format("%s[primary EQ true]", reference.getAttributeName())));
+
+        Deque<Integer> matches = new LinkedList<>();
+        List<Map<String, Object>> asListOfMaps = castToList(multiValuedObject);
+        int index = 0;
+        for (final Map<String, Object> element : asListOfMaps) {
+          if(!FilterMatchUtil.complexAttributeMatch(attribute, element, patchOperation) &&
+            FilterMatchUtil.complexAttributeMatch(attribute, element, searchPatchOps)) {
+            matches.push(index);
           }
 
-          Deque<Integer> matches = new LinkedList<>();
-          List<Map<String, Object>> asListOfMaps = castToList(multiValuedObject);
-          int index = 0;
-          for (final Map<String, Object> element : asListOfMaps) {
-            if(!FilterMatchUtil.complexAttributeMatch(parent, element, patchOperation) &&
-               FilterMatchUtil.complexAttributeMatch(parent, element, searchPatchOps)) {
-              matches.push(index);
-            }
-
-            index++;
-          }
-
-          if(matches.size() >= 1) {
-            log.info("Found {} multi-valued attribute {} with primary attribute set to 'true'", matches.size(), parent.getName());
-            matches.forEach(i -> {
-              log.info("Setting 'primary = false' for element index {} whose associated attribute '{}' and sub-attribute '{}' is '{}'",
-                i, reference.getAttributeName(), SUB_ATTR_NAME, asListOfMaps.get(i).get(SUB_ATTR_NAME));
-              asListOfMaps.get(i).replace(PRIMARY_ATTR_NAME, false);
-            });
-          }
+          index++;
         }
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
+
+        if(matches.size() >= 1) {
+          log.info("Found {} multi-valued attribute {} with primary attribute set to 'true'", matches.size(), attribute.getName());
+          matches.forEach(i -> {
+            log.info("Setting 'primary = false' for element index {} whose associated attribute '{}' and sub-attribute '{}' is '{}'",
+              i, reference.getAttributeName(), SUB_ATTR_NAME, asListOfMaps.get(i).get(SUB_ATTR_NAME));
+            asListOfMaps.get(i).replace(PRIMARY_ATTR_NAME, false);
+          });
+        }
       }
+    } catch (Exception e) {
+      log.error("There was a problem determining if attribute '{}}' has a single unique element with 'primary' set to 'true'.",
+        reference.getAttributeName(), e);
     }
   }
 }
