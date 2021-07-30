@@ -151,13 +151,13 @@ public class ScimTestHelper {
 
     user.setEmails(new ArrayList<>());
     user.getEmails().add(EmailBuilder.builder()
-      .display("User " + user.getId() + " email address")
+      .display("User " + user.getId() + " email")
       .primary(true)
       .type("home")
       .value(user.getUserName())
       .build());
     user.getEmails().add(EmailBuilder.builder()
-      .display("User " + user.getId() + " email address")
+      .display("User " + user.getId() + " email")
       .primary(false)
       .type("work")
       .value(user.getUserName().substring(0, user.getUserName().lastIndexOf(".")) + "edu")

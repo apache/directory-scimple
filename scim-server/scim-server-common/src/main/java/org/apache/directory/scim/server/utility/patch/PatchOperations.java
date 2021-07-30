@@ -53,6 +53,18 @@ public class PatchOperations {
 
     private static final Map<PatchOperation.Type, Set<String>> UNSUPPORTED =
             ImmutableMap.of( REMOVE, ImmutableSet.of( "active" ) );
+  private static final Set<String> MULTIVALUED_KEYS = ImmutableSet.of(
+    // Scim User Resource multi-valued complex attribute names
+    "addresses",
+    "emails",
+    "entitlements",
+    "ims",
+    "phoneNumbers",
+    "photos",
+    "roles",
+    "x509Certificates");
+  private static final String PRIMARY_ATTR_NAME = "primary";
+  private static final String SUB_ATTR_NAME = "type";
 
     private final ObjectMapper objectMapper;
 
@@ -269,7 +281,7 @@ public class PatchOperations {
     }
 
     if (!ADD.equals(operation.getOperation()) && (targetAttributes == null || targetAttributes.isEmpty())) {
-      // We can't replace or remove what isn't there. - see section 3.5.2.3/4 of RFC7644
+      // We can't replace or remove what isn't there. See section 3.5.2.3/4 of RFC7644
       throw throwScimException(Response.Status.BAD_REQUEST, ErrorMessageType.NO_TARGET);
     }
     if (targetAttributes == null) {
@@ -283,7 +295,7 @@ public class PatchOperations {
       }
     }
 
-    log.info("There are {} existing entries matching the filter '{}'", matchingIndexes.size(), operation.getPath());
+    log.info("There is {} existing element matching the value filter '{}'", matchingIndexes.size(), operation.getPath());
 
     if (matchingIndexes.isEmpty()) {
       if(ADD.equals(operation.getOperation()) && attribute != null && subAttribute != null) {
@@ -297,7 +309,7 @@ public class PatchOperations {
           AttributeComparisonExpression ace = (AttributeComparisonExpression)fe;
           targetAttributes.add(createFromAddOperation(ace));
           matchingIndexes.push(targetAttributes.size() - 1);
-          log.info("Entry added based on filter '{}'", operation.getPath());
+          log.info("Element added based on filter '{}'", operation.getPath());
         }
       } else {
         /*
@@ -326,6 +338,8 @@ public class PatchOperations {
     }
 
     resourceAsMap.put(attribute, targetAttributes.size() == 0 ? null : targetAttributes);
+
+    multiValuedPrimaryUniqueness(resourceAsMap, operation);
 
     return (T) mapAsResource(resourceAsMap, resource.getClass());
   }
@@ -418,11 +432,11 @@ public class PatchOperations {
     checkRequired(patchOperation, schema);
     checkSupported(patchOperation, schema);
 
-    Map<String, Object> sourceAsMap = remove(source, attributeReference, patchOperation);
+    Map<String, Object> sourceAsMap = remove(source, attributeReference);
     return (T) mapAsResource(sourceAsMap, source.getClass());
   }
 
-  private <T extends ScimResource> Map<String, Object> remove(T resource, final AttributeReference reference, final PatchOperation patchOperation) {
+  private <T extends ScimResource> Map<String, Object> remove(T resource, final AttributeReference reference) {
     Map<String, Object> sourceAsMap = resourceAsMap(resource);
 
     // are we dealing with Scim Extension?
@@ -430,14 +444,14 @@ public class PatchOperations {
       final List<ScimExtension> scimExtensions = getExtensions(resource);
       removeExtension(sourceAsMap, reference, scimExtensions);
     } else {
-      remove(sourceAsMap, reference, patchOperation);
+      remove(sourceAsMap, reference);
     }
 
     return sourceAsMap;
   }
 
   @SuppressWarnings("unchecked")
-  private void remove(Map<String, Object> sourceAsMap, final AttributeReference reference, final PatchOperation patchOperation) {
+  private void remove(Map<String, Object> sourceAsMap, final AttributeReference reference) {
     String path = reference.getFullAttributeName();
 
     int i = path.indexOf(".");
@@ -454,13 +468,13 @@ public class PatchOperations {
     if (value!=null) {
       try {
         // If it's a map we must recurse
-        remove(castToMap(value), new AttributeReference(path), patchOperation);
+        remove(castToMap(value), new AttributeReference(path));
       } catch (Exception e) {
         if (isCollection(value.getClass())) {
           Collection<Object> col = (Collection<Object>) value;
           for (Object item : col) {
             if (item instanceof Map) {
-              remove(castToMap(item), new AttributeReference(path), patchOperation);
+              remove(castToMap(item), new AttributeReference(path));
             }
           }
         }
@@ -558,6 +572,7 @@ public class PatchOperations {
                 switch (patchOperation.getOperation()) {
                   case ADD:
                     asList.addAll(oldList);
+                    // fall-through to add the new when Patch Operation is ADD
                   case REPLACE:
                     asList.addAll(newList);
                     break;
@@ -569,6 +584,7 @@ public class PatchOperations {
             }
           }
         }
+        multiValuedPrimaryUniqueness(source, patchOperation);
       }
     }
 
@@ -820,6 +836,60 @@ public class PatchOperations {
 
   private <T extends ScimResource> List<ScimExtension> getExtensions(final T scimResource) {
     return new ArrayList<>(scimResource.getExtensions().values());
+  }
+
+  /**
+   * For multi-valued attributes, a PATCH operation that sets a value's "primary" sub-attribute to "true" SHALL cause
+   * the server to automatically set "primary" to "false" for any other values in the array.
+   *
+   * @param scimResourceAsMap the {@link Map} representation of the {@link ScimResource}
+   * @param patchOperation the {@link PatchOperation}
+   */
+  private void multiValuedPrimaryUniqueness(Map<String,Object> scimResourceAsMap, final PatchOperation patchOperation) {
+    final AttributeReference reference = attributeReference(patchOperation);
+    if(MULTIVALUED_KEYS.contains(reference.getAttributeName()) &&
+      (reference.getSubAttributeName() != null && reference.getSubAttributeName().equals(PRIMARY_ATTR_NAME)) &&
+      scimResourceAsMap.containsKey(reference.getAttributeName())) {
+
+      try {
+        Object multiValuedObject = scimResourceAsMap.get(reference.getAttributeName());
+        if(multiValuedObject instanceof List) {
+          PatchOperation searchPatchOps = new PatchOperation();
+          searchPatchOps.setPath(new PatchOperationPath(String.format("%s[primary EQ true]", reference.getAttributeName())));
+
+          // throws exception is no matching schema is found.
+          final Schema schema = checkSchema(patchOperation);
+
+          final Attribute parent = schema.getAttribute(reference.getAttributeName());
+          if(parent == null) {
+            return;
+          }
+
+          Deque<Integer> matches = new LinkedList<>();
+          List<Map<String, Object>> asListOfMaps = castToList(multiValuedObject);
+          int index = 0;
+          for (final Map<String, Object> element : asListOfMaps) {
+            if(!FilterMatchUtil.complexAttributeMatch(parent, element, patchOperation) &&
+               FilterMatchUtil.complexAttributeMatch(parent, element, searchPatchOps)) {
+              matches.push(index);
+            }
+
+            index++;
+          }
+
+          if(matches.size() >= 1) {
+            log.info("Found {} multi-valued attribute {} with primary attribute set to 'true'", matches.size(), parent.getName());
+            matches.forEach(i -> {
+              log.info("Setting 'primary = false' for element index {} whose associated attribute '{}' and sub-attribute '{}' is '{}'",
+                i, reference.getAttributeName(), SUB_ATTR_NAME, asListOfMaps.get(i).get(SUB_ATTR_NAME));
+              asListOfMaps.get(i).replace(PRIMARY_ATTR_NAME, false);
+            });
+          }
+        }
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+      }
+    }
   }
 }
 

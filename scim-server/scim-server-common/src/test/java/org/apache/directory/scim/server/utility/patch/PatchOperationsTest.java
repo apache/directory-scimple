@@ -1,5 +1,10 @@
 package org.apache.directory.scim.server.utility.patch;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.ADD;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.REMOVE;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.REPLACE;
+import static org.apache.directory.scim.spec.protocol.data.PatchOperation.Type.valueOf;
 import static org.apache.directory.scim.test.helpers.ScimTestHelper.createRegistry;
 import static org.apache.directory.scim.test.helpers.ScimTestHelper.generateMinimalScimGroup;
 import static org.apache.directory.scim.test.helpers.ScimTestHelper.getValueByAttributeName;
@@ -38,12 +43,12 @@ import org.apache.directory.scim.test.helpers.builder.EmailBuilder;
 import org.apache.directory.scim.test.helpers.builder.NameBuilder;
 import org.apache.directory.scim.test.helpers.builder.PatchOperationBuilder;
 import org.apache.directory.scim.test.helpers.builder.ResourceReferenceBuilder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -59,21 +64,16 @@ class PatchOperationsTest {
   private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<Map<String, Object>>() {};
   private static final TypeReference<List<Map<String, Object>>> LIST_MAP_TYPE = new TypeReference<List<Map<String, Object>>>() {};
 
-  Registry registry;
-  ObjectMapper objectMapper;
+  private static ObjectMapper objectMapper;
 
-  PatchOperations patchOperations;
+  private static PatchOperations patchOperations;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    this.registry = createRegistry();
-    this.objectMapper = new ObjectMapperFactory(registry).createObjectMapper();
+  @BeforeAll
+  static void beforeAll() throws Exception {
+    Registry registry = createRegistry();
+    objectMapper = new ObjectMapperFactory(registry).createObjectMapper();
 
-    this.patchOperations = new PatchOperations(registry);
-  }
-
-  @AfterEach
-  void tearDown() {
+    patchOperations = new PatchOperations(registry);
   }
 
   @ParameterizedTest
@@ -82,11 +82,11 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.valueOf(operation))
+            .operation(valueOf(operation))
             .path("garbage")
             .build();
 
-    Throwable t = catchThrowable(() -> this.patchOperations.apply(user,
+    Throwable t = catchThrowable(() -> patchOperations.apply(user,
             ImmutableList.of(patchOperation)));
 
     ScimTestHelper.assertScimException(t,
@@ -101,12 +101,12 @@ class PatchOperationsTest {
 
     List<PatchOperation> patchOperationList = new ArrayList<>();
     patchOperationList.add(PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .operation(REPLACE)
             .path("addresses[type EQ \"work\"].locality")
             .value("Rochester")
             .build());
 
-    Throwable t = catchThrowable(() -> this.patchOperations.apply(user,
+    Throwable t = catchThrowable(() -> patchOperations.apply(user,
             patchOperationList));
 
     ScimTestHelper.assertScimException(t,
@@ -118,18 +118,18 @@ class PatchOperationsTest {
   // SCIM USER PATCH ADD -----------------------------------------------------------------------------
   @ParameterizedTest
   @CsvSource({"displayName, DisplayName", "locale, Locale", "nickName, NickName",
-    "profileUrl, http://example.com/Users/ProfileUrl", "preferredLanguage, PreferredLanguage",
+    "profileUrl, https://example.com/Users/ProfileUrl", "preferredLanguage, PreferredLanguage",
     "timezone, Timezone", "title, Title", "userType, UserType"})
   void apply_simpleAttributeAdd_successfullyPatched(final String path, final String patchValue) throws Exception {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path(path)
       .value(patchValue)
       .build();
 
-    ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(ScimTestHelper.getValueByAttributeName(result, path)).isEqualTo(patchValue);
@@ -137,17 +137,17 @@ class PatchOperationsTest {
 
   @ParameterizedTest
   @CsvSource({"displayName, DisplayName", "locale, Locale", "nickName, NickName",
-    "profileUrl, http://example.com/Users/ProfileUrl", "preferredLanguage, PreferredLanguage",
+    "profileUrl, https://example.com/Users/ProfileUrl", "preferredLanguage, PreferredLanguage",
     "timezone, Timezone", "title, Title", "userType, UserType"})
   void apply_simpleAttributeAddAsMap_successfullyPatched(final String path, final String patchValue) throws Exception {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .value(ImmutableMap.of(path, patchValue))
       .build();
 
-    ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(ScimTestHelper.getValueByAttributeName(result, path)).isEqualTo(patchValue);
@@ -161,12 +161,12 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(path)
       .value(patchValue)
       .build();
 
-    ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getActive()).isEqualTo(Boolean.valueOf(patchValue));
@@ -180,11 +180,11 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .value(ImmutableMap.of(path, patchValue))
       .build();
 
-    ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getActive()).isEqualTo(Boolean.valueOf(patchValue));
@@ -207,11 +207,11 @@ class PatchOperationsTest {
       .build(), MAP_TYPE);
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .value(ImmutableMap.of("addresses", Lists.newArrayList(values)))
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getAddresses()).hasSize(1);
@@ -242,20 +242,20 @@ class PatchOperationsTest {
     user.setAddresses(Lists.newArrayList(address));
 
     List<PatchOperation> patchOperationList = ImmutableList.of(
-      PatchOperationBuilder.builder().operation(PatchOperation.Type.REPLACE)
+      PatchOperationBuilder.builder().operation(REPLACE)
         .path("addresses[type EQ \"home\"].primary")
         .value("true")
         .build(),
       // One address list entry is expected to exist, add another.
       PatchOperationBuilder.builder()
-        .operation(PatchOperation.Type.ADD)
+        .operation(ADD)
         .path("addresses[type EQ \"work\"].region")
         .value("MN")
         .build()
     );
 
 
-    final ScimUser result = this.patchOperations.apply(user, patchOperationList);
+    final ScimUser result = patchOperations.apply(user, patchOperationList);
 
     assertThat(result).isNotNull();
     assertThat(result.getAddresses()).hasSize(2);
@@ -277,20 +277,20 @@ class PatchOperationsTest {
 
     try {
       List<PatchOperation> patchOperationList = ImmutableList.of(
-              PatchOperationBuilder.builder().operation(PatchOperation.Type.REPLACE)
+              PatchOperationBuilder.builder().operation(REPLACE)
                       .path("title")
                       .value("title -- 01")
                       .build(),
               // no address list entries are expected to exist
               PatchOperationBuilder.builder()
-                      .operation(PatchOperation.Type.ADD)
+                      .operation(ADD)
                       .path("addresses[type EQ \"work\"].region")
                       .value("MN")
                       .build()
       );
 
 
-      final ScimUser result = this.patchOperations.apply(user, patchOperationList);
+      final ScimUser result = patchOperations.apply(user, patchOperationList);
 
       assertThat(result).isNotNull();
       assertThat(result.getTitle()).isEqualTo("title -- 01");
@@ -344,38 +344,38 @@ class PatchOperationsTest {
 
     List<PatchOperation> patchOperationList = ImmutableList.of(
       PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.ADD)
+            .operation(ADD)
             .path("title")
             .value(false)
             .build(),
       PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .operation(REPLACE)
             .path("name.familyName")
             .value("User-001a")
             .build(),
       PatchOperationBuilder.builder()
-                    .operation(PatchOperation.Type.REPLACE)
+                    .operation(REPLACE)
                     .path("name.givenName")
                     .value("a100-resU")
                     .build(),
       PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.ADD)
+            .operation(ADD)
             .path("addresses[type eq \"work\"].region")
             .value("MN")
             .build(),
       PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.ADD)
+            .operation(ADD)
             .path("addresses[type EQ \"work\"].locality")
             .value("Rochester")
             .build(),
       PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.ADD)
+            .operation(ADD)
             .path("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department")
             .value("** Department **")
             .build());
 
     try {
-      ScimUser result = this.patchOperations.apply(user, patchOperationList);
+      ScimUser result = patchOperations.apply(user, patchOperationList);
       assertThat(result).isNotNull();
       assertThat(result.getName().getFamilyName()).isEqualTo("User-001a");
       assertThat(result.getName().getGivenName()).isEqualTo("a100-resU");
@@ -404,11 +404,11 @@ class PatchOperationsTest {
       .build(), MAP_TYPE);
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .value(ImmutableMap.of("emails", Lists.newArrayList(values)))
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getEmails()).hasSize(1);
@@ -443,12 +443,12 @@ class PatchOperationsTest {
       .build());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path(String.format("%s.%s", filter, patchAttrName))
       .value(patchValue)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getEmails()).hasSize(2);
@@ -466,12 +466,12 @@ class PatchOperationsTest {
     final ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path(path)
       .value(patchValue)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getName()).isNotNull();
@@ -492,12 +492,12 @@ class PatchOperationsTest {
       .build();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path("name")
-      .value(this.objectMapper.convertValue(name, MAP_TYPE))
+      .value(objectMapper.convertValue(name, MAP_TYPE))
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getName()).isNotNull();
@@ -511,12 +511,12 @@ class PatchOperationsTest {
     user.setName(new Name());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path("name.familyName")
       .value("** Family Name **")
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getName()).isNotNull();
@@ -530,12 +530,12 @@ class PatchOperationsTest {
     user.setName(NameBuilder.builder().familyName("## family name ##").build());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path("name.familyName")
       .value("** Family Name **")
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getName()).isNotNull();
@@ -552,14 +552,14 @@ class PatchOperationsTest {
     final ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path(path)
       .value(value)
       .build();
 
     assertThat(user.getExtension(EnterpriseExtension.URN)).isNull();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
@@ -575,12 +575,12 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path(path)
       .value(value)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
@@ -602,7 +602,7 @@ class PatchOperationsTest {
 //            .value(UUID.randomUUID().toString())
 //            .build();
 //
-//    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+//    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 //
 //    assertThat(result).isNotNull();
 //    assertThat(result.getExtensions()).isNotNull();
@@ -621,12 +621,12 @@ class PatchOperationsTest {
     ScimGroup group = ScimTestHelper.generateMinimalScimGroup();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path(path)
       .value(value)
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getDisplayName()).isEqualTo(value);
@@ -641,12 +641,12 @@ class PatchOperationsTest {
     resourceReference.setValue( UUID.randomUUID().toString() );
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-            .operation( PatchOperation.Type.ADD )
+            .operation( ADD )
             .path( "members" )
             .value( objectMapper.convertValue( ImmutableList.of(resourceReference), LIST_MAP_TYPE ) )
             .build();
 
-    final ScimGroup result = this.patchOperations.apply( group, ImmutableList.of( patchOperation ) );
+    final ScimGroup result = patchOperations.apply( group, ImmutableList.of( patchOperation ) );
 
     assertThat( result ).isNotNull();
     assertThat( result.getMembers() ).hasSize( 2 );
@@ -665,11 +665,11 @@ class PatchOperationsTest {
     group.getMembers().add(resourceReference);
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-            .operation( PatchOperation.Type.REMOVE )
+            .operation( REMOVE )
             .path( "members[value EQ \"" + resourceReference.getValue() + "\"]" )
             .build();
 
-    final ScimGroup result = this.patchOperations.apply( group, ImmutableList.of( patchOperation ) );
+    final ScimGroup result = patchOperations.apply( group, ImmutableList.of( patchOperation ) );
 
     assertThat(result ).isNotNull();
     assertThat(result.getMembers()).hasSize(1);
@@ -688,12 +688,12 @@ class PatchOperationsTest {
       .build());
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.ADD)
+      .operation(ADD)
       .path("members")
       .value(referenceList)
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getMembers()).hasSize(1);
@@ -703,18 +703,18 @@ class PatchOperationsTest {
   // SCIM USER PATCH REPLACE -----------------------------------------------------------------------------
   @ParameterizedTest
   @CsvSource({"displayName, DisplayName", "locale, Locale", "nickName, NickName",
-    "profileUrl, http://example.com/Users/ProfileUrl", "preferredLanguage, PreferredLanguage",
+    "profileUrl, https://example.com/Users/ProfileUrl", "preferredLanguage, PreferredLanguage",
     "timezone, Timezone", "title, Title", "userType, UserType"})
   void apply_simpleAttributeReplace_successfullyPatched(final String path, final String patchValue) throws Exception {
     ScimUser user = ScimTestHelper.generateScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(path)
       .value(patchValue)
       .build();
 
-    ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(ScimTestHelper.getValueByAttributeName(result, path)).isEqualTo(patchValue);
@@ -727,12 +727,12 @@ class PatchOperationsTest {
     final ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(path)
       .value(patchValue)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getName()).isNotNull();
@@ -763,12 +763,12 @@ class PatchOperationsTest {
       .build());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(String.format("%s.%s", filter, patchAttrName))
       .value(patchValue)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getAddresses()).hasSize(2);
@@ -788,14 +788,14 @@ class PatchOperationsTest {
   void apply_enterpriseExtensionAttributeReplace_successfullyPatched(final String path, final String value) throws Exception {
     final ScimUser user = ScimTestHelper.generateScimUser();
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(path)
       .value(value)
       .build();
 
     assertThat(user.getExtension(EnterpriseExtension.URN)).isNotNull();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
@@ -811,12 +811,12 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(path)
       .value(value)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
@@ -828,12 +828,6 @@ class PatchOperationsTest {
 
   // SCIM GROUP PATCH REPLACE -----------------------------------------------------------------------------
 
-  /*
-   * [method=PATCH, uri=http://console.sso.test.core.cloud.code42.com/scim/v2/Groups/933868861859790973, hasEntity=true,
-   * contentType=application/scim+json;charset=utf-8, contentLanguage=null, acceptableTypes=[application/scim+json],
-   * acceptableLanguages=[*], requestBody={"schemas":["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-   * "Operations":[{"op":"replace","value":{"id":"933868861859790973","displayName":"TestGroup1 -- Update12345"}}]}]
-   */
   @Test
   void apply_groupReplaceForIdAndDisplayName_successfullyPatched() throws Exception {
     ScimGroup group = ScimTestHelper.generateScimGroup();
@@ -844,11 +838,11 @@ class PatchOperationsTest {
     values.put("displayName", expectedDisplayName);
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .operation(REPLACE)
             .value(values)
             .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
@@ -856,13 +850,6 @@ class PatchOperationsTest {
     assertThat(result.getDisplayName()).isEqualTo(expectedDisplayName);
   }
 
-  /*
-   * failing Patch Operation
-   * [PatchOperation(operation=REPLACE, path=members, value=[
-   *  {value=1017715644414275429, display=july2021.user04@oktaidp.com},
-   *  {value=1017715644363943781, display=july2021.user03@oktaidp.com}])
-   * ]
-   */
   @Test
   void apply_multiValuedComplexReplace_successfullyPatched() throws Exception {
     final ScimGroup group = generateMinimalScimGroup();
@@ -893,15 +880,15 @@ class PatchOperationsTest {
       .build());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path("members")
       .value(objectMapper.convertValue(expectedMembers, LIST_MAP_TYPE))
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
-//    assertThat(result).isNotEqualTo(group);
+    assertThat(result).isNotEqualTo(group);
     assertThat(result.getMembers()).hasSize(2);
     assertThat(result.getMembers()).contains(expectedMembers.get(0), expectedMembers.get(1));
   }
@@ -912,12 +899,12 @@ class PatchOperationsTest {
     ScimGroup group = ScimTestHelper.generateScimGroup();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path(path)
       .value(value)
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
@@ -936,12 +923,12 @@ class PatchOperationsTest {
       .build());
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path("members")
       .value(referenceList)
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
@@ -955,12 +942,12 @@ class PatchOperationsTest {
     ScimGroup group = ScimTestHelper.generateScimGroup();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .path("members[value EQ \"" + group.getMembers().get(0).getValue() + "\"]." + path)
       .value(value)
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
@@ -973,12 +960,12 @@ class PatchOperationsTest {
     ScimGroup group = ScimTestHelper.generateScimGroup();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-            .operation(PatchOperation.Type.REPLACE)
+            .operation(REPLACE)
             .path("members[value EQ \"" + group.getMembers().get(0).getValue() + "\"].type")
             .value(ResourceReference.ReferenceType.INDIRECT)
             .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
@@ -997,11 +984,11 @@ class PatchOperationsTest {
     values.put("displayName", "** Display Name **");
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REPLACE)
+      .operation(REPLACE)
       .value(values)
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEqualTo(group);
@@ -1018,14 +1005,14 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(path)
       .build();
 
-    ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
-    Map<String, Object> resultAsMap = this.objectMapper.convertValue(result, MAP_TYPE);
+    Map<String, Object> resultAsMap = objectMapper.convertValue(result, MAP_TYPE);
 
     assertThat(resultAsMap.get(path)).isNull();
   }
@@ -1060,11 +1047,11 @@ class PatchOperationsTest {
       .build());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(String.format("%s.%s", filter, patchAttrName))
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getAddresses()).hasSize(2);
@@ -1099,11 +1086,11 @@ class PatchOperationsTest {
       .build());
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(String.format("%s.%s", filter, patchAttrName))
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getEmails()).hasSize(2);
@@ -1122,15 +1109,15 @@ class PatchOperationsTest {
     final ScimUser user = ScimTestHelper.generateScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(path)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getName()).isNotNull();
-    final Map<String, Object> resultAsMap = this.objectMapper.convertValue(result, MAP_TYPE);
+    final Map<String, Object> resultAsMap = objectMapper.convertValue(result, MAP_TYPE);
 
     final AttributeReference reference = new AttributeReference(user.getBaseUrn(), path);
 
@@ -1151,13 +1138,13 @@ class PatchOperationsTest {
   void apply_enterpriseExtensionAttributeRemove_successfullyPatched(final String path) throws Exception {
     final ScimUser user = ScimTestHelper.generateScimUser();
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(path)
       .build();
 
     assertThat(user.getExtension(EnterpriseExtension.URN)).isNotNull();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
@@ -1172,11 +1159,11 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateScimUser();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(path)
       .build();
 
-    final ScimUser result = this.patchOperations.apply(user, ImmutableList.of(patchOperation));
+    final ScimUser result = patchOperations.apply(user, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getExtensions()).isNotNull();
@@ -1192,11 +1179,11 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(path)
       .build();
 
-    Throwable t = catchThrowable(() -> this.patchOperations.apply(user,
+    Throwable t = catchThrowable(() -> patchOperations.apply(user,
       ImmutableList.of(patchOperation)));
 
     ScimTestHelper.assertScimException(t,
@@ -1211,11 +1198,11 @@ class PatchOperationsTest {
     ScimUser user = ScimTestHelper.generateMinimalScimUser();
 
     PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path(path)
       .build();
 
-    Throwable t = catchThrowable(() -> this.patchOperations.apply(user,
+    Throwable t = catchThrowable(() -> patchOperations.apply(user,
       ImmutableList.of(patchOperation)));
 
     ScimTestHelper.assertScimException(t,
@@ -1231,14 +1218,54 @@ class PatchOperationsTest {
     ScimGroup group = ScimTestHelper.generateScimGroup();
 
     final PatchOperation patchOperation = PatchOperationBuilder.builder()
-      .operation(PatchOperation.Type.REMOVE)
+      .operation(REMOVE)
       .path("members")
       .build();
 
-    final ScimGroup result = this.patchOperations.apply(group, ImmutableList.of(patchOperation));
+    final ScimGroup result = patchOperations.apply(group, ImmutableList.of(patchOperation));
 
     assertThat(result).isNotNull();
     assertThat(result.getMembers()).isNull();
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = PatchOperation.Type.class, names = {"ADD", "REPLACE"})
+  void apply_multipleMultiValuedAttributeWithPrimaryEqualToTrue_onlyOneMultiValuedAttributeWithPrimaryEqualToTrue(
+    final PatchOperation.Type operation) throws Exception {
+
+    ScimUser user = ScimTestHelper.generateScimUser();
+
+    final List<PatchOperation> operations = ImmutableList.of(
+      PatchOperationBuilder.builder()
+        .operation(operation)
+        .path("addresses[type EQ \"home\"].primary")
+        .value(true)
+        .build(),
+      PatchOperationBuilder.builder()
+        .operation(operation)
+        .path("emails[type EQ \"work\"].primary")
+        .value(true)
+        .build()
+      );
+
+    final ScimUser result = patchOperations.apply(user, operations);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getAddresses()).hasSize(2);
+
+    List<Address> addresses = result.getAddresses().stream().filter(Address::getPrimary).collect(toList());
+
+    assertThat(addresses).hasSize(1);
+    assertThat(addresses.get(0).getPrimary()).isTrue();
+    assertThat(addresses.get(0).getType()).isEqualTo("home");
+
+    assertThat(result.getEmails()).hasSize(2);
+
+    List<Email> emails = result.getEmails().stream().filter(Email::getPrimary).collect(toList());
+
+    assertThat(emails).hasSize(1);
+    assertThat(emails.get(0).getPrimary()).isTrue();
+    assertThat(emails.get(0).getType()).isEqualTo("work");
   }
 
   // HELPER METHODS -----------------------------------------------------------------------------
