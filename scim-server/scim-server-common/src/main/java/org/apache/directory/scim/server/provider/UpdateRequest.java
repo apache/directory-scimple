@@ -65,6 +65,7 @@ import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation.Type;
 import org.apache.directory.scim.spec.protocol.data.PatchOperationPath;
+import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
 import org.apache.directory.scim.spec.protocol.filter.CompareOperator;
 import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
@@ -79,8 +80,8 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
 @Named
 @Slf4j
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(doNotUseGetters = true)
+@ToString(doNotUseGetters = true)
 public class UpdateRequest<T extends ScimResource> {
   
   private static final String OPERATION = "op";
@@ -96,10 +97,10 @@ public class UpdateRequest<T extends ScimResource> {
   private boolean initialized = false;
 
   private Schema schema;
+  private PatchProvider patchProvider;
 
-  private Registry registry;
-
-  private Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
+  private final Registry registry;
+  private final Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
   
   @Inject
   public UpdateRequest(Registry registry) {
@@ -120,12 +121,13 @@ public class UpdateRequest<T extends ScimResource> {
     this.id = id;
     this.original = original;
     this.patchOperations = patchOperations;
-    schema = registry.getSchema(original.getBaseUrn());
+    this.patchProvider = new PatchProvider(this.registry);
+    schema = this.registry.getSchema(original.getBaseUrn());
 
     initialized = true;
   }
 
-  public T getResource() {
+  public T getResource() throws ScimException {
     if (!initialized) {
       throw new IllegalStateException("UpdateRequest was not initialized");
     }
@@ -194,8 +196,12 @@ public class UpdateRequest<T extends ScimResource> {
     return set1;
   }
 
-  private T applyPatchOperations() {
-    throw new java.lang.UnsupportedOperationException("PATCH operations are not implemented at this time.");
+  private T applyPatchOperations() throws ScimException {
+    if(this.patchProvider == null) {
+      throw new java.lang.UnsupportedOperationException("PATCH operations are not implemented at this time.");
+    }
+
+    return this.patchProvider.apply(this.resource, this.patchOperations);
   }
   
   /**

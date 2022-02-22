@@ -32,6 +32,7 @@ import org.apache.directory.scim.example.memory.extensions.LuckyNumberExtension;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.server.provider.UpdateRequest;
+import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -106,7 +107,12 @@ public class InMemoryUserService implements Provider<ScimUser> {
   @Override
   public ScimUser update(UpdateRequest<ScimUser> updateRequest) throws UnableToUpdateResourceException {
     String id = updateRequest.getId();
-    ScimUser resource = updateRequest.getResource();
+    ScimUser resource = null;
+    try {
+      resource = updateRequest.getResource();
+    } catch (ScimException e) {
+      throw new UnableToUpdateResourceException(e.getStatus(), e.getMessage());
+    }
     users.put(id, resource);
     return resource;
   }

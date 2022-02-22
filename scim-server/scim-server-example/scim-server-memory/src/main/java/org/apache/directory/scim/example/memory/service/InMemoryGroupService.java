@@ -22,6 +22,7 @@ package org.apache.directory.scim.example.memory.service;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.server.provider.UpdateRequest;
+import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -61,7 +62,12 @@ public class InMemoryGroupService implements Provider<ScimGroup> {
   @Override
   public ScimGroup update(UpdateRequest<ScimGroup> updateRequest) throws UnableToUpdateResourceException {
     String id = updateRequest.getId();
-    ScimGroup resource = updateRequest.getResource();
+    ScimGroup resource;
+    try {
+      resource = updateRequest.getResource();
+    } catch (ScimException e) {
+      throw new UnableToUpdateResourceException(e.getStatus(), e.getMessage());
+    }
     groups.put(id, resource);
     return resource;
   }

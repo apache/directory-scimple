@@ -44,6 +44,7 @@ import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation.Type;
 import org.apache.directory.scim.spec.protocol.data.PatchOperationPath;
+import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
@@ -133,7 +134,7 @@ public class UpdateRequestTest {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
     updateRequest.initWithPatch("1234", createUser1(), createUser1PatchOps());
         
-    assertThrows(UnsupportedOperationException.class, () -> updateRequest.getResource());
+    assertThrows(ScimException.class, updateRequest::getResource);
   }
 
   @Test
@@ -216,7 +217,7 @@ public class UpdateRequestTest {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
     ScimUser user1 = createUser1();
-    user1.setPhoneNumbers(new ArrayList<PhoneNumber>());
+    user1.setPhoneNumbers(new ArrayList<>());
     ScimUser user2 = copy(user1);
     
     PhoneNumber mobilePhone = new GlobalPhoneNumberBuilder().globalNumber("+1(814)867-5306").build();
@@ -239,7 +240,7 @@ public class UpdateRequestTest {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>(registry);
 
     ScimUser user1 = createUser1();
-    user1.setPhoneNumbers(new ArrayList<PhoneNumber>());
+    user1.setPhoneNumbers(new ArrayList<>());
     ScimUser user2 = copy(user1);
     
     PhoneNumber mobilePhone = new GlobalPhoneNumberBuilder().globalNumber("+1(814)867-5306").build();
@@ -509,14 +510,14 @@ public class UpdateRequestTest {
     //Reset user 1 and empty list on Extension and verify no differences
     user1 = createUser1();
     ExampleObjectExtension ext = new ExampleObjectExtension();
-    ext.setList(new ArrayList<String>());
+    ext.setList(new ArrayList<>());
     updateRequest.initWithResource("1234", user1, user2);
     operations = updateRequest.getPatchOperations();
     assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
     
     //Reset extension and set empty list on element of extension then verify no differences
     Subobject subobject = new Subobject();
-    subobject.setList1(new ArrayList<String>());
+    subobject.setList1(new ArrayList<>());
     ext = new ExampleObjectExtension();
     ext.setSubobject(subobject);
     updateRequest.initWithResource("1234", user1, user2);
@@ -608,7 +609,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
     
     //TODO: perform assert that proper add and remove paths are correct
   }
@@ -630,7 +631,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   @Test
@@ -652,7 +653,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   @Test
@@ -674,7 +675,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   @Test
@@ -696,7 +697,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   @Test
@@ -718,7 +719,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   @ParameterizedTest
@@ -753,11 +754,11 @@ public class UpdateRequestTest {
       
     }
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   @SuppressWarnings("unused")
-  private static Object[] testListOfStringsParameters() throws Exception {
+  private static Object[] testListOfStringsParameters() {
     List<Object> params = new ArrayList<>();
     String nickName = "John Xander Anyman";
     //Parameter order
@@ -768,7 +769,7 @@ public class UpdateRequestTest {
     //  3b Path
     //  3c Value
     
-    List<ExpectedPatchOperation> multipleOps = new ArrayList<ExpectedPatchOperation>();
+    List<ExpectedPatchOperation> multipleOps = new ArrayList<>();
     multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A"));
     multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "B"));
     multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "C"));
@@ -813,7 +814,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
     
   }
   
@@ -834,7 +835,7 @@ public class UpdateRequestTest {
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+    operations.forEach(System.out::println);
   }
   
   /**
@@ -845,7 +846,7 @@ public class UpdateRequestTest {
    */
   @Test
   @Disabled
-  public void testShowBugWhereDeleteIsTreatedAsMultipleReplace() throws Exception {
+  public void testShowBugWhereDeleteIsTreatedAsMultipleReplace() /*throws Exception*/ {
 //    final int expectedNumberOfOperationsWithoutBug = 1;
 //    final int expectedNumberOfOperationsWithBug = 4;
 //    
@@ -870,11 +871,10 @@ public class UpdateRequestTest {
               .isNotNull();
     Assertions.assertThat(result)
               .hasSize(1);
-    PatchOperation actual = result.get(0);
-    return actual;
+    return result.get(0);
   }
 
-  private void checkAssertions(PatchOperation actual, Type op, String path, Object value) throws FilterParseException {
+  private void checkAssertions(PatchOperation actual, Type op, String path, Object value) {
     Assertions.assertThat(actual.getOperation())
               .isEqualTo(op);
     Assertions.assertThat(actual.getPath()
@@ -894,7 +894,8 @@ public class UpdateRequestTest {
     
   }
   
-  public static final Address createHomeAddress() {
+  @SuppressWarnings("unused")
+  public static Address createHomeAddress() {
     Address homeAddress = new Address();
     homeAddress.setType("home");
     homeAddress.setStreetAddress("123 Fake Street");
