@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.protocol.search;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -44,7 +45,11 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 public class Filter {
-  
+
+  @Getter
+  @Setter
+  private static boolean silenceStandardError = false;
+
   @Setter(AccessLevel.NONE)
   private FilterExpression expression;
   private String filter;
@@ -76,6 +81,10 @@ public class Filter {
     FilterLexer l = new FilterLexer(new ANTLRInputStream(filter));
     FilterParser p = new FilterParser(new CommonTokenStream(l));
     p.setBuildParseTree(true);
+
+    if(silenceStandardError) {
+      l.removeErrorListeners();
+    }
 
     p.addErrorListener(new BaseErrorListener() {
       @Override
