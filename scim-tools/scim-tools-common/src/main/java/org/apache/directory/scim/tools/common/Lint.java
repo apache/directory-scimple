@@ -19,12 +19,12 @@
 
 package org.apache.directory.scim.tools.common;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Validates that a SCIM resource conforms to the associated schema definition.
@@ -36,8 +36,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 public class Lint {
-  
-  ObjectMapper objectMapper = new ObjectMapper();
 
   JsonNode convert(InputStream inputStream) throws JsonProcessingException, IOException {
     ObjectMapper objectMapper = new ObjectMapper();

@@ -56,11 +56,11 @@
       <plugin>
         <groupId>org.apache.openejb.maven</groupId>
         <artifactId>tomee-maven-plugin</artifactId>
-        <version>1.7.1</version>
+        <version>1.7.5</version>
         <configuration>
           <context>ROOT</context>
           <warFile>target/${project.artifactId}-${project.version}.war</warFile>
-          <tomeeVersion>1.7.1</tomeeVersion>
+          <tomeeVersion>1.7.5</tomeeVersion>
           <tomeeClassifier>plus</tomeeClassifier>
           <simpleLog>true</simpleLog>
         </configuration>

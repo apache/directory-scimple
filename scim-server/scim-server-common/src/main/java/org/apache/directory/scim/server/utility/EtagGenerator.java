@@ -19,39 +19,34 @@
 
 package org.apache.directory.scim.server.utility;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.spec.schema.Meta;
+
+import javax.ejb.Stateless;
+import javax.ws.rs.core.EntityTag;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.core.EntityTag;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
-
-import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.schema.Meta;
-
 @Stateless
 public class EtagGenerator {
 
-  public EntityTag generateEtag(ScimResource resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
+  private final ObjectMapper objectMapper;
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objectMapper.registerModule(jaxbAnnotationModule);
-
-    AnnotationIntrospector jaxbAnnotationIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    objectMapper.setAnnotationIntrospector(jaxbAnnotationIntrospector);
-
+  public EtagGenerator() {
+    objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.setSerializationInclusion(Include.NON_NULL);
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
+  public EntityTag generateEtag(ScimResource resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
 
     Meta meta = resource.getMeta();
 
@@ -72,7 +67,7 @@ public class EtagGenerator {
   
   private static EntityTag hash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    digest.update(input.getBytes("UTF-8"));
+    digest.update(input.getBytes(StandardCharsets.UTF_8));
     byte[] hash = digest.digest();
     return new EntityTag(Base64.getEncoder().encodeToString(hash));
   }

@@ -35,8 +35,7 @@
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
-
-    <version.jackson>2.13.2.1</version.jackson>
+    <version.jackson>2.13.3</version.jackson>
     <version.lombok>1.18.24</version.lombok>
     <version.lombok.plugin>1.18.20.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
@@ -233,7 +232,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>31.0.1-android</version>
+        <version>31.1-android</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -255,7 +254,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-junit-jupiter</artifactId>
-        <version>4.4.0</version>
+        <version>4.5.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -315,7 +314,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.12</version>
+        <version>1.6.13</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>rao</serverId>
@@ -471,7 +470,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.7</version>
+            <version>0.8.8</version>
           </plugin>
       </plugins>
     </pluginManagement>
