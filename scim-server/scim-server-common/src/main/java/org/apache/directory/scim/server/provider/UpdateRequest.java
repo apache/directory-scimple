@@ -19,6 +19,43 @@
 
 package org.apache.directory.scim.server.provider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.flipkart.zjsonpatch.JsonDiff;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
+import org.apache.directory.scim.spec.protocol.data.PatchOperation;
+import org.apache.directory.scim.spec.protocol.data.PatchOperation.Type;
+import org.apache.directory.scim.spec.protocol.data.PatchOperationPath;
+import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
+import org.apache.directory.scim.spec.protocol.filter.CompareOperator;
+import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
+import org.apache.directory.scim.spec.protocol.filter.ValuePathExpression;
+import org.apache.directory.scim.spec.resources.ScimExtension;
+import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.spec.resources.TypedAttribute;
+import org.apache.directory.scim.spec.schema.AttributeContainer;
+import org.apache.directory.scim.spec.schema.Schema;
+import org.apache.directory.scim.spec.schema.Schema.Attribute;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,51 +69,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
-import com.flipkart.zjsonpatch.JsonDiff;
-
-import org.apache.directory.scim.server.schema.Registry;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.data.PatchOperation;
-import org.apache.directory.scim.spec.protocol.data.PatchOperation.Type;
-import org.apache.directory.scim.spec.protocol.data.PatchOperationPath;
-import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
-import org.apache.directory.scim.spec.protocol.filter.CompareOperator;
-import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
-import org.apache.directory.scim.spec.protocol.filter.ValuePathExpression;
-import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.resources.TypedAttribute;
-import org.apache.directory.scim.spec.schema.AttributeContainer;
-import org.apache.directory.scim.spec.schema.Schema;
-import org.apache.directory.scim.spec.schema.Schema.Attribute;
-
 @Named
 @Slf4j
 @EqualsAndHashCode
@@ -86,6 +78,8 @@ public class UpdateRequest<T extends ScimResource> {
   private static final String OPERATION = "op";
   private static final String PATH = "path";
   private static final String VALUE = "value";
+
+  private final ObjectMapper objectMapper;
 
   @Getter
   private String id;
@@ -104,6 +98,10 @@ public class UpdateRequest<T extends ScimResource> {
   @Inject
   public UpdateRequest(Registry registry) {
     this.registry = registry;
+
+    //Create a Jackson ObjectMapper that reads JaxB annotations
+    objectMapper = ObjectMapperFactory.getObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
   public void initWithResource(String id, T original, T resource) {
@@ -252,19 +250,9 @@ public class UpdateRequest<T extends ScimResource> {
       sortMultiValuedCollections(originalExtension, resourceExtension, extSchema);
     }
 
-    //Create a Jackson ObjectMapper that reads JaxB annotations
-    ObjectMapper objMapper = new ObjectMapper();
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objMapper.registerModule(jaxbAnnotationModule);
-    objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objMapper.getTypeFactory());
-    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
-    objMapper.setAnnotationIntrospector(pair);
-    
-    JsonNode node1 = objMapper.valueToTree(original);
+    JsonNode node1 = objectMapper.valueToTree(original);
     nullEmptyLists(node1);
-    JsonNode node2 = objMapper.valueToTree(resource);
+    JsonNode node2 = objectMapper.valueToTree(resource);
     nullEmptyLists(node2);
     JsonNode differences = JsonDiff.asJson(node1, node2);
     
@@ -294,13 +282,6 @@ public class UpdateRequest<T extends ScimResource> {
     }*/
 
     return patchOps;
-  }
-
-  JsonNode compareUsers(ScimUser user1, ScimUser user2) {
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode node1 = mapper.valueToTree(user1);
-    JsonNode node2 = mapper.valueToTree(user2);
-    return JsonDiff.asJson(node1, node2);
   }
 
   List<PatchOperation> convertToPatchOperations(JsonNode node) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {

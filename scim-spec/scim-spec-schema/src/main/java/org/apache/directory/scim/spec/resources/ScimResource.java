@@ -19,36 +19,29 @@
 
 package org.apache.directory.scim.spec.resources;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.directory.scim.spec.annotation.ScimAttribute;
+import org.apache.directory.scim.spec.annotation.ScimExtensionType;
+import org.apache.directory.scim.spec.exception.InvalidExtensionException;
+import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
+import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import org.apache.directory.scim.spec.schema.Meta;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-
-import org.apache.directory.scim.spec.annotation.ScimAttribute;
-import org.apache.directory.scim.spec.annotation.ScimExtensionType;
-import org.apache.directory.scim.spec.exception.InvalidExtensionException;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
-import org.apache.directory.scim.spec.schema.Meta;
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class defines the attributes shared by all SCIM resources. It also
@@ -64,6 +57,8 @@ public abstract class ScimResource extends BaseResource implements Serializable 
   private static final long serialVersionUID = 3673404125396687366L;
 
   private static final Logger LOG = LoggerFactory.getLogger(ScimResource.class);
+
+  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   @XmlElement
   @NotNull
@@ -159,15 +154,6 @@ public abstract class ScimResource extends BaseResource implements Serializable 
 
     if (extensionClass != null) {
       LOG.debug("Extension class: " + extensionClass.getSimpleName());
-
-      ObjectMapper objectMapper = new ObjectMapper();
-      JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-      objectMapper.registerModule(jaxbAnnotationModule);
-
-      AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-      AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-      AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
-      objectMapper.setAnnotationIntrospector(pair);
 
       ScimExtension extension = objectMapper.convertValue(value, extensionClass);
       if (extension != null) {
