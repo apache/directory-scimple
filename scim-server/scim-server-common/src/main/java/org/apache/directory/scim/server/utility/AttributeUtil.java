@@ -19,6 +19,30 @@
 
 package org.apache.directory.scim.server.utility;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
+import org.apache.directory.scim.server.rest.ScimResourceDeserializer;
+import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
+import org.apache.directory.scim.spec.resources.ScimExtension;
+import org.apache.directory.scim.spec.resources.ScimGroup;
+import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.spec.resources.ScimUser;
+import org.apache.directory.scim.spec.schema.AttributeContainer;
+import org.apache.directory.scim.spec.schema.Schema;
+import org.apache.directory.scim.spec.schema.Schema.Attribute;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,37 +57,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
-
-import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
-import org.apache.directory.scim.server.rest.ScimResourceDeserializer;
-import org.apache.directory.scim.server.schema.Registry;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimGroup;
-import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.schema.AttributeContainer;
-import org.apache.directory.scim.spec.schema.Schema;
-import org.apache.directory.scim.spec.schema.Schema.Attribute;
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
-import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
-import lombok.extern.slf4j.Slf4j;
-
 @Stateless
 @Slf4j
 public class AttributeUtil {
@@ -75,17 +68,8 @@ public class AttributeUtil {
 
   @PostConstruct
   public void init() { // TODO move this to a CDI producer
-    objectMapper = new ObjectMapper();
-
-    JaxbAnnotationModule jaxbAnnotationModule = new JaxbAnnotationModule();
-    objectMapper.registerModule(jaxbAnnotationModule);
+    objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
-    objectMapper.setAnnotationIntrospector(pair);
-
     objectMapper.setSerializationInclusion(Include.NON_NULL);
 
     SimpleModule module = new SimpleModule();

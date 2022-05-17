@@ -20,14 +20,9 @@
 package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
@@ -51,16 +46,8 @@ public class ObjectMapperFactory {
   @Produces
   public ObjectMapper createObjectMapper() {
 
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    objectMapper.registerModule(new JaxbAnnotationModule());
+    ObjectMapper objectMapper = org.apache.directory.scim.spec.json.ObjectMapperFactory.getObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    AnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector(objectMapper.getTypeFactory());
-    AnnotationIntrospector jacksonIntrospector = new JacksonAnnotationIntrospector();
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(jacksonIntrospector, jaxbIntrospector);
-    objectMapper.setAnnotationIntrospector(pair);
-
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     SimpleModule module = new SimpleModule();
