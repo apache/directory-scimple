@@ -20,6 +20,7 @@
 package org.apache.directory.scim.server.rest;
 
 import javax.inject.Inject;
+import javax.ws.rs.ext.ContextResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,7 +30,7 @@ import org.apache.directory.scim.server.schema.Registry;
  * @deprecated Use {@link ScimJacksonJaxbJsonProvider} instead.
  */
 @Deprecated
-public class ObjectMapperContextResolver extends edu.psu.swe.commons.jaxrs.server.ObjectMapperContextResolver {
+public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
   private ObjectMapper objectMapper;
 

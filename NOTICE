@@ -3,3 +3,7 @@ Copyright 2018-Present The Apache Software Foundation
 
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
+
+Files located in scim-common-ws/src/main/java/org/apache/directory/scim/ws/common/ were copied
+  from https://github.com/PennState/commons-jaxrs and retain the original copyright.
+

@@ -22,9 +22,9 @@ package org.apache.directory.scim.client.rest;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.GenericType;
 
-import edu.psu.swe.commons.jaxrs.RestCall;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.resources.ScimGroup;
+import org.apache.directory.scim.ws.common.RestCall;
 
 public class ScimGroupClient extends BaseScimClient<ScimGroup> {
 
