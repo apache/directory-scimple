@@ -477,6 +477,8 @@
               <exclude>**/README.md</exclude>
               <exclude>**/*.json</exclude>
               <exclude>**/*.iml</exclude>
+              <exclude>mvnw</exclude>
+              <exclude>mvnw.cmd</exclude>
             </excludes>
           </configuration>
           </plugin>
