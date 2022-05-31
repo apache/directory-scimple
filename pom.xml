@@ -44,6 +44,7 @@
   </properties>
 
   <modules>
+    <module>scim-common-ws</module>
     <module>scim-client</module>
     <module>scim-server</module>
     <module>scim-spec</module>
@@ -116,6 +117,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-common-ws</artifactId>
+        <version>2.23-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-tools-common</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
@@ -141,9 +147,24 @@
       </dependency>
 
       <dependency>
-        <groupId>edu.psu.swe.commons</groupId>
-        <artifactId>commons-jaxrs</artifactId>
-        <version>1.41.0</version>
+        <groupId>javax.ejb</groupId>
+        <artifactId>javax.ejb-api</artifactId>
+        <version>3.2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.enterprise</groupId>
+        <artifactId>cdi-api</artifactId>
+        <version>2.0</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>4.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
       </dependency>
       <dependency>
         <groupId>javax</groupId>
@@ -219,13 +240,13 @@
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
-        <version>3.14.0.Final</version>
+        <version>4.7.4.Final</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jackson-provider</artifactId>
-        <version>3.15.3.Final</version>
+        <artifactId>resteasy-jackson2-provider</artifactId>
+        <version>4.7.6.Final</version>
         <scope>test</scope>
       </dependency>
       <!-- Guava is a transitive dep, forcing a newer version to avoid older vulns -->
@@ -353,6 +374,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.10.1</version>
           <configuration>
             <!-- parent pom currently defines v1.7 -->
             <source>${maven.compiler.source}</source>
@@ -455,6 +477,8 @@
               <exclude>**/README.md</exclude>
               <exclude>**/*.json</exclude>
               <exclude>**/*.iml</exclude>
+              <exclude>mvnw</exclude>
+              <exclude>mvnw.cmd</exclude>
             </excludes>
           </configuration>
           </plugin>

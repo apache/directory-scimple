@@ -28,14 +28,14 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
-import edu.psu.swe.commons.jaxrs.exceptions.BackingStoreChangedException;
-import edu.psu.swe.commons.jaxrs.exceptions.ConflictingDataException;
-import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
-import edu.psu.swe.commons.jaxrs.exceptions.RestServerException;
-import edu.psu.swe.commons.jaxrs.exceptions.ServiceAuthException;
-import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
 import org.apache.directory.scim.spec.protocol.ResourceTypesResource;
 import org.apache.directory.scim.spec.schema.ResourceType;
+import org.apache.directory.scim.ws.common.RestClientUtil;
+import org.apache.directory.scim.ws.common.exception.BackingStoreChangedException;
+import org.apache.directory.scim.ws.common.exception.ConflictingDataException;
+import org.apache.directory.scim.ws.common.exception.RestClientException;
+import org.apache.directory.scim.ws.common.exception.RestServerException;
+import org.apache.directory.scim.ws.common.exception.ServiceAuthException;
 
 public class ResourceTypesClient implements AutoCloseable {
 

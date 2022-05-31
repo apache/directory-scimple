@@ -22,8 +22,8 @@ package org.apache.directory.scim.client.rest.legacy;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
 
-import edu.psu.swe.commons.jaxrs.RestCall;
 import org.apache.directory.scim.client.rest.ScimGroupClient;
+import org.apache.directory.scim.ws.common.RestCall;
 
 public class Version1ScimGroupClient extends ScimGroupClient {
 

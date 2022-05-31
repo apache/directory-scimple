@@ -60,8 +60,8 @@
 		<artifactId>javax.el</artifactId>
 	</dependency>
 	<dependency>
-		<groupId>javax</groupId>
-		<artifactId>javaee-api</artifactId>
+    <groupId>javax.ejb</groupId>
+    <artifactId>javax.ejb-api</artifactId>
 	</dependency>
 	<dependency>
 		<groupId>org.slf4j</groupId>

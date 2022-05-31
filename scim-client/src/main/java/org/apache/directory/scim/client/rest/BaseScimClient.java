@@ -32,9 +32,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import edu.psu.swe.commons.jaxrs.RestCall;
-import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
-import edu.psu.swe.commons.jaxrs.utilities.RestClientUtil;
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
@@ -49,6 +46,9 @@ import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.SortOrder;
 import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.ws.common.RestCall;
+import org.apache.directory.scim.ws.common.RestClientUtil;
+import org.apache.directory.scim.ws.common.exception.RestClientException;
 
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {
 

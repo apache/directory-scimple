@@ -84,7 +84,7 @@ public class ProviderRegistry {
   private static final String LOCAL_DATE_TIME_TYPE_IDENTIFIER = "class java.time.LocalDateTime";
   private static final String DATE_TYPE_IDENTIFIER = "class java.util.Date";
   private static final String BYTE_ARRAY_TYPE_IDENTIFIER = "class [B";
-  private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class edu.psu.swe.scim.spec.schema.ResourceReference$ReferenceType";
+  private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class org.apache.directory.scim.spec.schema.ResourceReference$ReferenceType";
 
   @Inject
   Registry registry;

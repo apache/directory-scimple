@@ -17,9 +17,6 @@
 * under the License.
 */
 
-/**
- * 
- */
 package org.apache.directory.scim.compliance.server.configuration;
 
 import com.eclipsesource.restfuse.Destination;

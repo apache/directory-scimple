@@ -25,14 +25,14 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import edu.psu.swe.commons.jaxrs.RestCall;
-import edu.psu.swe.commons.jaxrs.exceptions.RestClientException;
 import org.apache.directory.scim.spec.protocol.Constants;
 import org.apache.directory.scim.spec.protocol.SelfResource;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.resources.ScimUser;
+import org.apache.directory.scim.ws.common.RestCall;
+import org.apache.directory.scim.ws.common.exception.RestClientException;
 
 // purposefully does not extend BaseScimClient, has a different utility than other clients
 
