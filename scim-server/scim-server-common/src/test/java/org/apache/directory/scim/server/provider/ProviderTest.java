@@ -44,7 +44,7 @@ public class ProviderTest {
   public void handleException_jaxrsExceptionTest() {
 
     Exception e = new WebApplicationException();
-    catchException(new ProviderAdapter()).handleException(e);
+    catchException(() -> new ProviderAdapter().handleException(e));
     assertThat(caughtException(), sameInstance(e));
   }
 
