@@ -19,19 +19,18 @@
 
 package org.apache.directory.scim.example.memory.rest;
 
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 @WebListener
 public class SwaggerJaxrsConfig implements ServletContextListener {
@@ -52,8 +51,8 @@ public class SwaggerJaxrsConfig implements ServletContextListener {
       beanConfig.setDescription("In Memory SCIM Server Example Implementation");
       beanConfig.setVersion("2.0");
 
-      Json.mapper().registerModule(new JaxbAnnotationModule());
-      Yaml.mapper().registerModule(new JaxbAnnotationModule());
+      Json.mapper().registerModule(new JakartaXmlBindAnnotationModule());
+      Yaml.mapper().registerModule(new JakartaXmlBindAnnotationModule());
 
     } catch (Exception e) {
       LOGGER.error("Error initializing swagger", e);

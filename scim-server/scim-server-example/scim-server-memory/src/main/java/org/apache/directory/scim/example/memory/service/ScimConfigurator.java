@@ -19,11 +19,11 @@
 
 package org.apache.directory.scim.example.memory.service;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 
 import org.apache.directory.scim.server.exception.InvalidProviderException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsException;

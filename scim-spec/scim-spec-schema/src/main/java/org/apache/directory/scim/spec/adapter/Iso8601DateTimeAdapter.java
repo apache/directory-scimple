@@ -22,7 +22,7 @@ package org.apache.directory.scim.spec.adapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public class Iso8601DateTimeAdapter extends XmlAdapter<String, Date> {
   

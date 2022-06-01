@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 
 import org.apache.directory.scim.server.rest.ObjectMapperFactory;
 import org.apache.directory.scim.server.schema.Registry;

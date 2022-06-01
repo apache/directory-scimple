@@ -20,13 +20,13 @@
 package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 import org.apache.directory.scim.spec.protocol.Constants;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * Adds JacksonJaxbJsonProvider for custom MediaType {@code application/scim+json}.
@@ -34,10 +34,10 @@ import javax.ws.rs.ext.Provider;
 @Provider
 @Consumes(Constants.SCIM_CONTENT_TYPE)
 @Produces(Constants.SCIM_CONTENT_TYPE)
-public class ScimJacksonJaxbJsonProvider extends JacksonJaxbJsonProvider {
+public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
 
   @Inject
-  public ScimJacksonJaxbJsonProvider(ObjectMapper objectMapper) {
+  public ScimJacksonXmlBindJsonProvider(ObjectMapper objectMapper) {
     super(objectMapper, DEFAULT_ANNOTATIONS);
   }
 }

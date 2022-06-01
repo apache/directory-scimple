@@ -29,13 +29,17 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-		</dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+    </dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -47,21 +51,28 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+    <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>jakarta.el</groupId>
+    <artifactId>jakarta.el-api</artifactId>
+    <scope>test</scope>
+  </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.el</artifactId>
+      <version>4.0.2</version>
+    </dependency>
 	<dependency>
-		<groupId>com.fasterxml.jackson.jaxrs</groupId>
-		<artifactId>jackson-jaxrs-json-provider</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.hibernate</groupId>
-		<artifactId>hibernate-validator</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.glassfish</groupId>
-		<artifactId>javax.el</artifactId>
-	</dependency>
-	<dependency>
-    <groupId>javax.ejb</groupId>
-    <artifactId>javax.ejb-api</artifactId>
+    <groupId>jakarta.ejb</groupId>
+    <artifactId>jakarta.ejb-api</artifactId>
 	</dependency>
 	<dependency>
 		<groupId>org.slf4j</groupId>

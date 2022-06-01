@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.spec.protocol.data;
 
-import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public class StatusAdapter extends XmlAdapter<String, Status> {
 

@@ -27,8 +27,8 @@ import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Meta;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.core.EntityTag;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.core.EntityTag;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

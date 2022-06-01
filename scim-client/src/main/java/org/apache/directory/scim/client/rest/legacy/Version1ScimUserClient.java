@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.client.rest.legacy;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.core.MediaType;
 
 import org.apache.directory.scim.client.rest.ScimUserClient;
 import org.apache.directory.scim.ws.common.RestCall;

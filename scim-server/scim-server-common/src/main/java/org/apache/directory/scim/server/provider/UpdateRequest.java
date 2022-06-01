@@ -54,8 +54,8 @@ import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -20,12 +20,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status.Family;
 import org.apache.directory.scim.ws.common.exception.BackingStoreChangedException;
 import org.apache.directory.scim.ws.common.exception.BadUrlException;
 import org.apache.directory.scim.ws.common.exception.ConflictingDataException;

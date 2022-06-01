@@ -26,9 +26,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.ws.rs.ext.Provider;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * Creates and configures an {@link ObjectMapper} used for {@code application/scim+json} parsing.

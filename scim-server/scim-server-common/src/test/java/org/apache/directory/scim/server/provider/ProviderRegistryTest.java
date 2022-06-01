@@ -21,7 +21,7 @@ package org.apache.directory.scim.server.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.resources.ScimUser;

@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.server.schema;
 
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Produces;
 
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 

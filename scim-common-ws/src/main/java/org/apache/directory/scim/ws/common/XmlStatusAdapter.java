@@ -16,8 +16,8 @@
  */
 package org.apache.directory.scim.ws.common;
 
-import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public final class XmlStatusAdapter extends XmlAdapter<JaxRsStatusAdapterType, Status>
 {

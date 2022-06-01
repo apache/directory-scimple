@@ -24,8 +24,8 @@ import org.apache.directory.scim.server.provider.SelfIdResolver;
 
 import java.security.Principal;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.core.Response.Status;
 
 @Stateless
 public class InMemorySelfResolverImpl implements SelfIdResolver {

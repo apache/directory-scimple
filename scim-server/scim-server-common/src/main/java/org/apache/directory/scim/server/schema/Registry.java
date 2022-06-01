@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -23,18 +23,18 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 
 public class ObjectMapperFactory {
 
   public static ObjectMapper getObjectMapper() {
     ObjectMapper objectMapper = new ObjectMapper();
 
-    objectMapper.registerModule(new JaxbAnnotationModule());
+    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
 
     AnnotationIntrospector pair = new AnnotationIntrospectorPair(
-      new JaxbAnnotationIntrospector(objectMapper.getTypeFactory()),
+      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
       new JacksonAnnotationIntrospector());
     objectMapper.setAnnotationIntrospector(pair);
 

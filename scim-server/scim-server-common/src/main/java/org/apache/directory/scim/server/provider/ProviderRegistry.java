@@ -30,13 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.xml.bind.annotation.XmlEnumValue;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 
 import org.apache.directory.scim.common.ScimUtils;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
