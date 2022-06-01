@@ -55,9 +55,9 @@
   </modules>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com:PennState/scim.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:PennState/scim.git</developerConnection>
-    <url>https://github.com/PennState/scim</url>
+    <connection>scm:git:ssh://git@github.com:apache/directory-scimple.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:apache/directory-scimple.git</developerConnection>
+    <url>https://github.com/apache/directory-scimple</url>
   </scm>
 
   <licenses>
