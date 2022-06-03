@@ -228,7 +228,7 @@ public class UpdateRequest<T extends ScimResource> {
       if (!objectsToDelete.isEmpty() && node instanceof ObjectNode) {
         ObjectNode on = (ObjectNode)node;
         for(String name : objectsToDelete) {
-          on.putNull(name);
+          on.remove(name);
         }
       }
     }
