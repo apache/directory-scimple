@@ -86,6 +86,7 @@ public class EnterpriseExtension implements ScimExtension {
     @XmlType
     @XmlAccessorType(XmlAccessType.NONE)
     @Data
+    @Accessors(chain = true)
     public static class Manager {
 
         @ScimAttribute(
