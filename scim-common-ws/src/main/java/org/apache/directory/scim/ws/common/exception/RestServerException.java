@@ -16,8 +16,8 @@
  */
 package org.apache.directory.scim.ws.common.exception;
 
-import javax.ejb.ApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.ApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.ws.common.ErrorMessage;
 
 @ApplicationException

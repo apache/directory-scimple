@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.spec.protocol;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 
 import lombok.AccessLevel;
 import lombok.Getter;

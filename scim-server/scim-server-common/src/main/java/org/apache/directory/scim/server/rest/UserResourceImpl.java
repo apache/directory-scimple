@@ -22,11 +22,11 @@
  */
 package org.apache.directory.scim.server.rest;
 
-import javax.ejb.Stateless;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.util.TypeLiteral;
+import jakarta.inject.Inject;
 
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.server.provider.ProviderRegistry;

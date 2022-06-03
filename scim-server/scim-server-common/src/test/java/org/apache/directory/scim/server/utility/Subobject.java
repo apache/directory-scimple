@@ -22,7 +22,7 @@ package org.apache.directory.scim.server.utility;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElement;
 
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import lombok.Data;

@@ -40,9 +40,9 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

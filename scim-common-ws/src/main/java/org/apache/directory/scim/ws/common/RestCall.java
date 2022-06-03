@@ -16,8 +16,8 @@
  */
 package org.apache.directory.scim.ws.common;
 
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.ws.common.exception.RestClientException;
 
 /**

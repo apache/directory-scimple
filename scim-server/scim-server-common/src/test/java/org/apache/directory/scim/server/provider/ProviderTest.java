@@ -27,8 +27,8 @@ import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;

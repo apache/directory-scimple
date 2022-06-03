@@ -23,8 +23,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 public final class UriUtilities
 {

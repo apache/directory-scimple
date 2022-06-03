@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.protocol.search;
 
-import javax.xml.bind.annotation.XmlEnumValue;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 
 public enum SortOrder {
   @XmlEnumValue("ascending")

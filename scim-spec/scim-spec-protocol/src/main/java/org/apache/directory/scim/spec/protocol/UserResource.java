@@ -21,7 +21,7 @@ package org.apache.directory.scim.spec.protocol;
 
 import io.swagger.annotations.Api;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 import org.apache.directory.scim.spec.resources.ScimUser;
 

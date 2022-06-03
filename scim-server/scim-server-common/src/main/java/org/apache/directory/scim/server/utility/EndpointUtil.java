@@ -21,9 +21,9 @@ package org.apache.directory.scim.server.utility;
 
 import java.net.URI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidScimResourceException;

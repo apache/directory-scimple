@@ -29,9 +29,9 @@ import static org.mockito.Mockito.when;
 import java.security.Principal;
 import java.util.List;
 
-import javax.ejb.SessionContext;
-import javax.enterprise.inject.Instance;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.SessionContext;
+import jakarta.enterprise.inject.Instance;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.directory.scim.server.exception.UnableToResolveIdException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;

@@ -22,10 +22,10 @@
  */
 package org.apache.directory.scim.server.rest;
 
-import javax.ejb.Stateless;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-import javax.enterprise.util.TypeLiteral;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.spec.protocol.GroupResource;

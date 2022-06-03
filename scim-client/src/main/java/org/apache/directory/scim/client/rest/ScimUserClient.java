@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.client.rest;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.GenericType;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.core.GenericType;
 
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.resources.ScimUser;

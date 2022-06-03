@@ -19,15 +19,15 @@
 
 package org.apache.directory.scim.server.rest;
 
-import javax.inject.Inject;
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.ContextResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.directory.scim.server.schema.Registry;
 
 /**
- * @deprecated Use {@link ScimJacksonJaxbJsonProvider} instead.
+ * @deprecated Use {@link ScimJacksonXmlBindJsonProvider} instead.
  */
 @Deprecated
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {

@@ -23,10 +23,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
 
 import org.apache.directory.scim.spec.validator.Urn;
 import lombok.Data;

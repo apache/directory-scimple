@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.server.provider.extensions.exceptions;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
