@@ -69,6 +69,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import static org.assertj.core.groups.Tuple.tuple;
+
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 public class UpdateRequestTest {
@@ -550,12 +552,14 @@ public class UpdateRequestTest {
     
     updateRequest.initWithResource("1234", user1, user2);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    assertNotNull(operations);
-    assertEquals(3, operations.size());
-    PatchOperation operation = operations.get(0);
-    assertNotNull(operation.getValue());
-    assertEquals(Type.ADD, operation.getOperation());
-    assertEquals(Photo.class, operation.getValue().getClass());
+
+    Assertions.assertThat(operations)
+      .hasSize(3)
+      .extracting("operation","value")
+      .contains(
+        tuple(Type.ADD, photo),
+        tuple(Type.ADD, "first"),
+        tuple(Type.ADD, "second"));
   }
   
   @Test
