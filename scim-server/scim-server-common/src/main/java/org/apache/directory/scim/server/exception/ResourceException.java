@@ -20,21 +20,25 @@
 package org.apache.directory.scim.server.exception;
 
 import jakarta.ws.rs.core.Response.Status;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class UnableToCreateResourceException extends ResourceException {
+public class ResourceException extends Exception {
 
   private static final long serialVersionUID = -3872700870424005641L;
 
-  public UnableToCreateResourceException(Status status, String message) {
-    super(status, message);
+  private Status status;
+
+  public ResourceException(Status status, String message) {
+    super(message);
+
+    this.status = status;
   }
 
-  public UnableToCreateResourceException(Status status, String message, Throwable cause) {
-    super(status, message, cause);
+  public ResourceException(Status status, String message, Throwable cause) {
+    super(message, cause);
+    this.status = status;
   }
 }

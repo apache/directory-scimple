@@ -26,7 +26,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
-import org.apache.directory.scim.spec.exception.InvalidScimResourceException;
+import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 @RequestScoped
@@ -45,7 +45,7 @@ public class EndpointUtil {
     }
 
     if (sr.length == 0 || sr.length > 1) {
-      throw new InvalidScimResourceException("ScimResource class must have a ScimResourceType annotation");
+      throw new ScimResourceInvalidException("ScimResource class must have a ScimResourceType annotation");
     }
 
     // yuck! TODO where to get REST endpoint from?

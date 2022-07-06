@@ -29,7 +29,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.server.exception.UnableToResolveIdException;
+import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.SelfResource;
 import org.apache.directory.scim.spec.protocol.UserResource;
@@ -58,7 +58,7 @@ public class SelfResourceImpl implements SelfResource {
     try {
       String internalId = getInternalId();
       return userResource.getById(internalId, attributes, excludedAttributes);
-    } catch (UnableToResolveIdException e) {
+    } catch (UnableToResolveIdResourceException e) {
       return createErrorResponse(e);
     } catch (ScimException e) {
       return createErrorResponse(e);
@@ -78,7 +78,7 @@ public class SelfResourceImpl implements SelfResource {
     try {
       String internalId = getInternalId();
       return userResource.update(resource, internalId, attributes, excludedAttributes);
-    } catch (UnableToResolveIdException e) {
+    } catch (UnableToResolveIdResourceException e) {
       return createErrorResponse(e);
     } catch (ScimException e) {
       return createErrorResponse(e);
@@ -90,7 +90,7 @@ public class SelfResourceImpl implements SelfResource {
     try {
       String internalId = getInternalId();
       return userResource.patch(patchRequest, internalId, attributes, excludedAttributes);
-    } catch (UnableToResolveIdException e) {
+    } catch (UnableToResolveIdResourceException e) {
       return createErrorResponse(e);
     } catch (ScimException e) {
       return createErrorResponse(e);
@@ -102,7 +102,7 @@ public class SelfResourceImpl implements SelfResource {
     try {
       String internalId = getInternalId();
       return userResource.delete(internalId);
-    } catch (UnableToResolveIdException e) {
+    } catch (UnableToResolveIdResourceException e) {
       return createErrorResponse(e);
     } catch (ScimException e) {
       return createErrorResponse(e);
@@ -115,23 +115,23 @@ public class SelfResourceImpl implements SelfResource {
     return er.toResponse();
   }
 
-  private Response createErrorResponse(UnableToResolveIdException e) {
+  private Response createErrorResponse(UnableToResolveIdResourceException e) {
     ErrorResponse er = new ErrorResponse(e.getStatus(), "Error");
     er.addErrorMessage(e.getMessage());
     return er.toResponse();
   }
 
-  private String getInternalId() throws UnableToResolveIdException {
+  private String getInternalId() throws UnableToResolveIdResourceException {
     Principal callerPrincipal = sessionContext.getCallerPrincipal();
 
     if (callerPrincipal != null) {
       log.debug("Resolved SelfResource principal to : {}", callerPrincipal.getName());
     } else {
-      throw new UnableToResolveIdException(Status.UNAUTHORIZED, "Unauthorized");
+      throw new UnableToResolveIdResourceException(Status.UNAUTHORIZED, "Unauthorized");
     }
 
     if (selfIdResolver.isUnsatisfied()) {
-      throw new UnableToResolveIdException(Status.NOT_IMPLEMENTED, "Caller SelfIdResolver not available");
+      throw new UnableToResolveIdResourceException(Status.NOT_IMPLEMENTED, "Caller SelfIdResolver not available");
     }
 
     return selfIdResolver.get().resolveToInternalId(callerPrincipal);

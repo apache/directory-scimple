@@ -26,21 +26,15 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class UnableToRetrieveResourceException extends Exception {
+public class UnableToRetrieveResourceException extends ResourceException {
 
   private static final long serialVersionUID = -3872700870424005641L;
 
-  private Status status;
-  
-  public UnableToRetrieveResourceException(Status status, String what) {
-    super(what);
-    
-    this.status = status;
+  public UnableToRetrieveResourceException(Status status, String message) {
+    super(status, message);
   }
-  
-  public UnableToRetrieveResourceException(Status status, String what, Throwable why) {
-    super(what, why);
-    
-    this.status = status;
+
+  public UnableToRetrieveResourceException(Status status, String message, Throwable cause) {
+    super(status, message, cause);
   }
 }

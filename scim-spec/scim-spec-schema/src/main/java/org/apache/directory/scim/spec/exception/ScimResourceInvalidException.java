@@ -19,11 +19,11 @@
 
 package org.apache.directory.scim.spec.exception;
 
-public class InvalidScimResourceException extends RuntimeException {
+public class ScimResourceInvalidException extends RuntimeException {
   
   private static final long serialVersionUID = -3378968149599082798L;
 
-  public InvalidScimResourceException(String what) {
+  public ScimResourceInvalidException(String what) {
     super(what);
   }
 }

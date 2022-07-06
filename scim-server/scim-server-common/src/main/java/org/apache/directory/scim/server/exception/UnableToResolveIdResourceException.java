@@ -26,22 +26,15 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class UnableToResolveIdException extends Exception {
+public class UnableToResolveIdResourceException extends ResourceException {
 
   private static final long serialVersionUID = -7401709416973728017L;
 
-  private Status status;
-  
-  public UnableToResolveIdException(Status status, String what) {
-    super(what);
-    
-    this.status = status;
-  }
-  
-  public UnableToResolveIdException(Status status, String what, Throwable why) {
-    super(what, why);
-    
-    this.status = status;
+  public UnableToResolveIdResourceException(Status status, String message) {
+    super(status, message);
   }
 
+  public UnableToResolveIdResourceException(Status status, String message, Throwable cause) {
+    super(status, message, cause);
+  }
 }

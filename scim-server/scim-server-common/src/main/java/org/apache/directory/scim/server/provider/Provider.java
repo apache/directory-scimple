@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
-import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsException;
+import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.rest.BaseResourceTypeResourceImpl;
@@ -117,10 +117,10 @@ public interface Provider<T extends ScimResource> {
    * associated with the ScimResource of type T.
    * 
    * @return A list of ScimExtension classes.
-   * @throws UnableToRetrieveExtensionsException If the provider cannot return
+   * @throws UnableToRetrieveExtensionsResourceException If the provider cannot return
    *         the appropriate list.
    */
-  List<Class<? extends ScimExtension>> getExtensionList() throws UnableToRetrieveExtensionsException;
+  List<Class<? extends ScimExtension>> getExtensionList() throws UnableToRetrieveExtensionsResourceException;
 
   /**
    * <p>In the case where the provider throws an unhandled exception, this

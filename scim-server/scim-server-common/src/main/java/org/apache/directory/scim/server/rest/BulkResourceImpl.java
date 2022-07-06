@@ -234,18 +234,9 @@ public class BulkResourceImpl implements BulkResource {
           log.error("Failed to do bulk operation", resourceException);
 
           errorCount += errorCountIncrement;
+
           String detail = resourceException.getLocalizedMessage();
-          Status status;
-
-          if (resourceException instanceof UnableToCreateResourceException) {
-            status = ((UnableToCreateResourceException) resourceException).getStatus();
-          } else if (resourceException instanceof UnableToDeleteResourceException) {
-            status = ((UnableToDeleteResourceException) resourceException).getStatus();
-          } else {
-            status = ((UnableToUpdateResourceException) resourceException).getStatus();
-          }
-
-          createAndSetErrorResponse(operationResult, status, detail);
+          createAndSetErrorResponse(operationResult, resourceException.getStatus(), detail);
 
           if (operationResult.getBulkId() != null) {
             String bulkIdKey = "bulkId:" + operationResult.getBulkId();
