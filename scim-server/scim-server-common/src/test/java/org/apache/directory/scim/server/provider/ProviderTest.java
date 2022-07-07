@@ -68,6 +68,11 @@ public class ProviderTest {
   private class ProviderAdapter implements Provider<ScimResource> {
 
     @Override
+    public Class<ScimResource> getResourceClass() {
+      return ScimResource.class;
+    }
+
+    @Override
     public ScimResource create(ScimResource resource) {
       return null;
     }

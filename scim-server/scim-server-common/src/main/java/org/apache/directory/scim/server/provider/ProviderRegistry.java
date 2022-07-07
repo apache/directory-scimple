@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.ejb.Lock;
-import jakarta.ejb.LockType;
+import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import jakarta.enterprise.inject.Instance;
@@ -47,6 +46,7 @@ import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.annotation.ScimType;
+import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -91,6 +91,11 @@ public class ProviderRegistry {
 
   @Inject
   ScimExtensionRegistry scimExtensionRegistry;
+
+  @Inject
+  Instance<Provider<ScimResource>> scimProviderInstances;
+
+  private Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
   
   public ProviderRegistry() {}
   
@@ -99,12 +104,18 @@ public class ProviderRegistry {
     this.scimExtensionRegistry = scimExtensionRegistry;
   }
 
-  private Map<Class<? extends ScimResource>, Instance<? extends Provider<? extends ScimResource>>> providerMap = new HashMap<>();
+  @PostConstruct
+  void populateRegistry(){
+    scimProviderInstances.forEach(provider -> {
+      try {
+        registerProvider(provider.getResourceClass(), provider);
+      } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsResourceException e) {
+        throw new ScimResourceInvalidException("Failed to register provider " + provider.getClass() + " for ScimResource type " + provider.getResourceClass(), e);
+      }
+    });
+  }
 
-  @Lock(LockType.WRITE)
-  public <T extends ScimResource> void registerProvider(Class<T> clazz, Instance<? extends Provider<T>> providerInstance) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsResourceException {
-
-    Provider<T> provider = providerInstance.get();
+  public synchronized <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsResourceException {
 
     ResourceType resourceType = generateResourceType(clazz, provider);
 
@@ -130,19 +141,12 @@ public class ProviderRegistry {
     }
 
     registry.addResourceType(resourceType);
-    providerMap.put(clazz, providerInstance);
+    providerMap.put(clazz, provider);
   }
 
-  @Deprecated
-  @Lock(LockType.READ)
   @SuppressWarnings("unchecked")
   public <T extends ScimResource> Provider<T> getProvider(Class<T> clazz) {
-    Instance<? extends Provider<? extends ScimResource>> providerInstance = providerMap.get(clazz);
-    if (providerInstance == null) {
-      return null;
-    }
-
-    return (Provider<T>) providerInstance.get();
+    return (Provider<T>) providerMap.get(clazz);
   }
 
   private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException, UnableToRetrieveExtensionsResourceException {

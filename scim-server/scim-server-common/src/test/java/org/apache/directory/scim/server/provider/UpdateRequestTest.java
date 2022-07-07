@@ -102,12 +102,10 @@ public class UpdateRequestTest {
     providerRegistry.registry = registry;
     providerRegistry.scimExtensionRegistry = ScimExtensionRegistry.getInstance();
 
-    Mockito.when(providerInstance.get())
-           .thenReturn(provider);
     Mockito.when(provider.getExtensionList())
            .thenReturn(Stream.of(EnterpriseExtension.class,ExampleObjectExtension.class).collect(Collectors.toList()));
 
-    providerRegistry.registerProvider(ScimUser.class, providerInstance);
+    providerRegistry.registerProvider(ScimUser.class, provider);
   }
 
   @Test

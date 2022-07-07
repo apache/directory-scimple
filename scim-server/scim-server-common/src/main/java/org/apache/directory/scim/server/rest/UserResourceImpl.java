@@ -23,17 +23,9 @@
 package org.apache.directory.scim.server.rest;
 
 import jakarta.ejb.Stateless;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.CDI;
-import jakarta.enterprise.util.TypeLiteral;
-import jakarta.inject.Inject;
-
-import org.apache.directory.scim.server.provider.Provider;
-import org.apache.directory.scim.server.provider.ProviderRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author shawn
@@ -42,25 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Stateless
 public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> implements UserResource {
-
-//  @Inject
-//  ProviderRegistry providerRegistry;
-//  
-//  @Inject
-////  @ProviderQualifier(ScimUser.class)
-//  Provider<ScimUser> provider;
-  
-  @Override
-  public Provider<ScimUser> getProvider() {
-    try {
-      TypeLiteral<Provider<ScimUser>> typeLiteral = new TypeLiteral<Provider<ScimUser>>() {
-      };
-      Instance<Provider<ScimUser>> select = CDI.current().select(typeLiteral);
-      return select.get();
-    } catch (Exception e) {
-      log.warn("Provider doesn't exist", e);
-      return null;
-    }
+  public UserResourceImpl() {
+    super(ScimUser.class);
   }
-
 }

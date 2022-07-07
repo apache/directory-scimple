@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.example.memory.service;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.server.provider.UpdateRequest;
@@ -41,8 +42,20 @@ import jakarta.inject.Named;
 @ApplicationScoped
 public class InMemoryGroupService implements Provider<ScimGroup> {
 
-  private Map<String, ScimGroup> groups = new HashMap<>();
-  
+  private final Map<String, ScimGroup> groups = new HashMap<>();
+
+  @PostConstruct
+  public void init() {
+    ScimGroup group = new ScimGroup();
+    group.setId("example-group");
+    groups.put(group.getId(), group);
+  }
+
+  @Override
+  public Class<ScimGroup> getResourceClass() {
+    return ScimGroup.class;
+  }
+
   @Override
   public ScimGroup create(ScimGroup resource) {
     String resourceId = resource.getId();

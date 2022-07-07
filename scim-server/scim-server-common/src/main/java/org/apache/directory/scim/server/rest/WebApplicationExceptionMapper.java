@@ -34,7 +34,6 @@ import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 
 
 @Provider
-@Specializes
 @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
 public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
