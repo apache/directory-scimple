@@ -66,6 +66,7 @@
       <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
+        <version>4.0.0.Alpha2</version>
         <configuration>
           <skip>false</skip>
           <filename>${project.artifactId}-${project.version}.war</filename>

@@ -24,7 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Response;
@@ -44,7 +44,7 @@ import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.BulkCo
 import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.FilterConfiguration;
 import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.SupportedConfiguration;
 
-@Stateless
+@ApplicationScoped
 public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigResource {
 
   @Inject

@@ -32,7 +32,6 @@ import java.util.Set;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
@@ -92,9 +91,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Context
   Request request;
 
-  @Context
-  HttpServletRequest servletRequest;
-
   @Inject
   ProviderRegistry providerRegistry;
 
@@ -130,7 +126,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    if (servletRequest.getParameter("filter") != null) {
+    if (uriInfo.getQueryParameters().getFirst("filter") != null) {
       return Response.status(Status.FORBIDDEN)
                      .build();
     }

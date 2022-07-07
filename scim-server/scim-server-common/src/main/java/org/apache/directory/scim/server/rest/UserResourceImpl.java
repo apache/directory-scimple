@@ -22,7 +22,7 @@
  */
 package org.apache.directory.scim.server.rest;
 
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -32,7 +32,7 @@ import org.apache.directory.scim.spec.resources.ScimUser;
  *
  */
 @Slf4j
-@Stateless
+@ApplicationScoped
 public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> implements UserResource {
   public UserResourceImpl() {
     super(ScimUser.class);

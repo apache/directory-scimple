@@ -21,14 +21,14 @@ package org.apache.directory.scim.server.rest;
 
 import java.security.Principal;
 
-import jakarta.annotation.Resource;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import jakarta.ws.rs.core.SecurityContext;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.SelfResource;
@@ -41,7 +41,7 @@ import org.apache.directory.scim.spec.resources.ScimUser;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Stateless
+@ApplicationScoped
 public class SelfResourceImpl implements SelfResource {
 
   @Inject
@@ -50,8 +50,8 @@ public class SelfResourceImpl implements SelfResource {
   @Inject
   Instance<SelfIdResolver> selfIdResolver;
 
-  @Resource
-  SessionContext sessionContext;
+  @Context
+  SecurityContext securityContext;
 
   @Override
   public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -122,7 +122,7 @@ public class SelfResourceImpl implements SelfResource {
   }
 
   private String getInternalId() throws UnableToResolveIdResourceException {
-    Principal callerPrincipal = sessionContext.getCallerPrincipal();
+    Principal callerPrincipal = securityContext.getUserPrincipal();
 
     if (callerPrincipal != null) {
       log.debug("Resolved SelfResource principal to : {}", callerPrincipal.getName());

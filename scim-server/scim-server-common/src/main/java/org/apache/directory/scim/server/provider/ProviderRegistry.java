@@ -31,13 +31,13 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.ejb.Singleton;
-import jakarta.ejb.Startup;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
 import org.apache.directory.scim.common.ScimUtils;
+import org.apache.directory.scim.server.ScimConfiguration;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
 import org.apache.directory.scim.server.schema.Registry;
@@ -62,11 +62,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-@Singleton
-@Startup
 @Data
 @Slf4j
-public class ProviderRegistry {
+@ApplicationScoped
+public class ProviderRegistry implements ScimConfiguration {
 
   private static final String STRING_TYPE_IDENTIFIER = "class java.lang.String";
   private static final String CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [C";
@@ -104,8 +103,8 @@ public class ProviderRegistry {
     this.scimExtensionRegistry = scimExtensionRegistry;
   }
 
-  @PostConstruct
-  void populateRegistry(){
+  @Override
+  public void configure() {
     scimProviderInstances.forEach(provider -> {
       try {
         registerProvider(provider.getResourceClass(), provider);

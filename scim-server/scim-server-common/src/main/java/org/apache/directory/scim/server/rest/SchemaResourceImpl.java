@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -36,7 +36,7 @@ import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.Schema;
 
-@Stateless
+@ApplicationScoped
 public class SchemaResourceImpl implements SchemaResource {
   
   @Inject

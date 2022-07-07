@@ -28,10 +28,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import jakarta.ws.rs.core.UriInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -83,10 +84,12 @@ public class BaseResourceTypeResourceImplTest {
     // given
     @SuppressWarnings("rawtypes")
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
-    HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
-    baseResourceImpl.servletRequest = servletRequest;
-    
-    when(servletRequest.getParameter("filter")).thenReturn("not null");
+    UriInfo uriInfo = mock(UriInfo.class);
+    MultivaluedMap queryParams = mock(MultivaluedMap.class);
+    baseResourceImpl.uriInfo = uriInfo;
+
+    when(uriInfo.getQueryParameters()).thenReturn(queryParams);
+    when(queryParams.getFirst("filter")).thenReturn("not null");
     when(baseResourceImpl.getById("1", includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     
     // when

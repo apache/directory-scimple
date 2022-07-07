@@ -22,13 +22,13 @@
  */
 package org.apache.directory.scim.server.rest;
 
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.protocol.GroupResource;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 
 @Slf4j
-@Stateless
+@ApplicationScoped
 public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> implements GroupResource {
 
   public GroupResourceImpl() {
