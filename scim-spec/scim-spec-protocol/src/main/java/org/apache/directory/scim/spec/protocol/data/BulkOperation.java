@@ -33,7 +33,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@XmlType
+@XmlType(propOrder = {"method","path","bulkId","data"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class BulkOperation {
 

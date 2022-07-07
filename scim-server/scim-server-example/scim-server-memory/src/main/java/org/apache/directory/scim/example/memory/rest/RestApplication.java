@@ -32,10 +32,9 @@ public class RestApplication extends Application {
   
   @Override
   public Set<Class<?>> getClasses() {
-    Set<Class<?>> clazzes = new HashSet<Class<?>>();
+    Set<Class<?>> clazzes = new HashSet<>();
     
     clazzes.addAll(ScimResourceHelper.getScimClassesToLoad());
-    clazzes.addAll(ScimResourceHelper.getSwaggerClassesToLoad());
 
     return clazzes;
   }

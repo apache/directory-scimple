@@ -19,6 +19,13 @@
 
 package org.apache.directory.scim.spec.protocol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -32,10 +39,7 @@ import jakarta.ws.rs.core.UriInfo;
 import org.apache.directory.scim.spec.protocol.data.BulkRequest;
 import org.apache.directory.scim.spec.protocol.data.BulkResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
 /**
@@ -54,7 +58,7 @@ import io.swagger.annotations.ApiResponses;
 //@formatter:on
 
 @Path("Bulk")
-@Api("SCIM")
+@Tag(name="SCIM")
 public interface BulkResource {
 
   /**
@@ -64,13 +68,17 @@ public interface BulkResource {
   @POST
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value="Bulk Operations", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response=BulkResponse.class, code=200)
+  @Operation(description="Bulk Operations")
   @ApiResponses(value={
-      @ApiResponse(code=400, message="Bad Request"),
-      @ApiResponse(code=500, message="Internal Server Error"),
-      @ApiResponse(code=501, message="Not Implemented")
+    @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE, schema = @Schema(implementation = BulkResponse.class))),
+      @ApiResponse(responseCode="400", description="Bad Request"),
+      @ApiResponse(responseCode="500", description="Internal Server Error"),
+      @ApiResponse(responseCode="501", description="Not Implemented")
     })
-  default Response doBulk(BulkRequest bulkRequest, @Context UriInfo uriInfo) {
+  default Response doBulk(@RequestBody(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                                       schema = @Schema(implementation = BulkRequest.class)),
+                                       required = true) BulkRequest bulkRequest,
+                          @Context UriInfo uriInfo) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   

@@ -39,7 +39,7 @@ public class BulkRequest extends BaseResource {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
   
   @XmlElement
-  int failOnErrors;
+  Integer failOnErrors;
   
   @XmlElement(name = "Operations")
   List<BulkOperation> operations;

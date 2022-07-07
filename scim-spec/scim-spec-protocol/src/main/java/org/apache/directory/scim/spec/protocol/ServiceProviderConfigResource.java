@@ -19,6 +19,11 @@
 
 package org.apache.directory.scim.spec.protocol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -27,9 +32,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
+import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
 /**
@@ -53,14 +58,15 @@ import io.swagger.annotations.ApiOperation;
 //@formatter:on
 
 @Path("ServiceProviderConfig")
-@Api("SCIM-Configuration")
+@Tag(name="SCIM-Configuration")
 public interface ServiceProviderConfigResource {
 
   @GET
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value="Get Service Provider Configuration", produces=Constants.SCIM_CONTENT_TYPE)
-  default public Response getServiceProviderConfiguration(@Context UriInfo context) {
+  @Operation(description="Get Service Provider Configuration")
+  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+               schema = @Schema(implementation = ServiceProviderConfiguration.class)))
+  default Response getServiceProviderConfiguration(@Context UriInfo context) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
-  
 }

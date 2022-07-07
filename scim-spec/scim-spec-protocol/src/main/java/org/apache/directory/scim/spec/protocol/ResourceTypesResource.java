@@ -19,6 +19,12 @@
 
 package org.apache.directory.scim.spec.protocol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -27,9 +33,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import org.apache.directory.scim.spec.schema.ResourceType;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
 /**
  * From SCIM Protocol Specification, section 4, page 74
@@ -59,12 +65,14 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @Path("ResourceTypes")
-@Api("SCIM-Configuration")
+@Tag(name="SCIM-Configuration")
 public interface ResourceTypesResource {
 
   @GET
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "Get All Resource Types", produces=Constants.SCIM_CONTENT_TYPE)
+  @Operation(description = "Get All Resource Types")
+  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+    array = @ArraySchema(schema = @Schema(implementation = ResourceType.class))))
   default Response getAllResourceTypes(@QueryParam("filter") String filter) throws Exception {
 
     if (filter != null) {
@@ -77,7 +85,8 @@ public interface ResourceTypesResource {
   @GET
   @Path("{name}")
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "Get Resource Type by URN", produces=Constants.SCIM_CONTENT_TYPE)
+  @Operation(description = "Get Resource Type by URN")
+  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE, schema = @Schema(implementation = ResourceType.class)))
   default Response getResourceType(@PathParam("name") String name) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }

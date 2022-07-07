@@ -112,37 +112,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-jaxrs</artifactId>
-      <version>1.6.6</version>
-      <exclusions>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.dataformat</groupId>
-					<artifactId>jackson-dataformat-xml</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.code.findbugs</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-databind</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsr311-api</artifactId>
-					<groupId>javax.ws.rs</groupId>
-				</exclusion>
-			</exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.apache.directory.scim</groupId>
       <artifactId>scim-common</artifactId>
     </dependency>

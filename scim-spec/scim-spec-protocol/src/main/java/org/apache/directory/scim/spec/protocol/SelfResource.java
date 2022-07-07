@@ -19,9 +19,18 @@
 
 package org.apache.directory.scim.spec.protocol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -36,12 +45,7 @@ import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.jaxrs.PATCH;
+import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
 /**
@@ -64,7 +68,7 @@ import io.swagger.jaxrs.PATCH;
 //@formatter:on
 
 @Path(SelfResource.PATH)
-@Api("SCIM")
+@Tag(name="SCIM")
 public interface SelfResource {
 
   public static final String PATH = "Me";
@@ -77,15 +81,17 @@ public interface SelfResource {
    */
   @GET
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value="Get self record", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, code=200)
+  @Operation(description="Get self record")
   @ApiResponses(value={
-                  @ApiResponse(code=400, message="Bad Request"),
-                  @ApiResponse(code=404, message="Not found"),
-                  @ApiResponse(code=500, message="Internal Server Error"),
-                  @ApiResponse(code=501, message="Not Implemented")
-                })
-    default Response getSelf(@ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                             @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+    @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                 schema = @Schema(implementation = ScimResource.class))),
+    @ApiResponse(responseCode="400", description="Bad Request"),
+    @ApiResponse(responseCode="404", description="Not found"),
+    @ApiResponse(responseCode="500", description="Internal Server Error"),
+    @ApiResponse(responseCode="501", description="Not Implemented")
+  })
+    default Response getSelf(@Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                             @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -97,11 +103,20 @@ public interface SelfResource {
   @POST
   @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "Create self record", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 201)
-  @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 409, message = "Conflict"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response create(ScimUser resource,
-                          @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+  @Operation(description = "Create self record")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "201",
+                 content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                 schema = @Schema(implementation = ScimResource.class))),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "409", description = "Conflict"),
+    @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+    @ApiResponse(responseCode = "501", description = "Not Implemented") })
+  default Response create(@RequestBody(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                                       schema = @Schema(implementation = ScimResource.class)),
+                                       required = true) ScimUser resource,
+                          @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -113,28 +128,49 @@ public interface SelfResource {
   @PUT
   @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "Update self record", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, response = ScimResource.class, code = 200)
-  @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response update(ScimUser resource, 
-                          @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+  @Operation(description = "Update self record")
+  @ApiResponses(value = {
+    @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                 schema = @Schema(implementation = ScimResource.class))),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+    @ApiResponse(responseCode = "501", description = "Not Implemented") })
+  default Response update(@RequestBody(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                                       schema = @Schema(implementation = ScimUser.class)),
+                                       required = true) ScimUser resource,
+                          @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
   @PATCH
   @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "Patch a portion of the backing store", produces=Constants.SCIM_CONTENT_TYPE, consumes=Constants.SCIM_CONTENT_TYPE, code = 204)
-  @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
-  default Response patch(PatchRequest patchRequest,
-                         @ApiParam(value="attributes", required=false) @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                         @ApiParam(value="excludedAttributes", required=false) @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+  @Operation(description = "Patch a portion of the backing store")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "204",
+                 content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                 schema = @Schema(implementation = ScimResource.class))),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "404", description = "Not found"),
+    @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+    @ApiResponse(responseCode = "501", description = "Not Implemented") })
+  default Response patch(@RequestBody(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                                      schema = @Schema(implementation = PatchRequest.class)),
+                                      required = true) PatchRequest patchRequest,
+                         @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                         @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
   @DELETE
-  @ApiOperation(value = "Delete self record", code = 204)
-  @ApiResponses(value = { @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not found"), @ApiResponse(code = 500, message = "Internal Server Error"), @ApiResponse(code = 501, message = "Not Implemented") })
+  @Operation(description = "Delete self record")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "204", description = "No Content"),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "404", description = "Not found"),
+    @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+    @ApiResponse(responseCode = "501", description = "Not Implemented") })
   default Response delete() throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
