@@ -151,8 +151,8 @@
 
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
-        <artifactId>weld-se</artifactId>
-        <version>2.4.8.Final</version>
+        <artifactId>weld-se-core</artifactId>
+        <version>4.0.3.Final</version>
       </dependency>
       <dependency>
         <groupId>args4j</groupId>
@@ -223,6 +223,16 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>31.1-android</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.2.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jul-to-slf4j</artifactId>
+        <version>${version.slf4j}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
