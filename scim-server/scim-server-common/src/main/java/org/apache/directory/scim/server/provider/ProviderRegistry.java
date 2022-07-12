@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -91,8 +90,10 @@ public class ProviderRegistry implements ScimConfiguration {
   @Inject
   ScimExtensionRegistry scimExtensionRegistry;
 
+  // Weld needs the '? extends' or the providers will not be found, some CDI
+  // implementations work fine with just <ScimResources>
   @Inject
-  Instance<Provider<ScimResource>> scimProviderInstances;
+  Instance<Provider<? extends ScimResource>> scimProviderInstances;
 
   private Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
   
@@ -104,8 +105,11 @@ public class ProviderRegistry implements ScimConfiguration {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void configure() {
-    scimProviderInstances.forEach(provider -> {
+    scimProviderInstances.stream()
+      .map(provider -> (Provider<ScimResource>) provider)
+      .forEach(provider -> {
       try {
         registerProvider(provider.getResourceClass(), provider);
       } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsResourceException e) {
