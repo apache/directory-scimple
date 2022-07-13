@@ -98,6 +98,12 @@
       <organization>The Pennsylvania State University</organization>
       <organizationUrl>https://www.psu.edu</organizationUrl>
     </developer>
+    <developer>
+      <id>bdemers</id>
+      <email>bdemers@apache.org</email>
+      <url>https://blog.bdemers.io/</url>
+      <timezone>-0500</timezone>
+    </developer>
   </developers>
 
   <dependencyManagement>
