@@ -43,11 +43,11 @@ public class BulkResponse extends BaseResource {
   @XmlElement(name = "Operations")
   List<BulkOperation> operations;
 
-  @XmlElement(name="status", nillable=true)
+  @XmlElement(name="status")
   @XmlJavaTypeAdapter(StatusAdapter.class)
   Status status;
   
-  @XmlElement(name="response", nillable=true)
+  @XmlElement(name="response")
   ErrorResponse errorResponse;
   
   public BulkResponse() {

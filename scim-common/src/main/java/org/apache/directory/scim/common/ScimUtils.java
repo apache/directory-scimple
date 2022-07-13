@@ -24,11 +24,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import com.google.common.collect.Lists;
-
 
 public final class ScimUtils {
   private ScimUtils() {
@@ -56,10 +56,11 @@ public final class ScimUtils {
   //public static List<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
 
   public static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
-    List<Field> currentClassFields = Lists.newArrayList(startClass.getDeclaredFields());
+    List<Field> currentClassFields = new ArrayList<>();
+    Collections.addAll(currentClassFields, startClass.getDeclaredFields());
     Class<?> parentClass = startClass.getSuperclass();
     if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
-      List<Field> parentClassFields = (List<Field>) getFieldsUpTo(parentClass, exclusiveParent);
+      List<Field> parentClassFields = getFieldsUpTo(parentClass, exclusiveParent);
       currentClassFields.addAll(parentClassFields);
     }
     return currentClassFields;

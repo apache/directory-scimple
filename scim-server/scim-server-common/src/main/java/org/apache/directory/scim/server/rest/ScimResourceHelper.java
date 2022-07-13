@@ -62,15 +62,4 @@ public final class ScimResourceHelper {
 
     return clazzez;
   }
-
-  public static Set<Class<?>> getSwaggerClassesToLoad() {
-    Set<Class<?>> clazzez = new HashSet<>();
-
-    // Required swagger classes.
-    clazzez.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-    clazzez.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-
-    return clazzez;
-  }
-
 }

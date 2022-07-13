@@ -19,6 +19,12 @@
 
 package org.apache.directory.scim.spec.protocol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -28,8 +34,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
 /**
  * From SCIM Protocol Specification, section 4, page 74
@@ -63,13 +68,15 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @Path("Schemas")
-@Api("SCIM-Configuration")
+@Tag(name="SCIM-Configuration")
 public interface SchemaResource {
 
   @GET
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value="Get All Schemas", produces=Constants.SCIM_CONTENT_TYPE)
-  default public Response getAllSchemas(@QueryParam("filter") String filter) {
+  @Operation(description="Get All Schemas")
+  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+    array = @ArraySchema(schema = @Schema(implementation = org.apache.directory.scim.spec.schema.Schema.class))))
+  default Response getAllSchemas(@QueryParam("filter") String filter) {
 
     if (filter != null) {
       return Response.status(Status.FORBIDDEN).build();
@@ -81,8 +88,10 @@ public interface SchemaResource {
   @GET
   @Path("{uri}")
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value="Get Schemas by URN", produces=Constants.SCIM_CONTENT_TYPE)
-  default public Response getSchema(@PathParam("uri") String uri) {
+  @Operation(description="Get Schemas by URN")
+  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+    schema = @Schema(implementation = org.apache.directory.scim.spec.schema.Schema.class)))
+  default Response getSchema(@PathParam("uri") String uri) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

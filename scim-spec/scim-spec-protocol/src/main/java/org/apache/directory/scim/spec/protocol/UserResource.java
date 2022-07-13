@@ -19,8 +19,7 @@
 
 package org.apache.directory.scim.spec.protocol;
 
-import io.swagger.annotations.Api;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Path;
 
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -45,7 +44,6 @@ import org.apache.directory.scim.spec.resources.ScimUser;
 //@formatter:on
 
 @Path("Users")
-@Api("SCIM")
+@Tag(name="SCIM")
 public interface UserResource extends BaseResourceTypeResource<ScimUser> {
-  
 }

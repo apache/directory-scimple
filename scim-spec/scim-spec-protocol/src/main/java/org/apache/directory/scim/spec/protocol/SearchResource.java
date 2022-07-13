@@ -19,6 +19,14 @@
 
 package org.apache.directory.scim.spec.protocol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -29,10 +37,7 @@ import jakarta.ws.rs.core.Response.Status;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
 /**
@@ -56,7 +61,7 @@ import io.swagger.annotations.ApiResponses;
 
 
 @Path(".search")
-@Api("SCIM")
+@Tag(name="SCIM")
 public interface SearchResource {
 
   /**
@@ -65,13 +70,16 @@ public interface SearchResource {
    */
   @POST
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @ApiOperation(value="Search", produces=Constants.SCIM_CONTENT_TYPE, response=ScimResource.class, responseContainer="List", code=200)
+  @Operation(description="Search")
   @ApiResponses(value={
-      @ApiResponse(code=400, message="Bad Request"),
-      @ApiResponse(code=500, message="Internal Server Error"),
-      @ApiResponse(code=501, message="Not Implemented")
-    })
-  default Response find(SearchRequest request){
+    @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE, array = @ArraySchema(schema = @Schema(implementation = ScimResource.class)))),
+    @ApiResponse(responseCode="400", description="Bad Request"),
+    @ApiResponse(responseCode="500", description="Internal Server Error"),
+    @ApiResponse(responseCode="501", description="Not Implemented")
+  })
+  default Response find(@RequestBody(content = @Content(mediaType = SCIM_CONTENT_TYPE,
+                                     schema = @Schema(implementation = SearchRequest.class)),
+                                     required = true) SearchRequest request){
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
   
