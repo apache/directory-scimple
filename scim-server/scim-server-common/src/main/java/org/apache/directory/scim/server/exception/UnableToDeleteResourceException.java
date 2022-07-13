@@ -26,19 +26,15 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class UnableToDeleteResourceException extends Exception {
+public class UnableToDeleteResourceException extends ResourceException {
 
   private static final long serialVersionUID = -3872700870424005641L;
 
-  private Status status;
-  
-  public UnableToDeleteResourceException(Status status, String what) {
-    super(what);
-    this.status = status;
+  public UnableToDeleteResourceException(Status status, String message) {
+    super(status, message);
   }
-  
-  public UnableToDeleteResourceException(Status status, String what, Throwable why) {
-    super(what, why);
-    this.status = status;
+
+  public UnableToDeleteResourceException(Status status, String message, Throwable cause) {
+    super(status, message, cause);
   }
 }

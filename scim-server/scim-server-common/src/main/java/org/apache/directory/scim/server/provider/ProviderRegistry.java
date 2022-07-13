@@ -40,7 +40,7 @@ import jakarta.xml.bind.annotation.XmlEnumValue;
 
 import org.apache.directory.scim.common.ScimUtils;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
-import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsException;
+import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
@@ -102,7 +102,7 @@ public class ProviderRegistry {
   private Map<Class<? extends ScimResource>, Instance<? extends Provider<? extends ScimResource>>> providerMap = new HashMap<>();
 
   @Lock(LockType.WRITE)
-  public <T extends ScimResource> void registerProvider(Class<T> clazz, Instance<? extends Provider<T>> providerInstance) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsException {
+  public <T extends ScimResource> void registerProvider(Class<T> clazz, Instance<? extends Provider<T>> providerInstance) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsResourceException {
 
     Provider<T> provider = providerInstance.get();
 
@@ -145,7 +145,7 @@ public class ProviderRegistry {
     return (Provider<T>) providerInstance.get();
   }
 
-  private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException, UnableToRetrieveExtensionsException {
+  private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException, UnableToRetrieveExtensionsResourceException {
 
     ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
 

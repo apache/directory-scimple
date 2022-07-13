@@ -26,7 +26,7 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 
 import org.apache.directory.scim.server.exception.InvalidProviderException;
-import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsException;
+import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
 import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -54,7 +54,7 @@ public class ScimConfigurator implements ServletContextListener {
     try {
       providerRegistry.registerProvider(ScimUser.class, userProviderInstance);
       providerRegistry.registerProvider(ScimGroup.class, groupProviderInstance);
-    } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsException e) {
+    } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsResourceException e) {
       e.printStackTrace();
     }
   }

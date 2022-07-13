@@ -21,10 +21,10 @@ package org.apache.directory.scim.server.provider;
 
 import java.security.Principal;
 
-import org.apache.directory.scim.server.exception.UnableToResolveIdException;
+import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 
 public interface SelfIdResolver {
 
-  String resolveToInternalId(Principal principal) throws UnableToResolveIdException;
+  String resolveToInternalId(Principal principal) throws UnableToResolveIdResourceException;
   
 }
