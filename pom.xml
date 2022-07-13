@@ -274,6 +274,13 @@
         <groupId>com.restfuse</groupId>
         <artifactId>com.eclipsesource.restfuse</artifactId>
         <version>${version.restfuse}</version>
+        <exclusions>
+          <!-- exclude old jetty dependency -->
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-continuation</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <!-- Update the version of junit restfuse depends on -->
       <dependency>
