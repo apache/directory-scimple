@@ -47,7 +47,13 @@ import org.apache.directory.scim.spec.resources.ScimResource;
  * @param <T> a SCIM ResourceType that extends ScimResource
  */
 public interface Provider<T extends ScimResource> {
-  
+
+  /**
+   * Returns the type of ScimResource this provider manages.
+   * @return The type of resource this provider manages.
+   */
+  Class<T> getResourceClass();
+
   /**
    * Allows the SCIM server's REST implementation to create a resource via
    * a POST to a valid end-point.

@@ -16,11 +16,9 @@
  */
 package org.apache.directory.scim.ws.common.exception;
 
-import jakarta.ejb.ApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.ws.common.ErrorMessage;
 
-@ApplicationException
 public class RestServerException extends RuntimeException {
   private static final long serialVersionUID = 7360783673606191577L;
   

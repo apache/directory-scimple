@@ -29,10 +29,10 @@ import static org.mockito.Mockito.when;
 import java.security.Principal;
 import java.util.List;
 
-import jakarta.ejb.SessionContext;
 import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
 
+import jakarta.ws.rs.core.SecurityContext;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.UserResource;
@@ -46,17 +46,17 @@ public class SelfResourceImplTest {
   public void noSelfIdResolverTest() {
 
     Principal principal = mock(Principal.class);
-    SessionContext sessionContext = mock(SessionContext.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
     @SuppressWarnings("unchecked")
-	Instance<SelfIdResolver> selfIdResolverInstance = mock(Instance.class);
+    Instance<SelfIdResolver> selfIdResolverInstance = mock(Instance.class);
 
-    when(sessionContext.getCallerPrincipal()).thenReturn(principal);
+    when(securityContext.getUserPrincipal()).thenReturn(principal);
     when(principal.getName()).thenReturn("test-user");
     when(selfIdResolverInstance.isUnsatisfied()).thenReturn(true);
 
     SelfResourceImpl selfResource = new SelfResourceImpl();
     selfResource.selfIdResolver = selfIdResolverInstance;
-    selfResource.sessionContext = sessionContext;
+    selfResource.securityContext = securityContext;
 
     Response response = selfResource.getSelf(null, null);
     assertThat(response.getEntity(), instanceOf(ErrorResponse.class));
@@ -70,14 +70,14 @@ public class SelfResourceImplTest {
 
     String internalId = "test-user-resolved";
     Principal principal = mock(Principal.class);
-    SessionContext sessionContext = mock(SessionContext.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
     @SuppressWarnings("unchecked")
 	Instance<SelfIdResolver> selfIdResolverInstance = mock(Instance.class);
     SelfIdResolver selfIdResolver = mock(SelfIdResolver.class);
     UserResource userResource = mock(UserResource.class);
     Response mockResponse = mock(Response.class);
 
-    when(sessionContext.getCallerPrincipal()).thenReturn(principal);
+    when(securityContext.getUserPrincipal()).thenReturn(principal);
     when(principal.getName()).thenReturn("test-user");
     when(selfIdResolverInstance.isUnsatisfied()).thenReturn(false);
     when(selfIdResolverInstance.get()).thenReturn(selfIdResolver);
@@ -86,7 +86,7 @@ public class SelfResourceImplTest {
 
     SelfResourceImpl selfResource = new SelfResourceImpl();
     selfResource.selfIdResolver = selfIdResolverInstance;
-    selfResource.sessionContext = sessionContext;
+    selfResource.securityContext = securityContext;
     selfResource.userResource = userResource;
 
     // the response is just a passed along from the UserResource, so just validate it is the same instance.

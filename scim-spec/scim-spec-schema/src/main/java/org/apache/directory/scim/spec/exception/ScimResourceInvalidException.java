@@ -23,7 +23,10 @@ public class ScimResourceInvalidException extends RuntimeException {
   
   private static final long serialVersionUID = -3378968149599082798L;
 
-  public ScimResourceInvalidException(String what) {
-    super(what);
+  public ScimResourceInvalidException(String message) {
+    super(message);
+  }
+  public ScimResourceInvalidException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

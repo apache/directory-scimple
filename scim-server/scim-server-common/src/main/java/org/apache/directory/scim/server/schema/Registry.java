@@ -25,20 +25,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.ejb.Singleton;
-import jakarta.ejb.Startup;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.ResourceType;
 import org.apache.directory.scim.spec.schema.Schema;
 import lombok.extern.slf4j.Slf4j;
 
-@Singleton
-@Startup
 @Slf4j
+@ApplicationScoped
 public class Registry {
 
   private Map<String, Schema> schemaMap = new HashMap<>();
@@ -48,7 +45,7 @@ public class Registry {
   private Map<String, Class<? extends ScimResource>> endpointToScimResourceClass = new HashMap<>();
 
   private Map<String, ResourceType> resourceTypeMap = new HashMap<>();
-  
+
   private ObjectMapper objectMapper;
 
   public Schema getSchema(String urn) {

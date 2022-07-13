@@ -30,9 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -60,7 +59,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Stateless
+@ApplicationScoped
 public class BulkResourceImpl implements BulkResource {
 //  private static final StatusWrapper OKAY_STATUS = new StatusWrapper();
 //  private static final StatusWrapper CREATED_STATUS = new StatusWrapper();

@@ -32,7 +32,6 @@ import java.util.Set;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
@@ -42,6 +41,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.UriInfo;
 
+import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +91,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Context
   Request request;
 
-  @Context
-  HttpServletRequest servletRequest;
+  @Inject
+  ProviderRegistry providerRegistry;
 
   @Inject
   private AttributeUtil attributeUtil;
@@ -106,7 +106,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Inject
   private Instance<UpdateRequest<T>> updateRequestInstance;
 
-  public abstract Provider<T> getProvider();
+  private final Class<T> resourceClass;
+
+  protected BaseResourceTypeResourceImpl(Class<T> resourceClass) {
+    this.resourceClass = resourceClass;
+  }
+
+  public Provider<T> getProvider() {
+    return providerRegistry.getProvider(resourceClass);
+  }
 
   Provider<T> getProviderInternal() throws ScimServerException {
     Provider<T> provider = getProvider();
@@ -118,7 +126,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    if (servletRequest.getParameter("filter") != null) {
+    if (uriInfo.getQueryParameters().getFirst("filter") != null) {
       return Response.status(Status.FORBIDDEN)
                      .build();
     }

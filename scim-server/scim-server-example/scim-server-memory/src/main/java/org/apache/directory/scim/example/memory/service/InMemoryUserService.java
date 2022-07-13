@@ -81,7 +81,12 @@ public class InMemoryUserService implements Provider<ScimUser> {
     
     users.put(user.getId(), user);
   }
-  
+
+  @Override
+  public Class<ScimUser> getResourceClass() {
+    return ScimUser.class;
+  }
+
   /**
    * @see Provider#create(ScimResource)
    */

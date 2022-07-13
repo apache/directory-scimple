@@ -53,13 +53,12 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.openejb.maven</groupId>
+        <groupId>org.apache.tomee.maven</groupId>
         <artifactId>tomee-maven-plugin</artifactId>
-        <version>1.7.5</version>
+        <version>9.0.0-M8</version>
         <configuration>
           <context>ROOT</context>
           <warFile>target/${project.artifactId}-${project.version}.war</warFile>
-          <tomeeVersion>1.7.5</tomeeVersion>
           <tomeeClassifier>plus</tomeeClassifier>
           <simpleLog>true</simpleLog>
         </configuration>
@@ -67,6 +66,7 @@
       <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
+        <version>4.0.0.Alpha2</version>
         <configuration>
           <skip>false</skip>
           <filename>${project.artifactId}-${project.version}.war</filename>

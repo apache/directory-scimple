@@ -36,11 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ProviderRegistryTest {
 
-  
   Registry registry;
-  
-  @Mock
-  Instance<Provider<ScimUser>> providerInstance;
   
   @Mock
   Provider<ScimUser> provider;
@@ -52,21 +48,14 @@ public class ProviderRegistryTest {
     registry = new Registry();
     providerRegistry.registry = registry;
   }
-  
-  @BeforeEach
-  public void initialize() {
-    Mockito.when(providerInstance.get()).thenReturn(provider);
-//  Mockito.when(provider.getExtensionList()).thenReturn(Collections.singletonList(Enterprise));
-  }
-  
+
   @Test
   public void testAddProvider() throws Exception {
-    providerRegistry.registerProvider(ScimUser.class, providerInstance);
+    providerRegistry.registerProvider(ScimUser.class, provider);
     
     Schema schema = registry.getSchema(ScimUser.SCHEMA_URI);
     
     assertThat(schema).isNotNull();
     assertThat(schema.getId()).isEqualTo(ScimUser.SCHEMA_URI);
   }
-
 }

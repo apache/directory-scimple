@@ -19,20 +19,19 @@
 
 package org.apache.directory.scim.example.memory.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 
 import java.security.Principal;
 
-import jakarta.ejb.Stateless;
 import jakarta.ws.rs.core.Response.Status;
 
-@Stateless
+@ApplicationScoped
 public class InMemorySelfResolverImpl implements SelfIdResolver {
 
   @Override
   public String resolveToInternalId(Principal principal) throws UnableToResolveIdResourceException {
     throw new UnableToResolveIdResourceException(Status.NOT_IMPLEMENTED, "Caller Principal not available");
   }
-
 }

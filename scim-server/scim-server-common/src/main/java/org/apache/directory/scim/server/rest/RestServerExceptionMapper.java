@@ -6,7 +6,7 @@
 * to you under the Apache License, Version 2.0 (the
 * "License"); you may not use this file except in compliance
 * with the License.  You may obtain a copy of the License at
- 
+
 * http://www.apache.org/licenses/LICENSE-2.0
 
 * Unless required by applicable law or agreed to in writing,
@@ -17,22 +17,24 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.filter;
+package org.apache.directory.scim.server.rest;
 
-import java.io.IOException;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
+import org.apache.directory.scim.spec.protocol.Constants;
+import org.apache.directory.scim.ws.common.exception.RestServerException;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.core.MultivaluedMap;
-
-public class ApiOriginFilter implements ContainerResponseFilter {
+@Provider
+@Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+public class RestServerExceptionMapper implements ExceptionMapper<RestServerException> {
 
   @Override
-  public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-    MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-    headers.add("Access-Control-Allow-Origin", "*");
-    headers.add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-    headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  public Response toResponse(RestServerException e) {
+    return Response.status(e.getStatusCode())
+      .entity(e.getMessage())
+      .build();
   }
 }
