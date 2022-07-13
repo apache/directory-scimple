@@ -42,4 +42,25 @@
    <vulnerabilityName>CVE-2019-10247</vulnerabilityName>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[
+    Weld contains META-INF/client/probe.js which includes old versions of bootstrap and JQuery
+    Weld is only used in an example, and the JS client is not used
+    file name: weld-probe-core-4.0.3.Final.jar: probe.js]]></notes>
+    <packageUrl regex="true">^pkg:javascript/bootstrap@.*$</packageUrl>
+    <cve>CVE-2017-18214</cve>
+    <cve>CVE-2022-24785</cve>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2016-10735</cve>
+    <cve>CVE-2018-14040</cve>
+    <cve>CVE-2018-14041</cve>
+    <cve>CVE-2018-14042</cve>
+    <cve>CVE-2019-11358</cve>
+    <cve>CVE-2019-8331</cve>
+    <cve>CVE-2020-11022</cve>
+    <cve>CVE-2020-11023</cve>
+    <vulnerabilityName>Regular Expression Denial of Service (ReDoS)</vulnerabilityName>
+    <vulnerabilityName>reDOS - regular expression denial of service</vulnerabilityName>
+  </suppress>
+
 </suppressions>
