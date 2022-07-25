@@ -63,4 +63,12 @@
     <vulnerabilityName>reDOS - regular expression denial of service</vulnerabilityName>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[
+    False positive: wrong GAV
+    fan_platform is a python project
+    file name: junit-platform-engine-1.8.2.jar]]></notes>
+    <cpe>cpe:/a:fan_platform_project:fan_platform</cpe>
+  </suppress>
+
 </suppressions>
