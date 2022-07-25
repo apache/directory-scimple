@@ -53,41 +53,41 @@ public class ScimSelfClient implements AutoCloseable {
     this.invoke = invoke;
   }
 
-  public ScimUser getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+  public ScimUser get(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     ScimUser self;
-    Response response = this.selfResourceClient.getSelf(attributes, excludedAttributes);
+    Response response = this.selfResourceClient.get(attributes, excludedAttributes);
     self = BaseScimClient.handleResponse(response, ScimUser.class, response::readEntity);
 
     return self;
   }
 
-  public ScimUser getSelf() throws ScimException {
-    ScimUser self = this.getSelf(null, null);
+  public ScimUser get() throws ScimException {
+    ScimUser self = this.get(null, null);
 
     return self;
   }
 
-  public void updateSelf(ScimUser scimUser, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+  public void update(ScimUser scimUser, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     Response response = this.selfResourceClient.update(scimUser, attributes, excludedAttributes);
 
     BaseScimClient.handleResponse(response);
   }
 
-  public void updateSelf(ScimUser scimUser) throws ScimException {
-    this.updateSelf(scimUser, null, null);
+  public void update(ScimUser scimUser) throws ScimException {
+    this.update(scimUser, null, null);
   }
 
-  public void patchSelf(PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+  public void patch(PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
     Response response = this.selfResourceClient.patch(patchRequest, attributes, excludedAttributes);
 
     BaseScimClient.handleResponse(response);
   }
 
-  public void patchSelf(PatchRequest patchRequest) throws ScimException {
-    this.patchSelf(patchRequest, null, null);
+  public void patch(PatchRequest patchRequest) throws ScimException {
+    this.patch(patchRequest, null, null);
   }
 
-  public void deleteSelf() throws ScimException {
+  public void delete() throws ScimException {
     Response response = this.selfResourceClient.delete();
 
     BaseScimClient.handleResponse(response);
@@ -95,10 +95,6 @@ public class ScimSelfClient implements AutoCloseable {
 
   public RestCall getInvoke() {
     return this.invoke;
-  }
-
-  public void setInvoke(RestCall invoke) {
-    this.invoke = invoke;
   }
 
   @Override
@@ -109,7 +105,7 @@ public class ScimSelfClient implements AutoCloseable {
   private class SelfResourceClient implements SelfResource {
 
     @Override
-    public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+    public Response get(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
       Response response;
       Invocation request = ScimSelfClient.this.target
           .queryParam(BaseScimClient.ATTRIBUTES_QUERY_PARAM, attributes)

@@ -58,7 +58,7 @@ public class SelfResourceImplTest {
     selfResource.selfIdResolver = selfIdResolverInstance;
     selfResource.securityContext = securityContext;
 
-    Response response = selfResource.getSelf(null, null);
+    Response response = selfResource.get(null, null);
     assertThat(response.getEntity(), instanceOf(ErrorResponse.class));
     List<String> messages = ((ErrorResponse)response.getEntity()).getErrorMessageList();
     assertThat(messages, hasItem("Caller SelfIdResolver not available"));
@@ -90,6 +90,6 @@ public class SelfResourceImplTest {
     selfResource.userResource = userResource;
 
     // the response is just a passed along from the UserResource, so just validate it is the same instance.
-    assertThat(selfResource.getSelf(null, null), sameInstance(mockResponse));
+    assertThat(selfResource.get(null, null), sameInstance(mockResponse));
   }
 }

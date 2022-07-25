@@ -57,9 +57,13 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
   private final GenericType<ListResponse<T>> scimResourceListResponseGenericType;
   private final WebTarget target;
   private final InternalScimClient scimClient;
-  private RestCall invoke = Invocation::invoke;
+  private final RestCall invoke;
 
   public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType) {
+    this(client, baseUrl, scimResourceClass, scimResourceListGenericType, null);
+  }
+
+  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType, RestCall invoke) {
     ScimResourceType scimResourceType = scimResourceClass.getAnnotation(ScimResourceType.class);
     String endpoint = scimResourceType != null ? scimResourceType.endpoint() : null;
 
@@ -71,12 +75,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     this.scimResourceListResponseGenericType = scimResourceListGenericType;
     this.target = this.client.target(baseUrl).path(endpoint);
     this.scimClient = new InternalScimClient();
-  }
-
-  public BaseScimClient(Client client, String baseUrl, Class<T> scimResourceClass, GenericType<ListResponse<T>> scimResourceListGenericType, RestCall invoke) {
-    this(client, baseUrl, scimResourceClass, scimResourceListGenericType);
-
-    this.invoke = invoke;
+    this.invoke = invoke != null ? invoke : Invocation::invoke;
   }
 
   @Override
@@ -199,12 +198,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     return new ScimException(restException.getError(), restException.getStatus());
   }
 
-  public RestCall getInvoke() {
+  protected RestCall getInvoke() {
     return this.invoke;
-  }
-
-  public void setInvoke(RestCall invoke) {
-    this.invoke = invoke;
   }
 
   private class InternalScimClient implements BaseResourceTypeResource<T> {
@@ -217,7 +212,6 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
 
     @Override
     public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
           .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
@@ -225,18 +219,11 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .request(getContentType())
           .buildGet();
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
 
     @Override
     public Response query(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, FilterWrapper filter, AttributeReference sortBy, SortOrder sortOrder, Integer startIndex, Integer count) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
@@ -248,53 +235,32 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .request(getContentType())
           .buildGet();
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
 
     @Override
     public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
           .queryParam(EXCLUDED_ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(excludedAttributes))
           .request(getContentType())
           .buildPost(Entity.entity(resource, getContentType()));
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
 
     @Override
     public Response find(SearchRequest searchRequest) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .path(".search")
           .request(getContentType())
           .buildPost(Entity.entity(searchRequest, getContentType()));
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
 
     @Override
     public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
           .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
@@ -302,18 +268,11 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .request(getContentType())
           .buildPut(Entity.entity(resource, getContentType()));
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
 
     @Override
     public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
           .queryParam(ATTRIBUTES_QUERY_PARAM, nullOutQueryParamIfListIsNullOrEmpty(attributes))
@@ -321,30 +280,17 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
           .request(getContentType())
           .build("PATCH", Entity.entity(patchRequest, getContentType()));
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
 
     @Override
     public Response delete(String id) throws ScimException {
-      Response response;
       Invocation request = BaseScimClient.this.target
           .path(id)
           .request(getContentType())
           .buildDelete();
 
-      try {
-        response = BaseScimClient.this.invoke.apply(request);
-
-        return response;
-      } catch (RestException restException) {
-        throw toScimException(restException);
-      }
+      return executeRequest(request);
     }
     
     private AttributeReferenceListWrapper nullOutQueryParamIfListIsNullOrEmpty(AttributeReferenceListWrapper wrapper) {
@@ -357,6 +303,14 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
       }
       
       return wrapper;
+    }
+
+    private Response executeRequest(Invocation invocation) throws ScimException {
+      try {
+        return BaseScimClient.this.invoke.apply(invocation);
+      } catch (RestException restClientException) {
+        throw toScimException(restClientException);
+      }
     }
   }
 

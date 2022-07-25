@@ -90,8 +90,8 @@ public interface SelfResource {
     @ApiResponse(responseCode="500", description="Internal Server Error"),
     @ApiResponse(responseCode="501", description="Not Implemented")
   })
-    default Response getSelf(@Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                             @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+    default Response get(@Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
+                         @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 

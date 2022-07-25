@@ -54,7 +54,7 @@ public class SelfResourceImpl implements SelfResource {
   SecurityContext securityContext;
 
   @Override
-  public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
+  public Response get(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     try {
       String internalId = getInternalId();
       return userResource.getById(internalId, attributes, excludedAttributes);

@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
@@ -37,14 +38,19 @@ public class ResourceTypesClient implements AutoCloseable {
 
   private final Client client;
   private final WebTarget target;
-  private final ResourceTypesResourceClient resourceTypesResourceClient = new ResourceTypesResourceClient();
+  private final ResourceTypesResourceClient resourceTypesResourceClient;
 
   public ResourceTypesClient(Client client, String baseUrl) {
-    this.client = client;
-    this.target = this.client.target(baseUrl).path("ResourceTypes");
+    this(client, baseUrl, null);
   }
 
-  public List<ResourceType> getAllResourceTypes(String filter) throws RestException {
+  public ResourceTypesClient(Client client, String baseUrl, RestCall invoke) {
+    this.client = client;
+    this.target = this.client.target(baseUrl).path("ResourceTypes");
+    this.resourceTypesResourceClient = new ResourceTypesResourceClient(invoke);
+  }
+
+  public List<ResourceType> query(String filter) throws RestException {
     List<ResourceType> resourceTypes;
     Response response = this.resourceTypesResourceClient.getAllResourceTypes(filter);
 
@@ -58,7 +64,7 @@ public class ResourceTypesClient implements AutoCloseable {
     return resourceTypes;
   }
 
-  public Optional<ResourceType> getResourceType(String name) throws RestException, ProcessingException, IllegalStateException {
+  public Optional<ResourceType> get(String name) throws RestException, ProcessingException, IllegalStateException {
     Optional<ResourceType> resourceType;
     Response response = this.resourceTypesResourceClient.getResourceType(name);
 
@@ -76,6 +82,12 @@ public class ResourceTypesClient implements AutoCloseable {
   }
 
   private class ResourceTypesResourceClient implements ResourceTypesResource {
+
+    private final RestCall invoke;
+
+    private ResourceTypesResourceClient(RestCall invoke) {
+      this.invoke = invoke != null ? null : Invocation::invoke;
+    }
 
     @Override
     public Response getAllResourceTypes(String filter) throws RestException {

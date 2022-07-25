@@ -20,6 +20,7 @@
 package org.apache.directory.scim.client.rest;
 
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
