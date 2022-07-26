@@ -23,7 +23,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 
 import org.apache.directory.scim.client.rest.ScimUserClient;
-import org.apache.directory.scim.ws.common.RestCall;
+import org.apache.directory.scim.client.rest.RestCall;
 
 public class Version1ScimUserClient extends ScimUserClient {
 

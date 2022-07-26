@@ -50,10 +50,6 @@
       <artifactId>scim-spec-protocol</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.directory.scim</groupId>
-      <artifactId>scim-common-ws</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
@@ -102,10 +98,6 @@
       <groupId>eu.codearte.catch-exception</groupId>
       <artifactId>catch-exception</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.scim</groupId>
-      <artifactId>scim-common</artifactId>
     </dependency>
     <dependency>
       <groupId>com.flipkart.zjsonpatch</groupId>

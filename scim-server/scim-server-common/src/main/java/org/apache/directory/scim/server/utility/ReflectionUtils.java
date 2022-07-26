@@ -17,23 +17,25 @@
 * under the License.
 */
 
-package org.apache.directory.scim.client.rest;
+package org.apache.directory.scim.server.utility;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.core.GenericType;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.apache.directory.scim.spec.protocol.data.ListResponse;
-import org.apache.directory.scim.spec.resources.ScimGroup;
-
-public class ScimGroupClient extends BaseScimClient<ScimGroup> {
-
-  private static final GenericType<ListResponse<ScimGroup>> SCIM_GROUP_LIST = new GenericType<ListResponse<ScimGroup>>(){};
-
-  public ScimGroupClient(Client client, String baseUrl) {
-    super(client, baseUrl, ScimGroup.class, SCIM_GROUP_LIST);
+public final class ReflectionUtils {
+  private ReflectionUtils() {
   }
 
-  public ScimGroupClient(Client client, String baseUrl, RestCall invoke) {
-    super(client, baseUrl, ScimGroup.class, SCIM_GROUP_LIST, invoke);
+  public static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
+    List<Field> currentClassFields = new ArrayList<>();
+    Collections.addAll(currentClassFields, startClass.getDeclaredFields());
+    Class<?> parentClass = startClass.getSuperclass();
+    if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+      List<Field> parentClassFields = getFieldsUpTo(parentClass, exclusiveParent);
+      currentClassFields.addAll(parentClassFields);
+    }
+    return currentClassFields;
   }
 }

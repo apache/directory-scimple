@@ -47,13 +47,11 @@
   </properties>
 
   <modules>
-    <module>scim-common-ws</module>
     <module>scim-client</module>
     <module>scim-server</module>
     <module>scim-spec</module>
     <module>scim-tools</module>
     <module>scim-compliance</module>
-    <module>scim-common</module>
     <module>scim-coverage</module>
   </modules>
 
@@ -66,7 +64,7 @@
   <licenses>
     <license>
       <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
 
@@ -117,16 +115,6 @@
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-spec-schema</artifactId>
-        <version>2.23-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-common</artifactId>
-        <version>2.23-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-common-ws</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
       <dependency>

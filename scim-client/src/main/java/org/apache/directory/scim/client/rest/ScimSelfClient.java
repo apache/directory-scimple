@@ -31,8 +31,6 @@ import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListW
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.ws.common.RestCall;
-import org.apache.directory.scim.ws.common.exception.RestClientException;
 
 // purposefully does not extend BaseScimClient, has a different utility than other clients
 
