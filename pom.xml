@@ -51,7 +51,6 @@
     <module>scim-server</module>
     <module>scim-spec</module>
     <module>scim-tools</module>
-    <module>scim-compliance</module>
     <module>scim-coverage</module>
   </modules>
 
@@ -132,21 +131,11 @@
         <artifactId>scim-client</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-compliance-client</artifactId>
-        <version>2.23-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-compliance-server</artifactId>
-        <version>2.23-SNAPSHOT</version>
-      </dependency>
 
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
         <artifactId>weld-se-core</artifactId>
-        <version>5.0.1.Final</version>
+        <version>4.0.2.Final</version>
       </dependency>
       <dependency>
         <groupId>args4j</groupId>
@@ -179,14 +168,6 @@
         <version>${version.jackson}</version>
         <scope>import</scope>
         <type>pom</type>
-      </dependency>
-      <!-- update the version of jetty that restfuse uses, fixes CVE-2017-9735-->
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-bom</artifactId>
-        <version>11.0.11</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>
@@ -256,25 +237,6 @@
         <artifactId>assertj-core</artifactId>
         <version>3.23.1</version>
         <scope>test</scope>
-      </dependency>
-      <dependency>
-        <!-- RestFuse is no longer maintained -->
-        <groupId>com.restfuse</groupId>
-        <artifactId>com.eclipsesource.restfuse</artifactId>
-        <version>${version.restfuse}</version>
-        <exclusions>
-          <!-- exclude old jetty dependency -->
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-continuation</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <!-- Update the version of junit restfuse depends on -->
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.13.2</version>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
