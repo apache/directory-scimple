@@ -46,9 +46,6 @@ import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.SortOrder;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.ws.common.RestCall;
-import org.apache.directory.scim.ws.common.RestClientUtil;
-import org.apache.directory.scim.ws.common.exception.RestClientException;
 
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {
 

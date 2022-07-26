@@ -35,7 +35,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
-import org.apache.directory.scim.common.ScimUtils;
+import org.apache.directory.scim.server.utility.ReflectionUtils;
 import org.apache.directory.scim.server.ScimConfiguration;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
@@ -194,7 +194,7 @@ public class ProviderRegistry implements ScimConfiguration {
   }
 
   private static Schema generateBaseSchema(Class<?> clazz) throws InvalidProviderException {
-    List<Field> fieldList = ScimUtils.getFieldsUpTo(clazz, BaseResource.class);
+    List<Field> fieldList = ReflectionUtils.getFieldsUpTo(clazz, BaseResource.class);
 
     return generateSchema(clazz, fieldList);
   }
@@ -202,7 +202,7 @@ public class ProviderRegistry implements ScimConfiguration {
   private static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
     log.debug("----> In generateExtensionSchema");
     
-    return generateSchema(clazz, ScimUtils.getFieldsUpTo(clazz, Object.class));
+    return generateSchema(clazz, ReflectionUtils.getFieldsUpTo(clazz, Object.class));
   }
   
   public static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidProviderException {
@@ -420,7 +420,7 @@ public class ProviderRegistry implements ScimConfiguration {
           componentType = (Class<?>) stringListType.getActualTypeArguments()[0];
         }
         
-        List<Field> fl = ScimUtils.getFieldsUpTo(componentType, Object.class);
+        List<Field> fl = ReflectionUtils.getFieldsUpTo(componentType, Object.class);
         List<Attribute> la = createAttributes(urn, fl, invalidAttributes, nameBase + "." + f.getName());
           
         attribute.setSubAttributes(la, AddAction.APPEND);

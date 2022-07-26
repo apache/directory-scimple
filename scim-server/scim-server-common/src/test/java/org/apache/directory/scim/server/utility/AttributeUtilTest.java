@@ -24,7 +24,6 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.apache.directory.scim.common.ScimUtils;
 import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
@@ -70,9 +69,9 @@ public class AttributeUtilTest {
     registry = Mockito.mock(Registry.class);
     attributeUtil = new AttributeUtil();
     attributeUtil.registry = registry;
-    Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class, ScimUtils.getFieldsUpTo(ScimUser.class, BaseResource.class));
-    Schema scimEnterpriseUserSchema = ProviderRegistry.generateSchema(EnterpriseExtension.class, ScimUtils.getFieldsUpTo(EnterpriseExtension.class, Object.class));
-    Schema scimExampleSchema = ProviderRegistry.generateSchema(ExampleObjectExtension.class, ScimUtils.getFieldsUpTo(ExampleObjectExtension.class, Object.class));
+    Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class, ReflectionUtils.getFieldsUpTo(ScimUser.class, BaseResource.class));
+    Schema scimEnterpriseUserSchema = ProviderRegistry.generateSchema(EnterpriseExtension.class, ReflectionUtils.getFieldsUpTo(EnterpriseExtension.class, Object.class));
+    Schema scimExampleSchema = ProviderRegistry.generateSchema(ExampleObjectExtension.class, ReflectionUtils.getFieldsUpTo(ExampleObjectExtension.class, Object.class));
 
 
     Mockito.when(registry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);

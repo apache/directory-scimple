@@ -26,10 +26,22 @@
 
   <artifactId>scim-tools</artifactId>
   <name>SCIM - Tools</name>
-  <packaging>pom</packaging>
 
-  <modules>
-    <module>scim-tools-common</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.directory.scim</groupId>
+      <artifactId>scim-spec-schema</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.foodev</groupId>
+      <artifactId>jsondiff</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>

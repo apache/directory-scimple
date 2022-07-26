@@ -24,7 +24,6 @@ import jakarta.ws.rs.core.GenericType;
 
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.ws.common.RestCall;
 
 public class ScimUserClient extends BaseScimClient<ScimUser> {
 
