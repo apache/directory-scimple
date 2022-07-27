@@ -42,7 +42,7 @@
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-server-common</artifactId>
+        <artifactId>scim-server</artifactId>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
