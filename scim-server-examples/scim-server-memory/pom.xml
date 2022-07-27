@@ -19,12 +19,13 @@
 
   <parent>
     <groupId>org.apache.directory.scim</groupId>
-    <artifactId>scim-server-examples</artifactId>
+    <artifactId>scim-parent</artifactId>
     <version>2.23-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
   <artifactId>scim-server-memory</artifactId>
-  <name>SCIM - Server - Memory</name>
+  <name>SCIM - Server - Examples - Memory</name>
   <packaging>war</packaging>
 
   <dependencies>
@@ -34,7 +35,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.directory.scim</groupId>
-      <artifactId>scim-server-common</artifactId>
+      <artifactId>scim-server</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
