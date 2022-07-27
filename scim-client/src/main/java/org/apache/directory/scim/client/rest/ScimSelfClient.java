@@ -119,8 +119,8 @@ public class ScimSelfClient implements AutoCloseable {
 
       try {
         response = ScimSelfClient.this.invoke.apply(request);
-      } catch (RestClientException restClientException) {
-        throw BaseScimClient.toScimException(restClientException);
+      } catch (RestException restException) {
+        throw BaseScimClient.toScimException(restException);
       }
       return response;
     }
@@ -136,8 +136,8 @@ public class ScimSelfClient implements AutoCloseable {
 
       try {
         response = ScimSelfClient.this.invoke.apply(request);
-      } catch (RestClientException restClientException) {
-        throw BaseScimClient.toScimException(restClientException);
+      } catch (RestException restException) {
+        throw BaseScimClient.toScimException(restException);
       }
       return response;
     }
@@ -153,8 +153,8 @@ public class ScimSelfClient implements AutoCloseable {
 
       try {
         response = ScimSelfClient.this.invoke.apply(request);
-      } catch (RestClientException restClientException) {
-        throw BaseScimClient.toScimException(restClientException);
+      } catch (RestException restException) {
+        throw BaseScimClient.toScimException(restException);
       }
       return response;
     }
@@ -168,8 +168,8 @@ public class ScimSelfClient implements AutoCloseable {
 
       try {
         response = ScimSelfClient.this.invoke.apply(request);
-      } catch (RestClientException restClientException) {
-        throw BaseScimClient.toScimException(restClientException);
+      } catch (RestException restException) {
+        throw BaseScimClient.toScimException(restException);
       }
       return response;
     }

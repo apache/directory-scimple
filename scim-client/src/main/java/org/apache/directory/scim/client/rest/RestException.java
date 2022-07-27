@@ -35,40 +35,48 @@ package org.apache.directory.scim.client.rest;
 
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.core.Response;
+import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 
-public class RestClientException extends Exception {
+public class RestException extends Exception {
   private static final long serialVersionUID = 7360783673606191577L;
 
-  private int statusCode;
-  private ErrorMessage errorMessage;
+  private final int statusCode;
+  private final Response.Status status;
+  private ErrorResponse errorResponse;
 
-  public RestClientException(Response response) {
+  public RestException(Response response) {
     statusCode = response.getStatus();
+    status = response.getStatusInfo().toEnum();
     try {
-      errorMessage = response.readEntity(ErrorMessage.class);
+      errorResponse = response.readEntity(ErrorResponse.class);
     } catch (ProcessingException e) {
-      errorMessage = null;
+      errorResponse = null;
     }
   }
 
-  public RestClientException(int statusCode, ErrorMessage errorMessage) {
+  public RestException(int statusCode, ErrorResponse errorResponse) {
     this.statusCode = statusCode;
-    this.errorMessage = errorMessage;
+    this.status = Response.Status.fromStatusCode(statusCode);
+    this.errorResponse = errorResponse;
   }
 
   public int getStatusCode() {
     return statusCode;
   }
 
-  public ErrorMessage getErrorMessage() {
-    return errorMessage;
+  public Response.Status getStatus() {
+    return status;
+  }
+
+  public ErrorResponse getError() {
+    return errorResponse;
   }
 
   @Override
   public String getMessage() {
     String message = "Rest Client Exception: Status Code: " + statusCode + " ";
-    if (errorMessage != null) {
-      message += "Error Messages: " + errorMessage.getErrorMessageList();
+    if (errorResponse != null) {
+      message += "Error Message: " + errorResponse.getDetail();
     }
 
     return message;

@@ -195,13 +195,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     }
   }
 
-  static ScimException toScimException(RestClientException restClientException) {
-    ScimException scimException;
-    Status status = restClientException.getErrorMessage().getStatus();
-    ErrorResponse errorResponse = new ErrorResponse(status, String.join("\n", restClientException.getErrorMessage().getErrorMessageList()));
-    scimException = new ScimException(errorResponse, status);
-
-    return scimException;
+  static ScimException toScimException(RestException restException) {
+    return new ScimException(restException.getError(), restException.getStatus());
   }
 
   public RestCall getInvoke() {
@@ -234,8 +229,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
 
@@ -257,8 +252,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
 
@@ -275,8 +270,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
 
@@ -292,8 +287,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
 
@@ -311,8 +306,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
 
@@ -330,8 +325,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
 
@@ -347,8 +342,8 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
         response = BaseScimClient.this.invoke.apply(request);
 
         return response;
-      } catch (RestClientException restClientException) {
-        throw toScimException(restClientException);
+      } catch (RestException restException) {
+        throw toScimException(restException);
       }
     }
     

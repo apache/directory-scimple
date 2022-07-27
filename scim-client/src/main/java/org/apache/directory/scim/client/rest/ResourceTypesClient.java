@@ -44,7 +44,7 @@ public class ResourceTypesClient implements AutoCloseable {
     this.target = this.client.target(baseUrl).path("ResourceTypes");
   }
 
-  public List<ResourceType> getAllResourceTypes(String filter) throws RestClientException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
+  public List<ResourceType> getAllResourceTypes(String filter) throws RestException {
     List<ResourceType> resourceTypes;
     Response response = this.resourceTypesResourceClient.getAllResourceTypes(filter);
 
@@ -58,7 +58,7 @@ public class ResourceTypesClient implements AutoCloseable {
     return resourceTypes;
   }
 
-  public Optional<ResourceType> getResourceType(String name) throws RestClientException, ProcessingException, IllegalStateException, RestServerException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException {
+  public Optional<ResourceType> getResourceType(String name) throws RestException, ProcessingException, IllegalStateException {
     Optional<ResourceType> resourceType;
     Response response = this.resourceTypesResourceClient.getResourceType(name);
 
@@ -78,7 +78,7 @@ public class ResourceTypesClient implements AutoCloseable {
   private class ResourceTypesResourceClient implements ResourceTypesResource {
 
     @Override
-    public Response getAllResourceTypes(String filter) throws RestClientException {
+    public Response getAllResourceTypes(String filter) throws RestException {
       Response response = ResourceTypesClient.this.target
           .queryParam("filter", filter)
           .request("application/scim+json")
@@ -88,7 +88,7 @@ public class ResourceTypesClient implements AutoCloseable {
     }
 
     @Override
-    public Response getResourceType(String name) throws RestClientException {
+    public Response getResourceType(String name) throws RestException {
       Response response = ResourceTypesClient.this.target
           .path(name)
           .request("application/scim+json")
