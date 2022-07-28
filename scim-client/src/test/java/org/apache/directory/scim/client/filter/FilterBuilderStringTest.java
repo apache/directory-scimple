@@ -19,44 +19,35 @@
 
 package org.apache.directory.scim.client.filter;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
+import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.client.rest.FilterBuilder;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.junit.jupiter.api.Test;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class FilterBuilderStringTests {
+public class FilterBuilderStringTest {
 
   @Test
-  public void testEndsWith() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().endsWith("address.streetAddress", "Way").toString();
-     new Filter(decode(encoded));
+  public void testEndsWith() throws FilterParseException {
+    Filter filter = FilterBuilder.create().endsWith("address.streetAddress", "Way").build();
+    Filter expected = new Filter("address.streetAddress EW \"Way\"");
+    assertThat(filter).isEqualTo(expected);
   }
 
   @Test
-  public void testStartsWith()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().startsWith("address.streetAddress", "133").toString();
-    new Filter(decode(encoded));
+  public void testStartsWith()  throws FilterParseException {
+    Filter filter = FilterBuilder.create().startsWith("address.streetAddress", "133").build();
+    Filter expected = new Filter("address.streetAddress SW \"133\"");
+    assertThat(filter).isEqualTo(expected);
   }
 
   @Test
-  public void testContains()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().contains("address.streetAddress", "MacDuff").toString();
-    new Filter(decode(encoded));
-  }
-
-  private String decode(String encoded) throws UnsupportedEncodingException {
-
-    log.info(encoded);
-    
-    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
-    
-    log.info(decoded);
-    
-    return decoded;
+  public void testContains()  throws FilterParseException {
+    Filter filter = FilterBuilder.create().contains("address.streetAddress", "MacDuff").build();
+    Filter expected = new Filter("address.streetAddress CO \"MacDuff\"");
+    assertThat(filter).isEqualTo(expected);
   }
 }

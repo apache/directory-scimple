@@ -19,19 +19,23 @@
 
 package org.apache.directory.scim.client.filter;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
-
+import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.client.rest.FilterBuilder;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 public class FilterBuilderLessThanTest {
@@ -59,113 +63,125 @@ public class FilterBuilderLessThanTest {
   
   @ParameterizedTest
   @MethodSource("getIntExamples")
-  public void testLessThanT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThan("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanT_Int(Integer arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThan("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LT " + arg);
+    assertThat(filter).isEqualTo(expected);
   }
 
   @ParameterizedTest
   @MethodSource("getLongExamples")
-  public void testLessThanT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThan("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanT_Long(Long arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThan("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LT " + arg);
+    // values are parsed to integers, use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @ParameterizedTest
   @MethodSource("getFloatExamples")
-  public void testLessThanT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThan("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanT_Float(Float arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThan("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LT " + arg);
+    // values are parsed to doubles, use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @ParameterizedTest
   @MethodSource("getDoubleExamples")
-  public void testLessThanT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThan("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanT_Double(Double arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThan("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LT " + arg);
+    assertThat(filter).isEqualTo(expected);
   }
   
   
   @Test
-  public void testLessThanDate() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().lessThan("dog.dob", new Date()).toString();
-    new Filter(decode(encoded));
+  public void testLessThanDate() throws FilterParseException {
+    Date now = new Date();
+    Filter filter = FilterBuilder.create().lessThan("dog.dob", new Date()).build();
+    Filter expected = new Filter("dog.dob LT \"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS").format(now) + "\""); // FIXME: format is missing TZ
+    // TODO: dates are parsed to strings, for now use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
 
   @Test
-  public void testLessThanLocalDate() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().lessThan("dog.dob", LocalDate.now()).toString();
-    new Filter(decode(encoded));
+  public void testLessThanLocalDate() throws FilterParseException {
+    LocalDate now = LocalDate.now();
+    Filter filter = FilterBuilder.create().lessThan("dog.dob", now).build();
+    Filter expected = new Filter("dog.dob LT \"" + DateTimeFormatter.ISO_LOCAL_DATE.format(now) + "\"");
+    // TODO: dates are parsed to strings, for now use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
 
   @Test
-  public void testLessThanLocalDateTime() throws UnsupportedEncodingException, FilterParseException  {
-    String encoded = FilterClient.builder().lessThan("dog.dob", LocalDateTime.now()).toString();
-    new Filter(decode(encoded));
+  public void testLessThanLocalDateTime() throws FilterParseException  {
+    LocalDateTime now = LocalDateTime.now();
+    Filter filter = FilterBuilder.create().lessThan("dog.dob", now).build();
+    Filter expected = new Filter("dog.dob LT \"" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now) + "\"");
+    // TODO: dates are parsed to strings, for now use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
 
   @ParameterizedTest
   @MethodSource("getIntExamples")
-  public void testLessThanOrEqualsT_Int(Integer arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanOrEqualsT_Int(Integer arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LE " + arg);
+    assertThat(filter).isEqualTo(expected);
   }
 
   @ParameterizedTest
   @MethodSource("getLongExamples")
-  public void testLessThanOrEqualsT_Long(Long arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanOrEqualsT_Long(Long arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LE " + arg);
+    // values are parsed to doubles, use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @ParameterizedTest
   @MethodSource("getFloatExamples")
-  public void testLessThanOrEqualsT_Float(Float arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanOrEqualsT_Float(Float arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LE " + arg);
+    // values are parsed to doubles, use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @ParameterizedTest
   @MethodSource("getDoubleExamples")
-  public void testLessThanOrEqualsT_Double(Double arg) throws UnsupportedEncodingException, FilterParseException {
-    
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.weight", arg).toString();
-    new Filter(decode(encoded));
+  public void testLessThanOrEqualsT_Double(Double arg) throws FilterParseException {
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.weight", arg).build();
+    Filter expected = new Filter("dog.weight LE " + arg);
+    // values are parsed to doubles, use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @Test
-  public void testLessThanOrEqualsDate() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.dob", new Date()).toString();
-    new Filter(decode(encoded));
+  public void testLessThanOrEqualsDate() throws FilterParseException {
+    Date now = new Date();
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.dob", now).build();
+    Filter expected = new Filter("dog.dob LE \"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS").format(now) + "\""); // FIXME: format is missing TZ
+    // TODO: dates are parsed to strings, for now use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
 
   @Test
-  public void testLessThanOrEqualsLocalDate()  throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.dob", LocalDate.now()).toString();
-    new Filter(decode(encoded));
+  public void testLessThanOrEqualsLocalDate()  throws FilterParseException {
+    LocalDate now = LocalDate.now();
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.dob", now).build();
+    Filter expected = new Filter("dog.dob LE \"" + DateTimeFormatter.ISO_LOCAL_DATE.format(now) + "\"");
+    // TODO: dates are parsed to strings, for now use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
 
   @Test
-  public void testLessThanOrEqualsLocalDateTime() throws UnsupportedEncodingException, FilterParseException {
-    String encoded = FilterClient.builder().lessThanOrEquals("dog.dob", LocalDateTime.now()).toString();
-    new Filter(decode(encoded));
-  }
-
-  private String decode(String encoded) throws UnsupportedEncodingException {
-
-    log.info(encoded);
-    
-    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
-    
-    log.info(decoded);
-    
-    return decoded;
+  public void testLessThanOrEqualsLocalDateTime() throws FilterParseException {
+    LocalDateTime now = LocalDateTime.now();
+    Filter filter = FilterBuilder.create().lessThanOrEquals("dog.dob", now).build();
+    Filter expected = new Filter("dog.dob LE \"" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now) + "\"");
+    // TODO: dates are parsed to strings, for now use string comparison
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
 }

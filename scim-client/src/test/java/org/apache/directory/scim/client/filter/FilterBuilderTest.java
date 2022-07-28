@@ -19,206 +19,191 @@
 
 package org.apache.directory.scim.client.filter;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
+import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.client.rest.FilterBuilder;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import lombok.extern.slf4j.Slf4j;
+import java.beans.XMLEncoder;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
 public class FilterBuilderTest {
 
-//  address.type EQ "work"
-//  address.primary EQ true
-//  address.primary EQ false
-//  address.primary EQ null
-//  address.number EQ 123
-//  address.number EQ 123 OR address.primary EQ null
-//  address.number EQ 123 AND address.primary EQ null
-//  address.number EQ 123 OR NOT(address.primary EQ null)
-//  NOT(address.number EQ 123) OR NOT(address.primary EQ null)
-//  (address.number EQ 123) OR (address.primary EQ null)
-//  ((address.number EQ 123) OR (address.primary EQ null))
-//  address.primary PR
-//  NOT(address.primary PR)
-//  urn:scimscim:Custom+2.0:address EQ "work"
-//  urn:justlongenoughnidxxxxxxxxxxxxxxx:Custom:address EQ "work"
-//  urn:scim:Custom()+,-.:=@;$_!*\nss:address EQ "work"
-//  address.type2_-3 EQ "work"
-//
-//  Invalid:
-//  address.type EQ "work" MAYBE address.type EQ "home"
-//  address.type YZ "work"
-//  address.type EQ work
-//  address..type EQ "work"
-//  .address.type EQ "work"
-//  address[street[apt EQ "100"]]
-//  address[type EQ "work" AND street[apt EQ "100"]]
-//  urn:scim+scim:Custom:address EQ "work"
-//  urn:scim+scim:Custom.address EQ "work"
-//  urn:reallyreallyreallyreallylongnidxx:Custom:address EQ "work"
-//  address.type EQ "work" OR "home"
-//  NOT(address.primary)
-//  address^.type EQ "work"
-//  address,type EQ "work"
-//  address.2type EQ "work"
+  @Test
+  public void testSimpleAnd() throws FilterParseException {
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .and()
+      .equalTo("name.familyName", "Baggins")
+      .build();
+    assertThat(filter).isEqualTo(new Filter("name.givenName EQ \"Bilbo\" AND name.familyName EQ \"Baggins\""));
+  }
+  
+  @Test
+  public void testSimpleOr() throws FilterParseException {
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .or()
+      .equalTo("name.familyName", "Baggins").build();
 
-  
-  @Test
-  public void testSimpleAnd() throws UnsupportedEncodingException, FilterParseException {
-  
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and().equalTo("name.familyName", "Baggins").toString();
-  
-    String decoded = decode(encoded);
-    new Filter(decoded); 
+    assertThat(filter).isEqualTo(new Filter("name.givenName EQ \"Bilbo\" OR name.familyName EQ \"Baggins\""));
   }
   
   @Test
-  public void testSimpleOr() throws UnsupportedEncodingException, FilterParseException {
-  
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.familyName", "Baggins").toString();
-  
-    String decoded = decode(encoded);
-    new Filter(decoded); 
-  }
-  
-  @Test
-  public void testAndOrChain() throws UnsupportedEncodingException, FilterParseException {
-  
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").toString();
-  
-    String decoded = decode(encoded);
-    new Filter(decoded); 
-  }
-  
-  @Test
-  public void testAndOrChainComplex() throws UnsupportedEncodingException, FilterParseException {
-  
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").and(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).toString();
-  
-    String decoded = decode(encoded);
-    new Filter(decoded); 
-  }
-  
-  @Test
-  public void testOrAndChainComplex() throws UnsupportedEncodingException, FilterParseException {
-  
-    String encoded = FilterClient.builder().equalTo("name.givenName", "Bilbo").or(FilterClient.builder().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins").filter()).toString();
-  
-    String decoded = decode(encoded);
-    new Filter(decoded); 
-  }
-  
-  @Test
-  public void testComplexAnd() throws UnsupportedEncodingException, FilterParseException {
-  
-    FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
-    FilterClient.Builder b2 = FilterClient.builder().equalTo("address.streetAddress", "Underhill").or().equalTo("address.streetAddress", "Overhill").and().equalTo("address.postalCode", "16803");
-    
-    String encoded = FilterClient.builder().and(b1.filter(), b2.filter()).toString();
-    
-    String decoded = decode(encoded);
-    new Filter(decoded); 
-  }
-  
-  @Test
-  public void testNot() throws UnsupportedEncodingException, FilterParseException {
-    FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
+  public void testAndOrChain() throws FilterParseException, UnsupportedEncodingException {
 
-    String encoded = FilterClient.builder().not(b1.filter()).toString();
-    
-    String decoded = decode(encoded);
-    new Filter(decoded); 
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .or()
+      .equalTo("name.givenName", "Frodo")
+      .and()
+      .equalTo("name.familyName", "Baggins").build();
+
+    decode(filter.getFilter());
+
+    Filter expected = new Filter("(name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\"");
+
+    assertThat(filter).isEqualTo(expected);
   }
   
   @Test
-  public void testAttributeContains() throws UnsupportedEncodingException, FilterParseException {
-    
-    FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
-    FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
-    
-    String encoded = b2.toString();
-    
-    String decoded = decode(encoded);
-    new Filter(decoded); 
+  public void testAndOrChainComplex() throws FilterParseException, UnsupportedEncodingException {
+
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .and(FilterBuilder.create()
+        .equalTo("name.givenName", "Frodo")
+        .and()
+        .equalTo("name.familyName", "Baggins")
+        .filter())
+      .build();
+
+    decode(filter.getFilter());
+
+    Filter expected = new Filter("name.givenName EQ \"Bilbo\" AND (name.givenName EQ \"Frodo\" AND name.familyName EQ \"Baggins\")");
+    assertThat(filter).isEqualTo(expected);
   }
   
   @Test
-  public void testAttributeContainsEmbedded() throws UnsupportedEncodingException, FilterParseException {
+  public void testOrAndChainComplex() throws FilterParseException {
 
-    FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
-    FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
-    
-    FilterClient.Builder b3 = FilterClient.builder().attributeHas("address", b2.filter());
-   
-    String encoded = b3.toString();
-    
-    String decoded = decode(encoded);
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .or(FilterBuilder.create()
+        .equalTo("name.givenName", "Frodo")
+        .and()
+        .equalTo("name.familyName", "Baggins")
+        .filter())
+      .build();
 
-    assertThrows(FilterParseException.class, () -> new Filter(decoded));
+    Filter expected = new Filter("name.givenName EQ \"Bilbo\" OR (name.givenName EQ \"Frodo\" AND name.familyName EQ \"Baggins\")");
+
+    assertThat(filter).isEqualTo(expected);
   }
   
   @Test
-  public void testAttributeContainsDeeplyEmbedded() throws UnsupportedEncodingException, FilterParseException {
+  public void testComplexAnd() throws FilterParseException {
+  
+    FilterBuilder b1 = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .or()
+      .equalTo("name.givenName", "Frodo")
+      .and()
+      .equalTo("name.familyName", "Baggins");
 
-      FilterClient.Builder b1 = FilterClient.builder().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
-      FilterClient.Builder b2 = FilterClient.builder().attributeHas("address", b1.filter());
-      FilterClient.Builder b3 = FilterClient.builder().equalTo("name.giveName", "Gandalf").and(b2.filter());
-      FilterClient.Builder b4 = FilterClient.builder().attributeHas("address", b3.filter());
+    FilterBuilder b2 = FilterBuilder.create().equalTo("address.streetAddress", "Underhill")
+      .or()
+      .equalTo("address.streetAddress", "Overhill")
+      .and()
+      .equalTo("address.postalCode", "16803");
+    
+    Filter filter = FilterBuilder.create().and(b1.filter(), b2.filter()).build();
+
+    Filter expected = new Filter("((name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\") AND ((address.streetAddress EQ \"Underhill\" OR address.streetAddress EQ \"Overhill\") AND address.postalCode EQ \"16803\")");
+    
+    assertThat(filter).isEqualTo(expected);
+  }
+  
+  @Test
+  public void testNot() throws FilterParseException {
+    FilterBuilder b1 = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .or()
+      .equalTo("name.givenName", "Frodo")
+      .and()
+      .equalTo("name.familyName", "Baggins");
+
+    Filter filter = FilterBuilder.create().not(b1.filter()).build();
+    Filter expected = new Filter("NOT((name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\")");
+    assertThat(filter).isEqualTo(expected);
+  }
+  
+  @Test
+  public void testAttributeContains() throws FilterParseException {
+    
+    FilterBuilder b1 = FilterBuilder.create()
+      .equalTo("address.type", "work");
+    FilterBuilder b2 = FilterBuilder.create()
+      .attributeHas("address", b1.filter());
+    
+    Filter filter = b2.build();
+    Filter expected = new Filter("address[type EQ \"work\"]");
+
+    assertThat(filter).isEqualTo(expected);
+  }
+  
+  @Test
+  public void testAttributeContainsEmbedded() throws FilterParseException {
+
+    FilterBuilder b1 = FilterBuilder.create()
+      .equalTo("name.givenName", "Bilbo")
+      .or()
+      .equalTo("name.givenName", "Frodo")
+      .and()
+      .equalTo("name.familyName", "Baggins");
+
+    FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.filter());
+    
+    FilterBuilder b3 = FilterBuilder.create().attributeHas("address", b2.filter());
+
+    // TODO: I'm not sure why this test exists in the Client
+    // This should probably be a parsing test, and maybe the FilterBuilder should be smarter and throw an
+    // exception when this type Filter is created, instead of just when parsed.
+    String filterString = b3.build().toString();
+    assertThrows(FilterParseException.class, () -> new Filter(filterString));
+  }
+  
+  @Test
+  public void testAttributeContainsDeeplyEmbedded() throws FilterParseException {
+
+      FilterBuilder b1 = FilterBuilder.create().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
+      FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.filter());
+      FilterBuilder b3 = FilterBuilder.create().equalTo("name.giveName", "Gandalf").and(b2.filter());
+      FilterBuilder b4 = FilterBuilder.create().attributeHas("address", b3.filter());
 
       String encoded = b4.toString();
 
       String decoded = decode(encoded);
       assertThrows(FilterParseException.class, () -> new Filter(decoded));
   }
-  //@Test
-//  public void testNotSingleArg() throws UnsupportedEncodingException, FilterParseException {
-// 
-//     String encoded = filterBuilder.not(attributeComparisonExpression, LogicalOperator.AND, attributeComparisonExpression2).toString();
-// 
-//     String decoded = decode(encoded);
-//     Filter filter = new Filter(decoded);
-//  }
-//
-//  //@Test
-//  public void testAnd() throws UnsupportedEncodingException, FilterParseException {
-//
-//    String encoded = filterBuilder.and(attributeComparisonExpression, attributeComparisonExpression2).toString();
-//    
-//    String decoded = decode(encoded);
-//    Filter filter = new Filter(decoded);
-//  }
-//
-//  //@Test
-//  public void testOr() throws UnsupportedEncodingException, FilterParseException {
-//
-//    String encoded = filterBuilder.equalTo("addresses.postalCode", "16801")
-//                                  .and()
-//                                  .or(attributeComparisonExpression, attributeComparisonExpression2)
-//                                  .toString();
-//
-//    log.info(encoded);
-//    
-//    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
-//    
-//    log.info(decoded);
-//    
-//    Filter filter = new Filter(decoded);
-//  }
-  
-  private String decode(String encoded) throws UnsupportedEncodingException {
+
+  private String decode(String encoded) {
 
     log.info(encoded);
-    
-    String decoded = URLDecoder.decode(encoded, "UTF-8").replace("%20", " ");
-    
+
+    String decoded = URLDecoder.decode(encoded, UTF_8).replace("%20", " ");
+
     log.info(decoded);
-    
+
     return decoded;
   }
 

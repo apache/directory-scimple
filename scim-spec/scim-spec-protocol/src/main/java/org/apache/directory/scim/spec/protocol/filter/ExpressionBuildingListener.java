@@ -65,6 +65,11 @@ public class ExpressionBuildingListener extends FilterBaseListener {
     AttributeReference attributeReference = new AttributeReference(attributePath);
     String urn = attributeReference.getUrn();
     String parentAttributeName = attributeReference.getAttributeName();
+
+    if (expressionStack.size() == 0) {
+      throw new IllegalStateException("Invalid Expression " + ctx.attributePath);
+    }
+
     FilterExpression attributeExpression = (FilterExpression) expressionStack.pop();
     ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference, attributeExpression);
 
@@ -169,7 +174,11 @@ public class ExpressionBuildingListener extends FilterBaseListener {
       return false;
     } else {
       try {
-        return Double.parseDouble(jsonValue);
+        if(jsonValue.contains(".")) {
+          return Double.parseDouble(jsonValue);
+        } else {
+          return Integer.parseInt(jsonValue);
+        }
       } catch (NumberFormatException e) {
         LOG.warn("Unable to parse a json number: " + jsonValue);
       }
