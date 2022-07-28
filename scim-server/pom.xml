@@ -43,11 +43,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.directory.scim</groupId>
-      <artifactId>scim-spec-schema</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.scim</groupId>
-      <artifactId>scim-spec-protocol</artifactId>
+      <artifactId>scim-spec</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>

@@ -110,12 +110,7 @@
       <!-- Project Modules -->
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-spec-protocol</artifactId>
-        <version>2.23-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-spec-schema</artifactId>
+        <artifactId>scim-spec</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
       <dependency>
