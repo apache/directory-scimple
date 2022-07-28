@@ -63,8 +63,6 @@ public class FilterBuilderTest {
       .and()
       .equalTo("name.familyName", "Baggins").build();
 
-    decode(filter.getFilter());
-
     Filter expected = new Filter("(name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\"");
 
     assertThat(filter).isEqualTo(expected);
@@ -81,8 +79,6 @@ public class FilterBuilderTest {
         .equalTo("name.familyName", "Baggins")
         .build())
       .build();
-
-    decode(filter.getFilter());
 
     Filter expected = new Filter("name.givenName EQ \"Bilbo\" AND (name.givenName EQ \"Frodo\" AND name.familyName EQ \"Baggins\")");
     assertThat(filter).isEqualTo(expected);
@@ -185,21 +181,6 @@ public class FilterBuilderTest {
       FilterBuilder b3 = FilterBuilder.create().equalTo("name.giveName", "Gandalf").and(b2.build());
       FilterBuilder b4 = FilterBuilder.create().attributeHas("address", b3.build());
 
-      String encoded = b4.toString();
-
-      String decoded = decode(encoded);
-      assertThrows(FilterParseException.class, () -> new Filter(decoded));
+      assertThrows(FilterParseException.class, () -> new Filter( b4.toString()));
   }
-
-  private String decode(String encoded) {
-
-    log.info(encoded);
-
-    String decoded = URLDecoder.decode(encoded, UTF_8).replace("%20", " ");
-
-    log.info(decoded);
-
-    return decoded;
-  }
-
 }
