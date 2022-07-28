@@ -42,7 +42,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.spec.adapter.FilterWrapper;
+import org.apache.directory.scim.spec.protocol.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;

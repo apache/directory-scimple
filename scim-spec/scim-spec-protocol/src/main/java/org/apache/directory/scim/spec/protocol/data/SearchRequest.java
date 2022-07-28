@@ -29,8 +29,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.directory.scim.spec.adapter.AttributeReferenceAdapter;
-import org.apache.directory.scim.spec.adapter.FilterAdapter;
+import org.apache.directory.scim.spec.protocol.adapter.AttributeReferenceAdapter;
+import org.apache.directory.scim.spec.protocol.adapter.FilterAdapter;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;

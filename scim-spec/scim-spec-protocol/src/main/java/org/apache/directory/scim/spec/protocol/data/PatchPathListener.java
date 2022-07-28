@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.spec.protocol.data;
 
-import org.apache.directory.scim.server.filter.FilterParser.PatchPathFullContext;
-import org.apache.directory.scim.server.filter.FilterParser.PatchPathPartialContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.PatchPathFullContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.PatchPathPartialContext;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.filter.ExpressionBuildingListener;
 import org.apache.directory.scim.spec.protocol.filter.FilterExpression;

@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.spec.adapter.FilterWrapper;
+import org.apache.directory.scim.spec.protocol.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.Constants;

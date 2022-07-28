@@ -27,8 +27,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import org.apache.directory.scim.server.filter.FilterLexer;
-import org.apache.directory.scim.server.filter.FilterParser;
+import org.apache.directory.scim.spec.protocol.filter.FilterLexer;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.filter.ValuePathExpression;
 import lombok.Data;

@@ -26,17 +26,16 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.directory.scim.server.filter.FilterBaseListener;
-import org.apache.directory.scim.server.filter.FilterParser.AttributeCompareExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.AttributeGroupExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.AttributeLogicExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.AttributePresentExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterAttributeCompareExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterAttributePresentExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterGroupExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterLogicExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterValuePathExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributeCompareExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributeGroupExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributeLogicExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributePresentExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterAttributeCompareExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterAttributePresentExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterGroupExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterLogicExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterValuePathExpressionContext;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 
 public class ExpressionBuildingListener extends FilterBaseListener {

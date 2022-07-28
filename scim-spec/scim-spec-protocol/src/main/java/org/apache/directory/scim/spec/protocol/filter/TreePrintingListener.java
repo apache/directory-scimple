@@ -26,19 +26,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.directory.scim.server.filter.FilterParser.AttributeCompareExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.AttributeGroupExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.AttributeLogicExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.AttributePresentExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterAttributeCompareExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterAttributeExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterAttributePresentExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterGroupExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterLogicExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FilterValuePathExpressionContext;
-import org.apache.directory.scim.server.filter.FilterParser.FullAttributePathContext;
-import org.apache.directory.scim.server.filter.FilterParser.PartialAttributePathContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributeCompareExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributeGroupExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributeLogicExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.AttributePresentExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterAttributeCompareExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterAttributeExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterAttributePresentExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterGroupExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterLogicExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FilterValuePathExpressionContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.FullAttributePathContext;
+import org.apache.directory.scim.spec.protocol.filter.FilterParser.PartialAttributePathContext;
 
 public class TreePrintingListener extends ExpressionBuildingListener {
 

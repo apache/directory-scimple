@@ -63,7 +63,7 @@ import org.apache.directory.scim.server.provider.extensions.exceptions.ClientFil
 import org.apache.directory.scim.server.utility.AttributeUtil;
 import org.apache.directory.scim.server.utility.EndpointUtil;
 import org.apache.directory.scim.server.utility.EtagGenerator;
-import org.apache.directory.scim.spec.adapter.FilterWrapper;
+import org.apache.directory.scim.spec.protocol.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
