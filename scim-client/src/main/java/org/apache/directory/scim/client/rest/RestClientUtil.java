@@ -33,23 +33,9 @@ public final class RestClientUtil {
 
   }
 
-  public static void checkForSuccess(Response response) throws RestClientException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException, RestServerException {
+  public static void checkForSuccess(Response response) throws RestException{
     if (!isSuccessful(response)) {
-      int status = response.getStatus();
-      if (response.getStatusInfo().getFamily() == Family.SERVER_ERROR) {
-        throw new RestServerException(response);
-      } else if (status == 401 || status == 403) {
-        throw new ServiceAuthException(response);
-      } else if (status == 409) {
-        throw new ConflictingDataException(response);
-      } else if (status == 412) {
-        throw new BackingStoreChangedException(response);
-      } else if (status == Status.NOT_FOUND.getStatusCode()) {
-        //If the record doesn't exist let the client handle gracefully
-        return;
-      } else {
-        throw new RestClientException(response);
-      }
+      throw new RestException(response);
     }
   }
   
@@ -57,19 +43,14 @@ public final class RestClientUtil {
     try {
       verifyNotFourOhFour(target, response);
       return false;
-    } catch (RestClientException e) {
+    } catch (RestException e) {
       return true;
     }
   }
   
-  public static void verifyNotFourOhFour(WebTarget target, Response response) throws RestClientException {
+  public static void verifyNotFourOhFour(WebTarget target, Response response) throws RestException {
     if (response.getStatus() == Status.NOT_FOUND.getStatusCode()) {
-      try {
-        ErrorMessage em = response.readEntity(ErrorMessage.class);
-        throw new RestClientException(Status.NOT_FOUND.getStatusCode(), em);
-      } catch (ProcessingException pe) {
-        throw new BadUrlException(target.getUri().toASCIIString() + " could not be found");
-      }
+      throw new RestException(response);
     }
   }
 
@@ -119,19 +100,16 @@ public final class RestClientUtil {
    *          the type of entity
    * @return <code>Optional.empty()</code> if <b>Not Found</b> or empty
    *         response, otherwise <code>Optional.ofNullable(T)</code>
-   * @throws RestClientException
+   * @throws RestException
    *           if <code>response</code> is an error response other than
    *           <code>404 Not Found</code>
    * @throws ProcessingException
    *           see {@link Response#readEntity(Class)}
    * @throws IllegalStateException
    *           see {@link Response#readEntity(Class)}
-   * @throws RestServerException 
-   * @throws ServiceAuthException 
-   * @throws ConflictingDataException 
-   * @throws BackingStoreChangedException 
+   * @throws RestException
    */
-  public <T> Optional<T> tryReadEntity(Response response, Class<T> entityType) throws RestClientException, ProcessingException, IllegalStateException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException, RestServerException {
+  public <T> Optional<T> tryReadEntity(Response response, Class<T> entityType) throws RestException, ProcessingException, IllegalStateException{
     return readEntity(response, entityType, response::readEntity, Optional::ofNullable);
   }
 
@@ -144,19 +122,16 @@ public final class RestClientUtil {
    *          the type of entity
    * @return <code>Optional.empty()</code> if <code>Not Found</code> or empty
    *         response, otherwise <code>Optional.ofNullable(T)</code>
-   * @throws RestClientException
+   * @throws RestException
    *           if <code>response</code> is an error response other than
    *           <code>404 Not Found</code>
    * @throws ProcessingException
    *           see {@link Response#readEntity(GenericType)}
    * @throws IllegalStateException
    *           see {@link Response#readEntity(GenericType)}
-   * @throws RestServerException 
-   * @throws ServiceAuthException 
-   * @throws ConflictingDataException 
-   * @throws BackingStoreChangedException 
+   * @throws RestException
    */
-  public <T> Optional<T> tryReadEntity(Response response, GenericType<T> entityType) throws RestClientException, ProcessingException, IllegalStateException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException, RestServerException {
+  public <T> Optional<T> tryReadEntity(Response response, GenericType<T> entityType) throws RestException, ProcessingException, IllegalStateException {
     return readEntity(response, entityType, response::readEntity, Optional::ofNullable);
   }
 
@@ -174,19 +149,16 @@ public final class RestClientUtil {
    *          the type of entity
    * @return <code>Optional.empty()</code> if <code>Not Found</code>, otherwise
    *         <code>Optional.of(T)</code>
-   * @throws RestClientException
+   * @throws RestException
    *           if <code>response</code> is an error response other than
    *           <code>404 Not Found</code>
    * @throws ProcessingException
    *           see {@link Response#readEntity(Class)}
    * @throws IllegalStateException
    *           see {@link Response#readEntity(Class)}
-   * @throws RestServerException 
-   * @throws ServiceAuthException 
-   * @throws ConflictingDataException 
-   * @throws BackingStoreChangedException 
+   * @throws RestException
    */
-  public static <T> Optional<T> readEntity(Response response, Class<T> entityType) throws RestClientException, ProcessingException, IllegalStateException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException, RestServerException {
+  public static <T> Optional<T> readEntity(Response response, Class<T> entityType) throws RestException, ProcessingException, IllegalStateException{
     return readEntity(response, entityType, response::readEntity, Optional::of);
   }
 
@@ -204,23 +176,20 @@ public final class RestClientUtil {
    *          the type of entity
    * @return <code>Optional.empty()</code> if <code>Not Found</code>, otherwise
    *         <code>Optional.of(T)</code>
-   * @throws RestClientException
+   * @throws RestException
    *           if <code>response</code> is an error response other than
    *           <code>404 Not Found</code>
    * @throws ProcessingException
    *           see {@link Response#readEntity(GenericType)}
    * @throws IllegalStateException
    *           see {@link Response#readEntity(GenericType)}
-   * @throws RestServerException 
-   * @throws ServiceAuthException 
-   * @throws ConflictingDataException 
-   * @throws BackingStoreChangedException 
+   * @throws RestException
    */
-  public static <T> Optional<T> readEntity(Response response, GenericType<T> entityType) throws RestClientException, ProcessingException, IllegalStateException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException, RestServerException {
+  public static <T> Optional<T> readEntity(Response response, GenericType<T> entityType) throws RestException, ProcessingException, IllegalStateException{
     return readEntity(response, entityType, response::readEntity, Optional::of);
   }
 
-  private static <T, E> Optional<E> readEntity(Response response, T entityType, Function<T, E> readEntity, Function<E, Optional<E>> optionalOf) throws RestClientException, ProcessingException, IllegalStateException, BackingStoreChangedException, ConflictingDataException, ServiceAuthException, RestServerException {
+  private static <T, E> Optional<E> readEntity(Response response, T entityType, Function<T, E> readEntity, Function<E, Optional<E>> optionalOf) throws RestException, ProcessingException, IllegalStateException{
     Optional<E> result;
 
     if (response.getStatus() == Status.NOT_FOUND.getStatusCode()) {

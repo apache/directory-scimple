@@ -24,5 +24,5 @@ import jakarta.ws.rs.core.Response;
  */
 @FunctionalInterface
 public interface RestCall {
-  Response apply(Invocation request) throws RestClientException;
+  Response apply(Invocation request) throws RestException;
 }
