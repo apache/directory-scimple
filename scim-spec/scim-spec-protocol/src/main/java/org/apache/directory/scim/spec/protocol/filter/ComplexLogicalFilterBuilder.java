@@ -1,11 +1,6 @@
-package org.apache.directory.scim.client.rest;
+package org.apache.directory.scim.spec.protocol.filter;
 
-import org.apache.directory.scim.spec.protocol.filter.AttributeComparisonExpression;
-import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
-import org.apache.directory.scim.spec.protocol.filter.LogicalExpression;
-import org.apache.directory.scim.spec.protocol.filter.LogicalOperator;
-
-abstract class ComplexLogicalBuilder extends SimpleLogicalBuilder {
+abstract class ComplexLogicalFilterBuilder extends SimpleLogicalFilterBuilder {
 
     @Override
     public FilterBuilder or(FilterExpression fe1) {

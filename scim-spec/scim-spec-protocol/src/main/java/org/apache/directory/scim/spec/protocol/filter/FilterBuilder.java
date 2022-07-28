@@ -1,7 +1,5 @@
-package org.apache.directory.scim.client.rest;
+package org.apache.directory.scim.spec.protocol.filter;
 
-import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
-import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 
 import java.time.LocalDate;
@@ -14,13 +12,29 @@ public interface FilterBuilder {
 
   FilterBuilder and(FilterExpression fe1);
 
-  FilterBuilder and(FilterExpression fe1, FilterExpression fe2);
+  default FilterBuilder and(Filter filter) {
+    return and(filter.getExpression());
+  }
+
+  FilterBuilder and(FilterExpression left, FilterExpression right);
+
+  default FilterBuilder and(Filter left, Filter right) {
+    return and(left.getExpression(), right.getExpression());
+  }
 
   FilterBuilder or();
 
   FilterBuilder or(FilterExpression fe1);
 
-  FilterBuilder or(FilterExpression fe1, FilterExpression fe2);
+  default FilterBuilder or(Filter filter) {
+    return or(filter.getExpression());
+  }
+
+  FilterBuilder or(FilterExpression left, FilterExpression right);
+
+  default FilterBuilder or(Filter left, Filter right) {
+    return or(left.getExpression(), right.getExpression());
+  }
 
   FilterBuilder equalTo(String key, String value);
 
@@ -88,15 +102,23 @@ public interface FilterBuilder {
 
   FilterBuilder contains(String key, String value);
 
-  FilterBuilder not(FilterExpression filter);
+  FilterBuilder not(FilterExpression fe);
+
+  default FilterBuilder not(Filter filter) {
+    return not(filter.getExpression());
+  }
 
   FilterBuilder attributeHas(String attribute, FilterExpression filter) throws FilterParseException;
+
+  default FilterBuilder attributeHas(String attribute, Filter filter) throws FilterParseException {
+    return attributeHas(attribute, filter.getExpression());
+  }
 
   FilterExpression filter();
 
   Filter build();
 
   static FilterBuilder create() {
-    return new ComparisonBuilder();
+    return new FilterComparisonFilterBuilder();
   }
 }

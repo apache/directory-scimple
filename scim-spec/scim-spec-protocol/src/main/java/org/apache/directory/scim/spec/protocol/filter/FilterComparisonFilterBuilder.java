@@ -1,13 +1,12 @@
-package org.apache.directory.scim.client.rest;
+package org.apache.directory.scim.spec.protocol.filter;
 
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.filter.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-class ComparisonBuilder extends ComplexLogicalBuilder {
+class FilterComparisonFilterBuilder extends ComplexLogicalFilterBuilder {
 
     @Override
     public FilterBuilder equalTo(String key, String value) {

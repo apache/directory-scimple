@@ -17,19 +17,14 @@
 * under the License.
 */
 
-package org.apache.directory.scim.client.filter;
+package org.apache.directory.scim.spec.protocol.filter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.client.rest.FilterBuilder;
-import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.beans.XMLEncoder;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +79,7 @@ public class FilterBuilderTest {
         .equalTo("name.givenName", "Frodo")
         .and()
         .equalTo("name.familyName", "Baggins")
-        .filter())
+        .build())
       .build();
 
     decode(filter.getFilter());
@@ -102,7 +97,7 @@ public class FilterBuilderTest {
         .equalTo("name.givenName", "Frodo")
         .and()
         .equalTo("name.familyName", "Baggins")
-        .filter())
+        .build())
       .build();
 
     Filter expected = new Filter("name.givenName EQ \"Bilbo\" OR (name.givenName EQ \"Frodo\" AND name.familyName EQ \"Baggins\")");
@@ -126,7 +121,7 @@ public class FilterBuilderTest {
       .and()
       .equalTo("address.postalCode", "16803");
     
-    Filter filter = FilterBuilder.create().and(b1.filter(), b2.filter()).build();
+    Filter filter = FilterBuilder.create().and(b1.build(), b2.build()).build();
 
     Filter expected = new Filter("((name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\") AND ((address.streetAddress EQ \"Underhill\" OR address.streetAddress EQ \"Overhill\") AND address.postalCode EQ \"16803\")");
     
@@ -142,7 +137,7 @@ public class FilterBuilderTest {
       .and()
       .equalTo("name.familyName", "Baggins");
 
-    Filter filter = FilterBuilder.create().not(b1.filter()).build();
+    Filter filter = FilterBuilder.create().not(b1.build()).build();
     Filter expected = new Filter("NOT((name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\")");
     assertThat(filter).isEqualTo(expected);
   }
@@ -153,7 +148,7 @@ public class FilterBuilderTest {
     FilterBuilder b1 = FilterBuilder.create()
       .equalTo("address.type", "work");
     FilterBuilder b2 = FilterBuilder.create()
-      .attributeHas("address", b1.filter());
+      .attributeHas("address", b1.build());
     
     Filter filter = b2.build();
     Filter expected = new Filter("address[type EQ \"work\"]");
@@ -171,9 +166,9 @@ public class FilterBuilderTest {
       .and()
       .equalTo("name.familyName", "Baggins");
 
-    FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.filter());
+    FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.build());
     
-    FilterBuilder b3 = FilterBuilder.create().attributeHas("address", b2.filter());
+    FilterBuilder b3 = FilterBuilder.create().attributeHas("address", b2.build());
 
     // TODO: I'm not sure why this test exists in the Client
     // This should probably be a parsing test, and maybe the FilterBuilder should be smarter and throw an
@@ -186,9 +181,9 @@ public class FilterBuilderTest {
   public void testAttributeContainsDeeplyEmbedded() throws FilterParseException {
 
       FilterBuilder b1 = FilterBuilder.create().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
-      FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.filter());
-      FilterBuilder b3 = FilterBuilder.create().equalTo("name.giveName", "Gandalf").and(b2.filter());
-      FilterBuilder b4 = FilterBuilder.create().attributeHas("address", b3.filter());
+      FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.build());
+      FilterBuilder b3 = FilterBuilder.create().equalTo("name.giveName", "Gandalf").and(b2.build());
+      FilterBuilder b4 = FilterBuilder.create().attributeHas("address", b3.build());
 
       String encoded = b4.toString();
 

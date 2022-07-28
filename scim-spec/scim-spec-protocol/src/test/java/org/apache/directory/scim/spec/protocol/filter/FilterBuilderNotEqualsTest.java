@@ -17,15 +17,12 @@
 * under the License.
 */
 
-package org.apache.directory.scim.client.filter;
+package org.apache.directory.scim.spec.protocol.filter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.client.rest.FilterBuilder;
-import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.junit.jupiter.api.Test;
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

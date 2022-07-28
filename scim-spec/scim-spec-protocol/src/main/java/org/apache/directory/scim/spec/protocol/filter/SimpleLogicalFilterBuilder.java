@@ -1,11 +1,10 @@
-package org.apache.directory.scim.client.rest;
+package org.apache.directory.scim.spec.protocol.filter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.spec.protocol.filter.*;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 
 @Slf4j
-abstract class SimpleLogicalBuilder implements FilterBuilder {
+abstract class SimpleLogicalFilterBuilder implements FilterBuilder {
 
   protected FilterExpression filterExpression;
 
