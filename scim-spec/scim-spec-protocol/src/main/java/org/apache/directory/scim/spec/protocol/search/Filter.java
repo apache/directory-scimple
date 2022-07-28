@@ -19,23 +19,23 @@
 
 package org.apache.directory.scim.spec.protocol.search;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
 import org.apache.directory.scim.server.filter.FilterLexer;
 import org.apache.directory.scim.server.filter.FilterParser;
 import org.apache.directory.scim.spec.protocol.filter.ExpressionBuildingListener;
 import org.apache.directory.scim.spec.protocol.filter.FilterExpression;
 import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * 
@@ -60,7 +60,7 @@ public class Filter {
   public Filter(FilterExpression filterExpression) {
     log.debug("Creating a filter - {}", filterExpression);
     expression = filterExpression;
-    this.filter = filterExpression.toString();
+    this.filter = filterExpression.toFilter();
   }
   
   /**
@@ -98,5 +98,24 @@ public class Filter {
   @Override
   public String toString() {
     return expression.toFilter();
+  }
+
+
+  public String encode() {
+    String filterString = expression.toFilter();
+    return URLEncoder.encode(filterString, UTF_8).replace("+", "%20");
+  }
+
+  public static Filter decode(String encodedExpression) throws FilterParseException {
+    String decoded = URLDecoder.decode(encodedExpression, UTF_8).replace("%20", " ");
+    return new Filter(decoded);
+  }
+
+  public FilterExpression getExpression() {
+    return this.expression;
+  }
+
+  public String getFilter() {
+    return this.filter;
   }
 }
