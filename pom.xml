@@ -43,7 +43,7 @@
     <version.restfuse>1.2.0</version.restfuse>
     <version.slf4j>1.7.36</version.slf4j>
     <version.antlr4>4.5.3</version.antlr4>
-    <version.resteasy>6.0.3.Final</version.resteasy>
+    <version.resteasy>6.1.0.Final</version.resteasy>
   </properties>
 
   <modules>
