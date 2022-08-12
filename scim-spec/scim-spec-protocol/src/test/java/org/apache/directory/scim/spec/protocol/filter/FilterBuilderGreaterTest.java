@@ -67,7 +67,7 @@ public class FilterBuilderGreaterTest {
 
   @ParameterizedTest
   @MethodSource("getLongExamples")
-  public void getLongExamples(Long arg) throws FilterParseException {
+  public void testGreaterThan_Long(Long arg) throws FilterParseException {
     Filter filter = FilterBuilder.create().greaterThan("dog.weight", arg).build();
     Filter expected = new Filter("dog.weight GT " + arg);
     // values are parsed to integers, use string comparison
