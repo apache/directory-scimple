@@ -84,9 +84,9 @@ public class ProviderRegistry implements ScimConfiguration {
   private static final String BYTE_ARRAY_TYPE_IDENTIFIER = "class [B";
   private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class org.apache.directory.scim.spec.schema.ResourceReference$ReferenceType";
 
-  private final Registry registry;
+  private Registry registry;
 
-  private final ScimExtensionRegistry scimExtensionRegistry;
+  private ScimExtensionRegistry scimExtensionRegistry;
 
   // Weld needs the '? extends' or the providers will not be found, some CDI
   // implementations work fine with just <ScimResources>
@@ -100,6 +100,8 @@ public class ProviderRegistry implements ScimConfiguration {
     this.scimExtensionRegistry = scimExtensionRegistry;
     this.scimProviderInstances = scimProviderInstances;
   }
+
+  ProviderRegistry() {}
 
   @Override
   @SuppressWarnings("unchecked")

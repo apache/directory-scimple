@@ -55,6 +55,10 @@ public class SelfResourceImpl implements SelfResource {
     this.requestContext = requestContext;
   }
 
+  SelfResourceImpl() {
+    this(null, null, null);
+  }
+
   @Override
   public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     try {

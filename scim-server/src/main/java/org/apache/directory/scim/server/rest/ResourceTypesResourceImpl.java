@@ -49,6 +49,10 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     this.requestContext = requestContext;
   }
 
+  ResourceTypesResourceImpl() {
+    this(null, null);
+  }
+
   @Override
   public Response getAllResourceTypes(String filter) {
     

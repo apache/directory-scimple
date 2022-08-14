@@ -44,4 +44,8 @@ public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> imp
   public UserResourceImpl(Registry registry, ProviderRegistry providerRegistry, AttributeUtil attributeUtil, RequestContext requestContext, EtagGenerator etagGenerator) {
     super(registry, providerRegistry, attributeUtil, requestContext, etagGenerator, ScimUser.class);
   }
+
+  UserResourceImpl() {
+    this(null, null, null, null, null);
+  }
 }

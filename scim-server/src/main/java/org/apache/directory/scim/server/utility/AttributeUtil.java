@@ -78,6 +78,8 @@ public class AttributeUtil {
     objectMapper.registerModule(module);
   }
 
+  AttributeUtil() {}
+
   public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
     return setAttributesForDisplayInternal(resource, Returned.DEFAULT, Returned.REQUEST, Returned.NEVER);
   }

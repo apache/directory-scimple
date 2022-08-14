@@ -57,6 +57,10 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
     this.etagGenerator = etagGenerator;
   }
 
+  ServiceProviderConfigResourceImpl() {
+    this(null, null);
+  }
+
   @Override
   public Response getServiceProviderConfiguration(UriInfo uriInfo) {
     ServiceProviderConfiguration serviceProviderConfiguration = new ServiceProviderConfiguration();

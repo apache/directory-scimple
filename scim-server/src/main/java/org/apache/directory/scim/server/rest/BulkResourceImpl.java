@@ -105,6 +105,10 @@ public class BulkResourceImpl implements BulkResource {
     this.providerRegistry = providerRegistry;
   }
 
+  BulkResourceImpl() {
+    this(null, null);
+  }
+
   @Override
   public Response doBulk(BulkRequest request, UriInfo uriInfo) {
     BulkResponse response;

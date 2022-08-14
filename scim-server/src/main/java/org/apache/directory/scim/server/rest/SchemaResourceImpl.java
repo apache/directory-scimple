@@ -46,6 +46,10 @@ public class SchemaResourceImpl implements SchemaResource {
     this.registry = registry;
   }
 
+  SchemaResourceImpl() {
+    this(null);
+  }
+
   @Override
   public Response getAllSchemas(String filter, UriInfo uriInfo) {
 

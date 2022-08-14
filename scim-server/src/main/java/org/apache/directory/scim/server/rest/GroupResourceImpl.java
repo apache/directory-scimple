@@ -41,4 +41,8 @@ public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> i
   public GroupResourceImpl(Registry registry, ProviderRegistry providerRegistry, AttributeUtil attributeUtil, RequestContext requestContext, EtagGenerator etagGenerator) {
     super(registry, providerRegistry, attributeUtil, requestContext, etagGenerator, ScimGroup.class);
   }
+
+  GroupResourceImpl() {
+    this(null, null, null, null, null);
+  }
 }
