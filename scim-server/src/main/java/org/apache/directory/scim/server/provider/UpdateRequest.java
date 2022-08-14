@@ -119,33 +119,6 @@ public class UpdateRequest<T extends ScimResource> {
     initialized = true;
   }
 
-  /**
-   * @deprecated Use equivalent constructor
-   */
-  @Deprecated
-  public void initWithResource(String id, T original, T resource) {
-    this.id = id;
-    schema = registry.getSchema(original.getBaseUrn());
-
-    this.original = original;
-    this.resource = resource;
-
-    initialized = true;
-  }
-
-  /**
-   * @deprecated Use equivalent constructor
-   */
-  @Deprecated
-  public void initWithPatch(String id, T original, List<PatchOperation> patchOperations) {
-    this.id = id;
-    this.original = original;
-    this.patchOperations = patchOperations;
-    schema = registry.getSchema(original.getBaseUrn());
-
-    initialized = true;
-  }
-
   public T getResource() {
     if (!initialized) {
       throw new IllegalStateException("UpdateRequest was not initialized");
