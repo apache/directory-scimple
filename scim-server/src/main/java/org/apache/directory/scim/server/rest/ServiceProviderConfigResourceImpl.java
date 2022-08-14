@@ -47,20 +47,16 @@ import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.Suppor
 @ApplicationScoped
 public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigResource {
 
-  @Inject
-  ServerConfiguration serverConfiguration;
+  private final ServerConfiguration serverConfiguration;
+
+  private final EtagGenerator etagGenerator;
 
   @Inject
-  EtagGenerator etagGenerator;
-  
-  public ServiceProviderConfigResourceImpl() {
-    serverConfiguration = new ServerConfiguration();  
+  public ServiceProviderConfigResourceImpl(ServerConfiguration serverConfiguration, EtagGenerator etagGenerator) {
+    this.serverConfiguration = serverConfiguration;
+    this.etagGenerator = etagGenerator;
   }
-  
-  public void registerServerConfiguration(ServerConfiguration configuration) {
-    serverConfiguration = configuration;  
-  }
-  
+
   @Override
   public Response getServiceProviderConfiguration(UriInfo uriInfo) {
     ServiceProviderConfiguration serviceProviderConfiguration = new ServiceProviderConfiguration();

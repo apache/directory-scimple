@@ -96,11 +96,8 @@ public class UpdateRequestTest {
 
   @BeforeEach
   public void initialize() throws Exception {
-    providerRegistry = new ProviderRegistry();
     registry = new Registry();
-
-    providerRegistry.registry = registry;
-    providerRegistry.scimExtensionRegistry = ScimExtensionRegistry.getInstance();
+    providerRegistry = new ProviderRegistry(registry, ScimExtensionRegistry.getInstance(), null);
 
     Mockito.when(provider.getExtensionList())
            .thenReturn(Stream.of(EnterpriseExtension.class,ExampleObjectExtension.class).collect(Collectors.toList()));

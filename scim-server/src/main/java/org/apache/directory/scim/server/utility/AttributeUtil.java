@@ -61,13 +61,15 @@ import java.util.function.Function;
 @ApplicationScoped
 public class AttributeUtil {
 
-  @Inject
   Registry registry;
 
   ObjectMapper objectMapper;
 
-  @PostConstruct
-  public void init() { // TODO move this to a CDI producer
+  @Inject
+  public AttributeUtil(Registry registry) {
+    this.registry = registry;
+
+    // TODO move this to a CDI producer
     objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     objectMapper.setSerializationInclusion(Include.NON_NULL);

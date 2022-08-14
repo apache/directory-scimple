@@ -44,9 +44,8 @@ public class ProviderRegistryTest {
   ProviderRegistry providerRegistry;
   
   public ProviderRegistryTest() {
-    providerRegistry = new ProviderRegistry();
     registry = new Registry();
-    providerRegistry.registry = registry;
+    providerRegistry = new ProviderRegistry(registry, null, null);
   }
 
   @Test

@@ -23,7 +23,12 @@
 package org.apache.directory.scim.server.rest;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.server.provider.ProviderRegistry;
+import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.utility.AttributeUtil;
+import org.apache.directory.scim.server.utility.EtagGenerator;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 
@@ -34,7 +39,9 @@ import org.apache.directory.scim.spec.resources.ScimUser;
 @Slf4j
 @ApplicationScoped
 public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> implements UserResource {
-  public UserResourceImpl() {
-    super(ScimUser.class);
+
+  @Inject
+  public UserResourceImpl(Registry registry, ProviderRegistry providerRegistry, AttributeUtil attributeUtil, RequestContext requestContext, EtagGenerator etagGenerator) {
+    super(registry, providerRegistry, attributeUtil, requestContext, etagGenerator, ScimUser.class);
   }
 }

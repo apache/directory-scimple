@@ -23,15 +23,22 @@
 package org.apache.directory.scim.server.rest;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.server.provider.ProviderRegistry;
+import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.utility.AttributeUtil;
+import org.apache.directory.scim.server.utility.EtagGenerator;
 import org.apache.directory.scim.spec.protocol.GroupResource;
 import org.apache.directory.scim.spec.resources.ScimGroup;
+import org.apache.directory.scim.spec.resources.ScimUser;
 
 @Slf4j
 @ApplicationScoped
 public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> implements GroupResource {
 
-  public GroupResourceImpl() {
-    super(ScimGroup.class);
+  @Inject
+  public GroupResourceImpl(Registry registry, ProviderRegistry providerRegistry, AttributeUtil attributeUtil, RequestContext requestContext, EtagGenerator etagGenerator) {
+    super(registry, providerRegistry, attributeUtil, requestContext, etagGenerator, ScimGroup.class);
   }
 }

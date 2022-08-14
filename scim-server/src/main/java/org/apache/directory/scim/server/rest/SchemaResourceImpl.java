@@ -38,15 +38,16 @@ import org.apache.directory.scim.spec.schema.Schema;
 
 @ApplicationScoped
 public class SchemaResourceImpl implements SchemaResource {
-  
+
+  private final Registry registry;
+
   @Inject
-  Registry registry;
-  
-  @Context 
-  private UriInfo uriInfo;
-  
+  public SchemaResourceImpl(Registry registry) {
+    this.registry = registry;
+  }
+
   @Override
-  public Response getAllSchemas(String filter) {
+  public Response getAllSchemas(String filter, UriInfo uriInfo) {
 
     if (filter != null) {
       return Response.status(Status.FORBIDDEN).build();
@@ -74,7 +75,7 @@ public class SchemaResourceImpl implements SchemaResource {
   }
 
   @Override
-  public Response getSchema(String urn) {
+  public Response getSchema(String urn, UriInfo uriInfo) {
     
     Schema schema = registry.getSchema(urn);
     if (schema == null){

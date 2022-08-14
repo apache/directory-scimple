@@ -29,10 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
@@ -42,6 +39,7 @@ import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.directory.scim.server.provider.ProviderRegistry;
+import org.apache.directory.scim.server.schema.Registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +59,6 @@ import org.apache.directory.scim.server.provider.extensions.ProcessingExtension;
 import org.apache.directory.scim.server.provider.extensions.ScimRequestContext;
 import org.apache.directory.scim.server.provider.extensions.exceptions.ClientFilterException;
 import org.apache.directory.scim.server.utility.AttributeUtil;
-import org.apache.directory.scim.server.utility.EndpointUtil;
 import org.apache.directory.scim.server.utility.EtagGenerator;
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
@@ -85,30 +82,24 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
-  @Context
-  UriInfo uriInfo;
+  private final Registry registry;
 
-  @Context
-  Request request;
+  private final ProviderRegistry providerRegistry;
 
-  @Inject
-  ProviderRegistry providerRegistry;
+  private final  AttributeUtil attributeUtil;
 
-  @Inject
-  private AttributeUtil attributeUtil;
+  RequestContext requestContext;
 
-  @Inject
-  private EndpointUtil endpointUtil;
-
-  @Inject
-  private EtagGenerator etagGenerator;
-
-  @Inject
-  private Instance<UpdateRequest<T>> updateRequestInstance;
+  private final  EtagGenerator etagGenerator;
 
   private final Class<T> resourceClass;
 
-  protected BaseResourceTypeResourceImpl(Class<T> resourceClass) {
+  public BaseResourceTypeResourceImpl(Registry registry, ProviderRegistry providerRegistry, AttributeUtil attributeUtil, RequestContext requestContext, EtagGenerator etagGenerator, Class<T> resourceClass) {
+    this.registry = registry;
+    this.providerRegistry = providerRegistry;
+    this.attributeUtil = attributeUtil;
+    this.requestContext = requestContext;
+    this.etagGenerator = etagGenerator;
     this.resourceClass = resourceClass;
   }
 
@@ -126,7 +117,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    if (uriInfo.getQueryParameters().getFirst("filter") != null) {
+    if (requestContext.getUriInfo().getQueryParameters().getFirst("filter") != null) {
       return Response.status(Status.FORBIDDEN)
                      .build();
     }
@@ -134,7 +125,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     try {
       Provider<T> provider = getProviderInternal();
 
-      endpointUtil.process(uriInfo);
       T resource = null;
       try {
         resource = provider.get(id);
@@ -158,7 +148,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           return createETagErrorResponse();
         }
 
-        ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+        ResponseBuilder evaluatePreconditionsResponse = requestContext.getRequest().evaluatePreconditions(backingETag);
 
         if (evaluatePreconditionsResponse != null) {
           return Response.status(Status.NOT_MODIFIED)
@@ -262,7 +252,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createAmbiguousAttributeParametersResponse();
       }
 
-      endpointUtil.process(uriInfo);
       T created;
       try {
         created = provider.create(resource);
@@ -363,7 +352,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       ListResponse<T> listResponse = new ListResponse<>();
 
-      endpointUtil.process(uriInfo);
       FilterResponse<T> filterResp = null;
       try {
         filterResp = provider.find(filter, pageRequest, sortRequest);
@@ -454,7 +442,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createAmbiguousAttributeParametersResponse();
       }
 
-      endpointUtil.process(uriInfo);
       T stored;
       try {
         stored = provider.get(id);
@@ -478,7 +465,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createETagErrorResponse();
       }
 
-      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+      ResponseBuilder evaluatePreconditionsResponse = requestContext.getRequest().evaluatePreconditions(backingETag);
 
       if (evaluatePreconditionsResponse != null) {
         return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
@@ -486,8 +473,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T updated;
       try {
-        UpdateRequest<T> updateRequest = updateRequestInstance.get();
-        updateRequest.initWithResource(id, stored, resource);
+        UpdateRequest<T> updateRequest = new UpdateRequest<>(id, stored, resource, registry);
         updated = provider.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
@@ -556,7 +542,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createAmbiguousAttributeParametersResponse();
       }
 
-      endpointUtil.process(uriInfo);
       T stored;
       try {
         stored = provider.get(id);
@@ -580,7 +565,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return createETagErrorResponse();
       }
 
-      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+      ResponseBuilder evaluatePreconditionsResponse = requestContext.getRequest().evaluatePreconditions(backingETag);
 
       if (evaluatePreconditionsResponse != null) {
         return createPreconditionFailedResponse(id, evaluatePreconditionsResponse);
@@ -588,8 +573,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T updated;
       try {
-        UpdateRequest<T> updateRequest = updateRequestInstance.get();
-        updateRequest.initWithPatch(id, stored, patchRequest.getPatchOperationList());
+        UpdateRequest<T> updateRequest = new UpdateRequest<>(id, stored, patchRequest.getPatchOperationList(), registry);
         updated = provider.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
@@ -652,7 +636,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       Provider<T> provider = getProviderInternal();
 
       try {
-        endpointUtil.process(uriInfo);
         response = Response.noContent()
                            .build();
 
@@ -705,7 +688,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       LOG.warn("Provider must supply an id for a resource");
       id = "unknown";
     }
-    return uriInfo.getAbsolutePathBuilder()
+    return requestContext.getUriInfo().getAbsolutePathBuilder()
                   .path(id)
                   .build();
   }

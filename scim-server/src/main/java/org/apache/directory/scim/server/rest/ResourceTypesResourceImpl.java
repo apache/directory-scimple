@@ -39,12 +39,16 @@ import org.apache.directory.scim.spec.schema.ResourceType;
 @ApplicationScoped
 public class ResourceTypesResourceImpl implements ResourceTypesResource {
 
+  private final Registry registry;
+
+  private final RequestContext requestContext;
+
   @Inject
-  private Registry registry;
-  
-  @Context 
-  private UriInfo uriInfo;
-  
+  public ResourceTypesResourceImpl(Registry registry, RequestContext requestContext) {
+    this.registry = registry;
+    this.requestContext = requestContext;
+  }
+
   @Override
   public Response getAllResourceTypes(String filter) {
     
@@ -56,7 +60,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     
     for (ResourceType resourceType : resourceTypes) {
       Meta meta = new Meta();
-      meta.setLocation(uriInfo.getAbsolutePathBuilder().path(resourceType.getName()).build().toString());
+      meta.setLocation(requestContext.getUriInfo().getAbsolutePathBuilder().path(resourceType.getName()).build().toString());
       meta.setResourceType(resourceType.getResourceType());
       
       resourceType.setMeta(meta);
@@ -81,7 +85,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     }
     
     Meta meta = new Meta();
-    meta.setLocation(uriInfo.getAbsolutePath().toString());
+    meta.setLocation(requestContext.getUriInfo().getAbsolutePath().toString());
     meta.setResourceType(resourceType.getResourceType());
     
     resourceType.setMeta(meta);

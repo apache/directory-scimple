@@ -44,14 +44,18 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 public class SelfResourceImpl implements SelfResource {
 
-  @Inject
-  UserResource userResource;
+  private final UserResource userResource;
+
+  private final Instance<SelfIdResolver> selfIdResolver;
+
+  private final RequestContext requestContext;
 
   @Inject
-  Instance<SelfIdResolver> selfIdResolver;
-
-  @Context
-  SecurityContext securityContext;
+  public SelfResourceImpl(UserResource userResource, Instance<SelfIdResolver> selfIdResolver, RequestContext requestContext) {
+    this.userResource = userResource;
+    this.selfIdResolver = selfIdResolver;
+    this.requestContext = requestContext;
+  }
 
   @Override
   public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -122,7 +126,7 @@ public class SelfResourceImpl implements SelfResource {
   }
 
   private String getInternalId() throws UnableToResolveIdResourceException {
-    Principal callerPrincipal = securityContext.getUserPrincipal();
+    Principal callerPrincipal = requestContext.getSecurityContext().getUserPrincipal();
 
     if (callerPrincipal != null) {
       log.debug("Resolved SelfResource principal to : {}", callerPrincipal.getName());

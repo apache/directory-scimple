@@ -84,24 +84,21 @@ public class ProviderRegistry implements ScimConfiguration {
   private static final String BYTE_ARRAY_TYPE_IDENTIFIER = "class [B";
   private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class org.apache.directory.scim.spec.schema.ResourceReference$ReferenceType";
 
-  @Inject
-  Registry registry;
+  private final Registry registry;
 
-  @Inject
-  ScimExtensionRegistry scimExtensionRegistry;
+  private final ScimExtensionRegistry scimExtensionRegistry;
 
   // Weld needs the '? extends' or the providers will not be found, some CDI
   // implementations work fine with just <ScimResources>
-  @Inject
-  Instance<Provider<? extends ScimResource>> scimProviderInstances;
+  private Instance<Provider<? extends ScimResource>> scimProviderInstances;
 
   private Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
-  
-  public ProviderRegistry() {}
-  
-  public ProviderRegistry(Registry registry, ScimExtensionRegistry scimExtensionRegistry) {
+
+  @Inject
+  public ProviderRegistry(Registry registry, ScimExtensionRegistry scimExtensionRegistry, Instance<Provider<? extends ScimResource>> scimProviderInstances) {
     this.registry = registry;
     this.scimExtensionRegistry = scimExtensionRegistry;
+    this.scimProviderInstances = scimProviderInstances;
   }
 
   @Override

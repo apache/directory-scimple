@@ -67,8 +67,7 @@ public class AttributeUtilTest {
   @BeforeEach
   public void setup() throws Exception {
     registry = Mockito.mock(Registry.class);
-    attributeUtil = new AttributeUtil();
-    attributeUtil.registry = registry;
+    attributeUtil = new AttributeUtil(registry);
     Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class, ReflectionUtils.getFieldsUpTo(ScimUser.class, BaseResource.class));
     Schema scimEnterpriseUserSchema = ProviderRegistry.generateSchema(EnterpriseExtension.class, ReflectionUtils.getFieldsUpTo(EnterpriseExtension.class, Object.class));
     Schema scimExampleSchema = ProviderRegistry.generateSchema(ExampleObjectExtension.class, ReflectionUtils.getFieldsUpTo(ExampleObjectExtension.class, Object.class));
@@ -80,8 +79,6 @@ public class AttributeUtilTest {
     Mockito.when(registry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
     Mockito.when(registry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
     Mockito.when(registry.getAllSchemaUrns()).thenReturn(new HashSet<String>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
-
-    attributeUtil.init();
 
     objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.setSerializationInclusion(Include.NON_NULL);
