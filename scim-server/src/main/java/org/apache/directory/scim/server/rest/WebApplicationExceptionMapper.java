@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.server.rest;
 
-import jakarta.enterprise.inject.Specializes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -31,7 +30,6 @@ import jakarta.ws.rs.ext.Provider;
 
 import org.apache.directory.scim.spec.protocol.Constants;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
-
 
 @Provider
 @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})

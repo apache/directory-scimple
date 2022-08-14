@@ -31,12 +31,10 @@ import java.util.Set;
 
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.ws.rs.core.EntityTag;
-import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.apache.directory.scim.server.schema.Registry;

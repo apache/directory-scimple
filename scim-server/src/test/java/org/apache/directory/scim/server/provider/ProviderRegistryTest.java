@@ -21,16 +21,12 @@ package org.apache.directory.scim.server.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.enterprise.inject.Instance;
-
 import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.Schema;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
