@@ -30,9 +30,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
 
 import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
 
@@ -76,7 +78,7 @@ public interface SchemaResource {
   @Operation(description="Get All Schemas")
   @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
     array = @ArraySchema(schema = @Schema(implementation = org.apache.directory.scim.spec.schema.Schema.class))))
-  default Response getAllSchemas(@QueryParam("filter") String filter) {
+  default Response getAllSchemas(@QueryParam("filter") String filter, @Context UriInfo uriInfo) {
 
     if (filter != null) {
       return Response.status(Status.FORBIDDEN).build();
@@ -91,7 +93,7 @@ public interface SchemaResource {
   @Operation(description="Get Schemas by URN")
   @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
     schema = @Schema(implementation = org.apache.directory.scim.spec.schema.Schema.class)))
-  default Response getSchema(@PathParam("uri") String uri) {
+  default Response getSchema(@PathParam("uri") String uri, @Context UriInfo uriInfo) {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

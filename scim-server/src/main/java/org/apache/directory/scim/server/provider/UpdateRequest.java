@@ -54,8 +54,6 @@ import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +67,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Named
 @Slf4j
 @EqualsAndHashCode
 @ToString
@@ -94,8 +91,7 @@ public class UpdateRequest<T extends ScimResource> {
   private Registry registry;
 
   private Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
-  
-  @Inject
+
   public UpdateRequest(Registry registry) {
     this.registry = registry;
 
@@ -104,21 +100,21 @@ public class UpdateRequest<T extends ScimResource> {
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
-  public void initWithResource(String id, T original, T resource) {
+  public UpdateRequest(String id, T original, T resource, Registry registry) {
+    this(registry);
     this.id = id;
-    schema = registry.getSchema(original.getBaseUrn());
-
     this.original = original;
     this.resource = resource;
-
+    this.schema = registry.getSchema(original.getBaseUrn());
     initialized = true;
   }
 
-  public void initWithPatch(String id, T original, List<PatchOperation> patchOperations) {
+  public UpdateRequest(String id, T original, List<PatchOperation> patchOperations, Registry registry) {
+    this(registry);
     this.id = id;
     this.original = original;
     this.patchOperations = patchOperations;
-    schema = registry.getSchema(original.getBaseUrn());
+    this.schema = registry.getSchema(original.getBaseUrn());
 
     initialized = true;
   }

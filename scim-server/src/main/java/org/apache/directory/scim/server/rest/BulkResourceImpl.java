@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -96,14 +95,19 @@ public class BulkResourceImpl implements BulkResource {
 //    METHOD_NOT_IMPLEMENTED_STATUS.setCode(METHOD_NOT_IMPLEMENTED);
 //  }
 
-  @Inject
-  Registry registry;
+  private final Registry registry;
+
+  private final ProviderRegistry providerRegistry;
 
   @Inject
-  ProviderRegistry providerRegistry;
-  
-  @Inject
-  Instance<UpdateRequest<ScimResource>> updateRequestInstance;
+  public BulkResourceImpl(Registry registry, ProviderRegistry providerRegistry) {
+    this.registry = registry;
+    this.providerRegistry = providerRegistry;
+  }
+
+  BulkResourceImpl() {
+    this(null, null);
+  }
 
   @Override
   public Response doBulk(BulkRequest request, UriInfo uriInfo) {
@@ -284,8 +288,7 @@ public class BulkResourceImpl implements BulkResource {
 
         ScimResource original = provider.get(scimResourceId);
 
-        UpdateRequest<ScimResource> updateRequest = updateRequestInstance.get();
-        updateRequest.initWithResource(scimResourceId, original, scimResource);
+        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(scimResourceId, original, scimResource, registry);
         provider.update(updateRequest);
       } catch (UnresolvableOperationException unresolvableOperationException) {
         log.error("Could not complete final resolution pass, unresolvable bulkId", unresolvableOperationException);
@@ -454,8 +457,7 @@ public class BulkResourceImpl implements BulkResource {
       try {
         ScimResource original = provider.get(id);
 
-        UpdateRequest<ScimResource> updateRequest = updateRequestInstance.get();
-        updateRequest.initWithResource(id, original, scimResource);
+        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(id, original, scimResource, registry);
         
         provider.update(updateRequest);
         operationResult.setStatus(StatusWrapper.wrap(Status.OK));

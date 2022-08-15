@@ -41,7 +41,6 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -61,13 +60,15 @@ import java.util.function.Function;
 @ApplicationScoped
 public class AttributeUtil {
 
-  @Inject
   Registry registry;
 
   ObjectMapper objectMapper;
 
-  @PostConstruct
-  public void init() { // TODO move this to a CDI producer
+  @Inject
+  public AttributeUtil(Registry registry) {
+    this.registry = registry;
+
+    // TODO move this to a CDI producer
     objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     objectMapper.setSerializationInclusion(Include.NON_NULL);
@@ -76,6 +77,8 @@ public class AttributeUtil {
     module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(this.registry, this.objectMapper));
     objectMapper.registerModule(module);
   }
+
+  AttributeUtil() {}
 
   public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
     return setAttributesForDisplayInternal(resource, Returned.DEFAULT, Returned.REQUEST, Returned.NEVER);

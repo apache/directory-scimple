@@ -24,11 +24,9 @@ import java.security.Principal;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import jakarta.ws.rs.core.SecurityContext;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.server.provider.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.SelfResource;
@@ -44,14 +42,22 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 public class SelfResourceImpl implements SelfResource {
 
-  @Inject
-  UserResource userResource;
+  private final UserResource userResource;
+
+  private final Instance<SelfIdResolver> selfIdResolver;
+
+  private final RequestContext requestContext;
 
   @Inject
-  Instance<SelfIdResolver> selfIdResolver;
+  public SelfResourceImpl(UserResource userResource, Instance<SelfIdResolver> selfIdResolver, RequestContext requestContext) {
+    this.userResource = userResource;
+    this.selfIdResolver = selfIdResolver;
+    this.requestContext = requestContext;
+  }
 
-  @Context
-  SecurityContext securityContext;
+  SelfResourceImpl() {
+    this(null, null, null);
+  }
 
   @Override
   public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
@@ -122,7 +128,7 @@ public class SelfResourceImpl implements SelfResource {
   }
 
   private String getInternalId() throws UnableToResolveIdResourceException {
-    Principal callerPrincipal = securityContext.getUserPrincipal();
+    Principal callerPrincipal = requestContext.getSecurityContext().getUserPrincipal();
 
     if (callerPrincipal != null) {
       log.debug("Resolved SelfResource principal to : {}", callerPrincipal.getName());
