@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.server.rest;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.SecurityContext;
@@ -30,6 +31,7 @@ import lombok.Data;
  * removes the need to have field injection for @Context classes in other places.
  */
 @Data
+@ApplicationScoped
 public class RequestContext {
 
   @Context
