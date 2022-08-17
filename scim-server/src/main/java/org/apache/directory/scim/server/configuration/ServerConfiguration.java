@@ -79,8 +79,9 @@ public class ServerConfiguration {
     return Collections.unmodifiableList(authenticationSchemas);
   }
   
-  public void addAuthenticationSchema(AuthenticationSchema authenticationSchema) {
+  public ServerConfiguration addAuthenticationSchema(AuthenticationSchema authenticationSchema) {
     authenticationSchemas.add(authenticationSchema);
+    return this;
   }
 
   public SupportedConfiguration getChangePasswordConfiguration() {

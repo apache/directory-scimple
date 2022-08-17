@@ -50,6 +50,14 @@ import java.util.*;
 @Configuration
 public class ScimpleSpringConfiguration {
 
+// TODO: ServerConfiguration should be configured based on application.properties?
+// TODO: commented out for now, @ConditionalOnMissingBean would only work if this were an AutoConfig from another module
+//  @Bean
+//  @ConditionalOnMissingBean
+//  ServerConfiguration serverConfiguration() {
+//    return new ServerConfiguration();
+//  }
+
   @Bean
   @ConditionalOnMissingBean
   Registry registry() {
@@ -96,6 +104,7 @@ public class ScimpleSpringConfiguration {
         // basic beans, this could also be defined as @Beans above too
         bind(EtagGenerator.class).to(EtagGenerator.class);
         bind(AttributeUtil.class).to(AttributeUtil.class);
+//        bind(ServerConfiguration.class).to(ServerConfiguration.class);
       }
     });
     return config;

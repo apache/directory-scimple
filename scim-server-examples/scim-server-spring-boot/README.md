@@ -12,9 +12,9 @@ Run: `mvn spring-boot:run` and then access one of the endpoints:
 
 ```bash
 # httpie
-http :8080/Users
+http :8080/v2/Users
 
 # curl
-curl localhost:8080/Users
+curl localhost:8080/v2/Users
 ```
 n

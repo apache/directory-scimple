@@ -19,14 +19,15 @@
 
 package org.apache.directory.scim.example.spring.service;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
 
+import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.example.spring.extensions.LuckyNumberExtension;
+import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.server.provider.UpdateRequest;
@@ -34,10 +35,7 @@ import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
 import org.apache.directory.scim.spec.protocol.search.SortRequest;
-import org.apache.directory.scim.spec.resources.Email;
-import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.resources.ScimUser;
+import org.apache.directory.scim.spec.resources.*;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,7 +46,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class InMemoryUserService implements Provider<ScimUser> {
-  
+
   static final String DEFAULT_USER_ID = "1";
   static final String DEFAULT_USER_EXTERNAL_ID = "e" + DEFAULT_USER_ID;
   static final String DEFAULT_USER_DISPLAY_NAME = "User " + DEFAULT_USER_ID;
@@ -56,7 +54,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   static final String DEFAULT_USER_EMAIL_TYPE = "work";
   static final int DEFAULT_USER_LUCKY_NUMBER = 7;
 
-  private Map<String, ScimUser> users = new HashMap<>();
+  private final Map<String, ScimUser> users = new HashMap<>();
   
   @PostConstruct
   public void init() {
@@ -65,12 +63,15 @@ public class InMemoryUserService implements Provider<ScimUser> {
     user.setExternalId(DEFAULT_USER_EXTERNAL_ID);
     user.setUserName(DEFAULT_USER_EXTERNAL_ID);
     user.setDisplayName(DEFAULT_USER_DISPLAY_NAME);
+    user.setName(new Name()
+        .setGivenName("Tester")
+        .setFamilyName("McTest"));
     Email email = new Email();
     email.setDisplay(DEFAULT_USER_EMAIL_VALUE);
     email.setValue(DEFAULT_USER_EMAIL_VALUE);
     email.setType(DEFAULT_USER_EMAIL_TYPE);
     email.setPrimary(true);
-    user.setEmails(Arrays.asList(email));
+    user.setEmails(List.of(email));
     
     LuckyNumberExtension luckyNumberExtension = new LuckyNumberExtension();
     luckyNumberExtension.setLuckyNumber(DEFAULT_USER_LUCKY_NUMBER);
@@ -89,7 +90,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
    * @see Provider#create(ScimResource)
    */
   @Override
-  public ScimUser create(ScimUser resource) {
+  public ScimUser create(ScimUser resource) throws UnableToCreateResourceException {
     String resourceId = resource.getId();
     int idCandidate = resource.hashCode();
     String id = resourceId != null ? resourceId : Integer.toString(idCandidate);
@@ -98,8 +99,16 @@ public class InMemoryUserService implements Provider<ScimUser> {
       id = Integer.toString(idCandidate);
       ++idCandidate;
     }
-    users.put(id, resource);
+
+    // check to make sure the user doesn't already exist
+    boolean existingUserFound = users.values().stream()
+      .anyMatch(user -> user.getUserName().equals(resource.getUserName()));
+    if (existingUserFound) {
+      throw new UnableToCreateResourceException(Response.Status.CONFLICT, "User '" + resource.getUserName() + "' already exists.");
+    }
+
     resource.setId(id);
+    users.put(id, resource);
     return resource;
   }
 
@@ -135,7 +144,19 @@ public class InMemoryUserService implements Provider<ScimUser> {
    */
   @Override
   public FilterResponse<ScimUser> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
-    return new FilterResponse<>(users.values(), pageRequest, users.size());
+
+    long count = pageRequest.getCount() != null ? pageRequest.getCount() : users.size();
+    long startIndex = pageRequest.getStartIndex() != null
+      ? pageRequest.getStartIndex() - 1 // SCIM is 1-based indexed
+      : 0;
+
+    List<ScimUser> result = users.values().stream()
+      .skip(startIndex)
+      .limit(count)
+      .filter(user -> InMemoryScimFilterMatcher.matches(user, filter))
+      .toList();
+
+    return new FilterResponse<>(result, pageRequest, result.size());
   }
 
   /**
@@ -143,7 +164,6 @@ public class InMemoryUserService implements Provider<ScimUser> {
    */
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
-    return Arrays.asList(LuckyNumberExtension.class);
+    return List.of(LuckyNumberExtension.class);
   }
-
 }
