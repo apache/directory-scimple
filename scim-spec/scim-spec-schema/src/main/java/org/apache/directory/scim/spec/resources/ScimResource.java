@@ -26,6 +26,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
+import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidExtensionException;
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
@@ -83,6 +84,11 @@ public abstract class ScimResource extends BaseResource implements Serializable 
   public ScimResource(String urn) {
     super(urn);
     this.baseUrn = urn;
+
+    ScimResourceType resourceTypeAnnotation = getClass().getAnnotation(ScimResourceType.class);
+    if (resourceTypeAnnotation != null) {
+      this.meta = new Meta().setResourceType(resourceTypeAnnotation.id());
+    }
   }
 
   /**
