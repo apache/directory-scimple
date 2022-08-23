@@ -34,7 +34,6 @@ import jakarta.ws.rs.core.Response.Status;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.server.utility.EtagGenerator;
 import org.apache.directory.scim.spec.protocol.ServiceProviderConfigResource;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.schema.Meta;

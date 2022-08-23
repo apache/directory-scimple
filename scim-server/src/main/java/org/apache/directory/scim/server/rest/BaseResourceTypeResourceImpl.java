@@ -56,8 +56,6 @@ import org.apache.directory.scim.server.provider.extensions.AttributeFilterExten
 import org.apache.directory.scim.server.provider.extensions.ProcessingExtension;
 import org.apache.directory.scim.server.provider.extensions.ScimRequestContext;
 import org.apache.directory.scim.server.provider.extensions.exceptions.ClientFilterException;
-import org.apache.directory.scim.server.utility.AttributeUtil;
-import org.apache.directory.scim.server.utility.EtagGenerator;
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
@@ -92,13 +90,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private final Class<T> resourceClass;
 
-  public BaseResourceTypeResourceImpl(Registry registry, ProviderRegistry providerRegistry, AttributeUtil attributeUtil, RequestContext requestContext, EtagGenerator etagGenerator, Class<T> resourceClass) {
+  public BaseResourceTypeResourceImpl(Registry registry, ProviderRegistry providerRegistry, RequestContext requestContext, EtagGenerator etagGenerator, Class<T> resourceClass) {
     this.registry = registry;
     this.providerRegistry = providerRegistry;
-    this.attributeUtil = attributeUtil;
     this.requestContext = requestContext;
     this.etagGenerator = etagGenerator;
     this.resourceClass = resourceClass;
+    this.attributeUtil = new AttributeUtil(registry);
   }
 
   public Provider<T> getProvider() {

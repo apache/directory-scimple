@@ -35,7 +35,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
-import org.apache.directory.scim.server.utility.ReflectionUtils;
 import org.apache.directory.scim.server.ScimConfiguration;
 import org.apache.directory.scim.server.exception.InvalidProviderException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
