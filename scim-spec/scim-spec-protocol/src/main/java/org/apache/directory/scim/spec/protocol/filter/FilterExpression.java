@@ -21,7 +21,7 @@ package org.apache.directory.scim.spec.protocol.filter;
 
 public interface FilterExpression {
   
-  public String toFilter();
+  String toFilter();
 
   void setAttributePath(String urn, String parentAttributeName);
 

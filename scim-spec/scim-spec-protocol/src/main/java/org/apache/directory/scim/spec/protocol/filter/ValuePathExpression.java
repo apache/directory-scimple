@@ -37,13 +37,13 @@ public class ValuePathExpression implements FilterExpression {
     this.attributePath = attributePath;
   }
 
-  public static ValuePathExpression fromFilterExpression(AttributeReference attrRef, FilterExpression attributeExpression) throws FilterParseException {
+  public static ValuePathExpression fromFilterExpression(AttributeReference attrRef, FilterExpression attributeExpression) {
     ValuePathExpression vpe = new ValuePathExpression(attrRef, attributeExpression);
 
     return vpe;
   }
 
-  public static ValuePathExpression fromFilterExpression(String attribute, FilterExpression expression) throws FilterParseException {
+  public static ValuePathExpression fromFilterExpression(String attribute, FilterExpression expression) {
     AttributeReference attributeReference = new AttributeReference(attribute);
 
     return fromFilterExpression(attributeReference,  expression);

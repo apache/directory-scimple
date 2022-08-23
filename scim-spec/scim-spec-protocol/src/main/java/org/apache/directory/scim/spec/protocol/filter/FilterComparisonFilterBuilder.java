@@ -182,6 +182,16 @@ class FilterComparisonFilterBuilder extends ComplexLogicalFilterBuilder {
     }
 
     @Override
+    public FilterBuilder present(String key) {
+      AttributeReference ar = new AttributeReference(key);
+      FilterExpression filterExpression = new AttributePresentExpression(ar);
+
+      handleComparisonExpression(filterExpression);
+
+      return this;
+    }
+
+    @Override
     public <T extends Number> FilterBuilder greaterThan(String key, T value) {
       AttributeReference ar = new AttributeReference(key);
       FilterExpression filterExpression = new AttributeComparisonExpression(ar, CompareOperator.GT, value);
@@ -354,7 +364,7 @@ class FilterComparisonFilterBuilder extends ComplexLogicalFilterBuilder {
     }
 
     @Override
-    public FilterBuilder attributeHas(String attribute, FilterExpression expression) throws FilterParseException {
+    public FilterBuilder attributeHas(String attribute, FilterExpression expression) {
       handleComparisonExpression(ValuePathExpression.fromFilterExpression(attribute, expression));
 
       return this;
