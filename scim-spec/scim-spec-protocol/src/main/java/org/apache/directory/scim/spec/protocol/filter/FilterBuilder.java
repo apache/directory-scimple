@@ -5,12 +5,17 @@ import org.apache.directory.scim.spec.protocol.search.Filter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.function.UnaryOperator;
 
 public interface FilterBuilder {
 
   FilterBuilder and();
 
   FilterBuilder and(FilterExpression fe1);
+
+  default FilterBuilder and(UnaryOperator<FilterBuilder> filter) {
+    return and(filter.apply(FilterBuilder.create()).build());
+  }
 
   default FilterBuilder and(Filter filter) {
     return and(filter.getExpression());
@@ -22,6 +27,10 @@ public interface FilterBuilder {
     return and(left.getExpression(), right.getExpression());
   }
 
+  default FilterBuilder and(UnaryOperator<FilterBuilder> left, UnaryOperator<FilterBuilder> right) {
+    return and(left.apply(FilterBuilder.create()).build(), right.apply(FilterBuilder.create()).build());
+  }
+
   FilterBuilder or();
 
   FilterBuilder or(FilterExpression fe1);
@@ -30,10 +39,17 @@ public interface FilterBuilder {
     return or(filter.getExpression());
   }
 
+  default FilterBuilder or(UnaryOperator<FilterBuilder> filter) {
+    return or(filter.apply(FilterBuilder.create()).build());
+  }
+
   FilterBuilder or(FilterExpression left, FilterExpression right);
 
   default FilterBuilder or(Filter left, Filter right) {
     return or(left.getExpression(), right.getExpression());
+  }
+  default FilterBuilder or(UnaryOperator<FilterBuilder> left, UnaryOperator<FilterBuilder> right) {
+    return or(left.apply(FilterBuilder.create()).build(), right.apply(FilterBuilder.create()).build());
   }
 
   FilterBuilder equalTo(String key, String value);
@@ -102,15 +118,25 @@ public interface FilterBuilder {
 
   FilterBuilder contains(String key, String value);
 
+  FilterBuilder present(String key);
+
   FilterBuilder not(FilterExpression fe);
 
   default FilterBuilder not(Filter filter) {
     return not(filter.getExpression());
   }
 
-  FilterBuilder attributeHas(String attribute, FilterExpression filter) throws FilterParseException;
+  default FilterBuilder not(UnaryOperator<FilterBuilder> filter) {
+    return not(filter.apply(FilterBuilder.create()).build());
+  }
 
-  default FilterBuilder attributeHas(String attribute, Filter filter) throws FilterParseException {
+  FilterBuilder attributeHas(String attribute, FilterExpression filter);
+
+  default FilterBuilder attributeHas(String attribute, UnaryOperator<FilterBuilder> filter) {
+    return attributeHas(attribute, filter.apply(FilterBuilder.create()).build());
+  }
+
+  default FilterBuilder attributeHas(String attribute, Filter filter) {
     return attributeHas(attribute, filter.getExpression());
   }
 
