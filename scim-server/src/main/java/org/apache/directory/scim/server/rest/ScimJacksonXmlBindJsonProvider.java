@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
+import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.protocol.Constants;
 
 import jakarta.inject.Inject;
@@ -37,7 +37,7 @@ import jakarta.ws.rs.ext.Provider;
 public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
 
   @Inject
-  public ScimJacksonXmlBindJsonProvider(ObjectMapper objectMapper) {
-    super(objectMapper, DEFAULT_ANNOTATIONS);
+  public ScimJacksonXmlBindJsonProvider() {
+    super(ObjectMapperFactory.getObjectMapper(), DEFAULT_ANNOTATIONS);
   }
 }
