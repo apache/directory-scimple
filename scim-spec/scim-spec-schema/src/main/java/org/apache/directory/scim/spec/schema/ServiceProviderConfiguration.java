@@ -47,12 +47,48 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   public static class AuthenticationSchema {
 
     public enum Type {
-      @XmlEnumValue("oauth")
-      OAUTH, @XmlEnumValue("oauth2")
-      OAUTH2, @XmlEnumValue("oauthbearertoken")
-      OAUTH_BEARER, @XmlEnumValue("httpbasic")
-      HTTP_BASIC, @XmlEnumValue("httpdigest")
-      HTTP_DIGEST;
+      @XmlEnumValue("oauth") OAUTH(
+        "oauth",
+        "OAuth 1.0",
+        "Authentication scheme using the OAuth 1.0 Standard",
+        "https://www.rfc-editor.org/rfc/rfc5849.html"),
+      @XmlEnumValue("oauth2") OAUTH2(
+        "oauth2",
+        "OAuth 2.0",
+        "Authentication scheme using the OAuth 2.0 Standard",
+        "https://www.rfc-editor.org/rfc/rfc6749.html"),
+      @XmlEnumValue("oauthbearertoken") OAUTH_BEARER(
+        "oauthbearertoken",
+        "OAuth Bearer Token",
+        "Authentication scheme using the OAuth Bearer Token Standard",
+        "http://www.rfc-editor.org/info/rfc6750"),
+      @XmlEnumValue("httpbasic") HTTP_BASIC(
+        "httpbasic",
+        "HTTP Basic",
+        "Authentication scheme using the HTTP Basic Standard",
+        "http://www.rfc-editor.org/info/rfc2617"),
+      @XmlEnumValue("httpdigest") HTTP_DIGEST(
+        "httpdigest",
+        "HTTP Digest",
+        "Authentication scheme using the HTTP Digest Standard",
+        "https://www.rfc-editor.org/rfc/rfc7616.html");
+
+      private final String type;
+      private final String specUri;
+      private final String defaultName;
+      private final String defaultDescription;
+
+      Type(String type, String defaultName, String defaultDescription, String specUri) {
+        this.type = type;
+        this.defaultName = defaultName;
+        this.defaultDescription = defaultDescription;
+        this.specUri = specUri;
+      }
+
+      @Override
+      public String toString() {
+        return type;
+      }
     }
 
     @XmlElement
@@ -70,6 +106,30 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
     @XmlElement
     String documentationUri;
 
+    public static AuthenticationSchema oauth() {
+      return fromType(Type.OAUTH);
+    }
+
+    public static AuthenticationSchema oauth2() {
+      return fromType(Type.OAUTH2);
+    }
+    public static AuthenticationSchema oauthBearer() {
+      return fromType(Type.OAUTH_BEARER);
+    }
+    public static AuthenticationSchema httpBasic() {
+      return fromType(Type.HTTP_BASIC);
+    }
+    public static AuthenticationSchema httpDigest() {
+      return fromType(Type.HTTP_DIGEST);
+    }
+
+    private static AuthenticationSchema fromType(Type type) {
+      return new ServiceProviderConfiguration.AuthenticationSchema()
+        .setType(type)
+        .setName(type.defaultName)
+        .setDescription(type.defaultDescription)
+        .setSpecUri(type.specUri);
+    }
   }
 
   @Data
