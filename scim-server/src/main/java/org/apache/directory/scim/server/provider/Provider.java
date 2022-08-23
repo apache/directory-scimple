@@ -69,7 +69,7 @@ public interface Provider<T extends ScimResource> {
    * Allows the SCIM server's REST implementation to update and existing
    * resource via a PUT to a valid end-point.
    * 
-   * @param resource The ScimResource to update and persist.
+   * @param updateRequest The ScimResource to update and persist.
    * @return The newly updated ScimResource.
    * @throws UnableToUpdateResourceException When the ScimResource cannot be
    *         updated.
