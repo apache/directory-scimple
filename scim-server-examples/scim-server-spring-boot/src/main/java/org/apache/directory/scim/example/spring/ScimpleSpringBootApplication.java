@@ -20,7 +20,7 @@
 package org.apache.directory.scim.example.spring;
 
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
+import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -34,10 +34,7 @@ public class ScimpleSpringBootApplication {
 
   @Bean
   ServerConfiguration serverConfiguration() {
-    return new ServerConfiguration().addAuthenticationSchema(
-      new ServiceProviderConfiguration.AuthenticationSchema()
-      .setType(ServiceProviderConfiguration.AuthenticationSchema.Type.OAUTH_BEARER)
-        .setName(ServiceProviderConfiguration.AuthenticationSchema.Type.OAUTH_BEARER.name())
-        .setDescription("OAuth2 Bearer Token"));
+    return new ServerConfiguration()
+      .addAuthenticationSchema(AuthenticationSchema.oauthBearer());
   }
 }

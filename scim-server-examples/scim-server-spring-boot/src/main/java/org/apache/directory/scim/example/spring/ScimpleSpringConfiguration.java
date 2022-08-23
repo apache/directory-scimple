@@ -30,8 +30,7 @@ import org.apache.directory.scim.server.rest.RequestContext;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.apache.directory.scim.server.rest.UserResourceImpl;
 import org.apache.directory.scim.server.schema.Registry;
-import org.apache.directory.scim.server.utility.AttributeUtil;
-import org.apache.directory.scim.server.utility.EtagGenerator;
+import org.apache.directory.scim.server.rest.EtagGenerator;
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -103,7 +102,6 @@ public class ScimpleSpringConfiguration {
 
         // basic beans, this could also be defined as @Beans above too
         bind(EtagGenerator.class).to(EtagGenerator.class);
-        bind(AttributeUtil.class).to(AttributeUtil.class);
 //        bind(ServerConfiguration.class).to(ServerConfiguration.class);
       }
     });

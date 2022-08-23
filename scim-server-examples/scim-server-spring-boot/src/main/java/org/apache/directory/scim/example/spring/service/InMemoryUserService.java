@@ -22,6 +22,7 @@ package org.apache.directory.scim.example.spring.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 
@@ -31,6 +32,7 @@ import org.apache.directory.scim.server.exception.UnableToCreateResourceExceptio
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.provider.Provider;
 import org.apache.directory.scim.server.provider.UpdateRequest;
+import org.apache.directory.scim.server.schema.Registry;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -55,7 +57,13 @@ public class InMemoryUserService implements Provider<ScimUser> {
   static final int DEFAULT_USER_LUCKY_NUMBER = 7;
 
   private final Map<String, ScimUser> users = new HashMap<>();
-  
+
+  private final Registry registry;
+
+  public InMemoryUserService(Registry registry) {
+    this.registry = registry;
+  }
+
   @PostConstruct
   public void init() {
     ScimUser user = new ScimUser();
@@ -104,6 +112,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
     boolean existingUserFound = users.values().stream()
       .anyMatch(user -> user.getUserName().equals(resource.getUserName()));
     if (existingUserFound) {
+      // HTTP leaking into data layer
       throw new UnableToCreateResourceException(Response.Status.CONFLICT, "User '" + resource.getUserName() + "' already exists.");
     }
 
@@ -153,8 +162,8 @@ public class InMemoryUserService implements Provider<ScimUser> {
     List<ScimUser> result = users.values().stream()
       .skip(startIndex)
       .limit(count)
-      .filter(user -> InMemoryScimFilterMatcher.matches(user, filter))
-      .toList();
+      .filter(user -> InMemoryScimFilterMatcher.matches(user, registry.getSchema(ScimUser.SCHEMA_URI), filter))
+      .collect(Collectors.toList());
 
     return new FilterResponse<>(result, pageRequest, result.size());
   }
