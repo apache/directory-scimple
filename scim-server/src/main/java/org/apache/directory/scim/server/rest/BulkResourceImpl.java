@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.server.rest;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -502,7 +501,7 @@ public class BulkResourceImpl implements BulkResource {
   @AllArgsConstructor
   private static class UnresolvedComplex {
     private final Object object;
-    private final Field field;
+    private final Schema.AttributeAccessor accessor;
     private final String bulkIdKey;
 
     public void resolve(Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException {
@@ -512,12 +511,7 @@ public class BulkResourceImpl implements BulkResource {
 
       if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null) {
         String resolvedId = resolvedResource.getId();
-
-        try {
-          this.field.set(this.object, resolvedId);
-        } catch (IllegalAccessException illegalAccessException) {
-          log.error("Failed to access bulkId field", illegalAccessException);
-        }
+        this.accessor.set(this.object, resolvedId);
       } else {
         throw new UnresolvableOperationException(String.format(BULK_ID_REFERS_TO_FAILED_RESOURCE, this.bulkIdKey));
       }
@@ -526,7 +520,7 @@ public class BulkResourceImpl implements BulkResource {
 
   @AllArgsConstructor
   private static abstract class UnresolvedTopLevel {
-    protected final Field field;
+    protected final Schema.AttributeAccessor accessor;
 
     public abstract void resolve(ScimResource scimResource, Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException;
   }
@@ -534,8 +528,8 @@ public class BulkResourceImpl implements BulkResource {
   private static class UnresolvedTopLevelBulkId extends UnresolvedTopLevel {
     private final String unresolvedBulkIdKey;
 
-    public UnresolvedTopLevelBulkId(Field field, String bulkIdKey) {
-      super(field);
+    public UnresolvedTopLevelBulkId(Schema.AttributeAccessor accessor, String bulkIdKey) {
+      super(accessor);
       this.unresolvedBulkIdKey = bulkIdKey;
     }
 
@@ -548,11 +542,7 @@ public class BulkResourceImpl implements BulkResource {
       if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null) {
         String resolvedId = resolvedResource.getId();
 
-        try {
-          super.field.set(scimResource, resolvedId);
-        } catch (IllegalAccessException illegalAccessException) {
-          log.error("Failed to access bulkId field", illegalAccessException);
-        }
+        super.accessor.set(scimResource, resolvedId);
       } else {
         throw new UnresolvableOperationException("Bulk ID cannot be resolved because the resource it refers to had failed to be created: " + this.unresolvedBulkIdKey);
       }
@@ -563,22 +553,18 @@ public class BulkResourceImpl implements BulkResource {
     public final Object complex;
     public final List<UnresolvedComplex> unresolveds;
 
-    public UnresolvedTopLevelComplex(Field field, Object complex, List<UnresolvedComplex> unresolveds) {
-      super(field);
+    public UnresolvedTopLevelComplex(Schema.AttributeAccessor accessor, Object complex, List<UnresolvedComplex> unresolveds) {
+      super(accessor);
       this.complex = complex;
       this.unresolveds = unresolveds;
     }
 
     @Override
     public void resolve(ScimResource scimResource, Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException {
-      try {
-        for (UnresolvedComplex unresolved : this.unresolveds) {
-          unresolved.resolve(bulkIdKeyToOperationResult);
-        }
-        this.field.set(scimResource, this.complex);
-      } catch (IllegalAccessException illegalAccessException) {
-        log.error("Could not resolve top level SCIM resource", illegalAccessException);
+      for (UnresolvedComplex unresolved : this.unresolveds) {
+        unresolved.resolve(bulkIdKeyToOperationResult);
       }
+      this.accessor.set(scimResource, this.complex);
     }
   }
 
@@ -600,54 +586,50 @@ public class BulkResourceImpl implements BulkResource {
     List<Schema.Attribute> attributes = attribute.getAttributes();
 
     for (Schema.Attribute subAttribute : attributes) {
-      Field attributeField = subAttribute.getField();
+      Schema.AttributeAccessor accessor = subAttribute.getAccessor();
 
-      try {
-        if (subAttribute.isScimResourceIdReference()) {
-          // TODO - This will fail if field is a char or Character array
-          String bulkIdKey = (String) attributeField.get(attributeValue);
+      if (subAttribute.isScimResourceIdReference()) {
+        // TODO - This will fail if field is a char or Character array
+        String bulkIdKey = accessor.get(attributeValue);
 
-          if (bulkIdKey != null && bulkIdKey.startsWith("bulkId:")) {
-            log.debug("Found bulkId: {}", bulkIdKey);
-            if (bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
-              BulkOperation resolvedOperationResult = bulkIdKeyToOperationResult.get(bulkIdKey);
-              BaseResource response = resolvedOperationResult.getResponse();
-              ScimResource resolvedResource = resolvedOperationResult.getData();
+        if (bulkIdKey != null && bulkIdKey.startsWith("bulkId:")) {
+          log.debug("Found bulkId: {}", bulkIdKey);
+          if (bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
+            BulkOperation resolvedOperationResult = bulkIdKeyToOperationResult.get(bulkIdKey);
+            BaseResource response = resolvedOperationResult.getResponse();
+            ScimResource resolvedResource = resolvedOperationResult.getData();
 
-              if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null && resolvedResource.getId() != null) {
-                String resolvedId = resolvedResource.getId();
+            if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null && resolvedResource.getId() != null) {
+              String resolvedId = resolvedResource.getId();
 
-                attributeField.set(attributeValue, resolvedId);
-              } else {
-                UnresolvedComplex unresolved = new UnresolvedComplex(attributeValue, attributeField, bulkIdKey);
-
-                unresolveds.add(unresolved);
-              }
+              accessor.set(attributeValue, resolvedId);
             } else {
-              throw new UnresolvableOperationException(String.format(BULK_ID_DOES_NOT_EXIST, bulkIdKey));
+              UnresolvedComplex unresolved = new UnresolvedComplex(attributeValue, accessor, bulkIdKey);
+
+              unresolveds.add(unresolved);
             }
-          }
-        } else if (subAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
-          Object subFieldValue = attributeField.get(attributeValue);
-
-          if (subFieldValue != null) {
-            Class<?> subFieldClass = subFieldValue.getClass();
-            boolean isCollection = Collection.class.isAssignableFrom(subFieldClass);
-
-            if (isCollection || subFieldClass.isArray()) {
-              @SuppressWarnings("unchecked")
-              Collection<Object> subFieldValues = isCollection ? (Collection<Object>) subFieldValue : Arrays.asList((Object[]) subFieldValue);
-
-              for (Object subArrayFieldValue : subFieldValues) {
-                resolveAttribute(unresolveds, subArrayFieldValue, subAttribute, bulkIdKeyToOperationResult);
-              }
-            } else {
-              resolveAttribute(unresolveds, subFieldValue, subAttribute, bulkIdKeyToOperationResult);
-            }
+          } else {
+            throw new UnresolvableOperationException(String.format(BULK_ID_DOES_NOT_EXIST, bulkIdKey));
           }
         }
-      } catch (IllegalAccessException illegalAccessException) {
-        log.error("Could not resolve bulkId within ScimResource attribute", illegalAccessException);
+      } else if (subAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
+        Object subFieldValue = accessor.get(attributeValue);
+
+        if (subFieldValue != null) {
+          Class<?> subFieldClass = subFieldValue.getClass();
+          boolean isCollection = Collection.class.isAssignableFrom(subFieldClass);
+
+          if (isCollection || subFieldClass.isArray()) {
+            @SuppressWarnings("unchecked")
+            Collection<Object> subFieldValues = isCollection ? (Collection<Object>) subFieldValue : Arrays.asList((Object[]) subFieldValue);
+
+            for (Object subArrayFieldValue : subFieldValues) {
+              resolveAttribute(unresolveds, subArrayFieldValue, subAttribute, bulkIdKeyToOperationResult);
+            }
+          } else {
+            resolveAttribute(unresolveds, subFieldValue, subAttribute, bulkIdKeyToOperationResult);
+          }
+        }
       }
     }
     log.debug("Resolved attribute had {} unresolved fields", unresolveds.size());
@@ -671,61 +653,57 @@ public class BulkResourceImpl implements BulkResource {
     List<UnresolvedTopLevel> unresolvedTopLevels = new ArrayList<>();
 
     for (Schema.Attribute attribute : schema.getAttributes()) {
-      Field attributeField = attribute.getField();
+      Schema.AttributeAccessor accessor = attribute.getAccessor();
 
-      try {
-        if (attribute.isScimResourceIdReference()) {
-          String bulkIdKey = (String) attributeField.get(scimResource);
+      if (attribute.isScimResourceIdReference()) {
+        String bulkIdKey = accessor.get(scimResource);
 
-          if (bulkIdKey != null && bulkIdKey.startsWith("bulkId:")) {
-            if (bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
-              BulkOperation resolvedOperationResult = bulkIdKeyToOperationResult.get(bulkIdKey);
-              BaseResource response = resolvedOperationResult.getResponse();
-              ScimResource resolvedResource = resolvedOperationResult.getData();
+        if (bulkIdKey != null && bulkIdKey.startsWith("bulkId:")) {
+          if (bulkIdKeyToOperationResult.containsKey(bulkIdKey)) {
+            BulkOperation resolvedOperationResult = bulkIdKeyToOperationResult.get(bulkIdKey);
+            BaseResource response = resolvedOperationResult.getResponse();
+            ScimResource resolvedResource = resolvedOperationResult.getData();
 
-              if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null) {
-                String resolvedId = resolvedResource.getId();
+            if ((response == null || !(response instanceof ErrorResponse)) && resolvedResource != null) {
+              String resolvedId = resolvedResource.getId();
 
-                attributeField.set(scimResource, resolvedId);
-              } else {
-                UnresolvedTopLevel unresolved = new UnresolvedTopLevelBulkId(attributeField, bulkIdKey);
-
-                attributeField.set(scimResource, null);
-                unresolvedTopLevels.add(unresolved);
-              }
+              accessor.set(scimResource, resolvedId);
             } else {
-              throw new UnresolvableOperationException(String.format(BULK_ID_DOES_NOT_EXIST, bulkIdKey));
-            }
-          }
-        } else if (attribute.getType() == Schema.Attribute.Type.COMPLEX) {
-          Object attributeFieldValue = attributeField.get(scimResource);
+              UnresolvedTopLevel unresolved = new UnresolvedTopLevelBulkId(accessor, bulkIdKey);
 
-          if (attributeFieldValue != null) {
-            List<UnresolvedComplex> subUnresolveds = new ArrayList<>();
-            Class<?> subFieldClass = attributeFieldValue.getClass();
-            boolean isCollection = Collection.class.isAssignableFrom(subFieldClass);
-
-            if (isCollection || subFieldClass.isArray()) {
-              @SuppressWarnings("unchecked")
-              Collection<Object> subFieldValues = isCollection ? (Collection<Object>) attributeFieldValue : Arrays.asList((Object[]) attributeFieldValue);
-
-              for (Object subArrayFieldValue : subFieldValues) {
-                resolveAttribute(subUnresolveds, subArrayFieldValue, attribute, bulkIdKeyToOperationResult);
-              }
-            } else {
-              resolveAttribute(subUnresolveds, attributeFieldValue, attribute, bulkIdKeyToOperationResult);
-            }
-
-            if (subUnresolveds.size() > 0) {
-              UnresolvedTopLevel unresolved = new UnresolvedTopLevelComplex(attributeField, attributeFieldValue, subUnresolveds);
-
-              attributeField.set(scimResource, null);
+              accessor.set(scimResource, null);
               unresolvedTopLevels.add(unresolved);
             }
+          } else {
+            throw new UnresolvableOperationException(String.format(BULK_ID_DOES_NOT_EXIST, bulkIdKey));
           }
         }
-      } catch (IllegalAccessException illegalAccessException) {
-        log.error("Failed to access a ScimResource ID reference field to resolve it", illegalAccessException);
+      } else if (attribute.getType() == Schema.Attribute.Type.COMPLEX) {
+        Object attributeFieldValue = accessor.get(scimResource);
+
+        if (attributeFieldValue != null) {
+          List<UnresolvedComplex> subUnresolveds = new ArrayList<>();
+          Class<?> subFieldClass = attributeFieldValue.getClass();
+          boolean isCollection = Collection.class.isAssignableFrom(subFieldClass);
+
+          if (isCollection || subFieldClass.isArray()) {
+            @SuppressWarnings("unchecked")
+            Collection<Object> subFieldValues = isCollection ? (Collection<Object>) attributeFieldValue : Arrays.asList((Object[]) attributeFieldValue);
+
+            for (Object subArrayFieldValue : subFieldValues) {
+              resolveAttribute(subUnresolveds, subArrayFieldValue, attribute, bulkIdKeyToOperationResult);
+            }
+          } else {
+            resolveAttribute(subUnresolveds, attributeFieldValue, attribute, bulkIdKeyToOperationResult);
+          }
+
+          if (subUnresolveds.size() > 0) {
+            UnresolvedTopLevel unresolved = new UnresolvedTopLevelComplex(accessor, attributeFieldValue, subUnresolveds);
+
+            accessor.set(scimResource, null);
+            unresolvedTopLevels.add(unresolved);
+          }
+        }
       }
     }
     if (unresolvedTopLevels.size() > 0) {
@@ -781,39 +759,32 @@ public class BulkResourceImpl implements BulkResource {
 
   private static void generateReverseDependenciesGraph(Map<String, Set<String>> reverseDependenciesGraph, String dependentBulkId, Object scimObject, List<Schema.Attribute> scimObjectAttributes) {
     for (Schema.Attribute scimObjectAttribute : scimObjectAttributes)
-      try {
-        if (scimObjectAttribute.isScimResourceIdReference()) {
-          String reference = (String) scimObjectAttribute.getField()
-                                                         .get(scimObject);
+      if (scimObjectAttribute.isScimResourceIdReference()) {
+        String reference = scimObjectAttribute.getAccessor().get(scimObject);
 
-          if (reference != null && reference.startsWith("bulkId:")) {
-            Set<String> dependents = reverseDependenciesGraph.computeIfAbsent(reference, (unused) -> new HashSet<>());
+        if (reference != null && reference.startsWith("bulkId:")) {
+          Set<String> dependents = reverseDependenciesGraph.computeIfAbsent(reference, (unused) -> new HashSet<>());
 
-            dependents.add("bulkId:" + dependentBulkId);
-          }
-        } else if (scimObjectAttribute.isMultiValued()) { // all multiValueds
-                                                          // are COMPLEX, not
-                                                          // all COMPLEXES are
-                                                          // multiValued
-          Object attributeObject = scimObjectAttribute.getField()
-                                                      .get(scimObject);
-          Class<?> attributeObjectClass = attributeObject.getClass();
-          boolean isCollection = Collection.class.isAssignableFrom(attributeObjectClass);
-          Collection<?> attributeValues = isCollection ? (Collection<?>) attributeObject : Arrays.asList(attributeObject);
-          List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
+          dependents.add("bulkId:" + dependentBulkId);
+        }
+      } else if (scimObjectAttribute.isMultiValued()) { // all multiValueds
+                                                        // are COMPLEX, not
+                                                        // all COMPLEXES are
+                                                        // multiValued
+        Object attributeObject = scimObjectAttribute.getAccessor().get(scimObject);
+        Class<?> attributeObjectClass = attributeObject.getClass();
+        boolean isCollection = Collection.class.isAssignableFrom(attributeObjectClass);
+        Collection<?> attributeValues = isCollection ? (Collection<?>) attributeObject : Arrays.asList(attributeObject);
+        List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
 
-          for (Object attributeValue : attributeValues) {
-            generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
-          }
-        } else if (scimObjectAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
-          Object attributeValue = scimObjectAttribute.getField()
-                                                     .get(scimObject);
-          List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
-
+        for (Object attributeValue : attributeValues) {
           generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
         }
-      } catch (IllegalAccessException illegalAccessException) {
-        log.error("Resolving reverse dependencies", illegalAccessException);
+      } else if (scimObjectAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
+        Object attributeValue = scimObjectAttribute.getAccessor().get(scimObject);
+        List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
+
+        generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
       }
   }
 

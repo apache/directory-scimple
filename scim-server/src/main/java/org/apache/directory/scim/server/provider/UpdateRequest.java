@@ -54,7 +54,6 @@ import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -149,12 +148,12 @@ public class UpdateRequest<T extends ScimResource> {
 
   private void sortMultiValuedCollections(Object obj1, Object obj2, AttributeContainer ac) throws IllegalArgumentException, IllegalAccessException {
     for (Attribute attribute : ac.getAttributes()) {
-      Field field = attribute.getField();
+      Schema.AttributeAccessor accessor = attribute.getAccessor();
       if (attribute.isMultiValued()) {
         @SuppressWarnings("unchecked")
-        List<Object> collection1 = obj1 != null ? (List<Object>) field.get(obj1) : null;
+        List<Object> collection1 = obj1 != null ? (List<Object>) accessor.get(obj1) : null;
         @SuppressWarnings("unchecked")
-        List<Object> collection2 = obj2 != null ? (List<Object>) field.get(obj2) : null;
+        List<Object> collection2 = obj2 != null ? (List<Object>) accessor.get(obj2) : null;
         
         Set<Object> priorities = findCommonElements(collection1, collection2);
         PrioritySortingComparitor prioritySortingComparitor = new PrioritySortingComparitor(priorities);
@@ -166,8 +165,8 @@ public class UpdateRequest<T extends ScimResource> {
           Collections.sort(collection2, prioritySortingComparitor);
         }
       } else if (attribute.getType() == Attribute.Type.COMPLEX) {
-        Object nextObj1 = obj1 != null ? field.get(obj1) : null;
-        Object nextObj2 = obj2 != null ? field.get(obj2) : null;
+        Object nextObj1 = obj1 != null ? accessor.get(obj1) : null;
+        Object nextObj2 = obj2 != null ? accessor.get(obj2) : null;
         sortMultiValuedCollections(nextObj1, nextObj2, attribute);
       }
     }
@@ -595,8 +594,7 @@ public class UpdateRequest<T extends ScimResource> {
       }
 
       Attribute attribute = ac.getAttribute(attributeName);
-      Field field = attribute.getField();
-      return field.get(object);
+      return attribute.getAccessor().get(object);
     }
   }
 

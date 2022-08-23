@@ -191,19 +191,23 @@ public class ProviderRegistry implements ScimConfiguration {
     return resourceType;
   }
 
+  public static Schema generateSchema(Class<? extends ScimResource> clazz) throws InvalidProviderException {
+    return generateBaseSchema(clazz);
+  }
+
   private static Schema generateBaseSchema(Class<?> clazz) throws InvalidProviderException {
     List<Field> fieldList = ReflectionUtils.getFieldsUpTo(clazz, BaseResource.class);
 
     return generateSchema(clazz, fieldList);
   }
   
-  private static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
+  public static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
     log.debug("----> In generateExtensionSchema");
     
     return generateSchema(clazz, ReflectionUtils.getFieldsUpTo(clazz, Object.class));
   }
   
-  public static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidProviderException {
+  private static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidProviderException {
 
     // Field [] fieldList = clazz.getDeclaredFields();
 
@@ -277,7 +281,7 @@ public class ProviderRegistry implements ScimConfiguration {
 
       //TODO - Fix this to look for the two types of canonical attributes
       Attribute attribute = new Attribute();
-      attribute.setField(f);
+      attribute.setAccessor(Schema.AttributeAccessor.forField(f));
       attribute.setName(attributeName);
       attribute.setUrn(urn);
       
@@ -385,7 +389,7 @@ public class ProviderRegistry implements ScimConfiguration {
         if (attributeIsAString) {
           attribute.setScimResourceIdReference(true);
         } else {
-          log.warn("Field annotated with @edu.psu.swe.scim.spec.annotation.ScimResourceIdReference must be a string: {}", f);
+          log.warn("Field annotated with @ScimResourceIdReference must be a string: {}", f);
         }
       }
       attribute.setMutability(sa.mutability());
