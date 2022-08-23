@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.utility;
+package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,11 +65,10 @@ public class EtagGenerator {
     return etag;
   }
   
-  private static EntityTag hash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+  private static EntityTag hash(String input) throws NoSuchAlgorithmException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
     digest.update(input.getBytes(StandardCharsets.UTF_8));
     byte[] hash = digest.digest();
     return new EntityTag(Base64.getEncoder().encodeToString(hash));
   }
-  
 }

@@ -17,22 +17,22 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.utility;
+package org.apache.directory.scim.server.provider;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ReflectionUtils {
+final class ReflectionUtils {
   private ReflectionUtils() {
   }
 
-  public static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
+  static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
     List<Field> currentClassFields = new ArrayList<>();
     Collections.addAll(currentClassFields, startClass.getDeclaredFields());
     Class<?> parentClass = startClass.getSuperclass();
-    if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+    if (parentClass != null && (!(parentClass.equals(exclusiveParent)))) {
       List<Field> parentClassFields = getFieldsUpTo(parentClass, exclusiveParent);
       currentClassFields.addAll(parentClassFields);
     }

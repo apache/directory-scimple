@@ -19,34 +19,21 @@
 
 package org.apache.directory.scim.spec.schema;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlEnum;
-import jakarta.xml.bind.annotation.XmlEnumValue;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.apache.directory.scim.spec.validator.Urn;
+import jakarta.xml.bind.annotation.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
+import org.apache.directory.scim.spec.validator.Urn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * Defines the structure of the SCIM schemas as defined by section 7 of the SCIM
@@ -163,8 +150,8 @@ public class Schema implements AttributeContainer {
     
     @XmlElement
     List<String> referenceTypes;
-    
-    Field field;
+
+    AttributeAccessor accessor;
 
     private boolean scimResourceIdReference;
 
@@ -255,5 +242,42 @@ public class Schema implements AttributeContainer {
       return null;
     }
     return attributeNamesMap.get(name.toLowerCase());
+  }
+
+  public interface AttributeAccessor {
+    <T> T get(Object resource);
+
+    void set(Object resource, Object value);
+
+    Class<?> getType();
+
+    static AttributeAccessor forField(Field field) {
+      return new AttributeAccessor() {
+        @Override
+        public <T> T get(Object resource) {
+          try {
+            field.setAccessible(true);
+            return (T) field.get(resource);
+          } catch (IllegalAccessException e) {
+            throw new ScimResourceInvalidException("Schema definition is invalid", e);
+          }
+        }
+
+        @Override
+        public void set(Object resource, Object value) {
+          try {
+            field.setAccessible(true);
+            field.set(resource, value);
+          } catch (IllegalAccessException e) {
+            throw new ScimResourceInvalidException("Schema definition is invalid", e);
+          }
+        }
+
+        @Override
+        public Class<?> getType() {
+          return field.getType();
+        }
+      };
+    }
   }
 }

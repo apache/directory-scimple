@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.utility;
+package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.directory.scim.server.provider.ProviderRegistry;
 import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
@@ -33,7 +34,6 @@ import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.Address;
-import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
@@ -68,9 +68,9 @@ public class AttributeUtilTest {
   public void setup() throws Exception {
     registry = Mockito.mock(Registry.class);
     attributeUtil = new AttributeUtil(registry);
-    Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class, ReflectionUtils.getFieldsUpTo(ScimUser.class, BaseResource.class));
-    Schema scimEnterpriseUserSchema = ProviderRegistry.generateSchema(EnterpriseExtension.class, ReflectionUtils.getFieldsUpTo(EnterpriseExtension.class, Object.class));
-    Schema scimExampleSchema = ProviderRegistry.generateSchema(ExampleObjectExtension.class, ReflectionUtils.getFieldsUpTo(ExampleObjectExtension.class, Object.class));
+    Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class);
+    Schema scimEnterpriseUserSchema = ProviderRegistry.generateExtensionSchema(EnterpriseExtension.class);
+    Schema scimExampleSchema = ProviderRegistry.generateExtensionSchema(ExampleObjectExtension.class);
 
 
     Mockito.when(registry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
@@ -78,7 +78,7 @@ public class AttributeUtilTest {
     Mockito.when(registry.getSchema(EnterpriseExtension.URN)).thenReturn(scimEnterpriseUserSchema);
     Mockito.when(registry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
     Mockito.when(registry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
-    Mockito.when(registry.getAllSchemaUrns()).thenReturn(new HashSet<String>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
+    Mockito.when(registry.getAllSchemaUrns()).thenReturn(new HashSet<>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
 
     objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.setSerializationInclusion(Include.NON_NULL);

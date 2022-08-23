@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.utility;
+package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -47,7 +47,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -57,15 +56,13 @@ import java.util.Set;
 import java.util.function.Function;
 
 @Slf4j
-@ApplicationScoped
-public class AttributeUtil {
+class AttributeUtil {
 
   Registry registry;
 
   ObjectMapper objectMapper;
 
-  @Inject
-  public AttributeUtil(Registry registry) {
+  AttributeUtil(Registry registry) {
     this.registry = registry;
 
     // TODO move this to a CDI producer
@@ -205,7 +202,7 @@ public class AttributeUtil {
     return copy;
   }
 
-  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws IllegalArgumentException, IllegalAccessException {
+  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws IllegalArgumentException {
     Function<Attribute, Boolean> function = (attribute) -> returned == attribute.getReturned();
     processAttributes(object, attributeContainer, function);
   }
@@ -220,42 +217,39 @@ public class AttributeUtil {
     processAttributes(object, attributeContainer, function);
   }
 
-  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException, IllegalAccessException {
+  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException {
     if (attributeContainer != null && object != null) {
       for (Attribute attribute : attributeContainer.getAttributes()) {
-        Field field = attribute.getField();
+
+        Schema.AttributeAccessor accessor = attribute.getAccessor();
+
         if (function.apply(attribute)) {
-          field.setAccessible(true);
-          if (!field.getType().isPrimitive()) {
-            Object obj = field.get(object);
+          if (!accessor.getType().isPrimitive()) {
+            Object obj = accessor.get(object);
             if (obj == null) {
               continue;
             }
-            
-            log.info("field to be set to null = " + field.getType().getName());
-            field.set(object, null);
+
+            log.info("field to be set to null = " + accessor.getType().getName());
+            accessor.set(object, null);
           }
         } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
-          String name = field.getName();
-          log.debug("### Processing single value complex field " + name);
-          field.setAccessible(true);
-          Object subObject = field.get(object);
+          log.debug("### Processing single value complex field " + attribute.getName());
+          Object subObject = accessor.get(object);
 
           if (subObject == null) {
             continue;
           }
           
-          Attribute subAttribute = attributeContainer.getAttribute(name);
+          Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
           log.debug("### container type = " + attributeContainer.getClass().getName());
           if (subAttribute == null) {
             log.debug("#### subattribute == null");
           }
           processAttributes(subObject, subAttribute, function);
         } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
-          String name = field.getName();
-          log.debug("### Processing multi-valued complex field " + name);
-          field.setAccessible(true);
-          Object subObject = field.get(object);
+          log.debug("### Processing multi-valued complex field " + attribute.getName());
+          Object subObject = accessor.get(object);
 
           if (subObject == null) {
             continue;
@@ -264,14 +258,14 @@ public class AttributeUtil {
           if (Collection.class.isAssignableFrom(subObject.getClass())) {
             Collection<?> collection = (Collection<?>) subObject;
             for (Object o : collection) {
-              Attribute subAttribute = attributeContainer.getAttribute(name);
+              Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
               processAttributes(o, subAttribute, function);
             }
-          } else if (field.getType().isArray()) {
+          } else if (accessor.getType().isArray()) {
             Object[] array = (Object[]) subObject;
 
             for (Object o : array) {
-              Attribute subAttribute = attributeContainer.getAttribute(name);
+              Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
               processAttributes(o, subAttribute, function);
             }
           }
@@ -340,14 +334,13 @@ public class AttributeUtil {
   }
 
   private Set<Attribute> findAttributeInSchema(Schema schema, AttributeReference attributeReference, boolean includeAttributeChain) {
-    AttributeContainer attributeContainer = schema;
-    if (attributeContainer == null) {
+    if (schema == null) {
       return Collections.emptySet();
     }
     Set<Attribute> attributes = new HashSet<>();
     String attributeName = attributeReference.getAttributeName();
     String subAttributeName = attributeReference.getSubAttributeName();
-    Attribute attribute = attributeContainer.getAttribute(attributeName);
+    Attribute attribute = schema.getAttribute(attributeName);
 
     if (attribute == null) {
       return Collections.emptySet();
