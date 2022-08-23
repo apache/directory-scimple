@@ -21,14 +21,14 @@ package org.apache.directory.scim.spec.protocol.filter;
 
 public enum CompareOperator {
   
-  EQ,
-  NE,
-  CO,
-  SW,
-  EW,
-  GT,
-  GE,
-  LT,
-  LE;
-  
+  EQ, // equal
+  NE, // not equal
+  CO, // contains
+  SW, // starts with
+  EW, // ends with
+  PR, // present (has value)
+  GT, // greater than
+  GE, // greater than or equal
+  LT, // greater than
+  LE; // greater than or equal
 }
