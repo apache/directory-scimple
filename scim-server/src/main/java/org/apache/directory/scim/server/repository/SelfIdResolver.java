@@ -17,10 +17,14 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.exception;
+package org.apache.directory.scim.server.repository;
 
-public class InvalidProviderException extends Exception {
-  public InvalidProviderException(String what) {
-    super(what);
-  }
+import java.security.Principal;
+
+import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
+
+public interface SelfIdResolver {
+
+  String resolveToInternalId(Principal principal) throws UnableToResolveIdResourceException;
+  
 }

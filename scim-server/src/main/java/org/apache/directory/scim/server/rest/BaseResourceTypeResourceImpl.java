@@ -36,8 +36,9 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
-import org.apache.directory.scim.server.provider.ProviderRegistry;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.repository.RepositoryRegistry;
+import org.apache.directory.scim.server.repository.Repository;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +50,12 @@ import org.apache.directory.scim.server.exception.UnableToCreateResourceExceptio
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.provider.Provider;
-import org.apache.directory.scim.server.provider.UpdateRequest;
-import org.apache.directory.scim.server.provider.annotations.ScimProcessingExtension;
-import org.apache.directory.scim.server.provider.extensions.AttributeFilterExtension;
-import org.apache.directory.scim.server.provider.extensions.ProcessingExtension;
-import org.apache.directory.scim.server.provider.extensions.ScimRequestContext;
-import org.apache.directory.scim.server.provider.extensions.exceptions.ClientFilterException;
+import org.apache.directory.scim.server.repository.UpdateRequest;
+import org.apache.directory.scim.server.repository.annotations.ScimProcessingExtension;
+import org.apache.directory.scim.server.repository.extensions.AttributeFilterExtension;
+import org.apache.directory.scim.server.repository.extensions.ProcessingExtension;
+import org.apache.directory.scim.server.repository.extensions.ScimRequestContext;
+import org.apache.directory.scim.server.repository.extensions.exceptions.ClientFilterException;
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
@@ -78,9 +78,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
-  private final Registry registry;
+  private final SchemaRegistry schemaRegistry;
 
-  private final ProviderRegistry providerRegistry;
+  private final RepositoryRegistry repositoryRegistry;
 
   private final  AttributeUtil attributeUtil;
 
@@ -90,25 +90,25 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private final Class<T> resourceClass;
 
-  public BaseResourceTypeResourceImpl(Registry registry, ProviderRegistry providerRegistry, RequestContext requestContext, EtagGenerator etagGenerator, Class<T> resourceClass) {
-    this.registry = registry;
-    this.providerRegistry = providerRegistry;
+  public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, RequestContext requestContext, EtagGenerator etagGenerator, Class<T> resourceClass) {
+    this.schemaRegistry = schemaRegistry;
+    this.repositoryRegistry = repositoryRegistry;
     this.requestContext = requestContext;
     this.etagGenerator = etagGenerator;
     this.resourceClass = resourceClass;
-    this.attributeUtil = new AttributeUtil(registry);
+    this.attributeUtil = new AttributeUtil(schemaRegistry);
   }
 
-  public Provider<T> getProvider() {
-    return providerRegistry.getProvider(resourceClass);
+  public Repository<T> getRepository() {
+    return repositoryRegistry.getRepository(resourceClass);
   }
 
-  Provider<T> getProviderInternal() throws ScimServerException {
-    Provider<T> provider = getProvider();
-    if (provider == null) {
+  Repository<T> getRepositoryInternal() throws ScimServerException {
+    Repository<T> repository = getRepository();
+    if (repository == null) {
       throw new ScimServerException(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
     }
-    return provider;
+    return repository;
   }
 
   @Override
@@ -119,11 +119,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     try {
-      Provider<T> provider = getProviderInternal();
+      Repository<T> repository = getRepositoryInternal();
 
       T resource = null;
       try {
-        resource = provider.get(id);
+        resource = repository.get(id);
       } catch (UnableToRetrieveResourceException e2) {
         if (e2.getStatus()
               .getFamily()
@@ -131,9 +131,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           return createGenericExceptionResponse(e2, e2.getStatus());
         }
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.error("Uncaught repository exception", e);
 
-        return provider.handleException(e);
+        return repository.handleException(e);
       }
 
       if (resource != null) {
@@ -177,7 +177,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       // Process Attributes
       try {
-        resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+        resource = processFilterAttributeExtensions(repository, resource, attributeReferences, excludedAttributeReferences);
       } catch (ClientFilterException e1) {
         ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
         return er.toResponse();
@@ -197,7 +197,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                        .build();
       } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
         e.printStackTrace();
-        return createAttriubteProcessingErrorResponse(e);
+        return createAttributeProcessingErrorResponse(e);
       }
     } catch (ScimServerException sse) {
       LOG.error("Error Processing SCIM Request", sse);
@@ -235,7 +235,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Override
   public Response create(T resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     try {
-      Provider<T> provider = getProviderInternal();
+      Repository<T> repository = getRepositoryInternal();
 
       Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
                                                             .map(wrapper -> wrapper.getAttributeReferences())
@@ -250,7 +250,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T created;
       try {
-        created = provider.create(resource);
+        created = repository.create(resource);
       } catch (UnableToCreateResourceException e1) {
         Status status = e1.getStatus();
         ErrorResponse er = new ErrorResponse(status, "Error");
@@ -270,9 +270,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
         return er.toResponse();
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.error("Uncaught repository exception", e);
 
-        return provider.handleException(e);
+        return repository.handleException(e);
       }
 
       EntityTag etag = null;
@@ -284,7 +284,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       // Process Attributes
       try {
-        created = processFilterAttributeExtensions(provider, created, attributeReferences, excludedAttributeReferences);
+        created = processFilterAttributeExtensions(repository, created, attributeReferences, excludedAttributeReferences);
       } catch (ClientFilterException e1) {
         ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
         return er.toResponse();
@@ -332,7 +332,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Override
   public Response find(SearchRequest request) {
     try {
-      Provider<T> provider = getProviderInternal();
+      Repository<T> repository = getRepositoryInternal();
 
       Set<AttributeReference> attributeReferences = Optional.ofNullable(request.getAttributes())
                                                             .orElse(Collections.emptySet());
@@ -350,15 +350,15 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       FilterResponse<T> filterResp = null;
       try {
-        filterResp = provider.find(filter, pageRequest, sortRequest);
+        filterResp = repository.find(filter, pageRequest, sortRequest);
       } catch (UnableToRetrieveResourceException e1) {
         log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus()
                                                                                               .toString());
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.error("Uncaught repository exception", e);
 
-        return provider.handleException(e);
+        return repository.handleException(e);
       }
 
       // If no resources are found, we should still return a ListResponse with
@@ -390,7 +390,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
           // Process Attributes
           try {
             log.info("=== Calling processFilterAttributeExtensions");
-            resource = processFilterAttributeExtensions(provider, resource, attributeReferences, excludedAttributeReferences);
+            resource = processFilterAttributeExtensions(repository, resource, attributeReferences, excludedAttributeReferences);
           } catch (ClientFilterException e1) {
             ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
             return er.toResponse();
@@ -405,7 +405,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
             results.add(resource);
           } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
-            return createAttriubteProcessingErrorResponse(e);
+            return createAttributeProcessingErrorResponse(e);
           }
         }
 
@@ -425,7 +425,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     try {
-      Provider<T> provider = getProviderInternal();
+      Repository<T> repository = getRepositoryInternal();
 
       Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
                                                             .map(wrapper -> wrapper.getAttributeReferences())
@@ -440,14 +440,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T stored;
       try {
-        stored = provider.get(id);
+        stored = repository.get(id);
       } catch (UnableToRetrieveResourceException e2) {
         log.error("Unable to retrieve resource with id: {}", id, e2);
         return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.error("Uncaught repository exception", e);
 
-        return provider.handleException(e);
+        return repository.handleException(e);
       }
 
       if (stored == null) {
@@ -469,19 +469,19 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T updated;
       try {
-        UpdateRequest<T> updateRequest = new UpdateRequest<>(id, stored, resource, registry);
-        updated = provider.update(updateRequest);
+        UpdateRequest<T> updateRequest = new UpdateRequest<>(id, stored, resource, schemaRegistry);
+        updated = repository.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e1) {
-        log.error("Uncaught provider exception", e1);
+        log.error("Uncaught repository exception", e1);
 
-        return provider.handleException(e1);
+        return repository.handleException(e1);
       }
 
       // Process Attributes
       try {
-        updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
+        updated = processFilterAttributeExtensions(repository, updated, attributeReferences, excludedAttributeReferences);
       } catch (ClientFilterException e1) {
         ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
         return er.toResponse();
@@ -525,7 +525,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Override
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
     try {
-      Provider<T> provider = getProviderInternal();
+      Repository<T> repository = getRepositoryInternal();
 
       Set<AttributeReference> attributeReferences = Optional.ofNullable(attributes)
                                                             .map(wrapper -> wrapper.getAttributeReferences())
@@ -540,14 +540,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T stored;
       try {
-        stored = provider.get(id);
+        stored = repository.get(id);
       } catch (UnableToRetrieveResourceException e2) {
         log.error("Unable to retrieve resource with id: {}", id, e2);
         return createGenericExceptionResponse(e2, e2.getStatus());
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.error("Uncaught repository exception", e);
 
-        return provider.handleException(e);
+        return repository.handleException(e);
       }
 
       if (stored == null) {
@@ -569,21 +569,21 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
       T updated;
       try {
-        UpdateRequest<T> updateRequest = new UpdateRequest<>(id, stored, patchRequest.getPatchOperationList(), registry);
-        updated = provider.update(updateRequest);
+        UpdateRequest<T> updateRequest = new UpdateRequest<>(id, stored, patchRequest.getPatchOperationList(), schemaRegistry);
+        updated = repository.update(updateRequest);
       } catch (UnableToUpdateResourceException e1) {
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (UnsupportedOperationException e2) {
         return createGenericExceptionResponse(e2, Status.NOT_IMPLEMENTED);
       } catch (Exception e1) {
-        log.error("Uncaught provider exception", e1);
+        log.error("Uncaught repository exception", e1);
 
-        return provider.handleException(e1);
+        return repository.handleException(e1);
       }
 
       // Process Attributes
       try {
-        updated = processFilterAttributeExtensions(provider, updated, attributeReferences, excludedAttributeReferences);
+        updated = processFilterAttributeExtensions(repository, updated, attributeReferences, excludedAttributeReferences);
       } catch (ClientFilterException e1) {
         ErrorResponse er = new ErrorResponse(e1.getStatus(), e1.getMessage());
         return er.toResponse();
@@ -629,13 +629,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   public Response delete(String id) {
     Response response;
     try {
-      Provider<T> provider = getProviderInternal();
+      Repository<T> repository = getRepositoryInternal();
 
       try {
         response = Response.noContent()
                            .build();
 
-        provider.delete(id);
+        repository.delete(id);
         return response;
       } catch (UnableToDeleteResourceException e) {
         Status status = e.getStatus();
@@ -646,9 +646,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
         return response;
       } catch (Exception e) {
-        log.error("Uncaught provider exception", e);
+        log.error("Uncaught repository exception", e);
 
-        return provider.handleException(e);
+        return repository.handleException(e);
       }
     } catch (ScimServerException sse) {
       LOG.error("Error Processing SCIM Request", sse);
@@ -658,8 +658,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   @SuppressWarnings("unchecked")
-  private T processFilterAttributeExtensions(Provider<T> provider, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
-    ScimProcessingExtension annotation = provider.getClass()
+  private T processFilterAttributeExtensions(Repository<T> repository, T resource, Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ClientFilterException {
+    ScimProcessingExtension annotation = repository.getClass()
                                                  .getAnnotation(ScimProcessingExtension.class);
     if (annotation != null) {
       Class<? extends ProcessingExtension>[] value = annotation.value();
@@ -681,7 +681,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   private URI buildLocationTag(T resource) {
     String id = resource.getId();
     if (id == null) {
-      LOG.warn("Provider must supply an id for a resource");
+      LOG.warn("Repository must supply an id for a resource");
       id = "unknown";
     }
     return requestContext.getUriInfo().getAbsolutePathBuilder()
@@ -714,13 +714,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return er.toResponse();
   }
 
-  private Response createAttriubteProcessingErrorResponse(Exception e) {
+  private Response createAttributeProcessingErrorResponse(Exception e) {
     ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to parse the attribute query value " + e.getMessage());
     return er.toResponse();
   }
 
-  private Response createNoProviderException() {
-    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
+  private Response createNoRepositoryException() {
+    ErrorResponse er = new ErrorResponse(Status.INTERNAL_SERVER_ERROR, "Repository not defined");
     return er.toResponse();
   }
 

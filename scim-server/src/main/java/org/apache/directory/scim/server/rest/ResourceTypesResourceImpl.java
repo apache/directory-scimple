@@ -25,12 +25,10 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.UriInfo;
 
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.protocol.ResourceTypesResource;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.schema.Meta;
@@ -39,13 +37,13 @@ import org.apache.directory.scim.spec.schema.ResourceType;
 @ApplicationScoped
 public class ResourceTypesResourceImpl implements ResourceTypesResource {
 
-  private final Registry registry;
+  private final SchemaRegistry schemaRegistry;
 
   private final RequestContext requestContext;
 
   @Inject
-  public ResourceTypesResourceImpl(Registry registry, RequestContext requestContext) {
-    this.registry = registry;
+  public ResourceTypesResourceImpl(SchemaRegistry schemaRegistry, RequestContext requestContext) {
+    this.schemaRegistry = schemaRegistry;
     this.requestContext = requestContext;
   }
 
@@ -60,7 +58,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
       return Response.status(Status.FORBIDDEN).build();
     }
 
-    Collection<ResourceType> resourceTypes = registry.getAllResourceTypes();
+    Collection<ResourceType> resourceTypes = schemaRegistry.getAllResourceTypes();
     
     for (ResourceType resourceType : resourceTypes) {
       Meta meta = new Meta();
@@ -83,7 +81,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
 
   @Override
   public Response getResourceType(String name) {
-    ResourceType resourceType = registry.getResourceType(name);
+    ResourceType resourceType = schemaRegistry.getResourceType(name);
     if (resourceType == null){
       return Response.status(Status.NOT_FOUND).build();  
     }

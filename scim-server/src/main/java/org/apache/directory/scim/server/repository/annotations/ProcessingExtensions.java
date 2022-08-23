@@ -17,24 +17,24 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider.extensions.exceptions;
+package org.apache.directory.scim.server.repository.annotations;
 
-import jakarta.ws.rs.core.Response.Status;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+@Target({ ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+public @interface ProcessingExtensions {
 
-@Data
-@EqualsAndHashCode(callSuper=true)
-public class ClientFilterException extends Exception {
-  
-  private static final long serialVersionUID = 3308947684934769952L;
-  
-  Status status;
-  
-  public ClientFilterException(Status status, String message) {
-    super(message);
-    this.status = status;
-  }
+  /**
+   * An array of one or more {@link ExtendWith @ExtendWith} declarations.
+   */
+  ScimProcessingExtension[] value();
 
 }

@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
 import java.util.List;
 
@@ -40,17 +40,17 @@ import org.apache.directory.scim.spec.resources.ScimResource;
 
 /**
  * Defines the interface between the SCIM protocol implementation and the
- * Provider implementation for type T.
+ * Repository implementation for type T.
  * 
  * @author Chris Harm &lt;crh5255@psu.edu&gt;
  *
  * @param <T> a SCIM ResourceType that extends ScimResource
  */
-public interface Provider<T extends ScimResource> {
+public interface Repository<T extends ScimResource> {
 
   /**
-   * Returns the type of ScimResource this provider manages.
-   * @return The type of resource this provider manages.
+   * Returns the type of ScimResource this repository manages.
+   * @return The type of resource this repository manages.
    */
   Class<T> getResourceClass();
 
@@ -119,18 +119,18 @@ public interface Provider<T extends ScimResource> {
   void delete(String id) throws UnableToDeleteResourceException;
 
   /**
-   * Returns a list of the SCIM Extensions that this provider considers to be
+   * Returns a list of the SCIM Extensions that this repository considers to be
    * associated with the ScimResource of type T.
    * 
    * @return A list of ScimExtension classes.
-   * @throws UnableToRetrieveExtensionsResourceException If the provider cannot return
+   * @throws UnableToRetrieveExtensionsResourceException If the repository cannot return
    *         the appropriate list.
    */
   List<Class<? extends ScimExtension>> getExtensionList() throws UnableToRetrieveExtensionsResourceException;
 
   /**
-   * <p>In the case where the provider throws an unhandled exception, this
-   * method will be passed that exception in order for the provider to convert
+   * <p>In the case where the repository throws an unhandled exception, this
+   * method will be passed that exception in order for the repository to convert
    * it into the desired response.</p>
    * <p>The returned response SHOULD fulfill the requirements for SCIM error
    * responses as defined in <a

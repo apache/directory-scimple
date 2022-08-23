@@ -17,14 +17,25 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
-import java.security.Principal;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
+final class ReflectionUtils {
+  private ReflectionUtils() {
+  }
 
-public interface SelfIdResolver {
-
-  String resolveToInternalId(Principal principal) throws UnableToResolveIdResourceException;
-  
+  static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
+    List<Field> currentClassFields = new ArrayList<>();
+    Collections.addAll(currentClassFields, startClass.getDeclaredFields());
+    Class<?> parentClass = startClass.getSuperclass();
+    if (parentClass != null && (!(parentClass.equals(exclusiveParent)))) {
+      List<Field> parentClassFields = getFieldsUpTo(parentClass, exclusiveParent);
+      currentClassFields.addAll(parentClassFields);
+    }
+    return currentClassFields;
+  }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
@@ -38,13 +38,13 @@ import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 
-public class ProviderTest {
+public class RepositoryTest {
 
   @Test
   public void handleException_jaxrsExceptionTest() {
 
     Exception e = new WebApplicationException();
-    catchException(() -> new ProviderAdapter().handleException(e));
+    catchException(() -> new RepositoryAdapter().handleException(e));
     assertThat(caughtException(), sameInstance(e));
   }
 
@@ -52,7 +52,7 @@ public class ProviderTest {
   public void handleException_runtimeExceptionTest() {
 
     Exception e = new RuntimeException("fake test exception");
-    Response response = new ProviderAdapter().handleException(e);
+    Response response = new RepositoryAdapter().handleException(e);
     assertThat(response.getStatus(), is(500));
     assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("fake test exception"));
   }
@@ -60,12 +60,12 @@ public class ProviderTest {
   @Test
   public void handleException_nullExceptionTest() {
 
-    Response response = new ProviderAdapter().handleException(null);
+    Response response = new RepositoryAdapter().handleException(null);
     assertThat(response.getStatus(), is(500));
     assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("Unknown Server Error"));
   }
 
-  private class ProviderAdapter implements Provider<ScimResource> {
+  private class RepositoryAdapter implements Repository<ScimResource> {
 
     @Override
     public Class<ScimResource> getResourceClass() {

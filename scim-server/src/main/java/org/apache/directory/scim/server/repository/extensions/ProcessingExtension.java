@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider.extensions;
+package org.apache.directory.scim.server.repository.extensions;
 
 public interface ProcessingExtension {
 

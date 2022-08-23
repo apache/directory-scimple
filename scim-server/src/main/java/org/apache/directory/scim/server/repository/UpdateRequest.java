@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -37,7 +37,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.protocol.data.PatchOperation;
@@ -87,33 +87,33 @@ public class UpdateRequest<T extends ScimResource> {
 
   private Schema schema;
 
-  private Registry registry;
+  private SchemaRegistry schemaRegistry;
 
   private Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
 
-  public UpdateRequest(Registry registry) {
-    this.registry = registry;
+  public UpdateRequest(SchemaRegistry schemaRegistry) {
+    this.schemaRegistry = schemaRegistry;
 
     //Create a Jackson ObjectMapper that reads JaxB annotations
     objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
-  public UpdateRequest(String id, T original, T resource, Registry registry) {
-    this(registry);
+  public UpdateRequest(String id, T original, T resource, SchemaRegistry schemaRegistry) {
+    this(schemaRegistry);
     this.id = id;
     this.original = original;
     this.resource = resource;
-    this.schema = registry.getSchema(original.getBaseUrn());
+    this.schema = schemaRegistry.getSchema(original.getBaseUrn());
     initialized = true;
   }
 
-  public UpdateRequest(String id, T original, List<PatchOperation> patchOperations, Registry registry) {
-    this(registry);
+  public UpdateRequest(String id, T original, List<PatchOperation> patchOperations, SchemaRegistry schemaRegistry) {
+    this(schemaRegistry);
     this.id = id;
     this.original = original;
     this.patchOperations = patchOperations;
-    this.schema = registry.getSchema(original.getBaseUrn());
+    this.schema = schemaRegistry.getSchema(original.getBaseUrn());
 
     initialized = true;
   }
@@ -239,7 +239,7 @@ public class UpdateRequest<T extends ScimResource> {
     keys.addAll(resourceExtensions.keySet());
     
     for(String key: keys) {
-      Schema extSchema = registry.getSchema(key);
+      Schema extSchema = schemaRegistry.getSchema(key);
       ScimExtension originalExtension = originalExtensions.get(key);
       ScimExtension resourceExtension = resourceExtensions.get(key);
       sortMultiValuedCollections(originalExtension, resourceExtension, extSchema);
@@ -526,7 +526,7 @@ public class UpdateRequest<T extends ScimResource> {
       }
 
       if (pathUri != null) {
-        ac = registry.getSchema(pathUri);
+        ac = schemaRegistry.getSchema(pathUri);
         originalObject = original.getExtension(pathUri);
         resourceObject = resource.getExtension(pathUri);
       } else {

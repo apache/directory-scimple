@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import jakarta.enterprise.inject.Produces;
@@ -36,11 +36,11 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class ObjectMapperFactory {
 
-  private final Registry registry;
+  private final SchemaRegistry schemaRegistry;
 
   @Inject
-  public ObjectMapperFactory(Registry registry) {
-    this.registry = registry;
+  public ObjectMapperFactory(SchemaRegistry schemaRegistry) {
+    this.schemaRegistry = schemaRegistry;
   }
 
   @Produces
@@ -51,7 +51,7 @@ public class ObjectMapperFactory {
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     SimpleModule module = new SimpleModule();
-    module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(registry, objectMapper));
+    module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(schemaRegistry, objectMapper));
     objectMapper.registerModule(module);
 
     return objectMapper;

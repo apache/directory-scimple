@@ -17,25 +17,24 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository.extensions.exceptions;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import jakarta.ws.rs.core.Response.Status;
 
-final class ReflectionUtils {
-  private ReflectionUtils() {
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper=true)
+public class ClientFilterException extends Exception {
+  
+  private static final long serialVersionUID = 3308947684934769952L;
+  
+  Status status;
+  
+  public ClientFilterException(Status status, String message) {
+    super(message);
+    this.status = status;
   }
 
-  static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
-    List<Field> currentClassFields = new ArrayList<>();
-    Collections.addAll(currentClassFields, startClass.getDeclaredFields());
-    Class<?> parentClass = startClass.getSuperclass();
-    if (parentClass != null && (!(parentClass.equals(exclusiveParent)))) {
-      List<Field> parentClassFields = getFieldsUpTo(parentClass, exclusiveParent);
-      currentClassFields.addAll(parentClassFields);
-    }
-    return currentClassFields;
-  }
 }

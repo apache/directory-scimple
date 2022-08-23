@@ -39,10 +39,10 @@ import org.apache.directory.scim.server.exception.UnableToCreateResourceExceptio
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.provider.Provider;
-import org.apache.directory.scim.server.provider.ProviderRegistry;
-import org.apache.directory.scim.server.provider.UpdateRequest;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.repository.Repository;
+import org.apache.directory.scim.server.repository.RepositoryRegistry;
+import org.apache.directory.scim.server.repository.UpdateRequest;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.protocol.BulkResource;
 import org.apache.directory.scim.spec.protocol.data.BulkOperation;
 import org.apache.directory.scim.spec.protocol.data.BulkOperation.Method;
@@ -94,14 +94,14 @@ public class BulkResourceImpl implements BulkResource {
 //    METHOD_NOT_IMPLEMENTED_STATUS.setCode(METHOD_NOT_IMPLEMENTED);
 //  }
 
-  private final Registry registry;
+  private final SchemaRegistry schemaRegistry;
 
-  private final ProviderRegistry providerRegistry;
+  private final RepositoryRegistry repositoryRegistry;
 
   @Inject
-  public BulkResourceImpl(Registry registry, ProviderRegistry providerRegistry) {
-    this.registry = registry;
-    this.providerRegistry = providerRegistry;
+  public BulkResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
+    this.schemaRegistry = schemaRegistry;
+    this.repositoryRegistry = repositoryRegistry;
   }
 
   BulkResourceImpl() {
@@ -179,7 +179,7 @@ public class BulkResourceImpl implements BulkResource {
             createAndSetErrorResponse(operationRequest, Status.BAD_REQUEST, "path is not a valid path (e.g. \"/Groups/123abc\", \"/Users/123xyz\", ...)");
           } else {
             String endPoint = path.substring(0, path.lastIndexOf('/'));
-            Class<ScimResource> clazz = (Class<ScimResource>) registry.findScimResourceClassFromEndpoint(endPoint);
+            Class<ScimResource> clazz = (Class<ScimResource>) schemaRegistry.findScimResourceClassFromEndpoint(endPoint);
 
             if (clazz == null) {
               errorOccurred = true;
@@ -283,12 +283,12 @@ public class BulkResourceImpl implements BulkResource {
         String scimResourceId = scimResource.getId();
         @SuppressWarnings("unchecked")
         Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
-        Provider<ScimResource> provider = providerRegistry.getProvider(scimResourceClass);
+        Repository<ScimResource> repository = repositoryRegistry.getRepository(scimResourceClass);
 
-        ScimResource original = provider.get(scimResourceId);
+        ScimResource original = repository.get(scimResourceId);
 
-        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(scimResourceId, original, scimResource, registry);
-        provider.update(updateRequest);
+        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(scimResourceId, original, scimResource, schemaRegistry);
+        repository.update(updateRequest);
       } catch (UnresolvableOperationException unresolvableOperationException) {
         log.error("Could not complete final resolution pass, unresolvable bulkId", unresolvableOperationException);
 
@@ -341,10 +341,10 @@ public class BulkResourceImpl implements BulkResource {
     ScimResource scimResource = operationResult.getData();
     @SuppressWarnings("unchecked")
     Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
-    Provider<ScimResource> provider = this.providerRegistry.getProvider(scimResourceClass);
+    Repository<ScimResource> repository = this.repositoryRegistry.getRepository(scimResourceClass);
 
     try {
-      provider.delete(scimResource.getId());
+      repository.delete(scimResource.getId());
     } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
       log.error("Could not delete ScimResource after failure: {}", scimResource);
     }
@@ -357,12 +357,12 @@ public class BulkResourceImpl implements BulkResource {
           String dependentResourceId = dependentResource.getId();
           @SuppressWarnings("unchecked")
           Class<ScimResource> dependentResourceClass = (Class<ScimResource>) dependentResource.getClass();
-          Provider<ScimResource> dependentResourceProvider = this.providerRegistry.getProvider(dependentResourceClass);
+          Repository<ScimResource> dependentResourceRepository = this.repositoryRegistry.getRepository(dependentResourceClass);
 
           dependentOperationResult.setData(null);
           dependentOperationResult.setLocation(null);
           createAndSetErrorResponse(dependentOperationResult, Status.CONFLICT, String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkId, dependentBulkIdKey));
-          dependentResourceProvider.delete(dependentResourceId);
+          dependentResourceRepository.delete(dependentResourceId);
         } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
           log.error("Could not delete depenedent ScimResource after failing to update dependee", unableToDeleteResourceException);
         }
@@ -392,14 +392,14 @@ public class BulkResourceImpl implements BulkResource {
     if (scimResource == null) {
       String path = operationResult.getPath();
       String endPoint = path.substring(0, path.lastIndexOf('/'));
-      Class<ScimResource> clazz = (Class<ScimResource>) registry.findScimResourceClassFromEndpoint(endPoint);
+      Class<ScimResource> clazz = (Class<ScimResource>) schemaRegistry.findScimResourceClassFromEndpoint(endPoint);
       scimResourceClass = clazz;
     } else {
       @SuppressWarnings("unchecked")
       Class<ScimResource> clazz = (Class<ScimResource>) scimResource.getClass();
       scimResourceClass = clazz;
     }
-    Provider<ScimResource> provider = providerRegistry.getProvider(scimResourceClass);
+    Repository<ScimResource> repository = repositoryRegistry.getRepository(scimResourceClass);
 
     switch (bulkOperationMethod) {
     case POST: {
@@ -409,7 +409,7 @@ public class BulkResourceImpl implements BulkResource {
 
       log.debug("Creating {}", scimResource);
 
-      ScimResource newScimResource = provider.create(scimResource);
+      ScimResource newScimResource = repository.create(scimResource);
       String bulkOperationPath = operationResult.getPath();
       String newResourceId = newScimResource.getId();
       String newResourceUri = uriInfo.getBaseUriBuilder()
@@ -439,7 +439,7 @@ public class BulkResourceImpl implements BulkResource {
                                                                        .lastIndexOf("/")
                                                  + 1);
 
-      provider.delete(scimResourceId);
+      repository.delete(scimResourceId);
       operationResult.setStatus(StatusWrapper.wrap(Status.NO_CONTENT));
     }
       break;
@@ -454,11 +454,11 @@ public class BulkResourceImpl implements BulkResource {
                                      + 1);
 
       try {
-        ScimResource original = provider.get(id);
+        ScimResource original = repository.get(id);
 
-        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(id, original, scimResource, registry);
+        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(id, original, scimResource, schemaRegistry);
         
-        provider.update(updateRequest);
+        repository.update(updateRequest);
         operationResult.setStatus(StatusWrapper.wrap(Status.OK));
       } catch (UnableToRetrieveResourceException e) {
         operationResult.setStatus(StatusWrapper.wrap(Status.NOT_FOUND));
@@ -649,7 +649,7 @@ public class BulkResourceImpl implements BulkResource {
   private void resolveTopLevel(List<IWishJavaHadTuples> unresolveds, BulkOperation bulkOperationResult, Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException {
     ScimResource scimResource = bulkOperationResult.getData();
     String schemaUrn = scimResource.getBaseUrn();
-    Schema schema = this.registry.getSchema(schemaUrn);
+    Schema schema = this.schemaRegistry.getSchema(schemaUrn);
     List<UnresolvedTopLevel> unresolvedTopLevels = new ArrayList<>();
 
     for (Schema.Attribute attribute : schema.getAttributes()) {
@@ -803,7 +803,7 @@ public class BulkResourceImpl implements BulkResource {
       if (bulkId != null) {
         ScimResource scimResource = bulkOperation.getData();
         String scimResourceBaseUrn = scimResource.getBaseUrn();
-        Schema schema = this.registry.getSchema(scimResourceBaseUrn);
+        Schema schema = this.schemaRegistry.getSchema(scimResourceBaseUrn);
         List<Schema.Attribute> attributes = schema.getAttributes();
 
         generateReverseDependenciesGraph(reverseDependenciesGraph, bulkId, scimResource, attributes);

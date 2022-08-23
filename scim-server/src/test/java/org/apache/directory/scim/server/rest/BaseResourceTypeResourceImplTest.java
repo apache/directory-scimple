@@ -39,7 +39,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.apache.directory.scim.server.exception.ScimServerException;
-import org.apache.directory.scim.server.provider.Provider;
+import org.apache.directory.scim.server.repository.Repository;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
@@ -61,7 +61,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class BaseResourceTypeResourceImplTest {
   
   @Mock
-  Provider<ScimUser> provider;
+  Repository<ScimUser> repository;
   
   AttributeReferenceListWrapper includedAttributeList = new AttributeReferenceListWrapper("name.givenName, name.familyName");
   AttributeReferenceListWrapper excludedAttributeList = new AttributeReferenceListWrapper("emails, phoneNumbers");
@@ -72,10 +72,10 @@ public class BaseResourceTypeResourceImplTest {
     @SuppressWarnings("rawtypes")
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
     
-    when(baseResourceImpl.getProviderInternal()).thenCallRealMethod();
+    when(baseResourceImpl.getRepositoryInternal()).thenCallRealMethod();
     
     // when
-    assertThrows(ScimServerException.class, () -> baseResourceImpl.getProviderInternal());
+    assertThrows(ScimServerException.class, () -> baseResourceImpl.getRepositoryInternal());
   }
   
   @SuppressWarnings("unchecked")

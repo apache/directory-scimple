@@ -17,11 +17,11 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.junit.jupiter.api.Test;
@@ -30,25 +30,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ProviderRegistryTest {
+public class RepositorySchemaRegistryTest {
 
-  Registry registry;
+  SchemaRegistry schemaRegistry;
   
   @Mock
-  Provider<ScimUser> provider;
+  Repository<ScimUser> repository;
   
-  ProviderRegistry providerRegistry;
+  RepositoryRegistry repositoryRegistry;
   
-  public ProviderRegistryTest() {
-    registry = new Registry();
-    providerRegistry = new ProviderRegistry(registry, null, null);
+  public RepositorySchemaRegistryTest() {
+    schemaRegistry = new SchemaRegistry();
+    repositoryRegistry = new RepositoryRegistry(schemaRegistry, null, null);
   }
 
   @Test
-  public void testAddProvider() throws Exception {
-    providerRegistry.registerProvider(ScimUser.class, provider);
+  public void testAddRepository() throws Exception {
+    repositoryRegistry.registerRepository(ScimUser.class, repository);
     
-    Schema schema = registry.getSchema(ScimUser.SCHEMA_URI);
+    Schema schema = schemaRegistry.getSchema(ScimUser.SCHEMA_URI);
     
     assertThat(schema).isNotNull();
     assertThat(schema.getId()).isEqualTo(ScimUser.SCHEMA_URI);

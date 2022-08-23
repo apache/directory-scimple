@@ -17,19 +17,24 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider.extensions;
+package org.apache.directory.scim.server.repository.annotations;
 
-import java.util.Set;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.apache.directory.scim.server.repository.extensions.ProcessingExtension;
 
-@Data
-@AllArgsConstructor
-public class ScimRequestContext {
-
-  private Set<AttributeReference> attributeReferences;
-  private Set<AttributeReference> excludedAttributeReferences;
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+@Documented
+@Inherited
+@Repeatable(ProcessingExtensions.class)
+public @interface ScimProcessingExtension {
   
+  Class<? extends ProcessingExtension >[] value();
 }

@@ -21,7 +21,7 @@ package org.apache.directory.scim.example.memory.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
-import org.apache.directory.scim.server.provider.SelfIdResolver;
+import org.apache.directory.scim.server.repository.SelfIdResolver;
 
 import java.security.Principal;
 
