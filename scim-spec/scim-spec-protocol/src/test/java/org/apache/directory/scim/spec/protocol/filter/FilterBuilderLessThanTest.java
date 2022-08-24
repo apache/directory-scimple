@@ -95,7 +95,7 @@ public class FilterBuilderLessThanTest {
   @Test
   public void testLessThanDate() throws FilterParseException {
     Date now = new Date();
-    Filter filter = FilterBuilder.create().lessThan("dog.dob", new Date()).build();
+    Filter filter = FilterBuilder.create().lessThan("dog.dob", now).build();
     Filter expected = new Filter("dog.dob LT \"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS").format(now) + "\""); // FIXME: format is missing TZ
     // TODO: dates are parsed to strings, for now use string comparison
     assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
