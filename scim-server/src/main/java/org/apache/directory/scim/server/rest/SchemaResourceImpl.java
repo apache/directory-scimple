@@ -25,12 +25,11 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
 
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.protocol.SchemaResource;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.schema.Meta;
@@ -39,11 +38,11 @@ import org.apache.directory.scim.spec.schema.Schema;
 @ApplicationScoped
 public class SchemaResourceImpl implements SchemaResource {
 
-  private final Registry registry;
+  private final SchemaRegistry schemaRegistry;
 
   @Inject
-  public SchemaResourceImpl(Registry registry) {
-    this.registry = registry;
+  public SchemaResourceImpl(SchemaRegistry schemaRegistry) {
+    this.schemaRegistry = schemaRegistry;
   }
 
   SchemaResourceImpl() {
@@ -58,7 +57,7 @@ public class SchemaResourceImpl implements SchemaResource {
     }
     
     ListResponse<Schema> listResponse = new ListResponse<>();
-    Collection<Schema> schemas = registry.getAllSchemas();
+    Collection<Schema> schemas = schemaRegistry.getAllSchemas();
     
     for (Schema schema : schemas) {
       Meta meta = new Meta();
@@ -81,7 +80,7 @@ public class SchemaResourceImpl implements SchemaResource {
   @Override
   public Response getSchema(String urn, UriInfo uriInfo) {
     
-    Schema schema = registry.getSchema(urn);
+    Schema schema = schemaRegistry.getSchema(urn);
     if (schema == null){
       return Response.status(Status.NOT_FOUND).build();  
     }

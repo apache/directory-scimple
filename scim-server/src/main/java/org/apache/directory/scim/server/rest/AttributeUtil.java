@@ -23,12 +23,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
-import org.apache.directory.scim.server.rest.ScimResourceDeserializer;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -41,7 +39,6 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
 
-import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,12 +55,12 @@ import java.util.function.Function;
 @Slf4j
 class AttributeUtil {
 
-  Registry registry;
+  SchemaRegistry schemaRegistry;
 
   ObjectMapper objectMapper;
 
-  AttributeUtil(Registry registry) {
-    this.registry = registry;
+  AttributeUtil(SchemaRegistry schemaRegistry) {
+    this.schemaRegistry = schemaRegistry;
 
     // TODO move this to a CDI producer
     objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -71,7 +68,7 @@ class AttributeUtil {
     objectMapper.setSerializationInclusion(Include.NON_NULL);
 
     SimpleModule module = new SimpleModule();
-    module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(this.registry, this.objectMapper));
+    module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(this.schemaRegistry, this.objectMapper));
     objectMapper.registerModule(module);
   }
 
@@ -88,7 +85,7 @@ class AttributeUtil {
   private <T extends ScimResource> T setAttributesForDisplayInternal(T resource, Returned ... removeAttributesOfTypes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
     T copy = cloneScimResource(resource);
     String resourceType = copy.getResourceType();
-    Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
+    Schema schema = schemaRegistry.getBaseSchemaOfResourceType(resourceType);
 
     // return always and default, exclude never and requested
     for (Returned removeAttributesOfType : removeAttributesOfTypes) {
@@ -99,7 +96,7 @@ class AttributeUtil {
       String extensionUrn = extensionEntry.getKey();
       ScimExtension scimExtension = extensionEntry.getValue();
 
-      Schema extensionSchema = registry.getSchema(extensionUrn);
+      Schema extensionSchema = schemaRegistry.getSchema(extensionUrn);
 
       for (Returned removeAttributesOfType : removeAttributesOfTypes) {
         removeAttributesOfType(scimExtension, extensionSchema, removeAttributesOfType);
@@ -115,7 +112,7 @@ class AttributeUtil {
       T copy = cloneScimResource(resource);
       
       String resourceType = copy.getResourceType();
-      Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
+      Schema schema = schemaRegistry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and specified attributes, exclude never
       Set<Attribute> attributesToKeep = resolveAttributeReferences(attributes, true);
@@ -141,7 +138,7 @@ class AttributeUtil {
 
           continue;
         }
-        Schema extensionSchema = registry.getSchema(extensionUrn);
+        Schema extensionSchema = schemaRegistry.getSchema(extensionUrn);
 
         removeAttributesOfType(scimExtension, extensionSchema, Returned.DEFAULT, attributesToKeep);
         removeAttributesOfType(scimExtension, extensionSchema, Returned.REQUEST, attributesToKeep);
@@ -162,7 +159,7 @@ class AttributeUtil {
       T copy = cloneScimResource(resource);
 
       String resourceType = copy.getResourceType();
-      Schema schema = registry.getBaseSchemaOfResourceType(resourceType);
+      Schema schema = schemaRegistry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and default, exclude never and specified attributes
       Set<Attribute> attributesToRemove = resolveAttributeReferences(excludedAttributes, false);
@@ -174,7 +171,7 @@ class AttributeUtil {
         String extensionUrn = extensionEntry.getKey();
         ScimExtension scimExtension = extensionEntry.getValue();
 
-        Schema extensionSchema = registry.getSchema(extensionUrn);
+        Schema extensionSchema = schemaRegistry.getSchema(extensionUrn);
 
         removeAttributesOfType(scimExtension, extensionSchema, Returned.REQUEST);
         removeAttributesOfType(scimExtension, extensionSchema, Returned.NEVER);
@@ -306,7 +303,7 @@ class AttributeUtil {
     Set<Attribute> attributes;
     
     if (!StringUtils.isEmpty(schemaUrn)) {
-      schema = registry.getSchema(schemaUrn);
+      schema = schemaRegistry.getSchema(schemaUrn);
 
       attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
       if (attributes.isEmpty()) {
@@ -317,13 +314,13 @@ class AttributeUtil {
     }
 
     // Handle unqualified attributes, look in the core schemas
-    schema = registry.getSchema(ScimUser.SCHEMA_URI);
+    schema = schemaRegistry.getSchema(ScimUser.SCHEMA_URI);
     attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
     if (!attributes.isEmpty()) {
       return attributes;
     }
 
-    schema = registry.getSchema(ScimGroup.SCHEMA_URI);
+    schema = schemaRegistry.getSchema(ScimGroup.SCHEMA_URI);
     attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
     if (!attributes.isEmpty()) {
       return attributes;

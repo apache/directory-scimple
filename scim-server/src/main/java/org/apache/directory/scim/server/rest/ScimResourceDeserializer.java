@@ -32,15 +32,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 public class ScimResourceDeserializer extends JsonDeserializer<ScimResource> {
-  private final Registry registry;
+  private final SchemaRegistry schemaRegistry;
   private final ObjectMapper objectMapper;
 
-  public ScimResourceDeserializer(Registry registry, ObjectMapper objectMapper) {
-    this.registry = registry;
+  public ScimResourceDeserializer(SchemaRegistry schemaRegistry, ObjectMapper objectMapper) {
+    this.schemaRegistry = schemaRegistry;
     this.objectMapper = objectMapper;
   }
 
@@ -54,14 +54,14 @@ public class ScimResourceDeserializer extends JsonDeserializer<ScimResource> {
 
     for (JsonNode schemaUrnNode : schemas) {
       String schemaUrn = schemaUrnNode.textValue();
-      scimResourceClass = registry.findScimResourceClass(schemaUrn);
+      scimResourceClass = schemaRegistry.findScimResourceClass(schemaUrn);
 
       if (scimResourceClass != null) {
         break;
       }
     }
     if (scimResourceClass == null) {
-      throw new JsonParseException("Could not find a valid schema in: " + schemas + ", valid schemas are: " + registry.getAllSchemaUrns(), location);
+      throw new JsonParseException("Could not find a valid schema in: " + schemas + ", valid schemas are: " + schemaRegistry.getAllSchemaUrns(), location);
     }
     scimResource = objectMapper.readValue(node.toString(), scimResourceClass);
 

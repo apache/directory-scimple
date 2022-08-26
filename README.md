@@ -106,10 +106,10 @@ public class EnterpriseExtension implements ScimExtension {
 
 This example shows how an extension is declared at the class level, but also provides an example of how complex SCIM types can be simply defined as suitably annotated inner classes.
 
-Implementations are fully customizable without altering the core server code. The example below shows how the implementation for a provider is declared:
+Implementations are fully customizable without altering the core server code. The example below shows how the implementation for a repository is declared:
 
 ```java
-public class InMemoryUserService implements Provider<ScimUser> {
+public class InMemoryUserService implements Respository<ScimUser> {
 ```
 
-Implementing the provider interface allows the customization of create, retrieve, update, and delete methods (as well as find).  Customization is flexible - if your system implements soft deletes, create a delete method that simply sets a flag and alter the find and retrieve methods to only return "undeleted" resources.
+Implementing the repository interface allows the customization of create, retrieve, update, and delete methods (as well as find).  Customization is flexible - if your system implements soft deletes, create a delete method that simply sets a flag and alter the find and retrieve methods to only return "undeleted" resources.

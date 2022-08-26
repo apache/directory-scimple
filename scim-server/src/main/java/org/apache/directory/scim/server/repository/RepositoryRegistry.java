@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -36,9 +36,9 @@ import jakarta.inject.Inject;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
 import org.apache.directory.scim.server.ScimConfiguration;
-import org.apache.directory.scim.server.exception.InvalidProviderException;
+import org.apache.directory.scim.server.exception.InvalidRepositoryException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 @ApplicationScoped
-public class ProviderRegistry implements ScimConfiguration {
+public class RepositoryRegistry implements ScimConfiguration {
 
   private static final String STRING_TYPE_IDENTIFIER = "class java.lang.String";
   private static final String CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [C";
@@ -83,53 +83,53 @@ public class ProviderRegistry implements ScimConfiguration {
   private static final String BYTE_ARRAY_TYPE_IDENTIFIER = "class [B";
   private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class org.apache.directory.scim.spec.schema.ResourceReference$ReferenceType";
 
-  private Registry registry;
+  private SchemaRegistry schemaRegistry;
 
   private ScimExtensionRegistry scimExtensionRegistry;
 
-  // Weld needs the '? extends' or the providers will not be found, some CDI
+  // Weld needs the '? extends' or the repositories will not be found, some CDI
   // implementations work fine with just <ScimResources>
-  private Instance<Provider<? extends ScimResource>> scimProviderInstances;
+  private Instance<Repository<? extends ScimResource>> scimRepositoryInstances;
 
-  private Map<Class<? extends ScimResource>, Provider<? extends ScimResource>> providerMap = new HashMap<>();
+  private Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap = new HashMap<>();
 
   @Inject
-  public ProviderRegistry(Registry registry, ScimExtensionRegistry scimExtensionRegistry, Instance<Provider<? extends ScimResource>> scimProviderInstances) {
-    this.registry = registry;
+  public RepositoryRegistry(SchemaRegistry schemaRegistry, ScimExtensionRegistry scimExtensionRegistry, Instance<Repository<? extends ScimResource>> scimRepositoryInstances) {
+    this.schemaRegistry = schemaRegistry;
     this.scimExtensionRegistry = scimExtensionRegistry;
-    this.scimProviderInstances = scimProviderInstances;
+    this.scimRepositoryInstances = scimRepositoryInstances;
   }
 
-  ProviderRegistry() {}
+  RepositoryRegistry() {}
 
   @Override
   @SuppressWarnings("unchecked")
   public void configure() {
-    scimProviderInstances.stream()
-      .map(provider -> (Provider<ScimResource>) provider)
-      .forEach(provider -> {
+    scimRepositoryInstances.stream()
+      .map(repository -> (Repository<ScimResource>) repository)
+      .forEach(repository -> {
       try {
-        registerProvider(provider.getResourceClass(), provider);
-      } catch (InvalidProviderException | JsonProcessingException | UnableToRetrieveExtensionsResourceException e) {
-        throw new ScimResourceInvalidException("Failed to register provider " + provider.getClass() + " for ScimResource type " + provider.getResourceClass(), e);
+        registerRepository(repository.getResourceClass(), repository);
+      } catch (InvalidRepositoryException | JsonProcessingException | UnableToRetrieveExtensionsResourceException e) {
+        throw new ScimResourceInvalidException("Failed to register repository " + repository.getClass() + " for ScimResource type " + repository.getResourceClass(), e);
       }
     });
   }
 
-  public synchronized <T extends ScimResource> void registerProvider(Class<T> clazz, Provider<T> provider) throws InvalidProviderException, JsonProcessingException, UnableToRetrieveExtensionsResourceException {
+  public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException, JsonProcessingException, UnableToRetrieveExtensionsResourceException {
 
-    ResourceType resourceType = generateResourceType(clazz, provider);
+    ResourceType resourceType = generateResourceType(clazz, repository);
 
     log.info("Calling addSchema on the base class: {}", clazz);
-    registry.addSchema(generateBaseSchema(clazz));
+    schemaRegistry.addSchema(generateBaseSchema(clazz));
     // NOTE generateResourceType() ensures ScimResourceType exists
     ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
     String schemaUrn = scimResourceType.schema();
     String endpoint = scimResourceType.endpoint();
-    registry.addScimResourceSchemaUrn(schemaUrn, clazz);
-    registry.addScimResourceEndPoint(endpoint, clazz);
+    schemaRegistry.addScimResourceSchemaUrn(schemaUrn, clazz);
+    schemaRegistry.addScimResourceEndPoint(endpoint, clazz);
 
-    List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
+    List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
 
     if (extensionList != null) {
       for (Class<? extends ScimExtension> scimExtension : extensionList) {
@@ -137,25 +137,25 @@ public class ProviderRegistry implements ScimConfiguration {
         scimExtensionRegistry.registerExtension(clazz, scimExtension);
         
         log.info("Calling addSchema on an extension: " + scimExtension);
-        registry.addSchema(generateExtensionSchema(scimExtension));
+        schemaRegistry.addSchema(generateExtensionSchema(scimExtension));
       }
     }
 
-    registry.addResourceType(resourceType);
-    providerMap.put(clazz, provider);
+    schemaRegistry.addResourceType(resourceType);
+    repositoryMap.put(clazz, repository);
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends ScimResource> Provider<T> getProvider(Class<T> clazz) {
-    return (Provider<T>) providerMap.get(clazz);
+  public <T extends ScimResource> Repository<T> getRepository(Class<T> clazz) {
+    return (Repository<T>) repositoryMap.get(clazz);
   }
 
-  private ResourceType generateResourceType(Class<? extends ScimResource> base, Provider<? extends ScimResource> provider) throws InvalidProviderException, UnableToRetrieveExtensionsResourceException {
+  private ResourceType generateResourceType(Class<? extends ScimResource> base, Repository<? extends ScimResource> repository) throws InvalidRepositoryException, UnableToRetrieveExtensionsResourceException {
 
     ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
 
     if (scimResourceType == null) {
-      throw new InvalidProviderException("Missing annotation: ScimResourceType must be at the top of scim resource classes");
+      throw new InvalidRepositoryException("Missing annotation: ScimResourceType must be at the top of scim resource classes");
     }
 
     ResourceType resourceType = new ResourceType();
@@ -165,7 +165,7 @@ public class ProviderRegistry implements ScimConfiguration {
     resourceType.setEndpoint(scimResourceType.endpoint());
     resourceType.setSchemaUrn(scimResourceType.schema());
 
-    List<Class<? extends ScimExtension>> extensionList = provider.getExtensionList();
+    List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
 
     if (extensionList != null) {
 
@@ -176,7 +176,7 @@ public class ProviderRegistry implements ScimConfiguration {
         ScimExtensionType extensionType = se.getAnnotation(ScimExtensionType.class);
 
         if (extensionType == null) {
-          throw new InvalidProviderException("Missing annotation: ScimExtensionType must be at the top of scim extension classes");
+          throw new InvalidRepositoryException("Missing annotation: ScimExtensionType must be at the top of scim extension classes");
         }
 
         ResourceType.SchemaExtentionConfiguration ext = new ResourceType.SchemaExtentionConfiguration();
@@ -191,23 +191,23 @@ public class ProviderRegistry implements ScimConfiguration {
     return resourceType;
   }
 
-  public static Schema generateSchema(Class<? extends ScimResource> clazz) throws InvalidProviderException {
+  public static Schema generateSchema(Class<? extends ScimResource> clazz) throws InvalidRepositoryException {
     return generateBaseSchema(clazz);
   }
 
-  private static Schema generateBaseSchema(Class<?> clazz) throws InvalidProviderException {
+  private static Schema generateBaseSchema(Class<?> clazz) throws InvalidRepositoryException {
     List<Field> fieldList = ReflectionUtils.getFieldsUpTo(clazz, BaseResource.class);
 
     return generateSchema(clazz, fieldList);
   }
   
-  public static Schema generateExtensionSchema(Class<?> clazz) throws InvalidProviderException {
+  public static Schema generateExtensionSchema(Class<?> clazz) throws InvalidRepositoryException {
     log.debug("----> In generateExtensionSchema");
     
     return generateSchema(clazz, ReflectionUtils.getFieldsUpTo(clazz, Object.class));
   }
   
-  private static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidProviderException {
+  private static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws InvalidRepositoryException {
 
     // Field [] fieldList = clazz.getDeclaredFields();
 
@@ -237,7 +237,7 @@ public class ProviderRegistry implements ScimConfiguration {
         sb.append("\n");
       }
 
-      throw new InvalidProviderException(sb.toString());
+      throw new InvalidRepositoryException(sb.toString());
     }
 
     if (srt != null) {
@@ -253,7 +253,7 @@ public class ProviderRegistry implements ScimConfiguration {
     return schema;
   }
 
-  private static List<Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws InvalidProviderException {
+  private static List<Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws InvalidRepositoryException {
     List<Attribute> attributeList = new ArrayList<>();
 
     for (Field f : fieldList) {
@@ -293,7 +293,7 @@ public class ProviderRegistry implements ScimConfiguration {
         
         //This looks goofy, but there's always at least the default value, so it's not an empty list
         if (sa.canonicalValueList().length != 1 && !sa.canonicalValueList()[0].isEmpty()) {
-          throw new InvalidProviderException("You cannont set both the canonicalEnumValue and canonicalValueList attributes on the same ScimAttribute");
+          throw new InvalidRepositoryException("You cannont set both the canonicalEnumValue and canonicalValueList attributes on the same ScimAttribute");
         }
         
         canonicalTypes = new ArrayList<>();
@@ -433,9 +433,4 @@ public class ProviderRegistry implements ScimConfiguration {
     log.debug("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }
-
-  
-
-  // private Provider<ScimGroup> groupProvider = null;
-  // private Provider<ScimUser> userProvider = null;
 }

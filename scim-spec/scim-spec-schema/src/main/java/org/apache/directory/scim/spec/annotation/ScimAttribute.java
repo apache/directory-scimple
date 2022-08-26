@@ -45,7 +45,7 @@ public @interface ScimAttribute {
   boolean required() default false;
   
   //These two canonical attributes should be mutually exclusive, if both are 
-  //present we will reject the registered provider
+  //present we will reject the registered repository
   Class<? extends Enum<?>>  canonicalValueEnum() default NoOp.class;
   String [] canonicalValueList() default "";
   

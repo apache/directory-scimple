@@ -25,8 +25,8 @@ package org.apache.directory.scim.server.rest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.server.provider.ProviderRegistry;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.repository.RepositoryRegistry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.protocol.GroupResource;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 
@@ -35,8 +35,8 @@ import org.apache.directory.scim.spec.resources.ScimGroup;
 public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> implements GroupResource {
 
   @Inject
-  public GroupResourceImpl(Registry registry, ProviderRegistry providerRegistry, RequestContext requestContext, EtagGenerator etagGenerator) {
-    super(registry, providerRegistry, requestContext, etagGenerator, ScimGroup.class);
+  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, RequestContext requestContext, EtagGenerator etagGenerator) {
+    super(schemaRegistry, repositoryRegistry, requestContext, etagGenerator, ScimGroup.class);
   }
 
   GroupResourceImpl() {

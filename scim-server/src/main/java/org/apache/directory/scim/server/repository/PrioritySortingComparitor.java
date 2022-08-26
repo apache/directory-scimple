@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider;
+package org.apache.directory.scim.server.repository;
 
 import java.util.Comparator;
 import java.util.Set;

@@ -17,24 +17,10 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider.annotations;
+package org.apache.directory.scim.server.exception;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target({ ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface ProcessingExtensions {
-
-  /**
-   * An array of one or more {@link ExtendWith @ExtendWith} declarations.
-   */
-  ScimProcessingExtension[] value();
-
+public class InvalidRepositoryException extends Exception {
+  public InvalidRepositoryException(String what) {
+    super(what);
+  }
 }

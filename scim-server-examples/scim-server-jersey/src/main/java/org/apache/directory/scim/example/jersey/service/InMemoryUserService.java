@@ -30,8 +30,8 @@ import jakarta.inject.Named;
 
 import org.apache.directory.scim.example.jersey.extensions.LuckyNumberExtension;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.provider.Provider;
-import org.apache.directory.scim.server.provider.UpdateRequest;
+import org.apache.directory.scim.server.repository.Repository;
+import org.apache.directory.scim.server.repository.UpdateRequest;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -42,14 +42,14 @@ import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 
 /**
- * Creates a singleton (effectively) Provider<User> with a memory-based
+ * Creates a singleton (effectively) Repository<ScimUser> with a memory-based
  * persistence layer.
  * 
  * @author Chris Harm &lt;crh5255@psu.edu&gt;
  */
 @Named
 @ApplicationScoped
-public class InMemoryUserService implements Provider<ScimUser> {
+public class InMemoryUserService implements Repository<ScimUser> {
   
   static final String DEFAULT_USER_ID = "1";
   static final String DEFAULT_USER_EXTERNAL_ID = "e" + DEFAULT_USER_ID;
@@ -88,7 +88,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   }
 
   /**
-   * @see Provider#create(ScimResource)
+   * @see Repository#create(ScimResource)
    */
   @Override
   public ScimUser create(ScimUser resource) {
@@ -106,7 +106,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   }
 
   /**
-   * @see Provider#update(UpdateRequest)
+   * @see Repository#update(UpdateRequest)
    */
   @Override
   public ScimUser update(UpdateRequest<ScimUser> updateRequest) throws UnableToUpdateResourceException {
@@ -117,7 +117,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   }
 
   /**
-   * @see Provider#get(java.lang.String)
+   * @see Repository#get(java.lang.String)
    */
   @Override
   public ScimUser get(String id) {
@@ -125,7 +125,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   }
 
   /**
-   * @see Provider#delete(java.lang.String)
+   * @see Repository#delete(java.lang.String)
    */
   @Override
   public void delete(String id) {
@@ -133,7 +133,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   }
 
   /**
-   * @see Provider#find(Filter, PageRequest, SortRequest)
+   * @see Repository#find(Filter, PageRequest, SortRequest)
    */
   @Override
   public FilterResponse<ScimUser> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
@@ -141,7 +141,7 @@ public class InMemoryUserService implements Provider<ScimUser> {
   }
 
   /**
-   * @see Provider#getExtensionList()
+   * @see Repository#getExtensionList()
    */
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {

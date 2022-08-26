@@ -24,8 +24,8 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.apache.directory.scim.server.provider.ProviderRegistry;
-import org.apache.directory.scim.server.schema.Registry;
+import org.apache.directory.scim.server.repository.RepositoryRegistry;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
@@ -58,7 +58,7 @@ public class AttributeUtilTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(AttributeUtilTest.class);
 
-  Registry registry;
+  SchemaRegistry schemaRegistry;
 
   AttributeUtil attributeUtil;
 
@@ -66,19 +66,19 @@ public class AttributeUtilTest {
 
   @BeforeEach
   public void setup() throws Exception {
-    registry = Mockito.mock(Registry.class);
-    attributeUtil = new AttributeUtil(registry);
-    Schema scimUserSchema = ProviderRegistry.generateSchema(ScimUser.class);
-    Schema scimEnterpriseUserSchema = ProviderRegistry.generateExtensionSchema(EnterpriseExtension.class);
-    Schema scimExampleSchema = ProviderRegistry.generateExtensionSchema(ExampleObjectExtension.class);
+    schemaRegistry = Mockito.mock(SchemaRegistry.class);
+    attributeUtil = new AttributeUtil(schemaRegistry);
+    Schema scimUserSchema = RepositoryRegistry.generateSchema(ScimUser.class);
+    Schema scimEnterpriseUserSchema = RepositoryRegistry.generateExtensionSchema(EnterpriseExtension.class);
+    Schema scimExampleSchema = RepositoryRegistry.generateExtensionSchema(ExampleObjectExtension.class);
 
 
-    Mockito.when(registry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
-    Mockito.when(registry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(scimUserSchema);
-    Mockito.when(registry.getSchema(EnterpriseExtension.URN)).thenReturn(scimEnterpriseUserSchema);
-    Mockito.when(registry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
-    Mockito.when(registry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
-    Mockito.when(registry.getAllSchemaUrns()).thenReturn(new HashSet<>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
+    Mockito.when(schemaRegistry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
+    Mockito.when(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(scimUserSchema);
+    Mockito.when(schemaRegistry.getSchema(EnterpriseExtension.URN)).thenReturn(scimEnterpriseUserSchema);
+    Mockito.when(schemaRegistry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
+    Mockito.when(schemaRegistry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
+    Mockito.when(schemaRegistry.getAllSchemaUrns()).thenReturn(new HashSet<>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
 
     objectMapper = ObjectMapperFactory.getObjectMapper();
     objectMapper.setSerializationInclusion(Include.NON_NULL);

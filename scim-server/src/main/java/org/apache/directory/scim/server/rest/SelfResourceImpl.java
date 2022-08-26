@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
-import org.apache.directory.scim.server.provider.SelfIdResolver;
+import org.apache.directory.scim.server.repository.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.SelfResource;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;

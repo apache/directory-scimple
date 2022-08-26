@@ -21,8 +21,8 @@ package org.apache.directory.scim.example.jersey.service;
 
 import jakarta.annotation.PostConstruct;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.provider.Provider;
-import org.apache.directory.scim.server.provider.UpdateRequest;
+import org.apache.directory.scim.server.repository.Repository;
+import org.apache.directory.scim.server.repository.UpdateRequest;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -40,7 +40,7 @@ import jakarta.inject.Named;
 
 @Named
 @ApplicationScoped
-public class InMemoryGroupService implements Provider<ScimGroup> {
+public class InMemoryGroupService implements Repository<ScimGroup> {
 
   private final Map<String, ScimGroup> groups = new HashMap<>();
 

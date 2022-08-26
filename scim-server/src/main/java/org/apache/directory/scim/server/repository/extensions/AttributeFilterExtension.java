@@ -17,9 +17,9 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.provider.extensions;
+package org.apache.directory.scim.server.repository.extensions;
 
-import org.apache.directory.scim.server.provider.extensions.exceptions.ClientFilterException;
+import org.apache.directory.scim.server.repository.extensions.exceptions.ClientFilterException;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 public interface AttributeFilterExtension extends ProcessingExtension {
