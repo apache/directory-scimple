@@ -42,7 +42,9 @@ public class ResourceReference implements Serializable {
   @XmlEnum
   public enum ReferenceType {
     @XmlEnumValue("direct") DIRECT,
-    @XmlEnumValue("indirect") INDIRECT
+    @XmlEnumValue("indirect") INDIRECT,
+    @XmlEnumValue("User") USER,
+    @XmlEnumValue("Group") GROUP;
   }
   
   @ScimAttribute(description="Reference Element Identifier")
