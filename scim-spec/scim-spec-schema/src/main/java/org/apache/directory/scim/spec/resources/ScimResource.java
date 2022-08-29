@@ -59,7 +59,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
 
   private static final Logger LOG = LoggerFactory.getLogger(ScimResource.class);
 
-  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+  private transient final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   @XmlElement
   @NotNull

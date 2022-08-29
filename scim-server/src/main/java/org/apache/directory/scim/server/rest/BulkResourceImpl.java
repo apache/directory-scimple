@@ -19,14 +19,7 @@
 
 package org.apache.directory.scim.server.rest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +28,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
@@ -112,9 +106,9 @@ public class BulkResourceImpl implements BulkResource {
   public Response doBulk(BulkRequest request, UriInfo uriInfo) {
     BulkResponse response;
     int errorCount = 0;
-    int requestFailOnErrors = request.getFailOnErrors();
-    int maxErrorCount = requestFailOnErrors > 0 ? requestFailOnErrors : Integer.MAX_VALUE;
-    int errorCountIncrement = requestFailOnErrors > 0 ? 1 : 0;
+    Integer requestFailOnErrors = request.getFailOnErrors();
+    int maxErrorCount = requestFailOnErrors != null && requestFailOnErrors > 0 ? requestFailOnErrors : Integer.MAX_VALUE;
+    int errorCountIncrement = requestFailOnErrors == null || requestFailOnErrors > 0 ? 1 : 0;
     List<BulkOperation> bulkOperations = request.getOperations();
     Map<String, BulkOperation> bulkIdKeyToOperationResult = new HashMap<>();
     List<IWishJavaHadTuples> allUnresolveds = new ArrayList<>();
@@ -211,7 +205,7 @@ public class BulkResourceImpl implements BulkResource {
         operationRequest.setData(null);
 
         if (bulkIdKey != null) {
-          Set<String> reverseDependencies = transitiveReverseDependencies.get(bulkIdKey);
+          Set<String> reverseDependencies = transitiveReverseDependencies.getOrDefault(bulkIdKey, Collections.emptySet());
           String detail = String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkIdKey);
 
           for (String dependentBulkIdKey : reverseDependencies) {
@@ -225,9 +219,11 @@ public class BulkResourceImpl implements BulkResource {
         }
       }
     }
+
+    boolean errorCountExceeded = false;
+
     // do the operations
     for (BulkOperation operationResult : bulkOperations) {
-      boolean errorCountExceeded = errorCount >= maxErrorCount;
 
       if (!errorCountExceeded && !(operationResult.getResponse() instanceof ErrorResponse)) {
         try {
@@ -236,6 +232,7 @@ public class BulkResourceImpl implements BulkResource {
           log.error("Failed to do bulk operation", resourceException);
 
           errorCount += errorCountIncrement;
+          errorCountExceeded = errorCount >= maxErrorCount;
 
           String detail = resourceException.getLocalizedMessage();
           createAndSetErrorResponse(operationResult, resourceException.getStatus(), detail);
@@ -244,6 +241,7 @@ public class BulkResourceImpl implements BulkResource {
             String bulkIdKey = "bulkId:" + operationResult.getBulkId();
 
             this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
+            operationResult.setData(null);
           }
         } catch (UnresolvableOperationException unresolvableOperationException) {
           log.error("Could not resolve bulkId during Bulk Operation method handling", unresolvableOperationException);
@@ -257,11 +255,14 @@ public class BulkResourceImpl implements BulkResource {
             String bulkIdKey = "bulkId:" + operationResult.getBulkId();
 
             this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
+            operationResult.setData(null);
           }
         }
       } else if (errorCountExceeded) {
-        createAndSetErrorResponse(operationResult, Status.CONFLICT, "failOnErrors count reached");
 
+        // continue processing bulk operations to cleanup any dependencies
+
+        createAndSetErrorResponse(operationResult, Status.CONFLICT, "failOnErrors count reached");
         if (operationResult.getBulkId() != null) {
           String bulkIdKey = "bulkId:" + operationResult.getBulkId();
 
@@ -318,12 +319,16 @@ public class BulkResourceImpl implements BulkResource {
         this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
       }
     }
-    response = new BulkResponse();
-    response.setOperations(bulkOperations);
-    response.setStatus(Status.OK);
 
-    return Response.ok(response)
-                   .build();
+    Status status = errorCountExceeded ? Status.BAD_REQUEST : Status.OK;
+
+    response = new BulkResponse()
+      .setOperations(bulkOperations)
+      .setStatus(status);
+
+    return Response.status(status)
+      .entity(response)
+      .build();
   }
 
   /**
@@ -335,7 +340,7 @@ public class BulkResourceImpl implements BulkResource {
    * @param bulkIdKeyToOperationResult
    */
   private void cleanup(String bulkIdKeyToCleanup, Map<String, Set<String>> transitiveReverseDependencies, Map<String, BulkOperation> bulkIdKeyToOperationResult) {
-    Set<String> reverseDependencies = transitiveReverseDependencies.get(bulkIdKeyToCleanup);
+    Set<String> reverseDependencies = transitiveReverseDependencies.getOrDefault(bulkIdKeyToCleanup, Collections.emptySet());
     BulkOperation operationResult = bulkIdKeyToOperationResult.get(bulkIdKeyToCleanup);
     String bulkId = operationResult.getBulkId();
     ScimResource scimResource = operationResult.getData();
@@ -344,7 +349,9 @@ public class BulkResourceImpl implements BulkResource {
     Repository<ScimResource> repository = this.repositoryRegistry.getRepository(scimResourceClass);
 
     try {
-      repository.delete(scimResource.getId());
+      if (StringUtils.isNotBlank(scimResource.getId())) {
+        repository.delete(scimResource.getId());
+      }
     } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
       log.error("Could not delete ScimResource after failure: {}", scimResource);
     }
@@ -426,7 +433,8 @@ public class BulkResourceImpl implements BulkResource {
                                   .setData(newScimResource);
       }
       operationResult.setData(newScimResource);
-      operationResult.setLocation(newResourceUri.toString());
+      operationResult.setLocation(newResourceUri);
+      operationResult.setPath(null);
       operationResult.setStatus(StatusWrapper.wrap(Status.CREATED));
     }
       break;
@@ -481,6 +489,7 @@ public class BulkResourceImpl implements BulkResource {
     ErrorResponse error = new ErrorResponse(status, detail);
     operationResult.setResponse(error);
     operationResult.setStatus(new StatusWrapper(status));
+    operationResult.setPath(null);
   }
 
   @AllArgsConstructor
@@ -726,8 +735,7 @@ public class BulkResourceImpl implements BulkResource {
     if (!root.equals(current) && !visited.contains(current)) {
       visited.add(current);
 
-      Set<String> dependencies = dependencyGraph.get(current);
-
+      Set<String> dependencies = dependencyGraph.getOrDefault(current, Collections.emptySet());
       for (String dependency : dependencies) {
         generateVisited(visited, dependencyGraph, root, dependency);
       }
@@ -772,13 +780,15 @@ public class BulkResourceImpl implements BulkResource {
                                                         // all COMPLEXES are
                                                         // multiValued
         Object attributeObject = scimObjectAttribute.getAccessor().get(scimObject);
-        Class<?> attributeObjectClass = attributeObject.getClass();
-        boolean isCollection = Collection.class.isAssignableFrom(attributeObjectClass);
-        Collection<?> attributeValues = isCollection ? (Collection<?>) attributeObject : Arrays.asList(attributeObject);
-        List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
+        if (attributeObject != null) {
+          Class<?> attributeObjectClass = attributeObject.getClass();
+          boolean isCollection = Collection.class.isAssignableFrom(attributeObjectClass);
+          Collection<?> attributeValues = isCollection ? (Collection<?>) attributeObject : List.of(attributeObject);
+          List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
 
-        for (Object attributeValue : attributeValues) {
-          generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
+          for (Object attributeValue : attributeValues) {
+            generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
+          }
         }
       } else if (scimObjectAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
         Object attributeValue = scimObjectAttribute.getAccessor().get(scimObject);
