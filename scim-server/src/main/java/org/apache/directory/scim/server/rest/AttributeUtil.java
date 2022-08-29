@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
+import org.apache.directory.scim.server.exception.AttributeException;
 import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
@@ -74,15 +75,15 @@ class AttributeUtil {
 
   AttributeUtil() {}
 
-  public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+  public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws AttributeException {
     return setAttributesForDisplayInternal(resource, Returned.DEFAULT, Returned.REQUEST, Returned.NEVER);
   }
   
-  public <T extends ScimResource> T setAttributesForDisplay(T resource) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+  public <T extends ScimResource> T setAttributesForDisplay(T resource) throws AttributeException {
     return setAttributesForDisplayInternal(resource, Returned.REQUEST, Returned.NEVER);
   }
   
-  private <T extends ScimResource> T setAttributesForDisplayInternal(T resource, Returned ... removeAttributesOfTypes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+  private <T extends ScimResource> T setAttributesForDisplayInternal(T resource, Returned ... removeAttributesOfTypes) throws AttributeException {
     T copy = cloneScimResource(resource);
     String resourceType = copy.getResourceType();
     Schema schema = schemaRegistry.getBaseSchemaOfResourceType(resourceType);
@@ -105,7 +106,7 @@ class AttributeUtil {
     return copy;
   }
 
-  public <T extends ScimResource> T setAttributesForDisplay(T resource, Set<AttributeReference> attributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+  public <T extends ScimResource> T setAttributesForDisplay(T resource, Set<AttributeReference> attributes) throws AttributeException {
     if (attributes.isEmpty()) {
       return setAttributesForDisplay(resource);
     } else {
@@ -151,7 +152,7 @@ class AttributeUtil {
     }
   }
 
-  public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, Set<AttributeReference> excludedAttributes) throws IllegalArgumentException, IllegalAccessException, AttributeDoesNotExistException, IOException {
+  public <T extends ScimResource> T setExcludedAttributesForDisplay(T resource, Set<AttributeReference> excludedAttributes) throws AttributeException {
 
     if (excludedAttributes.isEmpty()) {
       return setAttributesForDisplay(resource);
@@ -182,92 +183,95 @@ class AttributeUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private <T extends ScimResource> T cloneScimResource(T original) throws IOException {
+  private <T extends ScimResource> T cloneScimResource(T original) throws AttributeException {
+    try {
     ByteArrayOutputStream boas = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(boas);
     oos.writeObject(original);
 
     ByteArrayInputStream bais = new ByteArrayInputStream(boas.toByteArray());
     ObjectInputStream ois = new ObjectInputStream(bais);
-    T copy = null;
-    try {
-      copy = (T) ois.readObject();
+    return (T) ois.readObject();
     } catch (ClassNotFoundException e) {
-      // Should never happen
-      log.error("", e);
+      throw new IllegalStateException(e);
+    } catch (IOException e) {
+      throw new AttributeException(e);
     }
-    return copy;
   }
 
-  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws IllegalArgumentException {
+  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws AttributeException {
     Function<Attribute, Boolean> function = (attribute) -> returned == attribute.getReturned();
     processAttributes(object, attributeContainer, function);
   }
 
-  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned, Set<Attribute> attributesToKeep) throws IllegalArgumentException, IllegalAccessException {
+  private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned, Set<Attribute> attributesToKeep) throws AttributeException {
     Function<Attribute, Boolean> function = (attribute) -> !attributesToKeep.contains(attribute) && returned == attribute.getReturned();
     processAttributes(object, attributeContainer, function);
   }
 
-  private void removeAttributes(Object object, AttributeContainer attributeContainer, Set<Attribute> attributesToRemove) throws IllegalArgumentException, IllegalAccessException {
+  private void removeAttributes(Object object, AttributeContainer attributeContainer, Set<Attribute> attributesToRemove) throws AttributeException {
     Function<Attribute, Boolean> function = (attribute) -> attributesToRemove.contains(attribute);
     processAttributes(object, attributeContainer, function);
   }
 
-  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws IllegalArgumentException {
-    if (attributeContainer != null && object != null) {
-      for (Attribute attribute : attributeContainer.getAttributes()) {
+  private void processAttributes(Object object, AttributeContainer attributeContainer, Function<Attribute, Boolean> function) throws AttributeException {
+    try {
+      if (attributeContainer != null && object != null) {
+        for (Attribute attribute : attributeContainer.getAttributes()) {
 
-        Schema.AttributeAccessor accessor = attribute.getAccessor();
+          Schema.AttributeAccessor accessor = attribute.getAccessor();
 
-        if (function.apply(attribute)) {
-          if (!accessor.getType().isPrimitive()) {
-            Object obj = accessor.get(object);
-            if (obj == null) {
+          if (function.apply(attribute)) {
+            if (!accessor.getType().isPrimitive()) {
+              Object obj = accessor.get(object);
+              if (obj == null) {
+                continue;
+              }
+
+              log.info("field to be set to null = " + accessor.getType().getName());
+              accessor.set(object, null);
+            }
+          } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
+            log.debug("### Processing single value complex field " + attribute.getName());
+            Object subObject = accessor.get(object);
+
+            if (subObject == null) {
               continue;
             }
 
-            log.info("field to be set to null = " + accessor.getType().getName());
-            accessor.set(object, null);
-          }
-        } else if (!attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
-          log.debug("### Processing single value complex field " + attribute.getName());
-          Object subObject = accessor.get(object);
-
-          if (subObject == null) {
-            continue;
-          }
-          
-          Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
-          log.debug("### container type = " + attributeContainer.getClass().getName());
-          if (subAttribute == null) {
-            log.debug("#### subattribute == null");
-          }
-          processAttributes(subObject, subAttribute, function);
-        } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
-          log.debug("### Processing multi-valued complex field " + attribute.getName());
-          Object subObject = accessor.get(object);
-
-          if (subObject == null) {
-            continue;
-          }
-
-          if (Collection.class.isAssignableFrom(subObject.getClass())) {
-            Collection<?> collection = (Collection<?>) subObject;
-            for (Object o : collection) {
-              Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
-              processAttributes(o, subAttribute, function);
+            Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
+            log.debug("### container type = " + attributeContainer.getClass().getName());
+            if (subAttribute == null) {
+              log.debug("#### subattribute == null");
             }
-          } else if (accessor.getType().isArray()) {
-            Object[] array = (Object[]) subObject;
+            processAttributes(subObject, subAttribute, function);
+          } else if (attribute.isMultiValued() && attribute.getType() == Type.COMPLEX) {
+            log.debug("### Processing multi-valued complex field " + attribute.getName());
+            Object subObject = accessor.get(object);
 
-            for (Object o : array) {
-              Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
-              processAttributes(o, subAttribute, function);
+            if (subObject == null) {
+              continue;
+            }
+
+            if (Collection.class.isAssignableFrom(subObject.getClass())) {
+              Collection<?> collection = (Collection<?>) subObject;
+              for (Object o : collection) {
+                Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
+                processAttributes(o, subAttribute, function);
+              }
+            } else if (accessor.getType().isArray()) {
+              Object[] array = (Object[]) subObject;
+
+              for (Object o : array) {
+                Attribute subAttribute = attributeContainer.getAttribute(attribute.getName());
+                processAttributes(o, subAttribute, function);
+              }
             }
           }
         }
       }
+    } catch (IllegalArgumentException e) {
+      throw new AttributeException(e);
     }
   }
 

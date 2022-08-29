@@ -36,6 +36,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
+import org.apache.directory.scim.server.exception.*;
 import org.apache.directory.scim.server.repository.RepositoryRegistry;
 import org.apache.directory.scim.server.repository.Repository;
 import org.apache.directory.scim.server.schema.SchemaRegistry;
@@ -44,12 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
-import org.apache.directory.scim.server.exception.ScimServerException;
-import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
-import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
-import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
-import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.repository.UpdateRequest;
 import org.apache.directory.scim.server.repository.annotations.ScimProcessingExtension;
 import org.apache.directory.scim.server.repository.extensions.AttributeFilterExtension;
@@ -195,8 +190,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                        .location(buildLocationTag(resource))
                        .tag(etag)
                        .build();
-      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
-        e.printStackTrace();
+      } catch (AttributeException e) {
         return createAttributeProcessingErrorResponse(e);
       }
     } catch (ScimServerException sse) {
@@ -296,7 +290,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         } else {
           created = attributeUtil.setAttributesForDisplay(created, attributeReferences);
         }
-      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+      } catch (AttributeException e) {
         if (etag == null) {
           return Response.status(Status.CREATED)
                          .location(buildLocationTag(created))
@@ -404,7 +398,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
             }
 
             results.add(resource);
-          } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+          } catch (AttributeException e) {
             return createAttributeProcessingErrorResponse(e);
           }
         }
@@ -493,7 +487,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         } else {
           updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
         }
-      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+      } catch (AttributeException e) {
         log.error("Failed to handle attribute processing in update " + e.getMessage());
       }
 
@@ -595,7 +589,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         } else {
           updated = attributeUtil.setAttributesForDisplay(updated, attributeReferences);
         }
-      } catch (IllegalArgumentException | IllegalAccessException | AttributeDoesNotExistException | IOException e) {
+      } catch (AttributeException e) {
         log.error("Failed to handle attribute processing in update " + e.getMessage());
       }
 
