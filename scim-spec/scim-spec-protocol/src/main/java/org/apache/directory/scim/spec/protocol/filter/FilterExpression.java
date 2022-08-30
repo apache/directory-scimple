@@ -19,6 +19,8 @@
 
 package org.apache.directory.scim.spec.protocol.filter;
 
+import java.util.function.Function;
+
 public interface FilterExpression {
   
   String toFilter();
@@ -26,4 +28,8 @@ public interface FilterExpression {
   void setAttributePath(String urn, String parentAttributeName);
 
   String toUnqualifiedFilter();
+
+  default <U> U map(Function<? super FilterExpression, U> mapper) {
+    return mapper.apply(this);
+  }
 }

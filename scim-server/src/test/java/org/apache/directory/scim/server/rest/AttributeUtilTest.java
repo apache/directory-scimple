@@ -39,6 +39,7 @@ import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.Schema;
+import org.apache.directory.scim.spec.schema.Schemas;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,12 +66,12 @@ public class AttributeUtilTest {
   private ObjectMapper objectMapper;
 
   @BeforeEach
-  public void setup() throws Exception {
+  public void setup() {
     schemaRegistry = Mockito.mock(SchemaRegistry.class);
     attributeUtil = new AttributeUtil(schemaRegistry);
-    Schema scimUserSchema = RepositoryRegistry.generateSchema(ScimUser.class);
-    Schema scimEnterpriseUserSchema = RepositoryRegistry.generateExtensionSchema(EnterpriseExtension.class);
-    Schema scimExampleSchema = RepositoryRegistry.generateExtensionSchema(ExampleObjectExtension.class);
+    Schema scimUserSchema = Schemas.schemaFor(ScimUser.class);
+    Schema scimEnterpriseUserSchema = Schemas.schemaForExtension(EnterpriseExtension.class);
+    Schema scimExampleSchema = Schemas.schemaForExtension(ExampleObjectExtension.class);
 
 
     Mockito.when(schemaRegistry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
