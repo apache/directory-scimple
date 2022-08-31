@@ -20,9 +20,14 @@
 package org.apache.directory.scim.example.jersey.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.server.repository.Repository;
 import org.apache.directory.scim.server.repository.UpdateRequest;
+import org.apache.directory.scim.server.schema.SchemaRegistry;
+import org.apache.directory.scim.spec.protocol.filter.FilterExpressions;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -34,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
@@ -43,6 +49,15 @@ import jakarta.inject.Named;
 public class InMemoryGroupService implements Repository<ScimGroup> {
 
   private final Map<String, ScimGroup> groups = new HashMap<>();
+
+  private SchemaRegistry schemaRegistry;
+
+  @Inject
+  public InMemoryGroupService(SchemaRegistry schemaRegistry) {
+    this.schemaRegistry = schemaRegistry;
+  }
+
+  protected InMemoryGroupService() {}
 
   @PostConstruct
   public void init() {
@@ -57,7 +72,7 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   }
 
   @Override
-  public ScimGroup create(ScimGroup resource) {
+  public ScimGroup create(ScimGroup resource) throws UnableToCreateResourceException {
     String resourceId = resource.getId();
     int idCandidate = resource.hashCode();
     String id = resourceId != null ? resourceId : Integer.toString(idCandidate);
@@ -66,8 +81,17 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
       id = Integer.toString(idCandidate);
       ++idCandidate;
     }
-    groups.put(id, resource);
+
+    // check to make sure the group doesn't already exist
+    boolean existingUserFound = groups.values().stream()
+      .anyMatch(group -> group.getExternalId().equals(resource.getExternalId()));
+    if (existingUserFound) {
+      // HTTP leaking into data layer
+      throw new UnableToCreateResourceException(Response.Status.CONFLICT, "Group '" + resource.getExternalId() + "' already exists.");
+    }
+
     resource.setId(id);
+    groups.put(id, resource);
     return resource;
   }
 
@@ -91,7 +115,18 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public FilterResponse<ScimGroup> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) {
-    return new FilterResponse<>(groups.values(), pageRequest, groups.size());
+    long count = pageRequest.getCount() != null ? pageRequest.getCount() : groups.size();
+    long startIndex = pageRequest.getStartIndex() != null
+      ? pageRequest.getStartIndex() - 1 // SCIM is 1-based indexed
+      : 0;
+
+    List<ScimGroup> result = groups.values().stream()
+      .skip(startIndex)
+      .limit(count)
+      .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimGroup.SCHEMA_URI)))
+      .collect(Collectors.toList());
+
+    return new FilterResponse<>(result, pageRequest, result.size());
   }
 
   @Override
