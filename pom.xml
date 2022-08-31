@@ -149,6 +149,11 @@
         <artifactId>scim-compliance-tests</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-spring-boot-starter</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
@@ -630,6 +635,84 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!-- TODO: once this is finalized require Java 17 to build project, (we can still target Java 11 for everything else) -->
+    <profile>
+      <id>spring-boot</id>
+      <activation>
+        <jdk>[17,)</jdk>
+      </activation>
+
+      <properties>
+        <version.spring-boot>3.0.0-RC1</version.spring-boot>
+      </properties>
+
+      <modules>
+        <module>support/spring-boot</module>
+        <module>scim-server-examples/scim-server-spring-boot</module>
+      </modules>
+
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${version.spring-boot}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-maven-plugin</artifactId>
+              <version>${version.spring-boot}</version>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+
+      <repositories>
+        <repository>
+          <id>spring-milestones</id>
+          <name>Spring Milestones</name>
+          <url>https://repo.spring.io/milestone</url>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>spring-snapshots</id>
+          <name>Spring Snapshots</name>
+          <url>https://repo.spring.io/snapshot</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>spring-milestones</id>
+          <name>Spring Milestones</name>
+          <url>https://repo.spring.io/milestone</url>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>spring-snapshots</id>
+          <name>Spring Snapshots</name>
+          <url>https://repo.spring.io/snapshot</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
     </profile>
   </profiles>
 </project>
