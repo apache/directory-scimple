@@ -19,6 +19,9 @@
 
 package org.apache.directory.scim.example.memory.rest;
 
+import jakarta.inject.Inject;
+import org.apache.directory.scim.server.ScimConfiguration;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import java.util.HashSet;
@@ -26,6 +29,9 @@ import java.util.Set;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
+
+import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;
 
 @ApplicationPath("v2")
 public class RestApplication extends Application {
@@ -35,8 +41,28 @@ public class RestApplication extends Application {
     Set<Class<?>> clazzes = new HashSet<>();
     
     clazzes.addAll(ScimResourceHelper.getScimClassesToLoad());
+    clazzes.add(ServerConfigInitializer.class);
 
     return clazzes;
   }
-  
+
+  /**
+   * A {@link ScimConfiguration} allow for eager initialization of beans, this class configures the {@link ServerConfiguration}.
+   */
+  public static class ServerConfigInitializer implements ScimConfiguration {
+
+    @Inject
+    private ServerConfiguration serverConfiguration;
+
+    @Override
+    public void configure() {
+      // Set any unique configuration bits
+      serverConfiguration
+        .setId("scimple-in-memory-example")
+        .setDocumentationUri("https://github.com/apache/directory-scimple");
+
+      // set the auth scheme too
+      // .addAuthenticationSchema(oauthBearer());
+    }
+  }
 }

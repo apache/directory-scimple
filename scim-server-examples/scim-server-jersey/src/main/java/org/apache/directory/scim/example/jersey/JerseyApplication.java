@@ -19,6 +19,9 @@
 
 package org.apache.directory.scim.example.jersey;
 
+import jakarta.inject.Inject;
+import org.apache.directory.scim.server.ScimConfiguration;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import java.net.URI;
@@ -33,6 +36,8 @@ import org.jboss.weld.environment.se.Weld;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;
+
 // @ApplicationPath("v2")
 // Embedded Jersey + Jetty ignores the ApplicationPath annotation
 // https://github.com/eclipse-ee4j/jersey/issues/3222
@@ -44,7 +49,30 @@ public class JerseyApplication extends Application {
   
   @Override
   public Set<Class<?>> getClasses() {
-    return new HashSet<>(ScimResourceHelper.getScimClassesToLoad());
+    Set<Class<?>> clazzes = new HashSet<>(ScimResourceHelper.getScimClassesToLoad());
+    clazzes.add(ServerConfigInitializer.class);
+    return clazzes;
+  }
+
+  /**
+   * A {@link ScimConfiguration} allow for eager initialization of beans, this class configures the {@link ServerConfiguration}.
+   */
+  public static class ServerConfigInitializer implements ScimConfiguration {
+
+    @Inject
+    private ServerConfiguration serverConfiguration;
+
+    @Override
+    public void configure() {
+
+      // Set any unique configuration bits
+      serverConfiguration
+        .setId("scimple-jersey-example")
+        .setDocumentationUri("https://github.com/apache/directory-scimple");
+
+        // set the auth scheme too
+        // .addAuthenticationSchema(oauthBearer());
+    }
   }
 
   public static void main(String[] args) {
