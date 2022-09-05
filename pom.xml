@@ -42,7 +42,7 @@
     <version.lombok.plugin>1.18.20.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
     <version.slf4j>1.7.36</version.slf4j>
-    <version.antlr4>4.5.3</version.antlr4>
+    <version.antlr4>4.11.1</version.antlr4>
     <version.resteasy>6.1.0.Final</version.resteasy>
   </properties>
 
