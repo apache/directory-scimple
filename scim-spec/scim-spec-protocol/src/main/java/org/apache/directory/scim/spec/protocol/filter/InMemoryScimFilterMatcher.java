@@ -219,9 +219,16 @@ final class InMemoryScimFilterMatcher {
       Object compareValue = expression.getCompareValue();
 
       if (op == CompareOperator.EQ) {
+
+        if (isStringExpression(attribute, compareValue) && !attribute.isCaseExact()) {
+          return actualValue.toString().equalsIgnoreCase(compareValue.toString());
+        }
         return compareValue.equals(actualValue);
       }
       if (op == CompareOperator.NE) {
+        if (isStringExpression(attribute, compareValue) && !attribute.isCaseExact()) {
+          return !actualValue.toString().equalsIgnoreCase(compareValue.toString());
+        }
         return !compareValue.equals(actualValue);
       }
       if (op == CompareOperator.SW) {
