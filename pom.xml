@@ -44,6 +44,10 @@
     <version.slf4j>1.7.36</version.slf4j>
     <version.antlr4>4.5.3</version.antlr4>
     <version.resteasy>6.1.0.Final</version.resteasy>
+
+    <!-- default surefire/failsafe arg lines to empty-->
+    <jacoco.argline></jacoco.argline>
+    <jacoco.it.argline></jacoco.it.argline>
   </properties>
 
   <modules>
@@ -53,6 +57,7 @@
     <module>scim-server-examples/scim-server-jersey</module>
     <module>scim-spec</module>
     <module>scim-tools</module>
+    <module>scim-compliance-tests</module>
     <module>scim-coverage</module>
   </modules>
 
@@ -133,6 +138,11 @@
         <artifactId>scim-client</artifactId>
         <version>2.23-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-compliance-tests</artifactId>
+        <version>2.23-SNAPSHOT</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
@@ -170,6 +180,20 @@
         <version>${version.jackson}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>rest-assured-bom</artifactId>
+        <type>pom</type>
+        <version>5.1.1</version>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey</groupId>
+        <artifactId>jersey-bom</artifactId>
+        <version>3.0.6</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>
@@ -217,6 +241,11 @@
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${version.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>${version.slf4j}</version>
         <scope>test</scope>
@@ -243,7 +272,6 @@
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest</artifactId>
         <version>2.2</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>eu.codearte.catch-exception</groupId>
@@ -295,14 +323,37 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <propertyName>jacoco.argline</propertyName>
-        </configuration>
         <executions>
           <execution>
             <id>prepare-agent</id>
             <goals>
               <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <propertyName>jacoco.argline</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>prepare-agent-integration</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+            <configuration>
+              <propertyName>jacoco.it.argline</propertyName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>run-its</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
             </goals>
           </execution>
         </executions>
@@ -439,6 +490,26 @@
             <configuration>
               <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
               <argLine>@{jacoco.argline}</argLine>
+              <includes>
+                <include>**/Test*.java</include>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+                <include>**/*TestCase.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.0.0-M7</version>
+            <configuration>
+              <argLine>@{jacoco.it.argline}</argLine>
+              <includes>
+                <include>**/*IT.java</include>
+              </includes>
+              <dependenciesToScan>
+                <dependency>org.apache.directory.scim:scim-compliance-tests</dependency>
+              </dependenciesToScan>
             </configuration>
           </plugin>
           <plugin>
