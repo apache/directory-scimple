@@ -27,43 +27,15 @@
   <artifactId>scim-server-jersey</artifactId>
   <name>SCIM - Server - Examples - Jersey</name>
 
-  <properties>
-    <jersey.version>3.0.5</jersey.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.glassfish.jersey</groupId>
-        <artifactId>jersey-bom</artifactId>
-        <version>${jersey.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-
-
   <dependencies>
 
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-jetty-http</artifactId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
       <artifactId>jersey-hk2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-json-jackson</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jersey.ext.cdi</groupId>
-      <artifactId>jersey-weld2-se</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.ext.cdi</groupId>
@@ -73,7 +45,6 @@
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
     </dependency>
-
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>

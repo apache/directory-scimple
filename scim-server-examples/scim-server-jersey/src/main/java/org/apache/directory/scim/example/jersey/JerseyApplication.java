@@ -20,6 +20,7 @@
 package org.apache.directory.scim.example.jersey;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.UriBuilder;
 import org.apache.directory.scim.server.ScimConfiguration;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
@@ -29,14 +30,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
-import org.eclipse.jetty.server.Server;
-import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
-import org.glassfish.jersey.server.ApplicationHandler;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.jboss.weld.environment.se.Weld;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
-
-import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;
 
 // @ApplicationPath("v2")
 // Embedded Jersey + Jetty ignores the ApplicationPath annotation
@@ -86,13 +85,14 @@ public class JerseyApplication extends Application {
       weld.addPackages(true, JerseyApplication.class.getPackage());
       weld.initialize();
 
-      ApplicationHandler applicationHandler = new ApplicationHandler(JerseyApplication.class);
-      final Server server = JettyHttpContainerFactory.createServer(URI.create(BASE_URI), applicationHandler.getConfiguration());
+      ResourceConfig resourceConfig = ResourceConfig.forApplication(new JerseyApplication());
+      URI uri = UriBuilder.fromUri("http://localhost/").port(8080).build();
+      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         try {
           System.out.println("Shutting down the application...");
-          server.stop();
+          server.shutdown();
           weld.shutdown();
           System.out.println("Done, exit.");
         } catch (Exception e) {
