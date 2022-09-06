@@ -44,22 +44,21 @@ public final class ScimResourceHelper {
    * @return the JAX-RS annotated classes.
    */
   public static Set<Class<?>> getScimClassesToLoad() {
-    Set<Class<?>> clazzez = new HashSet<>();
 
     // Required scim classes.
-    clazzez.add(BulkResourceImpl.class);
-    clazzez.add(GroupResourceImpl.class);
-    clazzez.add(ResourceTypesResourceImpl.class);
-    clazzez.add(SchemaResourceImpl.class);
-    clazzez.add(SearchResourceImpl.class);
-    clazzez.add(SelfResourceImpl.class);
-    clazzez.add(ServiceProviderConfigResourceImpl.class);
-    clazzez.add(UserResourceImpl.class);
-    clazzez.add(FilterParseExceptionMapper.class);
+    return Set.of(
+      BulkResourceImpl.class,
+      GroupResourceImpl.class,
+      ResourceTypesResourceImpl.class,
+      SchemaResourceImpl.class,
+      SearchResourceImpl.class,
+      SelfResourceImpl.class,
+      ServiceProviderConfigResourceImpl.class,
+      UserResourceImpl.class,
+      FilterParseExceptionMapper.class,
+      WebApplicationExceptionMapper.class,
 
     // handle MediaType of application/scim+json
-    clazzez.add(ScimJacksonXmlBindJsonProvider.class);
-
-    return clazzez;
+    ScimJacksonXmlBindJsonProvider.class);
   }
 }
