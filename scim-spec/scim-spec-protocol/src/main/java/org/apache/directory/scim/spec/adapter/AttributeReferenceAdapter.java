@@ -21,7 +21,7 @@ package org.apache.directory.scim.spec.adapter;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 
 public class AttributeReferenceAdapter extends XmlAdapter<String, AttributeReference> {
 

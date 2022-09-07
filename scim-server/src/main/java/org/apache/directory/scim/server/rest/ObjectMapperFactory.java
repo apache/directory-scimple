@@ -23,12 +23,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 /**
  * Creates and configures an {@link ObjectMapper} used for {@code application/scim+json} parsing.

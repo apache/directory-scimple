@@ -33,8 +33,8 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
 
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
-import org.apache.directory.scim.server.repository.SelfIdResolver;
+import org.apache.directory.scim.core.repository.ResourceException;
+import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.UserResource;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
@@ -64,7 +64,7 @@ public class SelfResourceImplTest {
   }
 
   @Test
-  public void withSelfIdResolverTest() throws UnableToResolveIdResourceException, ScimException {
+  public void withSelfIdResolverTest() throws ResourceException, ScimException {
 
     String internalId = "test-user-resolved";
     Principal principal = mock(Principal.class);

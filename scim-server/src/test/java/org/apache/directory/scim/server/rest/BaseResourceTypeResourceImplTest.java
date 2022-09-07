@@ -45,13 +45,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.apache.directory.scim.server.exception.ScimServerException;
-import org.apache.directory.scim.server.repository.Repository;
+import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;

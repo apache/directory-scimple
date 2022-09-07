@@ -37,34 +37,34 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
 import org.apache.directory.scim.server.exception.*;
-import org.apache.directory.scim.server.repository.RepositoryRegistry;
-import org.apache.directory.scim.server.repository.Repository;
-import org.apache.directory.scim.server.schema.SchemaRegistry;
+import org.apache.directory.scim.core.repository.RepositoryRegistry;
+import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.apache.directory.scim.server.repository.UpdateRequest;
-import org.apache.directory.scim.server.repository.annotations.ScimProcessingExtension;
-import org.apache.directory.scim.server.repository.extensions.AttributeFilterExtension;
-import org.apache.directory.scim.server.repository.extensions.ProcessingExtension;
-import org.apache.directory.scim.server.repository.extensions.ScimRequestContext;
-import org.apache.directory.scim.server.repository.extensions.exceptions.ClientFilterException;
+import org.apache.directory.scim.core.repository.UpdateRequest;
+import org.apache.directory.scim.core.repository.annotations.ScimProcessingExtension;
+import org.apache.directory.scim.core.repository.extensions.AttributeFilterExtension;
+import org.apache.directory.scim.core.repository.extensions.ProcessingExtension;
+import org.apache.directory.scim.spec.filter.attribute.ScimRequestContext;
+import org.apache.directory.scim.core.repository.extensions.ClientFilterException;
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;
-import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
-import org.apache.directory.scim.spec.protocol.search.Filter;
-import org.apache.directory.scim.spec.protocol.search.PageRequest;
-import org.apache.directory.scim.spec.protocol.search.SortOrder;
-import org.apache.directory.scim.spec.protocol.search.SortRequest;
+import org.apache.directory.scim.spec.filter.FilterResponse;
+import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortOrder;
+import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -120,10 +120,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       try {
         resource = repository.get(id);
       } catch (UnableToRetrieveResourceException e2) {
-        if (e2.getStatus()
-              .getFamily()
+        Status status = Status.fromStatusCode(e2.getStatus());
+        if (status.getFamily()
               .equals(Family.SERVER_ERROR)) {
-          return createGenericExceptionResponse(e2, e2.getStatus());
+          return createGenericExceptionResponse(e2, status);
         }
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
@@ -246,7 +246,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       try {
         created = repository.create(resource);
       } catch (UnableToCreateResourceException e1) {
-        Status status = e1.getStatus();
+        Status status = Status.fromStatusCode(e1.getStatus());
         ErrorResponse er = new ErrorResponse(status, "Error");
 
         if (status == Status.CONFLICT) {
@@ -346,8 +346,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       try {
         filterResp = repository.find(filter, pageRequest, sortRequest);
       } catch (UnableToRetrieveResourceException e1) {
-        log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus()
-                                                                                              .toString());
+        log.info("Caught an UnableToRetrieveResourceException " + e1.getMessage() + " : " + e1.getStatus());
         return createGenericExceptionResponse(e1, e1.getStatus());
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
@@ -632,10 +631,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         repository.delete(id);
         return response;
       } catch (UnableToDeleteResourceException e) {
-        Status status = e.getStatus();
-        response = Response.status(status)
-                           .build();
-
+        response = Response.status(e.getStatus()).build();
         log.error("Unable to delete resource", e);
 
         return response;
@@ -681,6 +677,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return requestContext.getUriInfo().getAbsolutePathBuilder()
                   .path(id)
                   .build();
+  }
+
+  static Response createGenericExceptionResponse(Throwable e1, int statusCode) {
+    return createGenericExceptionResponse(e1, Status.fromStatusCode(statusCode));
   }
 
   public static Response createGenericExceptionResponse(Throwable e1, Status status) {

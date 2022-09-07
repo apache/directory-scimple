@@ -21,7 +21,7 @@ package org.apache.directory.scim.example.jersey.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
-import org.apache.directory.scim.server.repository.SelfIdResolver;
+import org.apache.directory.scim.core.repository.SelfIdResolver;
 
 import java.security.Principal;
 

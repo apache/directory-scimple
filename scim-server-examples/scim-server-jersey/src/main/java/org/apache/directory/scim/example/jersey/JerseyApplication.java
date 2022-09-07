@@ -21,7 +21,7 @@ package org.apache.directory.scim.example.jersey;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
-import org.apache.directory.scim.server.ScimConfiguration;
+import org.apache.directory.scim.core.Initializable;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
@@ -54,15 +54,15 @@ public class JerseyApplication extends Application {
   }
 
   /**
-   * A {@link ScimConfiguration} allow for eager initialization of beans, this class configures the {@link ServerConfiguration}.
+   * A {@link Initializable} allow for eager initialization of beans, this class configures the {@link ServerConfiguration}.
    */
-  public static class ServerConfigInitializer implements ScimConfiguration {
+  public static class ServerConfigInitializer implements Initializable {
 
     @Inject
     private ServerConfiguration serverConfiguration;
 
     @Override
-    public void configure() {
+    public void initialize() {
 
       // Set any unique configuration bits
       serverConfiguration

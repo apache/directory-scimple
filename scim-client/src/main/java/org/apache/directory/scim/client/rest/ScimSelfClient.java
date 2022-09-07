@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.apache.directory.scim.spec.protocol.Constants;
 import org.apache.directory.scim.spec.protocol.SelfResource;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.resources.ScimUser;

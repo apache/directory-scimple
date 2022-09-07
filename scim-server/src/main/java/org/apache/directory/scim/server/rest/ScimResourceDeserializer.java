@@ -32,8 +32,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 public class ScimResourceDeserializer extends JsonDeserializer<ScimResource> {
   private final SchemaRegistry schemaRegistry;

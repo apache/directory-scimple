@@ -43,6 +43,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.directory.scim</groupId>
+      <artifactId>scim-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.scim</groupId>
       <artifactId>scim-spec-schema</artifactId>
     </dependency>
     <dependency>
@@ -102,11 +106,6 @@
       <groupId>eu.codearte.catch-exception</groupId>
       <artifactId>catch-exception</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.flipkart.zjsonpatch</groupId>
-      <artifactId>zjsonpatch</artifactId>
-      <version>0.4.12</version>
     </dependency>
 
     <dependency>
