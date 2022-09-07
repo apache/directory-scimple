@@ -24,11 +24,11 @@ import java.util.Set;
 
 import org.apache.directory.scim.spec.resources.TypedAttribute;
 
-public class PrioritySortingComparitor implements Comparator<Object> {
+class PrioritySortingComparator implements Comparator<Object> {
 
   private Set<Object> priorities;
 
-  public PrioritySortingComparitor(Set<Object> priorities) {
+  public PrioritySortingComparator(Set<Object> priorities) {
     this.priorities = priorities;
   }
 

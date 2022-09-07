@@ -28,14 +28,14 @@ import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class PrioritySortingComparitorTest {
+public class PrioritySortingComparatorTest {
 
   @Test
   public void testSorting() throws Exception {
     Set<Object> priorities = new HashSet<>();
     priorities.add("1P");
     priorities.add("2P");
-    PrioritySortingComparitor comparitor = new PrioritySortingComparitor(priorities);
+    PrioritySortingComparator comparitor = new PrioritySortingComparator(priorities);
     List<String> list = Arrays.asList("1", "2", "1P", "2P", "3", "4");
     Collections.sort(list, comparitor);
     System.out.println(list);
@@ -48,7 +48,7 @@ public class PrioritySortingComparitorTest {
     Set<Object> priorities = new HashSet<>();
     priorities.add("home");
     priorities.add("work");
-    PrioritySortingComparitor comparitor = new PrioritySortingComparitor(priorities);
+    PrioritySortingComparator comparitor = new PrioritySortingComparator(priorities);
     List<String> list = Arrays.asList("work", "local", "home");
     Collections.sort(list, comparitor);
     System.out.println(list);
