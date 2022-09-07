@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.server.rest;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import jakarta.enterprise.inject.spi.CDI;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
@@ -128,7 +128,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
 
-        return repository.handleException(e);
+        return handleException(e);
       }
 
       if (resource != null) {
@@ -266,7 +266,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
 
-        return repository.handleException(e);
+        return handleException(e);
       }
 
       EntityTag etag = null;
@@ -352,7 +352,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
 
-        return repository.handleException(e);
+        return handleException(e);
       }
 
       // If no resources are found, we should still return a ListResponse with
@@ -441,7 +441,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
 
-        return repository.handleException(e);
+        return handleException(e);
       }
 
       if (stored == null) {
@@ -470,7 +470,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e1) {
         log.error("Uncaught repository exception", e1);
 
-        return repository.handleException(e1);
+        return handleException(e1);
       }
 
       // Process Attributes
@@ -541,7 +541,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
 
-        return repository.handleException(e);
+        return handleException(e);
       }
 
       if (stored == null) {
@@ -572,7 +572,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e1) {
         log.error("Uncaught repository exception", e1);
 
-        return repository.handleException(e1);
+        return handleException(e1);
       }
 
       // Process Attributes
@@ -642,7 +642,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       } catch (Exception e) {
         log.error("Uncaught repository exception", e);
 
-        return repository.handleException(e);
+        return handleException(e);
       }
     } catch (ScimServerException sse) {
       LOG.error("Error Processing SCIM Request", sse);
@@ -723,5 +723,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     log.warn("Failed to update record, backing record has changed - " + id);
     return evaluatePreconditionsResponse.entity(er)
                                         .build();
+  }
+
+  Response handleException(Throwable unhandled) {
+    // Allow for ErrorMessageViolationExceptionMapper to handle JAX-RS exceptions by default
+    if (unhandled instanceof WebApplicationException) {
+      throw (WebApplicationException) unhandled;
+    }
+    return BaseResourceTypeResourceImpl.createGenericExceptionResponse(unhandled, Status.INTERNAL_SERVER_ERROR);
   }
 }
