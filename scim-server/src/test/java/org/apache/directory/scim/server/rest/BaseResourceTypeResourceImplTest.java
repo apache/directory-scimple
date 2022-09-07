@@ -19,6 +19,11 @@
 
 package org.apache.directory.scim.server.rest;
 
+import static com.googlecode.catchexception.CatchException.catchException;
+import static com.googlecode.catchexception.CatchException.caughtException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -28,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -213,6 +219,37 @@ public class BaseResourceTypeResourceImplTest {
     assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
     assertTrue(response.getEntity() instanceof ErrorResponse);
     assertTrue(((ErrorResponse)response.getEntity()).getDetail().equals("Cannot include both attributes and excluded attributes in a single request"));
+  }
+
+  @Test
+  public void handleException_jaxrsExceptionTest() {
+    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
+    when(baseResourceImpl.handleException(any())).thenCallRealMethod();
+
+    Exception e = new WebApplicationException();
+    catchException(() -> baseResourceImpl.handleException(e));
+    assertThat(caughtException(), sameInstance(e));
+  }
+
+  @Test
+  public void handleException_runtimeExceptionTest() {
+    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
+    when(baseResourceImpl.handleException(any())).thenCallRealMethod();
+
+    Exception e = new RuntimeException("fake test exception");
+    Response response = baseResourceImpl.handleException(e);
+    assertThat(response.getStatus(), is(500));
+    assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("fake test exception"));
+  }
+
+  @Test
+  public void handleException_nullExceptionTest() {
+    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
+    when(baseResourceImpl.handleException(any())).thenCallRealMethod();
+
+    Response response = baseResourceImpl.handleException(null);
+    assertThat(response.getStatus(), is(500));
+    assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("Unknown Server Error"));
   }
   
   private ScimUser getScimUser() throws PhoneNumberParseException {

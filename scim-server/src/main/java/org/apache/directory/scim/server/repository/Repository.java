@@ -21,16 +21,11 @@ package org.apache.directory.scim.server.repository;
 
 import java.util.List;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveExtensionsResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.rest.BaseResourceTypeResourceImpl;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
 import org.apache.directory.scim.spec.protocol.search.PageRequest;
@@ -127,25 +122,4 @@ public interface Repository<T extends ScimResource> {
    *         the appropriate list.
    */
   List<Class<? extends ScimExtension>> getExtensionList() throws UnableToRetrieveExtensionsResourceException;
-
-  /**
-   * <p>In the case where the repository throws an unhandled exception, this
-   * method will be passed that exception in order for the repository to convert
-   * it into the desired response.</p>
-   * <p>The returned response SHOULD fulfill the requirements for SCIM error
-   * responses as defined in <a
-   * href="https://tools.ietf.org/html/rfc7644#section-3.12">3.12. HTTP Status
-   * and Error Response Handling</a> of the SCIM specification.</p>
-   * <p>By default, exceptions are converted into a <code>500 Internal Server
-   * Error</code>.</p>
-   * @param unhandled
-   * @return
-   */
-  default Response handleException(Throwable unhandled) {
-    // Allow for ErrorMessageViolationExceptionMapper to handle JAX-RS exceptions by default
-    if (unhandled instanceof WebApplicationException) {
-      throw (WebApplicationException) unhandled;
-    }
-    return BaseResourceTypeResourceImpl.createGenericExceptionResponse(unhandled, Status.INTERNAL_SERVER_ERROR);
-  }
 }
