@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.core.repository.extensions;
 
+import org.apache.directory.scim.spec.filter.attribute.ScimRequestContext;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 public interface AttributeFilterExtension extends ProcessingExtension {

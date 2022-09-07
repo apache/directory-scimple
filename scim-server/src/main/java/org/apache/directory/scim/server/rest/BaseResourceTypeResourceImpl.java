@@ -49,7 +49,7 @@ import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.core.repository.annotations.ScimProcessingExtension;
 import org.apache.directory.scim.core.repository.extensions.AttributeFilterExtension;
 import org.apache.directory.scim.core.repository.extensions.ProcessingExtension;
-import org.apache.directory.scim.core.repository.extensions.ScimRequestContext;
+import org.apache.directory.scim.spec.filter.attribute.ScimRequestContext;
 import org.apache.directory.scim.core.repository.extensions.ClientFilterException;
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;

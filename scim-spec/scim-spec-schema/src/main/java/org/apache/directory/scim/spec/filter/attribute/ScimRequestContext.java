@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.core.repository.extensions;
+package org.apache.directory.scim.spec.filter.attribute;
 
 import java.util.Set;
 

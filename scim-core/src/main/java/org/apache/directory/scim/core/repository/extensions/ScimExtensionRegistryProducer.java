@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.core.schema;
+package org.apache.directory.scim.core.repository.extensions;
 
 import jakarta.enterprise.inject.Produces;
 
