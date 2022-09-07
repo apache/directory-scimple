@@ -17,14 +17,16 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.data;
+package org.apache.directory.scim.protocol.data;
 
 import java.util.List;
 
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.directory.scim.spec.resources.BaseResource;
 import lombok.Data;
@@ -34,17 +36,21 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-public class BulkRequest extends BaseResource {
+public class BulkResponse extends BaseResource {
 
-  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
-  
-  @XmlElement
-  Integer failOnErrors;
-  
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:BulkResponse";
+
   @XmlElement(name = "Operations")
   List<BulkOperation> operations;
+
+  @XmlElement(name="status")
+  @XmlJavaTypeAdapter(StatusAdapter.class)
+  Status status;
   
-  public BulkRequest() {
+  @XmlElement(name="response")
+  ErrorResponse errorResponse;
+  
+  public BulkResponse() {
     super(SCHEMA_URI);
   }
 }

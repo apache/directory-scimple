@@ -17,13 +17,33 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol;
+package org.apache.directory.scim.protocol.data;
 
-public final class Constants {
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-  private Constants() {
+public class StatusAdapter extends XmlAdapter<String, Status> {
+
+  @Override
+  public Status unmarshal(String v) throws Exception {
+    if (v == null) {
+      return null;
+    }
+
+    for (Status status : Status.values()) {
+      if (status.getStatusCode() == Integer.valueOf(v)) {
+        return status;
+      }
+    }
+    throw new EnumConstantNotPresentException(Status.class, v);
   }
-  
-  public static final String SCIM_CONTENT_TYPE = "application/scim+json";
-  public static final String PATCH = "PATCH";
+
+  @Override
+  public String marshal(Status v) throws Exception {
+    if (v == null) {
+      return null;
+    }
+    return Integer.toString(v.getStatusCode());
+  }
+
 }

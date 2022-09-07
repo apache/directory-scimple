@@ -28,7 +28,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.directory.scim.spec.protocol.ResourceTypesResource;
+import org.apache.directory.scim.protocol.ResourceTypesResource;
 import org.apache.directory.scim.spec.schema.ResourceType;
 
 public class ResourceTypesClient implements AutoCloseable {

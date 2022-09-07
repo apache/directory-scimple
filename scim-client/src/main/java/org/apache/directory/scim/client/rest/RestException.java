@@ -35,7 +35,7 @@ package org.apache.directory.scim.client.rest;
 
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.core.Response;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
+import org.apache.directory.scim.protocol.data.ErrorResponse;
 
 public class RestException extends Exception {
   private static final long serialVersionUID = 7360783673606191577L;

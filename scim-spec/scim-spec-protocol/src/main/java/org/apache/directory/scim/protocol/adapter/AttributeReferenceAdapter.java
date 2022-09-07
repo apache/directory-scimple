@@ -17,24 +17,29 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.exception;
+package org.apache.directory.scim.protocol.adapter;
 
-import jakarta.ws.rs.core.Response.Status;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
-public class ScimException extends Exception {
+public class AttributeReferenceAdapter extends XmlAdapter<String, AttributeReference> {
 
-  private static final long serialVersionUID = 3643485564325176463L;
-  private ErrorResponse error;
-  private Status status;
-
-  public ScimException(ErrorResponse error, Status status) {
-    this.error = error;
-    this.status = status;
+  @Override
+  public AttributeReference unmarshal(String string) throws Exception {
+    if (string == null) {
+      return null;
+    }
+    return new AttributeReference(string);
   }
+
+  @Override
+  public String marshal(AttributeReference attributeReference) throws Exception {
+    if (attributeReference == null) {
+      return null;
+    }
+    return attributeReference.getFullyQualifiedAttributeName();
+  }
+
+
 }

@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.data;
+package org.apache.directory.scim.protocol.data;
 
 import java.util.Set;
 
@@ -29,8 +29,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.directory.scim.spec.adapter.AttributeReferenceAdapter;
-import org.apache.directory.scim.spec.adapter.FilterAdapter;
+import org.apache.directory.scim.protocol.adapter.AttributeReferenceAdapter;
+import org.apache.directory.scim.protocol.adapter.FilterAdapter;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.PageRequest;

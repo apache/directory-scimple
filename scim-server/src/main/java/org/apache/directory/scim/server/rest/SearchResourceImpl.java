@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.server.rest;
 
-import org.apache.directory.scim.spec.protocol.SearchResource;
+import org.apache.directory.scim.protocol.SearchResource;
 
 public class SearchResourceImpl implements SearchResource {
 

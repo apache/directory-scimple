@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.adapter;
+package org.apache.directory.scim.protocol.adapter;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 

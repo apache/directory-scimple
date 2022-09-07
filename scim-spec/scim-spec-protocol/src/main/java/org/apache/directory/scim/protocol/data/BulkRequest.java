@@ -17,29 +17,34 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.adapter;
+package org.apache.directory.scim.protocol.data;
 
-import jakarta.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.List;
 
-import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 
-public class AttributeReferenceAdapter extends XmlAdapter<String, AttributeReference> {
+import org.apache.directory.scim.spec.resources.BaseResource;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-  @Override
-  public AttributeReference unmarshal(String string) throws Exception {
-    if (string == null) {
-      return null;
-    }
-    return new AttributeReference(string);
+@Data
+@EqualsAndHashCode(callSuper = true)
+@XmlType
+@XmlAccessorType(XmlAccessType.NONE)
+public class BulkRequest extends BaseResource {
+
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
+  
+  @XmlElement
+  Integer failOnErrors;
+  
+  @XmlElement(name = "Operations")
+  List<BulkOperation> operations;
+  
+  public BulkRequest() {
+    super(SCHEMA_URI);
   }
-
-  @Override
-  public String marshal(AttributeReference attributeReference) throws Exception {
-    if (attributeReference == null) {
-      return null;
-    }
-    return attributeReference.getFullyQualifiedAttributeName();
-  }
-
-
 }

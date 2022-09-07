@@ -17,34 +17,33 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol;
+package org.apache.directory.scim.protocol;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Path;
 
-import org.apache.directory.scim.spec.resources.ScimGroup;
+import org.apache.directory.scim.spec.resources.ScimUser;
 
 //@formatter:off
 /**
-* From SCIM Protocol Specification, section 3, page 9
-* 
-* @see <a href="https://tools.ietf.org/html/rfc7644#section-3.2">Scim spec section 3.2</a>
-* 
-* Resource Endpoint         Operations             Description
- -------- ---------------- ---------------------- --------------------
- Group    /Groups          GET (Section 3.4.1),   Retrieve, add,
-                           POST (Section 3.3),    modify Groups.
-                           PUT (Section 3.5.1),
-                           PATCH (Section 3.5.2),
-                           DELETE (Section 3.6)
+ * From SCIM Protocol Specification, section 3, page 9
+ * 
+ * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.2">Scim spec section 3.2</a>
+ * 
+ * Resource Endpoint         Operations             Description
+   -------- ---------------- ---------------------- --------------------
+   User     /Users           GET (Section 3.4.1),   Retrieve, add,
+                             POST (Section 3.3),    modify Users.
+                             PUT (Section 3.5.1),
+                             PATCH (Section 3.5.2),
+                             DELETE (Section 3.6)
 
-* @author chrisharm
-*
-*/
+ * @author chrisharm
+ *
+ */
 //@formatter:on
 
-@Path("Groups")
+@Path("Users")
 @Tag(name="SCIM")
-public interface GroupResource extends BaseResourceTypeResource<ScimGroup> {
-
+public interface UserResource extends BaseResourceTypeResource<ScimUser> {
 }

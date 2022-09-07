@@ -21,8 +21,8 @@ package org.apache.directory.scim.server.exception;
 
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.spec.protocol.ErrorMessageType;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
+import org.apache.directory.scim.protocol.ErrorMessageType;
+import org.apache.directory.scim.protocol.data.ErrorResponse;
 import lombok.Getter;
 
 public class ScimServerException extends Exception {

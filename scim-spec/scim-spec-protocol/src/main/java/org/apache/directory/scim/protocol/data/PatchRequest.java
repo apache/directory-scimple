@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.data;
+package org.apache.directory.scim.protocol.data;
 
 import java.util.List;
 
@@ -28,31 +28,20 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.BaseResource;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class ListResponse<T> extends BaseResource {
-
-  private static final long serialVersionUID = -2381780997440673136L;
-
-  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
+public class PatchRequest extends BaseResource {
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
   
-  @XmlElement
-  int totalResults;
-  
-  @XmlElement
-  Integer startIndex;
-  
-  @XmlElement
-  Integer itemsPerPage;
-
-  @XmlElement(name = "Resources")
-  List<T> resources;
-
-  public ListResponse() {
+  public PatchRequest() {
     super(SCHEMA_URI);
   }
+  
+  @XmlElement(name = "Operations")
+  List<PatchOperation> patchOperationList;
 }

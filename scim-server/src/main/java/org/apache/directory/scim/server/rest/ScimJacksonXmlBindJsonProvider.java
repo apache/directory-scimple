@@ -21,7 +21,7 @@ package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
-import org.apache.directory.scim.spec.protocol.Constants;
+import org.apache.directory.scim.protocol.Constants;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
