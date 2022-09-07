@@ -61,15 +61,9 @@ public class SelfResourceImpl implements SelfResource {
   }
 
   @Override
-  public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    try {
-      String internalId = getInternalId();
-      return userResource.getById(internalId, attributes, excludedAttributes);
-    } catch (ResourceException e) {
-      return createErrorResponse(e);
-    } catch (ScimException e) {
-      return createErrorResponse(e);
-    }
+  public Response getSelf(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
+    String internalId = getInternalId();
+    return userResource.getById(internalId, attributes, excludedAttributes);
   }
 
   // @Override
@@ -81,51 +75,21 @@ public class SelfResourceImpl implements SelfResource {
   // }
 
   @Override
-  public Response update(ScimUser resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    try {
-      String internalId = getInternalId();
-      return userResource.update(resource, internalId, attributes, excludedAttributes);
-    } catch (ResourceException e) {
-      return createErrorResponse(e);
-    } catch (ScimException e) {
-      return createErrorResponse(e);
-    }
+  public Response update(ScimUser resource, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
+    String internalId = getInternalId();
+    return userResource.update(resource, internalId, attributes, excludedAttributes);
   }
 
   @Override
-  public Response patch(PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) {
-    try {
-      String internalId = getInternalId();
-      return userResource.patch(patchRequest, internalId, attributes, excludedAttributes);
-    } catch (ResourceException e) {
-      return createErrorResponse(e);
-    } catch (ScimException e) {
-      return createErrorResponse(e);
-    }
+  public Response patch(PatchRequest patchRequest, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
+    String internalId = getInternalId();
+    return userResource.patch(patchRequest, internalId, attributes, excludedAttributes);
   }
 
   @Override
-  public Response delete() {
-    try {
-      String internalId = getInternalId();
-      return userResource.delete(internalId);
-    } catch (ResourceException e) {
-      return createErrorResponse(e);
-    } catch (ScimException e) {
-      return createErrorResponse(e);
-    }
-  }
-
-  private Response createErrorResponse(ScimException e) {
-    ErrorResponse er = new ErrorResponse(e.getStatus(), "Error");
-    er.addErrorMessage(e.getMessage());
-    return er.toResponse();
-  }
-
-  private Response createErrorResponse(ResourceException e) {
-    ErrorResponse er = new ErrorResponse(e.getStatus(), "Error");
-    er.addErrorMessage(e.getMessage());
-    return er.toResponse();
+  public Response delete() throws ScimException, ResourceException {
+    String internalId = getInternalId();
+    return userResource.delete(internalId);
   }
 
   private String getInternalId() throws ResourceException {

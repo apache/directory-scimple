@@ -19,10 +19,8 @@
 package org.apache.directory.scim.server.rest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +31,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
 
 import jakarta.ws.rs.core.SecurityContext;
+import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.protocol.UserResource;
@@ -56,11 +55,9 @@ public class SelfResourceImplTest {
 
     SelfResourceImpl selfResource = new SelfResourceImpl(null, selfIdResolverInstance, new RequestContext().setSecurityContext(securityContext));
 
-    Response response = selfResource.getSelf(null, null);
-    assertThat(response.getEntity(), instanceOf(ErrorResponse.class));
-    List<String> messages = ((ErrorResponse)response.getEntity()).getErrorMessageList();
-    assertThat(messages, hasItem("Caller SelfIdResolver not available"));
-    assertThat(messages, hasSize(1));
+    UnableToResolveIdResourceException exception = assertThrows(UnableToResolveIdResourceException.class, () -> selfResource.getSelf(null, null));
+
+    assertThat(exception.getMessage(), is("Caller SelfIdResolver not available"));
   }
 
   @Test

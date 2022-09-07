@@ -6,7 +6,7 @@
 * to you under the Apache License, Version 2.0 (the
 * "License"); you may not use this file except in compliance
 * with the License.  You may obtain a copy of the License at
- 
+
 * http://www.apache.org/licenses/LICENSE-2.0
 
 * Unless required by applicable law or agreed to in writing,
@@ -17,34 +17,31 @@
 * under the License.
 */
 
-package org.apache.directory.scim.protocol.exception;
+package org.apache.directory.scim.server.exception;
 
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
+import org.apache.directory.scim.protocol.Constants;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
-public class ScimException extends Exception {
+@Provider
+@Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
-  private static final long serialVersionUID = 3643485564325176463L;
-  private ErrorResponse error;
-  private Status status;
+  @Override
+  public Response toResponse(WebApplicationException e) {
+    ErrorResponse em = new ErrorResponse(Status.fromStatusCode(e.getResponse().getStatus()), e.getMessage());
 
-  public ScimException(Status status, String message, Throwable cause) {
-    super(message, cause);
-    this.error = new ErrorResponse(status, message);
-    this.status = status;
-  }
+    Response response = em.toResponse();
+    response.getHeaders().putSingle(HttpHeaders.CONTENT_TYPE, Constants.SCIM_CONTENT_TYPE);
 
-  public ScimException(Status status, String message) {
-    this(new ErrorResponse(status, message), status);
-  }
-
-  public ScimException(ErrorResponse error, Status status) {
-    this.error = error;
-    this.status = status;
+    return response;
   }
 }

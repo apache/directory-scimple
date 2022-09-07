@@ -21,7 +21,7 @@ package org.apache.directory.scim.server.rest;
 
 import java.util.Set;
 
-import org.apache.directory.scim.server.exception.FilterParseExceptionMapper;
+import org.apache.directory.scim.server.exception.*;
 
 /**
  * Provides the SCIM defined set of end-points and resources without declaring a
@@ -54,8 +54,14 @@ public final class ScimResourceHelper {
       SelfResourceImpl.class,
       ServiceProviderConfigResourceImpl.class,
       UserResourceImpl.class,
+
+      // exception mappers
+      ResourceExceptionMapper.class,
+      ScimExceptionMapper.class,
       FilterParseExceptionMapper.class,
       WebApplicationExceptionMapper.class,
+      UnsupportedOperationExceptionMapper.class,
+      GenericExceptionMapper.class,
 
     // handle MediaType of application/scim+json
     ScimJacksonXmlBindJsonProvider.class);

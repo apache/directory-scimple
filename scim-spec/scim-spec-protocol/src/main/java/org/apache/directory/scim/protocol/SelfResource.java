@@ -41,6 +41,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.data.PatchRequest;
+import org.apache.directory.scim.protocol.exception.ScimException;
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -91,7 +93,7 @@ public interface SelfResource {
     @ApiResponse(responseCode="501", description="Not Implemented")
   })
     default Response getSelf(@Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                             @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                             @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -116,7 +118,7 @@ public interface SelfResource {
                                        schema = @Schema(implementation = ScimResource.class)),
                                        required = true) ScimUser resource,
                           @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -139,7 +141,7 @@ public interface SelfResource {
                                        schema = @Schema(implementation = ScimUser.class)),
                                        required = true) ScimUser resource,
                           @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -159,7 +161,7 @@ public interface SelfResource {
                                       schema = @Schema(implementation = PatchRequest.class)),
                                       required = true) PatchRequest patchRequest,
                          @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                         @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws Exception {
+                         @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -171,7 +173,7 @@ public interface SelfResource {
     @ApiResponse(responseCode = "404", description = "Not found"),
     @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     @ApiResponse(responseCode = "501", description = "Not Implemented") })
-  default Response delete() throws Exception {
+  default Response delete() throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

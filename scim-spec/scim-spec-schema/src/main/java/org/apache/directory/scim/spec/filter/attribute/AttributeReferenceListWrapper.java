@@ -19,7 +19,9 @@
 
 package org.apache.directory.scim.spec.filter.attribute;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,6 +54,12 @@ public class AttributeReferenceListWrapper {
     AttributeReferenceListWrapper wrapper = new AttributeReferenceListWrapper("");
     wrapper.attributeReferences = attributeReferences;
     return wrapper;
+  }
+
+  public static Set<AttributeReference> getAttributeReferences(AttributeReferenceListWrapper attributeReferenceListWrapper) {
+    return Optional.ofNullable(attributeReferenceListWrapper)
+      .map(wrapper -> wrapper.getAttributeReferences())
+      .orElse(Collections.emptySet());
   }
 
   public String toString() {
