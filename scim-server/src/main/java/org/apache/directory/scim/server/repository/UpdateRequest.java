@@ -156,13 +156,13 @@ public class UpdateRequest<T extends ScimResource> {
         List<Object> collection2 = obj2 != null ? (List<Object>) accessor.get(obj2) : null;
         
         Set<Object> priorities = findCommonElements(collection1, collection2);
-        PrioritySortingComparitor prioritySortingComparitor = new PrioritySortingComparitor(priorities);
+        PrioritySortingComparator prioritySortingComparator = new PrioritySortingComparator(priorities);
         if (collection1 != null) {
-          Collections.sort(collection1, prioritySortingComparitor);
+          Collections.sort(collection1, prioritySortingComparator);
         }
         
         if (collection2 != null) {
-          Collections.sort(collection2, prioritySortingComparitor);
+          Collections.sort(collection2, prioritySortingComparator);
         }
       } else if (attribute.getType() == Attribute.Type.COMPLEX) {
         Object nextObj1 = obj1 != null ? accessor.get(obj1) : null;
@@ -180,8 +180,8 @@ public class UpdateRequest<T extends ScimResource> {
     Set<Object> set1 = new HashSet<>(list1);
     Set<Object> set2 = new HashSet<>(list2);
     
-    set1 = set1.stream().map(PrioritySortingComparitor::getComparableValue).collect(Collectors.toSet());
-    set2 = set2.stream().map(PrioritySortingComparitor::getComparableValue).collect(Collectors.toSet());
+    set1 = set1.stream().map(PrioritySortingComparator::getComparableValue).collect(Collectors.toSet());
+    set2 = set2.stream().map(PrioritySortingComparator::getComparableValue).collect(Collectors.toSet());
     
     set1.retainAll(set2);
     return set1;
