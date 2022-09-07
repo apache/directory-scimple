@@ -113,3 +113,32 @@ public class InMemoryUserService implements Respository<ScimUser> {
 ```
 
 Implementing the repository interface allows the customization of create, retrieve, update, and delete methods (as well as find).  Customization is flexible - if your system implements soft deletes, create a delete method that simply sets a flag and alter the find and retrieve methods to only return "undeleted" resources.
+
+## Building & Contributing
+
+Clone the code and build it!
+
+**Prerequisites**
+
+* Java 11+
+
+```bash
+git clone https://github.com/apache/directory-scimple.git
+cd directory-scimple
+./mvnw package
+# or on windows
+# mvnw.bat package
+```
+
+### Project modules
+
+| Name                         | Description                                                                                                                                                          |
+|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| scim-spec/scim-spec-schema   | SCIM relate models from [RFC7643](https://www.rfc-editor.org/rfc/rfc7643.html) and Filter related models from [RFC7644](https://www.rfc-editor.org/rfc/rfc7644.html) |
+| scim-spec/scim-spec-protocol | All other REST related models from [RFC7644](https://www.rfc-editor.org/rfc/rfc7644.html)                                                                            |
+| scim-client                  | A SCIM REST Client                                                                                                                                                   |
+| scim-core                    | SCIMple Repository related classes, used to provide CRUD operations to a data store (e.g. a database), see above example                                             |
+| scim-server                  | REST Endpoint implementations                                                                                                                                        |
+| scim-server-examples         | Various server examples                                                                                                                                              |
+| scim-compliance-tests        | Integration tests that can be used to test a SCIM server                                                                                                             |
+
