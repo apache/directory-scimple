@@ -22,7 +22,7 @@ package org.apache.directory.scim.client.rest;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.GenericType;
 
-import org.apache.directory.scim.spec.protocol.data.ListResponse;
+import org.apache.directory.scim.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.resources.ScimUser;
 
 public class ScimUserClient extends BaseScimClient<ScimUser> {

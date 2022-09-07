@@ -17,31 +17,24 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.data;
+package org.apache.directory.scim.protocol.exception;
 
-import java.util.List;
+import jakarta.ws.rs.core.Response.Status;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-
+import org.apache.directory.scim.protocol.data.ErrorResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.directory.scim.spec.patch.PatchOperation;
-import org.apache.directory.scim.spec.resources.BaseResource;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-public class PatchRequest extends BaseResource {
-  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
-  
-  public PatchRequest() {
-    super(SCHEMA_URI);
+@EqualsAndHashCode(callSuper=true)
+public class ScimException extends Exception {
+
+  private static final long serialVersionUID = 3643485564325176463L;
+  private ErrorResponse error;
+  private Status status;
+
+  public ScimException(ErrorResponse error, Status status) {
+    this.error = error;
+    this.status = status;
   }
-  
-  @XmlElement(name = "Operations")
-  List<PatchOperation> patchOperationList;
 }

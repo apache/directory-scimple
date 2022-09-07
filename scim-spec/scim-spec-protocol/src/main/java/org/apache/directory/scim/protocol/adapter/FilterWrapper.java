@@ -17,14 +17,14 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.adapter;
+package org.apache.directory.scim.protocol.adapter;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.spec.protocol.ErrorMessageType;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
+import org.apache.directory.scim.protocol.ErrorMessageType;
+import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.filter.Filter;
 

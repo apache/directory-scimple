@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol;
+package org.apache.directory.scim.protocol;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -34,10 +34,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.spec.protocol.data.SearchRequest;
+import org.apache.directory.scim.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
-import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
+import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
 /**

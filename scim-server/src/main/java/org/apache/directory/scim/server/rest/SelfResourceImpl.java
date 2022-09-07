@@ -30,12 +30,12 @@ import jakarta.ws.rs.core.Response.Status;
 import org.apache.directory.scim.core.repository.ResourceException;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
-import org.apache.directory.scim.spec.protocol.SelfResource;
-import org.apache.directory.scim.spec.protocol.UserResource;
+import org.apache.directory.scim.protocol.SelfResource;
+import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
-import org.apache.directory.scim.spec.protocol.data.PatchRequest;
-import org.apache.directory.scim.spec.protocol.exception.ScimException;
+import org.apache.directory.scim.protocol.data.ErrorResponse;
+import org.apache.directory.scim.protocol.data.PatchRequest;
+import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import lombok.extern.slf4j.Slf4j;
 

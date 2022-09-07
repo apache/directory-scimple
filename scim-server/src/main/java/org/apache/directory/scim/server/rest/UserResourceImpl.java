@@ -26,7 +26,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
-import org.apache.directory.scim.spec.protocol.UserResource;
+import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 

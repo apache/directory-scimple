@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.data;
+package org.apache.directory.scim.protocol.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.apache.directory.scim.spec.protocol.ErrorMessageType;
+import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol;
+package org.apache.directory.scim.protocol;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -30,31 +30,24 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.UriInfo;
-
-import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;
+import org.apache.directory.scim.spec.schema.ResourceType;
 
 /**
  * From SCIM Protocol Specification, section 4, page 74
  * 
- * @see <a href="https://tools.ietf.org/html/rfc7644#section-4">Scim spec section 4</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7644#section-4">Scim spec
+ *      section 4</a>
  * 
- *      /Schemas An HTTP GET to this endpoint is used to retrieve information
- *      about resource schemas supported by a SCIM service provider. An HTTP GET
- *      to the endpoint "/Schemas" SHALL return all supported schemas in
- *      ListResponse format (see Figure 3). Individual schema definitions can be
- *      returned by appending the schema URI to the /Schemas endpoint. For
- *      example:
- * 
- *      /Schemas/urn:ietf:params:scim:schemas:core:2.0:User
- * 
- *      The contents of each schema returned are described in Section 7 of
- *      [RFC7643]. An example representation of SCIM schemas may be found in
- *      Section 8.7 of [RFC7643].
+ *      /ResourceTypes An HTTP GET to this endpoint is used to discover the
+ *      types of resources available on a SCIM service provider (e.g., Users and
+ *      Groups). Each resource type defines the endpoints, the core schema URI
+ *      that defines the resource, and any supported schema extensions. The
+ *      attributes defining a resource type can be found in Section 6 of
+ *      [RFC7643], and an example representation can be found in Section 8.6 of
+ *      [RFC7643].
  * 
  *      In cases where a request is for a specific "ResourceType" or "Schema",
  *      the single JSON object is returned in the same way that a single User or
@@ -69,31 +62,30 @@ import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYP
  *      specified in a filter are true.
  */
 
-@Path("Schemas")
+@Path("ResourceTypes")
 @Tag(name="SCIM-Configuration")
-public interface SchemaResource {
+public interface ResourceTypesResource {
 
   @GET
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @Operation(description="Get All Schemas")
-  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
-    array = @ArraySchema(schema = @Schema(implementation = org.apache.directory.scim.spec.schema.Schema.class))))
-  default Response getAllSchemas(@QueryParam("filter") String filter, @Context UriInfo uriInfo) {
+  @Operation(description = "Get All Resource Types")
+  @ApiResponse(content = @Content(mediaType = Constants.SCIM_CONTENT_TYPE,
+    array = @ArraySchema(schema = @Schema(implementation = ResourceType.class))))
+  default Response getAllResourceTypes(@QueryParam("filter") String filter) throws Exception {
 
     if (filter != null) {
       return Response.status(Status.FORBIDDEN).build();
     }
-    
+
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
   @GET
-  @Path("{uri}")
+  @Path("{name}")
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @Operation(description="Get Schemas by URN")
-  @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
-    schema = @Schema(implementation = org.apache.directory.scim.spec.schema.Schema.class)))
-  default Response getSchema(@PathParam("uri") String uri, @Context UriInfo uriInfo) {
+  @Operation(description = "Get Resource Type by URN")
+  @ApiResponse(content = @Content(mediaType = Constants.SCIM_CONTENT_TYPE, schema = @Schema(implementation = ResourceType.class)))
+  default Response getResourceType(@PathParam("name") String name) throws Exception {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

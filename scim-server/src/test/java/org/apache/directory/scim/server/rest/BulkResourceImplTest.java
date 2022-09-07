@@ -27,10 +27,10 @@ import org.apache.directory.scim.server.exception.UnableToCreateResourceExceptio
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
-import org.apache.directory.scim.spec.protocol.data.BulkOperation;
-import org.apache.directory.scim.spec.protocol.data.BulkRequest;
-import org.apache.directory.scim.spec.protocol.data.BulkResponse;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
+import org.apache.directory.scim.protocol.data.BulkOperation;
+import org.apache.directory.scim.protocol.data.BulkRequest;
+import org.apache.directory.scim.protocol.data.BulkResponse;
+import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;

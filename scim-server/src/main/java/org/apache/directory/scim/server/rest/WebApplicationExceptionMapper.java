@@ -28,8 +28,8 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
-import org.apache.directory.scim.spec.protocol.Constants;
-import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
+import org.apache.directory.scim.protocol.Constants;
+import org.apache.directory.scim.protocol.data.ErrorResponse;
 
 @Provider
 @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})

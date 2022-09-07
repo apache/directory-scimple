@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.protocol.data;
+package org.apache.directory.scim.protocol.data;
 
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.xml.bind.annotation.XmlAccessType;
