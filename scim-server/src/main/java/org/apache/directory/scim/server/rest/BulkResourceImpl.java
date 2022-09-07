@@ -29,14 +29,14 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.scim.core.repository.ResourceException;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
 import org.apache.directory.scim.server.exception.UnableToRetrieveResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.repository.Repository;
-import org.apache.directory.scim.server.repository.RepositoryRegistry;
-import org.apache.directory.scim.server.repository.UpdateRequest;
-import org.apache.directory.scim.server.schema.SchemaRegistry;
+import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.repository.RepositoryRegistry;
+import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.spec.protocol.BulkResource;
 import org.apache.directory.scim.spec.protocol.data.BulkOperation;
 import org.apache.directory.scim.spec.protocol.data.BulkOperation.Method;
@@ -49,6 +49,7 @@ import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 @Slf4j
 @ApplicationScoped
@@ -228,7 +229,7 @@ public class BulkResourceImpl implements BulkResource {
       if (!errorCountExceeded && !(operationResult.getResponse() instanceof ErrorResponse)) {
         try {
           this.handleBulkOperationMethod(allUnresolveds, operationResult, bulkIdKeyToOperationResult, uriInfo);
-        } catch (UnableToCreateResourceException | UnableToDeleteResourceException | UnableToUpdateResourceException resourceException) {
+        } catch (ResourceException resourceException) {
           log.error("Failed to do bulk operation", resourceException);
 
           errorCount += errorCountIncrement;
@@ -308,7 +309,7 @@ public class BulkResourceImpl implements BulkResource {
         bulkOperationResult.setLocation(null);
         createAndSetErrorResponse(bulkOperationResult, unableToUpdateResourceException.getStatus(), detail);
         this.cleanup(bulkIdKey, transitiveReverseDependencies, bulkIdKeyToOperationResult);
-      } catch (UnableToRetrieveResourceException e) {
+      } catch (ResourceException e) {
         log.error("Could not complete final resolution pass, unresolvable bulkId", e);
 
         String detail = e.getLocalizedMessage();
@@ -352,7 +353,7 @@ public class BulkResourceImpl implements BulkResource {
       if (StringUtils.isNotBlank(scimResource.getId())) {
         repository.delete(scimResource.getId());
       }
-    } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
+    } catch (ResourceException unableToDeleteResourceException) {
       log.error("Could not delete ScimResource after failure: {}", scimResource);
     }
     for (String dependentBulkIdKey : reverseDependencies) {
@@ -370,7 +371,7 @@ public class BulkResourceImpl implements BulkResource {
           dependentOperationResult.setLocation(null);
           createAndSetErrorResponse(dependentOperationResult, Status.CONFLICT, String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkId, dependentBulkIdKey));
           dependentResourceRepository.delete(dependentResourceId);
-        } catch (UnableToDeleteResourceException unableToDeleteResourceException) {
+        } catch (ResourceException unableToDeleteResourceException) {
           log.error("Could not delete depenedent ScimResource after failing to update dependee", unableToDeleteResourceException);
         }
     }
@@ -390,7 +391,7 @@ public class BulkResourceImpl implements BulkResource {
    * @throws UnableToUpdateResourceException
    * @throws UnresolvableOperationException
    */
-  private void handleBulkOperationMethod(List<IWishJavaHadTuples> unresolveds, BulkOperation operationResult, Map<String, BulkOperation> bulkIdKeyToOperationResult, UriInfo uriInfo) throws UnableToCreateResourceException, UnableToDeleteResourceException, UnableToUpdateResourceException, UnresolvableOperationException {
+  private void handleBulkOperationMethod(List<IWishJavaHadTuples> unresolveds, BulkOperation operationResult, Map<String, BulkOperation> bulkIdKeyToOperationResult, UriInfo uriInfo) throws ResourceException, UnresolvableOperationException {
     ScimResource scimResource = operationResult.getData();
     Method bulkOperationMethod = operationResult.getMethod();
     String bulkId = operationResult.getBulkId();
@@ -483,6 +484,10 @@ public class BulkResourceImpl implements BulkResource {
     }
       break;
     }
+  }
+
+  private static void createAndSetErrorResponse(BulkOperation operationResult, int statusCode, String detail) {
+    createAndSetErrorResponse(operationResult, Status.fromStatusCode(statusCode), detail);
   }
 
   private static void createAndSetErrorResponse(BulkOperation operationResult, Status status, String detail) {

@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.server.rest;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.directory.scim.server.exception.FilterParseExceptionMapper;

@@ -28,11 +28,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.protocol.ResourceTypesResource;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.ResourceType;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 @ApplicationScoped
 public class ResourceTypesResourceImpl implements ResourceTypesResource {

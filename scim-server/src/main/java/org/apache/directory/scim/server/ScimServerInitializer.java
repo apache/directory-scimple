@@ -25,6 +25,7 @@ import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessBean;
+import org.apache.directory.scim.core.Initializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +35,15 @@ public class ScimServerInitializer implements Extension {
   private List<Bean<?>> scimConfigBeans = new ArrayList<>();
 
   public <T> void collect(@Observes ProcessBean<T> event) {
-    if (ScimConfiguration.class.isAssignableFrom(event.getBean().getBeanClass())) {
+    if (Initializable.class.isAssignableFrom(event.getBean().getBeanClass())) {
       scimConfigBeans.add(event.getBean());
     }
   }
 
   public void load(@Observes AfterDeploymentValidation event, BeanManager beanManager) {
     scimConfigBeans.forEach(bean -> {
-      ScimConfiguration configBean = (ScimConfiguration) beanManager.getReference(bean, bean.getBeanClass(), beanManager.createCreationalContext(bean));
-      configBean.configure();
+      Initializable configBean = (Initializable) beanManager.getReference(bean, bean.getBeanClass(), beanManager.createCreationalContext(bean));
+      configBean.initialize();
     });
   }
 }

@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
 import org.apache.directory.scim.server.exception.AttributeException;
-import org.apache.directory.scim.server.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -39,6 +38,7 @@ import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

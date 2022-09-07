@@ -24,9 +24,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
-import org.apache.directory.scim.server.repository.Repository;
-import org.apache.directory.scim.server.repository.UpdateRequest;
-import org.apache.directory.scim.server.schema.SchemaRegistry;
+import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.spec.protocol.filter.FilterExpressions;
 import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
 import org.apache.directory.scim.spec.protocol.search.Filter;
@@ -43,6 +42,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 @Named
 @ApplicationScoped

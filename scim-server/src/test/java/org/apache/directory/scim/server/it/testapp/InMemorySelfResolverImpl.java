@@ -22,7 +22,7 @@ package org.apache.directory.scim.server.it.testapp;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response.Status;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
-import org.apache.directory.scim.server.repository.SelfIdResolver;
+import org.apache.directory.scim.core.repository.SelfIdResolver;
 
 import java.security.Principal;
 

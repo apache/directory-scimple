@@ -19,18 +19,14 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
-import org.apache.directory.scim.server.repository.Repository;
-import org.apache.directory.scim.server.repository.RepositoryRegistry;
-import org.apache.directory.scim.server.schema.SchemaRegistry;
+import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.protocol.data.BulkOperation;
 import org.apache.directory.scim.spec.protocol.data.BulkRequest;
 import org.apache.directory.scim.spec.protocol.data.BulkResponse;
@@ -39,6 +35,7 @@ import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.ResourceReference;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 

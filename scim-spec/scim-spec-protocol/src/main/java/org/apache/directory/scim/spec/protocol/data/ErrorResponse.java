@@ -61,6 +61,10 @@ public class ErrorResponse extends BaseResource {
     super(SCHEMA_URI);
   }
 
+  public ErrorResponse(int statusCode, String detail) {
+    this(Status.fromStatusCode(statusCode), detail);
+  }
+
   public ErrorResponse(Status status, String detail) {
     super(SCHEMA_URI);
     this.status = status;

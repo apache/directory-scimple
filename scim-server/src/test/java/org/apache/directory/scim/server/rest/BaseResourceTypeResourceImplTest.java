@@ -45,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.apache.directory.scim.server.exception.ScimServerException;
-import org.apache.directory.scim.server.repository.Repository;
+import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;

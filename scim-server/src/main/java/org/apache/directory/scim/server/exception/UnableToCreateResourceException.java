@@ -23,6 +23,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.directory.scim.core.repository.ResourceException;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
@@ -31,10 +32,10 @@ public class UnableToCreateResourceException extends ResourceException {
   private static final long serialVersionUID = -3872700870424005641L;
 
   public UnableToCreateResourceException(Status status, String message) {
-    super(status, message);
+    super(status.getStatusCode(), message);
   }
 
   public UnableToCreateResourceException(Status status, String message, Throwable cause) {
-    super(status, message, cause);
+    super(status.getStatusCode(), message, cause);
   }
 }
