@@ -25,7 +25,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
-import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
+import org.apache.directory.scim.spec.filter.FilterParseException;
 
 public class FilterParseExceptionMapper implements ExceptionMapper<FilterParseException> {
 

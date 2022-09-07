@@ -43,12 +43,12 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
-import org.apache.directory.scim.spec.protocol.search.SortOrder;
+import org.apache.directory.scim.spec.filter.SortOrder;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import static org.apache.directory.scim.spec.protocol.Constants.SCIM_CONTENT_TYPE;

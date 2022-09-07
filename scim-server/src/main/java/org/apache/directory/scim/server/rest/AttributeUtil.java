@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
 import org.apache.directory.scim.server.exception.AttributeException;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimResource;

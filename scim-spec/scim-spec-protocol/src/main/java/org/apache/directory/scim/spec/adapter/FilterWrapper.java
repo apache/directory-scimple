@@ -25,8 +25,8 @@ import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
-import org.apache.directory.scim.spec.protocol.filter.FilterParseException;
-import org.apache.directory.scim.spec.protocol.search.Filter;
+import org.apache.directory.scim.spec.filter.FilterParseException;
+import org.apache.directory.scim.spec.filter.Filter;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

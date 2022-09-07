@@ -54,17 +54,17 @@ import org.apache.directory.scim.core.repository.extensions.ClientFilterExceptio
 import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.ErrorMessageType;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;
-import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
-import org.apache.directory.scim.spec.protocol.search.Filter;
-import org.apache.directory.scim.spec.protocol.search.PageRequest;
-import org.apache.directory.scim.spec.protocol.search.SortOrder;
-import org.apache.directory.scim.spec.protocol.search.SortRequest;
+import org.apache.directory.scim.spec.filter.FilterResponse;
+import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortOrder;
+import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import lombok.extern.slf4j.Slf4j;
 

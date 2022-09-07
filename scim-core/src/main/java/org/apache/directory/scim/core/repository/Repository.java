@@ -21,10 +21,10 @@ package org.apache.directory.scim.core.repository;
 
 import java.util.List;
 
-import org.apache.directory.scim.spec.protocol.filter.FilterResponse;
-import org.apache.directory.scim.spec.protocol.search.Filter;
-import org.apache.directory.scim.spec.protocol.search.PageRequest;
-import org.apache.directory.scim.spec.protocol.search.SortRequest;
+import org.apache.directory.scim.spec.filter.FilterResponse;
+import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 

@@ -32,7 +32,7 @@ import org.apache.directory.scim.server.exception.UnableToResolveIdResourceExcep
 import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.spec.protocol.SelfResource;
 import org.apache.directory.scim.spec.protocol.UserResource;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;

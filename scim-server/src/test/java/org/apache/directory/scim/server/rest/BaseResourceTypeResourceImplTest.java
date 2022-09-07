@@ -51,7 +51,7 @@ import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexOb
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;

@@ -36,15 +36,15 @@ import org.apache.directory.scim.spec.adapter.FilterWrapper;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.protocol.Constants;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReferenceListWrapper;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.spec.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.protocol.data.PatchRequest;
 import org.apache.directory.scim.spec.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.protocol.exception.ScimException;
-import org.apache.directory.scim.spec.protocol.search.Filter;
-import org.apache.directory.scim.spec.protocol.search.SortOrder;
+import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.filter.SortOrder;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 public abstract class BaseScimClient<T extends ScimResource> implements AutoCloseable {

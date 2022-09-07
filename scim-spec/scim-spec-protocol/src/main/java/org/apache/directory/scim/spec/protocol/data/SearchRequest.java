@@ -31,11 +31,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.adapter.AttributeReferenceAdapter;
 import org.apache.directory.scim.spec.adapter.FilterAdapter;
-import org.apache.directory.scim.spec.protocol.attribute.AttributeReference;
-import org.apache.directory.scim.spec.protocol.search.Filter;
-import org.apache.directory.scim.spec.protocol.search.PageRequest;
-import org.apache.directory.scim.spec.protocol.search.SortOrder;
-import org.apache.directory.scim.spec.protocol.search.SortRequest;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortOrder;
+import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.BaseResource;
 
 /**
