@@ -27,7 +27,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.directory.scim.core.repository.ResourceException;
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.protocol.SelfResource;

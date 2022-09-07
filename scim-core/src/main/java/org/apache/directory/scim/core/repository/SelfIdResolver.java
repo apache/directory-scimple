@@ -19,6 +19,8 @@
 
 package org.apache.directory.scim.core.repository;
 
+import org.apache.directory.scim.spec.exception.ResourceException;
+
 import java.security.Principal;
 
 public interface SelfIdResolver {
