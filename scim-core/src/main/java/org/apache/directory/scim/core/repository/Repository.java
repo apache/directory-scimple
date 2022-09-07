@@ -21,6 +21,7 @@ package org.apache.directory.scim.core.repository;
 
 import java.util.List;
 
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.PageRequest;

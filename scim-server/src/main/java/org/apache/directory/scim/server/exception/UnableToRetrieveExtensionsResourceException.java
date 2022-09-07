@@ -23,7 +23,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.directory.scim.core.repository.ResourceException;
+import org.apache.directory.scim.spec.exception.ResourceException;
 
 @Data
 @EqualsAndHashCode(callSuper=true)

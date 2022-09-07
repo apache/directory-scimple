@@ -33,7 +33,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
 
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.directory.scim.core.repository.ResourceException;
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.protocol.data.ErrorResponse;

@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.core.repository;
+package org.apache.directory.scim.spec.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
