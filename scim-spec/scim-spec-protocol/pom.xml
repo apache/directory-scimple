@@ -29,6 +29,10 @@
 	<artifactId>scim-spec-protocol</artifactId>
 	<name>SCIM - Specification - Protocol</name>
 
+  <properties>
+    <module.name>org.apache.directory.scim.protocol</module.name>
+  </properties>
+
 	<dependencies>
 		<dependency>
       <groupId>jakarta.ws.rs</groupId>
