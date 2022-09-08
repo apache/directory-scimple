@@ -45,6 +45,7 @@ import jakarta.ws.rs.core.Response.Status;
 import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.protocol.adapter.FilterWrapper;
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.protocol.data.SearchRequest;
@@ -76,7 +77,7 @@ public interface BaseResourceTypeResource<T> {
   })
     default Response getById(@Parameter(name="id", required=true) @PathParam("id") String id,
                              @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                             @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+                             @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -102,7 +103,7 @@ public interface BaseResourceTypeResource<T> {
                          @Parameter(name="sortBy") @QueryParam("sortBy") AttributeReference sortBy,
                          @Parameter(name="sortOrder") @QueryParam("sortOrder") SortOrder sortOrder,
                          @Parameter(name="startIndex") @QueryParam("startIndex") Integer startIndex,
-                         @Parameter(name="count") @QueryParam("count") Integer count) throws ScimException {
+                         @Parameter(name="count") @QueryParam("count") Integer count) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -127,7 +128,7 @@ public interface BaseResourceTypeResource<T> {
                                        schema = @Schema(implementation = ScimResource.class)),
                                        required = true) T resource,
                           @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -148,7 +149,7 @@ public interface BaseResourceTypeResource<T> {
     @ApiResponse(responseCode = "501", description = "Not Implemented") })
   default Response find(@RequestBody(content = @Content(mediaType = Constants.SCIM_CONTENT_TYPE,
                                      schema = @Schema(implementation = SearchRequest.class)),
-                                     required = true) SearchRequest request) throws ScimException {
+                                     required = true) SearchRequest request) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -173,7 +174,7 @@ public interface BaseResourceTypeResource<T> {
                                        required = true) T resource,
                           @PathParam("id") String id,
                           @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+                          @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -193,7 +194,7 @@ public interface BaseResourceTypeResource<T> {
                                       required = true) PatchRequest patchRequest,
                          @PathParam("id") String id,
                          @Parameter(name="attributes") @QueryParam("attributes") AttributeReferenceListWrapper attributes,
-                         @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException {
+                         @Parameter(name="excludedAttributes") @QueryParam("excludedAttributes") AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 
@@ -206,7 +207,7 @@ public interface BaseResourceTypeResource<T> {
     @ApiResponse(responseCode = "404", description = "Not found"),
     @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     @ApiResponse(responseCode = "501", description = "Not Implemented") })
-  default Response delete(@Parameter(name = "id", required = true) @PathParam("id") String id) throws ScimException {
+  default Response delete(@Parameter(name = "id", required = true) @PathParam("id") String id) throws ScimException, ResourceException {
     return Response.status(Status.NOT_IMPLEMENTED).build();
   }
 }

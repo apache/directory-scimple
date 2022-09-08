@@ -19,32 +19,27 @@
 
 package org.apache.directory.scim.server.rest;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import jakarta.ws.rs.core.UriInfo;
+import org.apache.directory.scim.protocol.exception.ScimException;
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import org.apache.directory.scim.server.exception.ScimServerException;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
@@ -52,7 +47,6 @@ import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
-import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.resources.Address;
@@ -73,7 +67,7 @@ public class BaseResourceTypeResourceImplTest {
   AttributeReferenceListWrapper excludedAttributeList = new AttributeReferenceListWrapper("emails, phoneNumbers");
   
   @Test
-  public void testGetProviderInternal_ScimServerExceptionThrownWhenNoProvider() throws ScimServerException {
+  public void testGetProviderInternal_ScimServerExceptionThrownWhenNoProvider() throws ScimException {
     // given
     @SuppressWarnings("rawtypes")
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
@@ -81,12 +75,12 @@ public class BaseResourceTypeResourceImplTest {
     when(baseResourceImpl.getRepositoryInternal()).thenCallRealMethod();
     
     // when
-    assertThrows(ScimServerException.class, () -> baseResourceImpl.getRepositoryInternal());
+    assertThrows(ScimException.class, () -> baseResourceImpl.getRepositoryInternal());
   }
   
   @SuppressWarnings("unchecked")
   @Test
-  public void testGetById_ForbiddenIfNoFilter() {
+  public void testGetById_ForbiddenIfNoFilter() throws ScimException, ResourceException {
     // given
     @SuppressWarnings("rawtypes")
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
@@ -102,12 +96,12 @@ public class BaseResourceTypeResourceImplTest {
     Response response = baseResourceImpl.getById("1", includedAttributeList, excludedAttributeList);
     
     // then
-    assertTrue(response != null);
-    assertTrue(response.getStatus() == Status.FORBIDDEN.getStatusCode());
+    assertNotNull(response);
+    assertEquals(response.getStatus(), Status.FORBIDDEN.getStatusCode());
   }
   
   @Test
-  public void testQuery_NullParametersValid() {
+  public void testQuery_NullParametersValid() throws ScimException, ResourceException {
     // given
     @SuppressWarnings("rawtypes")
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
@@ -124,38 +118,31 @@ public class BaseResourceTypeResourceImplTest {
     Response response = baseResourceImpl.query(null, null, null, null, null, null, null);
     
     // then
-    verify(baseResourceImpl, times(1)).find(searchRequest);  
-    assertTrue(response != null);
-    assertTrue(response.getStatus() == Status.OK.getStatusCode());
+    verify(baseResourceImpl, times(1)).find(searchRequest);
+    assertNotNull(response);
+    assertEquals(response.getStatus(), Status.OK.getStatusCode());
   }
   
   @Test
-  public void testCreate_ErrorIfBothAttributesAndExcludedAttributesExist() {
+  public void testCreate_ErrorIfBothAttributesAndExcludedAttributesExist() throws ScimException, ResourceException, PhoneNumberParseException {
     // given
     @SuppressWarnings("unchecked")
     BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
     
-    ScimUser scimUser = null;
-    try {
-      scimUser = getScimUser();
-    } catch (PhoneNumberParseException e) {
-      fail("Parsing phone number in getScimUser failed");
-    }
+    ScimUser scimUser = getScimUser();
     
     when(baseResourceImpl.create(scimUser, includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     
     // when
-    Response response = baseResourceImpl.create(scimUser, includedAttributeList, excludedAttributeList);
-    
+    ScimException exception = assertThrows(ScimException.class, () -> baseResourceImpl.create(scimUser, includedAttributeList, excludedAttributeList));
+
     // then
-    assertTrue(response != null);
-    assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
-    assertTrue(response.getEntity() instanceof ErrorResponse);
-    assertTrue(((ErrorResponse)response.getEntity()).getDetail().equals("Cannot include both attributes and excluded attributes in a single request"));
+    assertEquals(exception.getStatus(), Status.BAD_REQUEST);
+    assertThat(exception.getError().getDetail(), is("Cannot include both attributes and excluded attributes in a single request"));
   }
   
   @Test
-  public void testFind_ErrorIfBothAttributesAndExcludedAttributesExist() {
+  public void testFind_ErrorIfBothAttributesAndExcludedAttributesExist() throws ScimException, ResourceException {
     // given
     @SuppressWarnings("rawtypes")
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
@@ -167,38 +154,29 @@ public class BaseResourceTypeResourceImplTest {
     when(baseResourceImpl.find(searchRequest)).thenCallRealMethod();
     
     // when
-    Response response = baseResourceImpl.find(searchRequest);
-    
+    ScimException exception = assertThrows(ScimException.class, () -> baseResourceImpl.find(searchRequest));
+
     // then
-    assertTrue(response != null);
-    assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
-    assertTrue(response.getEntity() instanceof ErrorResponse);
-    assertTrue(((ErrorResponse)response.getEntity()).getDetail().equals("Cannot include both attributes and excluded attributes in a single request"));
+    assertEquals(exception.getStatus(), Status.BAD_REQUEST);
+    assertThat(exception.getError().getDetail(), is("Cannot include both attributes and excluded attributes in a single request"));
   }
   
   @Test
-  public void testUpdate_ErrorIfBothAttributesAndExcludedAttributesExist() {
+  public void testUpdate_ErrorIfBothAttributesAndExcludedAttributesExist() throws ScimException, ResourceException, PhoneNumberParseException {
     // given
     @SuppressWarnings("unchecked")
     BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
     
-    ScimUser scimUser = null;
-    try {
-      scimUser = getScimUser();
-    } catch (PhoneNumberParseException e) {
-      fail("Parsing phone number in getScimUser failed");
-    }
+    ScimUser scimUser = getScimUser();
     
     when(baseResourceImpl.update(scimUser, "1", includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     
     // when
-    Response response = baseResourceImpl.update(scimUser, "1", includedAttributeList, excludedAttributeList);
-    
+    ScimException exception = assertThrows(ScimException.class, () -> baseResourceImpl.update(scimUser, "1", includedAttributeList, excludedAttributeList));
+
     // then
-    assertTrue(response != null);
-    assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
-    assertTrue(response.getEntity() instanceof ErrorResponse);
-    assertTrue(((ErrorResponse)response.getEntity()).getDetail().equals("Cannot include both attributes and excluded attributes in a single request"));
+    assertEquals(exception.getStatus(), Status.BAD_REQUEST);
+    assertThat(exception.getError().getDetail(), is("Cannot include both attributes and excluded attributes in a single request"));
   }
   
   @Test
@@ -212,46 +190,13 @@ public class BaseResourceTypeResourceImplTest {
     when(baseResourceImpl.patch(patchRequest, "1", includedAttributeList, excludedAttributeList)).thenCallRealMethod();
     
     // when
-    Response response = baseResourceImpl.patch(patchRequest, "1", includedAttributeList, excludedAttributeList);
-    
+    ScimException exception = assertThrows(ScimException.class, () -> baseResourceImpl.patch(patchRequest, "1", includedAttributeList, excludedAttributeList));
+
     // then
-    assertTrue(response != null);
-    assertTrue(response.getStatus() == Status.BAD_REQUEST.getStatusCode());
-    assertTrue(response.getEntity() instanceof ErrorResponse);
-    assertTrue(((ErrorResponse)response.getEntity()).getDetail().equals("Cannot include both attributes and excluded attributes in a single request"));
+    assertEquals(exception.getStatus(), Status.BAD_REQUEST);
+    assertThat(exception.getError().getDetail(), is("Cannot include both attributes and excluded attributes in a single request"));
   }
 
-  @Test
-  public void handleException_jaxrsExceptionTest() {
-    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
-    when(baseResourceImpl.handleException(any())).thenCallRealMethod();
-
-    Exception e = new WebApplicationException();
-    catchException(() -> baseResourceImpl.handleException(e));
-    assertThat(caughtException(), sameInstance(e));
-  }
-
-  @Test
-  public void handleException_runtimeExceptionTest() {
-    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
-    when(baseResourceImpl.handleException(any())).thenCallRealMethod();
-
-    Exception e = new RuntimeException("fake test exception");
-    Response response = baseResourceImpl.handleException(e);
-    assertThat(response.getStatus(), is(500));
-    assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("fake test exception"));
-  }
-
-  @Test
-  public void handleException_nullExceptionTest() {
-    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
-    when(baseResourceImpl.handleException(any())).thenCallRealMethod();
-
-    Response response = baseResourceImpl.handleException(null);
-    assertThat(response.getStatus(), is(500));
-    assertThat(((ErrorResponse)response.getEntity()).getDetail(), is("Unknown Server Error"));
-  }
-  
   private ScimUser getScimUser() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
 
