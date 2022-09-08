@@ -27,8 +27,11 @@
   <artifactId>scim-server-jersey</artifactId>
   <name>SCIM - Server - Examples - Jersey</name>
 
-  <dependencies>
+  <properties>
+    <module.name>org.apache.directory.scim.example.jersey</module.name>
+  </properties>
 
+  <dependencies>
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-grizzly2-http</artifactId>

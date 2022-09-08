@@ -27,6 +27,10 @@
   <artifactId>scim-core</artifactId>
   <name>SCIM - Core</name>
 
+  <properties>
+    <module.name>org.apache.directory.scim.core</module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>jakarta.inject</groupId>

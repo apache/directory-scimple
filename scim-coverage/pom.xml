@@ -26,6 +26,7 @@
 
   <artifactId>scim-test-coverage</artifactId>
   <name>SCIM - Total Test Coverage</name>
+  <packaging>pom</packaging>
 
   <dependencies>
       <dependency>

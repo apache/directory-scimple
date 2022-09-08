@@ -415,6 +415,7 @@
                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               </manifest>
               <manifestEntries>
+                <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
                 <Build-Number>${build.number}</Build-Number>
                 <Build-Date>${timestamp}</Build-Date>
                 <SCM-Revision>${buildNumber}</SCM-Revision>

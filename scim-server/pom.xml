@@ -28,6 +28,10 @@
   <name>SCIM - Server</name>
   <packaging>jar</packaging>
 
+  <properties>
+    <module.name>org.apache.directory.scim.server</module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>jakarta.inject</groupId>

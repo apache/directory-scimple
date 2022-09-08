@@ -24,7 +24,11 @@
   </parent>
   <artifactId>scim-client</artifactId>
   <name>SCIM - Client</name>
-  
+
+  <properties>
+    <module.name>org.apache.directory.scim.client</module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.directory.scim</groupId>

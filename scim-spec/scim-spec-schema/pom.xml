@@ -27,6 +27,10 @@
 	<artifactId>scim-spec-schema</artifactId>
 	<name>SCIM - Specification - Schema</name>
 
+  <properties>
+    <module.name>org.apache.directory.scim.spec</module.name>
+  </properties>
+
 	<dependencies>
 		<dependency>
       <groupId>jakarta.xml.bind</groupId>
