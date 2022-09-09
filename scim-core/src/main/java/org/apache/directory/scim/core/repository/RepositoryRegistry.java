@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.core.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -74,38 +73,27 @@ public class RepositoryRegistry implements Initializable {
       .forEach(repository -> {
       try {
         registerRepository(repository.getResourceClass(), repository);
-      } catch (InvalidRepositoryException | JsonProcessingException | ResourceException e) {
+      } catch (InvalidRepositoryException | ResourceException e) {
         throw new ScimResourceInvalidException("Failed to register repository " + repository.getClass() + " for ScimResource type " + repository.getResourceClass(), e);
       }
     });
   }
 
-  public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException, JsonProcessingException, ResourceException {
+  public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException, ResourceException {
 
     ResourceType resourceType = generateResourceType(clazz, repository);
 
-    log.info("Calling addSchema on the base class: {}", clazz);
-    schemaRegistry.addSchema(Schemas.schemaFor(clazz));
-    // NOTE generateResourceType() ensures ScimResourceType exists
-    ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
-    String schemaUrn = scimResourceType.schema();
-    String endpoint = scimResourceType.endpoint();
-    schemaRegistry.addScimResourceSchemaUrn(schemaUrn, clazz);
-    schemaRegistry.addScimResourceEndPoint(endpoint, clazz);
-
     List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
+
+    log.debug("Calling addSchema on the base class: {}", clazz);
+    schemaRegistry.addSchema(clazz, resourceType, extensionList);
 
     if (extensionList != null) {
       for (Class<? extends ScimExtension> scimExtension : extensionList) {
-        log.info("Registering a extension of type: " + scimExtension);
+        log.debug("Registering a extension of type: " + scimExtension);
         scimExtensionRegistry.registerExtension(clazz, scimExtension);
-        
-        log.info("Calling addSchema on an extension: " + scimExtension);
-        schemaRegistry.addSchema(Schemas.schemaForExtension(scimExtension));
       }
     }
-
-    schemaRegistry.addResourceType(resourceType);
     repositoryMap.put(clazz, repository);
   }
 
@@ -119,7 +107,7 @@ public class RepositoryRegistry implements Initializable {
     ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
 
     if (scimResourceType == null) {
-      throw new InvalidRepositoryException("Missing annotation: ScimResourceType must be at the top of scim resource classes");
+      throw new InvalidRepositoryException("Missing annotation: @ScimResourceType must be at the top of scim resource classes");
     }
 
     ResourceType resourceType = new ResourceType();

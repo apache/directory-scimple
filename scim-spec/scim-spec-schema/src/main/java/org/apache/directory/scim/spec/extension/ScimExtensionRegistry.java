@@ -33,11 +33,9 @@ public final class ScimExtensionRegistry {
     
   private static final ScimExtensionRegistry INSTANCE = new ScimExtensionRegistry();
   
-  private Map<Class<? extends ScimResource>, Map<String, Class<? extends ScimExtension>>> registry;
+  private Map<Class<? extends ScimResource>, Map<String, Class<? extends ScimExtension>>> registry = new HashMap<>();
   
-  private ScimExtensionRegistry() {
-    registry = new HashMap<Class<? extends ScimResource>, Map<String, Class<? extends ScimExtension>>>();
-  }
+  private ScimExtensionRegistry() {}
   
   public Class<? extends ScimExtension> getExtensionClass(Class<? extends ScimResource> resourceClass, String urn) {
     Class<? extends ScimExtension> extensionClass = null;
@@ -57,22 +55,17 @@ public final class ScimExtensionRegistry {
   public void registerExtension(Class<? extends ScimResource> resourceClass, Class<? extends ScimExtension> extensionClass) {
     ScimExtensionType[] se = extensionClass.getAnnotationsByType(ScimExtensionType.class);
 
-    if (se.length == 0 || se.length > 1) {
-      throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
+    if (se.length != 1) {
+      throw new InvalidExtensionException("Registered extensions must a single @ScimExtensionType annotation");
     }
     
     String urn = se[0].id();
     
-    log.debug("Registering extension for URN: " + urn);
-    log.debug("    (associated resource class: " + resourceClass.getSimpleName() + ")");
-    log.debug("    (associated extension class: " + extensionClass.getSimpleName() + ")");
-    
-    Map<String, Class<? extends ScimExtension>> resourceMap = registry.get(resourceClass);
-    if(resourceMap == null) {
-      resourceMap = new HashMap<>();
-      registry.put(resourceClass, resourceMap);
-    }
-    
+    log.debug("Registering extension for URN: '{}' associated resource class: '{}' and extension class: '{}'",
+      urn, resourceClass.getSimpleName(), extensionClass.getSimpleName() );
+
+    Map<String, Class<? extends ScimExtension>> resourceMap = registry.computeIfAbsent(resourceClass, k -> new HashMap<>());
+
     if(!resourceMap.containsKey(urn)) {
       resourceMap.put(urn, extensionClass);
     }

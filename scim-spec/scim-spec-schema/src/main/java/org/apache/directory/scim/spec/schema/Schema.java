@@ -23,10 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.*;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.validator.Urn;
 import org.slf4j.Logger;
@@ -252,32 +249,42 @@ public class Schema implements AttributeContainer {
     Class<?> getType();
 
     static AttributeAccessor forField(Field field) {
-      return new AttributeAccessor() {
-        @Override
-        public <T> T get(Object resource) {
-          try {
-            field.setAccessible(true);
-            return (T) field.get(resource);
-          } catch (IllegalAccessException e) {
-            throw new ScimResourceInvalidException("Schema definition is invalid", e);
-          }
-        }
+      return new FieldAttributeAccessor(field);
+    }
+  }
 
-        @Override
-        public void set(Object resource, Object value) {
-          try {
-            field.setAccessible(true);
-            field.set(resource, value);
-          } catch (IllegalAccessException e) {
-            throw new ScimResourceInvalidException("Schema definition is invalid", e);
-          }
-        }
+  @EqualsAndHashCode
+  private static class FieldAttributeAccessor implements AttributeAccessor {
 
-        @Override
-        public Class<?> getType() {
-          return field.getType();
-        }
-      };
+    private final Field field;
+
+    public FieldAttributeAccessor(Field field) {
+      this.field = field;
+    }
+
+    @Override
+    public <T> T get(Object resource) {
+      try {
+        field.setAccessible(true);
+        return (T) field.get(resource);
+      } catch (IllegalAccessException e) {
+        throw new ScimResourceInvalidException("Schema definition is invalid", e);
+      }
+    }
+
+    @Override
+    public void set(Object resource, Object value) {
+      try {
+        field.setAccessible(true);
+        field.set(resource, value);
+      } catch (IllegalAccessException e) {
+        throw new ScimResourceInvalidException("Schema definition is invalid", e);
+      }
+    }
+
+    @Override
+    public Class<?> getType() {
+      return field.getType();
     }
   }
 }
