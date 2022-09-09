@@ -19,15 +19,11 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
 import org.apache.directory.scim.server.exception.AttributeException;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
@@ -64,16 +60,8 @@ class AttributeUtil {
     this.schemaRegistry = schemaRegistry;
 
     // TODO move this to a CDI producer
-    objectMapper = ObjectMapperFactory.getObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    objectMapper.setSerializationInclusion(Include.NON_NULL);
-
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(ScimResource.class, new ScimResourceDeserializer(this.schemaRegistry, this.objectMapper));
-    objectMapper.registerModule(module);
+    objectMapper = new ObjectMapperFactory(schemaRegistry).createObjectMapper();
   }
-
-  AttributeUtil() {}
 
   public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws AttributeException {
     return setAttributesForDisplayInternal(resource, Returned.DEFAULT, Returned.REQUEST, Returned.NEVER);
