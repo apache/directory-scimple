@@ -20,9 +20,6 @@
 package org.apache.directory.scim.spec.filter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.spec.filter.Filter;
-import org.apache.directory.scim.spec.filter.FilterBuilder;
-import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,8 +38,7 @@ public class FilterBuilderPresentTest {
   public void testStartsWith()  throws FilterParseException {
     Filter filter = FilterBuilder.create()
       .present("address.streetAddress")
-      .and()
-      .equalTo("address.region", "CA")
+      .and(f -> f.equalTo("address.region", "CA"))
       .build();
     Filter expected = new Filter("address.streetAddress PR AND address.region EQ \"CA\"");
     assertThat(filter).isEqualTo(expected);
