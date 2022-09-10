@@ -25,7 +25,6 @@ import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -45,7 +44,7 @@ public class RepositoryRegistryTest {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
     Instance<Repository<? extends ScimResource>> scimRepositoryInstances = mock(Instance.class);
     Repository<ScimUser> repository = mock(Repository.class);
-    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry, ScimExtensionRegistry.getInstance(), scimRepositoryInstances));
+    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry, scimRepositoryInstances));
 
     when(scimRepositoryInstances.stream()).thenReturn(Stream.of(repository));
     doThrow(new InvalidRepositoryException("test exception")).when(repositoryRegistry).registerRepository(any(), any());
@@ -58,16 +57,13 @@ public class RepositoryRegistryTest {
     SchemaRegistry schemaRegistry = spy(new SchemaRegistry());
     Instance<Repository<? extends ScimResource>> scimRepositoryInstances = mock(Instance.class);
     Repository<StubResource> repository = mock(Repository.class);
-    ScimExtensionRegistry extensionRegistry = ScimExtensionRegistry.getInstance();
-    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry, extensionRegistry, scimRepositoryInstances));
+    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry, scimRepositoryInstances));
 
     when(scimRepositoryInstances.stream()).thenReturn(Stream.of(repository));
     when(repository.getExtensionList()).thenReturn(List.of(StubExtension.class));
 
-    // TODO: need to refactor out the ScimExtensionRegistry to make it easier for test
-    assertThat(extensionRegistry.getExtensionClass(StubResource.class, StubExtension.URN)).isNull();
     repositoryRegistry.registerRepository(StubResource.class, repository);
-    assertThat(extensionRegistry.getExtensionClass(StubResource.class, StubExtension.URN)).isNotNull();
+    assertThat(schemaRegistry.getExtensionClass(StubResource.class, StubExtension.URN)).isNotNull();
 
     assertThat(repositoryRegistry.getRepository(StubResource.class)).isEqualTo(repository);
   }

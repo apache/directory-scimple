@@ -174,7 +174,7 @@ public class BulkResourceImpl implements BulkResource {
             createAndSetErrorResponse(operationRequest, Status.BAD_REQUEST, "path is not a valid path (e.g. \"/Groups/123abc\", \"/Users/123xyz\", ...)");
           } else {
             String endPoint = path.substring(0, path.lastIndexOf('/'));
-            Class<ScimResource> clazz = (Class<ScimResource>) schemaRegistry.findScimResourceClassFromEndpoint(endPoint);
+            Class<ScimResource> clazz = (Class<ScimResource>) schemaRegistry.getScimResourceClassFromEndpoint(endPoint);
 
             if (clazz == null) {
               errorOccurred = true;
@@ -400,7 +400,7 @@ public class BulkResourceImpl implements BulkResource {
     if (scimResource == null) {
       String path = operationResult.getPath();
       String endPoint = path.substring(0, path.lastIndexOf('/'));
-      Class<ScimResource> clazz = (Class<ScimResource>) schemaRegistry.findScimResourceClassFromEndpoint(endPoint);
+      Class<ScimResource> clazz = (Class<ScimResource>) schemaRegistry.getScimResourceClassFromEndpoint(endPoint);
       scimResourceClass = clazz;
     } else {
       @SuppressWarnings("unchecked")

@@ -25,18 +25,12 @@ import jakarta.inject.Inject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.Initializable;
-import org.apache.directory.scim.spec.annotation.ScimExtensionType;
-import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.schema.ResourceType;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
-import org.apache.directory.scim.spec.schema.Schemas;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +42,6 @@ public class RepositoryRegistry implements Initializable {
 
   private SchemaRegistry schemaRegistry;
 
-  private ScimExtensionRegistry scimExtensionRegistry;
-
   // Weld needs the '? extends' or the repositories will not be found, some CDI
   // implementations work fine with just <ScimResources>
   private Instance<Repository<? extends ScimResource>> scimRepositoryInstances;
@@ -57,9 +49,8 @@ public class RepositoryRegistry implements Initializable {
   private Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap = new HashMap<>();
 
   @Inject
-  public RepositoryRegistry(SchemaRegistry schemaRegistry, ScimExtensionRegistry scimExtensionRegistry, Instance<Repository<? extends ScimResource>> scimRepositoryInstances) {
+  public RepositoryRegistry(SchemaRegistry schemaRegistry, Instance<Repository<? extends ScimResource>> scimRepositoryInstances) {
     this.schemaRegistry = schemaRegistry;
-    this.scimExtensionRegistry = scimExtensionRegistry;
     this.scimRepositoryInstances = scimRepositoryInstances;
   }
 
@@ -80,66 +71,15 @@ public class RepositoryRegistry implements Initializable {
   }
 
   public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException, ResourceException {
-
-    ResourceType resourceType = generateResourceType(clazz, repository);
-
     List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
 
     log.debug("Calling addSchema on the base class: {}", clazz);
-    schemaRegistry.addSchema(clazz, resourceType, extensionList);
-
-    if (extensionList != null) {
-      for (Class<? extends ScimExtension> scimExtension : extensionList) {
-        log.debug("Registering a extension of type: " + scimExtension);
-        scimExtensionRegistry.registerExtension(clazz, scimExtension);
-      }
-    }
+    schemaRegistry.addSchema(clazz, extensionList);
     repositoryMap.put(clazz, repository);
   }
 
   @SuppressWarnings("unchecked")
   public <T extends ScimResource> Repository<T> getRepository(Class<T> clazz) {
     return (Repository<T>) repositoryMap.get(clazz);
-  }
-
-  private ResourceType generateResourceType(Class<? extends ScimResource> base, Repository<? extends ScimResource> repository) throws InvalidRepositoryException, ResourceException {
-
-    ScimResourceType scimResourceType = base.getAnnotation(ScimResourceType.class);
-
-    if (scimResourceType == null) {
-      throw new InvalidRepositoryException("Missing annotation: @ScimResourceType must be at the top of scim resource classes");
-    }
-
-    ResourceType resourceType = new ResourceType();
-    resourceType.setDescription(scimResourceType.description());
-    resourceType.setId(scimResourceType.id());
-    resourceType.setName(scimResourceType.name());
-    resourceType.setEndpoint(scimResourceType.endpoint());
-    resourceType.setSchemaUrn(scimResourceType.schema());
-
-    List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
-
-    if (extensionList != null) {
-
-      List<ResourceType.SchemaExtentionConfiguration> extensionSchemaList = new ArrayList<>();
-
-      for (Class<? extends ScimExtension> se : extensionList) {
-
-        ScimExtensionType extensionType = se.getAnnotation(ScimExtensionType.class);
-
-        if (extensionType == null) {
-          throw new InvalidRepositoryException("Missing annotation: ScimExtensionType must be at the top of scim extension classes");
-        }
-
-        ResourceType.SchemaExtentionConfiguration ext = new ResourceType.SchemaExtentionConfiguration();
-        ext.setRequired(extensionType.required());
-        ext.setSchemaUrn(extensionType.id());
-        extensionSchemaList.add(ext);
-      }
-
-      resourceType.setSchemaExtensions(extensionSchemaList);
-    }
-
-    return resourceType;
   }
 }

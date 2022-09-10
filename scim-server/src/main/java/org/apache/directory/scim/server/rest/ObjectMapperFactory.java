@@ -29,7 +29,6 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.Provider;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
@@ -61,26 +60,36 @@ public class ObjectMapperFactory {
 
   static class ScimResourceModule extends SimpleModule {
 
+    private final SchemaRegistry schemaRegistry;
+
     public ScimResourceModule(SchemaRegistry schemaRegistry) {
       super("scim-resources", Version.unknownVersion());
+      this.schemaRegistry = schemaRegistry;
       addDeserializer(ScimResource.class, new ScimResourceDeserializer(schemaRegistry));
     }
 
     @Override
     public void setupModule(SetupContext context) {
       super.setupModule(context);
-      context.addDeserializationProblemHandler(new UnknownPropertyHandler());
+      context.addDeserializationProblemHandler(new UnknownPropertyHandler(schemaRegistry));
     }
   }
 
   static class UnknownPropertyHandler extends DeserializationProblemHandler {
+
+    private final SchemaRegistry schemaRegistry;
+
+    UnknownPropertyHandler(SchemaRegistry schemaRegistry) {
+      this.schemaRegistry = schemaRegistry;
+    }
+
     @Override
     public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
 
       if (beanOrClass instanceof ScimResource) {
         ScimResource scimResource = (ScimResource) beanOrClass;
         Class<? extends ScimResource> resourceClass = scimResource.getClass();
-        Class<? extends ScimExtension> extensionClass = ScimExtensionRegistry.getInstance().getExtensionClass(resourceClass, propertyName);
+        Class<? extends ScimExtension> extensionClass = schemaRegistry.getExtensionClass(resourceClass, propertyName);
 
         if (extensionClass != null) {
           ScimExtension ext = ctxt.readPropertyValue(p, null, extensionClass);
@@ -92,5 +101,4 @@ public class ObjectMapperFactory {
       return super.handleUnknownProperty(ctxt, p, deserializer, beanOrClass, propertyName);
     }
   }
-
 }
