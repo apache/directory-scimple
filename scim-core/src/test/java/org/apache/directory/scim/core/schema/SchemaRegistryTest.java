@@ -42,25 +42,31 @@ public class SchemaRegistryTest {
     Schema extSchema = Schemas.schemaForExtension(ExampleObjectExtension.class);
 
     ResourceType userType = new ResourceType();
-    userType.setId("user");
+    userType.setId(ScimUser.RESOURCE_NAME);
+    userType.setEndpoint("/Users");
     userType.setSchemaUrn(ScimUser.SCHEMA_URI);
     userType.setName(ScimUser.RESOURCE_NAME);
+    userType.setDescription("Top level ScimUser");
+    userType.setSchemaExtensions(List.of(new ResourceType.SchemaExtentionConfiguration().setSchemaUrn(ExampleObjectExtension.URN)));
+
     ResourceType groupType = new ResourceType();
-    groupType.setId("group");
+    groupType.setId(ScimGroup.RESOURCE_NAME);
+    groupType.setEndpoint("/Groups");
     groupType.setSchemaUrn(ScimGroup.SCHEMA_URI);
     groupType.setName(ScimGroup.RESOURCE_NAME);
+    groupType.setDescription("Top level ScimGroup");
 
-    schemaRegistry.addSchema(ScimUser.class, userType, List.of(ExampleObjectExtension.class));
-    schemaRegistry.addSchema(ScimGroup.class, groupType, List.of());
+    schemaRegistry.addSchema(ScimUser.class, List.of(ExampleObjectExtension.class));
+    schemaRegistry.addSchema(ScimGroup.class, null);
 
     assertThat(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).isEqualTo(userSchema);
     assertThat(schemaRegistry.getAllSchemas()).containsOnly(userSchema, groupsSchema, extSchema);
     assertThat(schemaRegistry.getAllSchemaUrns()).containsOnly(ScimUser.SCHEMA_URI, ScimGroup.SCHEMA_URI, ExampleObjectExtension.URN);
     assertThat(schemaRegistry.getAllResourceTypes()).containsOnly(userType, groupType);
     assertThat(schemaRegistry.getResourceType(ScimUser.RESOURCE_NAME)).isEqualTo(userType);
-    assertThat(schemaRegistry.findScimResourceClassFromEndpoint("/Users")).isEqualTo(ScimUser.class);
-    assertThat(schemaRegistry.findScimResourceClassFromEndpoint("/Groups")).isEqualTo(ScimGroup.class);
-    assertThat(schemaRegistry.findScimResourceClass(ScimUser.SCHEMA_URI)).isEqualTo(ScimUser.class);
+    assertThat(schemaRegistry.getScimResourceClassFromEndpoint("/Users")).isEqualTo(ScimUser.class);
+    assertThat(schemaRegistry.getScimResourceClassFromEndpoint("/Groups")).isEqualTo(ScimGroup.class);
+    assertThat(schemaRegistry.getScimResourceClass(ScimUser.SCHEMA_URI)).isEqualTo(ScimUser.class);
     assertThat(schemaRegistry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).isEqualTo(Schemas.schemaFor(ScimUser.class));
   }
 }

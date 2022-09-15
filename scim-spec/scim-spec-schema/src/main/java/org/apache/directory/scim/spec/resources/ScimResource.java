@@ -20,14 +20,12 @@
 package org.apache.directory.scim.spec.resources;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidExtensionException;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.slf4j.Logger;
@@ -56,8 +54,6 @@ public abstract class ScimResource extends BaseResource implements Serializable 
   private static final long serialVersionUID = 3673404125396687366L;
 
   private static final Logger LOG = LoggerFactory.getLogger(ScimResource.class);
-
-  private transient final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   @XmlElement
   @NotNull

@@ -47,7 +47,7 @@ public class ScimResourceDeserializer extends StdDeserializer<ScimResource> {
 
     Class<? extends ScimResource> scimResourceClass = StreamSupport.stream(schemas.spliterator(), false)
       .map(JsonNode::textValue)
-      .map(schemaRegistry::findScimResourceClass)
+      .map(schemaRegistry::getScimResourceClass)
       .filter(Objects::nonNull)
       .findFirst()
       .orElseThrow(() -> new JsonParseException(jsonParser, "Could not find a valid schema in: " + schemas + ", valid schemas are: " + schemaRegistry.getAllSchemaUrns(), location));

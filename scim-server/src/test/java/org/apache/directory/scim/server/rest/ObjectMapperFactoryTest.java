@@ -23,10 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.schema.ResourceType;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -36,15 +34,9 @@ public class ObjectMapperFactoryTest {
 
   @Test
   public void serialize() throws JsonProcessingException {
-
-    ScimExtensionRegistry.getInstance().registerExtension(ScimUser.class, ExampleObjectExtension.class);
-
-    ResourceType userType = new ResourceType();
-    userType.setId("user");
-    userType.setSchemaUrn(ScimUser.SCHEMA_URI);
-    userType.setName(ScimUser.RESOURCE_NAME);
     SchemaRegistry schemaRegistry = new SchemaRegistry();
-    schemaRegistry.addSchema(ScimUser.class, userType, List.of(ExampleObjectExtension.class));
+    schemaRegistry.addSchema(ScimUser.class, List.of(ExampleObjectExtension.class));
+    schemaRegistry.addExtension(ScimUser.class, ExampleObjectExtension.class);
 
     ScimResource resource = new ScimUser().setId("test1");
     ExampleObjectExtension extension = new ExampleObjectExtension().setValueDefault("test-value");

@@ -26,7 +26,6 @@ import jakarta.ws.rs.core.UriInfo;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.protocol.data.BulkOperation;
 import org.apache.directory.scim.protocol.data.BulkRequest;
 import org.apache.directory.scim.protocol.data.BulkResponse;
@@ -82,7 +81,7 @@ public class BulkResourceImplTest {
     when(emptyInstance.stream()).thenReturn(Stream.empty());
 
     SchemaRegistry schemaRegistry = new SchemaRegistry();
-    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry, ScimExtensionRegistry.getInstance(), emptyInstance);
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry, emptyInstance);
 
     Instance<Repository<ScimUser>> userRepositoryInstance = mock(Instance.class);
     Repository<ScimUser> userRepository = mock(Repository.class);
@@ -172,7 +171,7 @@ public class BulkResourceImplTest {
     when(emptyInstance.stream()).thenReturn(Stream.empty());
 
     SchemaRegistry schemaRegistry = new SchemaRegistry();
-    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry, ScimExtensionRegistry.getInstance(), emptyInstance );
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry, emptyInstance );
 
     Instance<Repository<ScimUser>> userProviderInstance = mock(Instance.class);
     Repository<ScimUser> userRepository = mock(Repository.class);

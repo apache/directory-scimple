@@ -41,7 +41,7 @@ public class RepositorySchemaRegistryTest {
   
   public RepositorySchemaRegistryTest() {
     schemaRegistry = new SchemaRegistry();
-    repositoryRegistry = new RepositoryRegistry(schemaRegistry, null, null);
+    repositoryRegistry = new RepositoryRegistry(schemaRegistry, null);
   }
 
   @Test

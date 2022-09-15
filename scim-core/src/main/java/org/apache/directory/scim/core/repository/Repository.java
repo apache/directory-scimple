@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.core.repository;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.directory.scim.spec.exception.ResourceException;
@@ -117,5 +118,7 @@ public interface Repository<T extends ScimResource> {
    * @throws ResourceException If the repository cannot return
    *         the appropriate list.
    */
-  List<Class<? extends ScimExtension>> getExtensionList() throws ResourceException;
+  default List<Class<? extends ScimExtension>> getExtensionList() throws ResourceException {
+    return Collections.emptyList();
+  }
 }
