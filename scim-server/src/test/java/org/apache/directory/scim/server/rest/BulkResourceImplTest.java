@@ -81,7 +81,7 @@ public class BulkResourceImplTest {
     when(emptyInstance.stream()).thenReturn(Stream.empty());
 
     SchemaRegistry schemaRegistry = new SchemaRegistry();
-    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry, emptyInstance);
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry);
 
     Instance<Repository<ScimUser>> userRepositoryInstance = mock(Instance.class);
     Repository<ScimUser> userRepository = mock(Repository.class);
@@ -171,7 +171,7 @@ public class BulkResourceImplTest {
     when(emptyInstance.stream()).thenReturn(Stream.empty());
 
     SchemaRegistry schemaRegistry = new SchemaRegistry();
-    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry, emptyInstance );
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry);
 
     Instance<Repository<ScimUser>> userProviderInstance = mock(Instance.class);
     Repository<ScimUser> userRepository = mock(Repository.class);
