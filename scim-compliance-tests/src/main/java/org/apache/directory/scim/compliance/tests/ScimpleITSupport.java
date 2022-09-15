@@ -92,13 +92,14 @@ public class ScimpleITSupport {
       .when()
         .filter(logging(loggingEnabled))
         .get(uri(path, query))
-      .then()
-        .contentType(SCIM_MEDIA_TYPE);
+      .then();
 
       if (loggingEnabled) {
         responseSpec.log().everything();
       }
-      return responseSpec;
+
+      return responseSpec
+        .contentType(SCIM_MEDIA_TYPE);
   }
 
   protected ValidatableResponse post(String path, String body) {

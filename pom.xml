@@ -230,10 +230,12 @@
         <artifactId>guava</artifactId>
         <version>31.1-android</version>
       </dependency>
+      <!-- later version of logback and other deps in the examples don't play well together,
+           this version works seems to work with Spring, Jersey, and embedded examples -->
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.4.0</version>
+        <version>1.2.11</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>

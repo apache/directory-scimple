@@ -56,6 +56,7 @@ public final class ScimResourceHelper {
       UserResourceImpl.class,
 
       // exception mappers
+      UnsupportedFilterExceptionMapper.class,
       ResourceExceptionMapper.class,
       ScimExceptionMapper.class,
       FilterParseExceptionMapper.class,

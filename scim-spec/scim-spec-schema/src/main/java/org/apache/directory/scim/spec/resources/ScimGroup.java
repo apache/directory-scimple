@@ -20,6 +20,7 @@
 package org.apache.directory.scim.spec.resources;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -51,6 +52,15 @@ public class ScimGroup extends ScimResource implements Serializable {
   @XmlElement
   @ScimAttribute(description = "A list of members of the Group.")
   List<ResourceReference> members;
+
+  public ScimGroup addMember(ResourceReference resourceReference) {
+    if (members == null) {
+      members = new ArrayList<>();
+    }
+    members.add(resourceReference);
+
+    return this;
+  }
 
   public ScimGroup() {
     super(SCHEMA_URI);

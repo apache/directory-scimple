@@ -233,7 +233,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                                                                              .isEmpty()) {
       listResponse.setTotalResults(0);
     } else {
-      log.info("Find returned " + filterResp.getResources()
+      log.debug("Find returned " + filterResp.getResources()
                                             .size());
       listResponse.setItemsPerPage(filterResp.getResources()
                                              .size());

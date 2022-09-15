@@ -62,6 +62,7 @@ public class UsersIT extends ScimpleITSupport {
   @DisplayName("Get Users/{{id}}")
   public void userById() {
     String id = get("/Users", Map.of("count", "1","startIndex", "1"))
+      .statusCode(200)
       .extract().jsonPath().get("Resources[0].id");
 
     get("/Users/" + id)
@@ -129,7 +130,7 @@ public class UsersIT extends ScimpleITSupport {
         "id", not(emptyString()),
         "name.givenName", is(givenName),
         "name.familyName", is(familyName),
-        "userName", is(email)
+        "userName", equalToIgnoringCase(email)
       )
       .extract().jsonPath().get("id");
 
@@ -142,7 +143,7 @@ public class UsersIT extends ScimpleITSupport {
         "id", not(emptyString()),
         "name.givenName", is(givenName),
         "name.familyName", is(familyName),
-        "userName", is(email)
+        "userName", equalToIgnoringCase(email)
       );
 
     // posting same content again should return a conflict (409)
