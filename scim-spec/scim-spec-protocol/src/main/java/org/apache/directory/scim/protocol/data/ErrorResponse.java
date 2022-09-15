@@ -19,9 +19,6 @@
 
 package org.apache.directory.scim.protocol.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -55,8 +52,6 @@ public class ErrorResponse extends BaseResource {
   @XmlElement
   private ErrorMessageType scimType;
 
-  private List<String> errorMessageList;
-  
   protected ErrorResponse() {
     super(SCHEMA_URI);
   }
@@ -66,29 +61,16 @@ public class ErrorResponse extends BaseResource {
   }
 
   public ErrorResponse(Status status, String detail) {
-    super(SCHEMA_URI);
+    this();
     this.status = status;
     this.detail = detail;
   }
-  
-  public void addErrorMessage(String message) {
-    if (errorMessageList == null) {
-      errorMessageList = new ArrayList<>();
-    }
-    
-    errorMessageList.add(message);
-  }
-  
+
   public Response toResponse() {
-    if (errorMessageList != null) {
-      StringBuilder sb = new StringBuilder();
-      for (String s : errorMessageList) {
-        sb.append("\n").append(s);
-      }
-      detail += sb.toString();
-    }
-    
-    return Response.status(status).entity(this).build();
+    return toResponse(this);
   }
 
+  public static Response toResponse(ErrorResponse error) {
+    return Response.status(error.status).entity(error).build();
+  }
 }
