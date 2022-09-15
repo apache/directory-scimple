@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -41,8 +38,6 @@ import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.Suppor
  * @author Chris Harm &lt;crh5255@psu.edu&gt;
  */
 @Data
-@Named
-@ApplicationScoped
 public class ServerConfiguration {
   
   static final int BULK_MAXIMUM_OPERATIONS = 100;

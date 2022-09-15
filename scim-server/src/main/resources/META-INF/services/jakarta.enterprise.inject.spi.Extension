@@ -1,1 +1,1 @@
-org.apache.directory.scim.server.ScimServerInitializer
+org.apache.directory.scim.server.spi.ScimServerInitializer

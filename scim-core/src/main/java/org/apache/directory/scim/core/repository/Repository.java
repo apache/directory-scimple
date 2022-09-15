@@ -115,10 +115,10 @@ public interface Repository<T extends ScimResource> {
    * associated with the ScimResource of type T.
    * 
    * @return A list of ScimExtension classes.
-   * @throws ResourceException If the repository cannot return
+   * @throws InvalidRepositoryException If the repository cannot return
    *         the appropriate list.
    */
-  default List<Class<? extends ScimExtension>> getExtensionList() throws ResourceException {
+  default List<Class<? extends ScimExtension>> getExtensionList() throws InvalidRepositoryException {
     return Collections.emptyList();
   }
 }

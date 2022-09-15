@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.core.repository;
 
-import jakarta.enterprise.inject.Instance;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
@@ -31,7 +30,6 @@ import org.apache.directory.scim.spec.resources.ScimUser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,26 +38,21 @@ import static org.mockito.Mockito.*;
 public class RepositoryRegistryTest {
 
   @Test
-  public void initializeWithException() throws InvalidRepositoryException, ResourceException {
+  public void initializeWithException() throws InvalidRepositoryException {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
-    Instance<Repository<? extends ScimResource>> scimRepositoryInstances = mock(Instance.class);
     Repository<ScimUser> repository = mock(Repository.class);
-    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry, scimRepositoryInstances));
 
-    when(scimRepositoryInstances.stream()).thenReturn(Stream.of(repository));
-    doThrow(new InvalidRepositoryException("test exception")).when(repositoryRegistry).registerRepository(any(), any());
+    doThrow(new InvalidRepositoryException("test exception")).when(repository).getExtensionList();
 
-    assertThrows(ScimResourceInvalidException.class, repositoryRegistry::initialize);
+    assertThrows(ScimResourceInvalidException.class, () -> new RepositoryRegistry(schemaRegistry, List.of(repository)));
   }
 
   @Test
   public void registerRepository() throws InvalidRepositoryException, ResourceException {
     SchemaRegistry schemaRegistry = spy(new SchemaRegistry());
-    Instance<Repository<? extends ScimResource>> scimRepositoryInstances = mock(Instance.class);
     Repository<StubResource> repository = mock(Repository.class);
-    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry, scimRepositoryInstances));
+    RepositoryRegistry repositoryRegistry = spy(new RepositoryRegistry(schemaRegistry));
 
-    when(scimRepositoryInstances.stream()).thenReturn(Stream.of(repository));
     when(repository.getExtensionList()).thenReturn(List.of(StubExtension.class));
 
     repositoryRegistry.registerRepository(StubResource.class, repository);

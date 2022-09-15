@@ -17,15 +17,15 @@
  * under the License.
  */
 
-package org.apache.directory.scim.core;
+package org.apache.directory.scim.server.spi;
 
-/**
- * Classes implementing ScimConfiguration will be eagerly initialized.
- *
- * CDI does not have a way to eagerly initialize beans at startup. This is a workaround using a spi extension, for
- * non-EJB based deployments.
- */
-public interface Initializable {
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-  void initialize();
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Retention(RUNTIME)
+@Target({TYPE, METHOD, FIELD})
+public @interface Eager {
 }

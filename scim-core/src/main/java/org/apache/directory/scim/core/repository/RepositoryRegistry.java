@@ -19,13 +19,8 @@
 
 package org.apache.directory.scim.core.repository;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.core.Initializable;
-import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -37,40 +32,30 @@ import java.util.Map;
 
 @Data
 @Slf4j
-@ApplicationScoped
-public class RepositoryRegistry implements Initializable {
+public class RepositoryRegistry {
 
   private SchemaRegistry schemaRegistry;
 
-  // Weld needs the '? extends' or the repositories will not be found, some CDI
-  // implementations work fine with just <ScimResources>
-  private Instance<Repository<? extends ScimResource>> scimRepositoryInstances;
-
   private Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap = new HashMap<>();
 
-  @Inject
-  public RepositoryRegistry(SchemaRegistry schemaRegistry, Instance<Repository<? extends ScimResource>> scimRepositoryInstances) {
+  public RepositoryRegistry(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
-    this.scimRepositoryInstances = scimRepositoryInstances;
   }
 
-  RepositoryRegistry() {}
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public void initialize() {
-    scimRepositoryInstances.stream()
+  public RepositoryRegistry(SchemaRegistry schemaRegistry, List<Repository<? extends ScimResource>> scimRepositories) {
+    this.schemaRegistry = schemaRegistry;
+    scimRepositories.stream()
       .map(repository -> (Repository<ScimResource>) repository)
       .forEach(repository -> {
       try {
         registerRepository(repository.getResourceClass(), repository);
-      } catch (InvalidRepositoryException | ResourceException e) {
+      } catch (InvalidRepositoryException e) {
         throw new ScimResourceInvalidException("Failed to register repository " + repository.getClass() + " for ScimResource type " + repository.getResourceClass(), e);
       }
     });
   }
 
-  public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException, ResourceException {
+  public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException {
     List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
 
     log.debug("Calling addSchema on the base class: {}", clazz);

@@ -21,7 +21,6 @@ package org.apache.directory.scim.core.schema;
 
 import java.util.*;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidExtensionException;
@@ -34,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.schema.Schemas;
 
 @Slf4j
-@ApplicationScoped
 public class SchemaRegistry {
 
   private final Map<String, Schema> schemaMap = new HashMap<>();
