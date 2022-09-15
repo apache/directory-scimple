@@ -19,20 +19,17 @@
 
 package org.apache.directory.scim.core.schema;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.apache.directory.scim.spec.annotation.ScimResourceType;
+import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
+import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.ResourceType;
 import org.apache.directory.scim.spec.schema.Schema;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.spec.schema.Schemas;
 
 @Slf4j
 @ApplicationScoped
@@ -45,8 +42,6 @@ public class SchemaRegistry {
   private Map<String, Class<? extends ScimResource>> endpointToScimResourceClass = new HashMap<>();
 
   private Map<String, ResourceType> resourceTypeMap = new HashMap<>();
-
-  private ObjectMapper objectMapper;
 
   public Schema getSchema(String urn) {
     return schemaMap.get(urn);
@@ -70,26 +65,39 @@ public class SchemaRegistry {
     return schemaMap.get(schemaUrn);
   }
 
-  public void addSchema(Schema schema) throws JsonProcessingException {
-    log.info("Adding schema " + schema.getId() + " into the registry");
+  private void addSchema(Schema schema) {
+    log.debug("Adding schema " + schema.getId() + " into the registry");
     schemaMap.put(schema.getId(), schema);
   }
 
-  public void addSchemaDoc(String schemaDoc) {
-    // Unmarshall the JSON document to a Schema and its associated object graph.
-    try {
-      Schema schema = objectMapper.readValue(schemaDoc, Schema.class);
-      schemaMap.put(schema.getId(), schema);
-    } catch (Throwable t) {
-      log.error("Unexpected Throwable was caught while unmarshalling JSON, schema will not be added: " + t.getLocalizedMessage());
+  public <T extends ScimResource> void addSchema(Class<T> clazz, ResourceType resourceType, List<Class<? extends ScimExtension>> extensionList) {
+
+    ScimResourceType scimResourceType = clazz.getAnnotation(ScimResourceType.class);
+    if (scimResourceType == null) {
+      throw new ScimResourceInvalidException("Missing annotation: ScimResource must be annotated with @ScimResourceType.");
+    }
+
+    String schemaUrn = scimResourceType.schema();
+    String endpoint = scimResourceType.endpoint();
+
+    addSchema(Schemas.schemaFor(clazz));
+    addScimResourceSchemaUrn(schemaUrn, clazz);
+    addScimResourceEndPoint(endpoint, clazz);
+    addResourceType(resourceType);
+
+    if (extensionList != null) {
+      for (Class<? extends ScimExtension> scimExtension : extensionList) {
+        log.debug("Calling addSchema on an extension: " + scimExtension);
+        addSchema(Schemas.schemaForExtension(scimExtension));
+      }
     }
   }
 
-  public <T extends ScimResource> void addScimResourceSchemaUrn(String schemaUrn, Class<T> scimResourceClass) {
+  private <T extends ScimResource> void addScimResourceSchemaUrn(String schemaUrn, Class<T> scimResourceClass) {
     schemaUrnToScimResourceClass.put(schemaUrn, scimResourceClass);
   }
 
-  public <T extends ScimResource> void addScimResourceEndPoint(String endpoint, Class<T> scimResourceClass) {
+  private <T extends ScimResource> void addScimResourceEndPoint(String endpoint, Class<T> scimResourceClass) {
     endpointToScimResourceClass.put(endpoint, scimResourceClass);
   }
 
@@ -114,9 +122,8 @@ public class SchemaRegistry {
   public Collection<ResourceType> getAllResourceTypes() {
     return Collections.unmodifiableCollection(resourceTypeMap.values());
   }
-  
-  public void addResourceType(ResourceType resourceType) {
+
+  private void addResourceType(ResourceType resourceType) {
     resourceTypeMap.put(resourceType.getName(), resourceType);
   }
-
 }
