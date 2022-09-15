@@ -20,7 +20,6 @@
 package org.apache.directory.scim.spec.resources;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,7 +27,6 @@ import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidExtensionException;
-import org.apache.directory.scim.spec.extension.ScimExtensionRegistry;
 import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
@@ -99,7 +97,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
   public void addExtension(ScimExtension extension) {
     ScimExtensionType[] se = extension.getClass().getAnnotationsByType(ScimExtensionType.class);
 
-    if (se.length == 0 || se.length > 1) {
+    if (se.length != 1) {
       throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
     }
 
@@ -129,7 +127,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
   private <T> ScimExtensionType lookupScimExtensionType(Class<T> extensionClass) {
     ScimExtensionType[] se = extensionClass.getAnnotationsByType(ScimExtensionType.class);
 
-    if (se.length == 0 || se.length > 1) {
+    if (se.length != 1) {
       throw new InvalidExtensionException("Registered extensions must have an ScimExtensionType annotation");
     }
 
@@ -147,28 +145,6 @@ public abstract class ScimResource extends BaseResource implements Serializable 
     return extensions;
   }
 
-  @JsonAnySetter
-  public void setExtensions(String key, Object value) {
-    LOG.debug("Found a ScimExtension");
-    LOG.debug("Extension's URN: " + key);
-    LOG.debug("Extension's string representation: " + value);
-
-    Class<? extends ScimResource> resourceClass = getClass();
-    LOG.debug("Resource class: " + resourceClass.getSimpleName());
-
-    Class<? extends ScimExtension> extensionClass = ScimExtensionRegistry.getInstance().getExtensionClass(resourceClass, key);
-
-    if (extensionClass != null) {
-      LOG.debug("Extension class: " + extensionClass.getSimpleName());
-
-      ScimExtension extension = objectMapper.convertValue(value, extensionClass);
-      if (extension != null) {
-        LOG.debug("    ***** Added extension to the resource *****");
-        extensions.put(key, extension);
-      }
-    }
-  }
-  
   public ScimExtension removeExtension(String urn) {
     return extensions.remove(urn);
   }
@@ -179,5 +155,4 @@ public abstract class ScimResource extends BaseResource implements Serializable 
     
     return (T) extensions.remove(se.id());
   }
-
 }
