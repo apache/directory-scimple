@@ -7,8 +7,6 @@ import java.util.function.UnaryOperator;
 
 public interface FilterBuilder {
 
-  FilterBuilder and();
-
   FilterBuilder and(FilterExpression fe1);
 
   default FilterBuilder and(UnaryOperator<FilterBuilder> filter) {
@@ -28,8 +26,6 @@ public interface FilterBuilder {
   default FilterBuilder and(UnaryOperator<FilterBuilder> left, UnaryOperator<FilterBuilder> right) {
     return and(left.apply(FilterBuilder.create()).build(), right.apply(FilterBuilder.create()).build());
   }
-
-  FilterBuilder or();
 
   FilterBuilder or(FilterExpression fe1);
 

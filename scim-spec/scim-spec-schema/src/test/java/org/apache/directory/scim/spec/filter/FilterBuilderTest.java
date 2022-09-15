@@ -20,9 +20,6 @@
 package org.apache.directory.scim.spec.filter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.spec.filter.Filter;
-import org.apache.directory.scim.spec.filter.FilterBuilder;
-import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -37,8 +34,7 @@ public class FilterBuilderTest {
   public void testSimpleAnd() throws FilterParseException {
     Filter filter = FilterBuilder.create()
       .equalTo("name.givenName", "Bilbo")
-      .and()
-      .equalTo("name.familyName", "Baggins")
+      .and(r -> r.equalTo("name.familyName", "Baggins"))
       .build();
     assertThat(filter).isEqualTo(new Filter("name.givenName EQ \"Bilbo\" AND name.familyName EQ \"Baggins\""));
   }
@@ -47,8 +43,8 @@ public class FilterBuilderTest {
   public void testSimpleOr() throws FilterParseException {
     Filter filter = FilterBuilder.create()
       .equalTo("name.givenName", "Bilbo")
-      .or()
-      .equalTo("name.familyName", "Baggins").build();
+      .or(r -> r.equalTo("name.familyName", "Baggins"))
+      .build();
 
     assertThat(filter).isEqualTo(new Filter("name.givenName EQ \"Bilbo\" OR name.familyName EQ \"Baggins\""));
   }
@@ -58,14 +54,13 @@ public class FilterBuilderTest {
 
     Filter filter = FilterBuilder.create()
       .equalTo("name.givenName", "Bilbo")
-      .or()
-      .equalTo("name.givenName", "Frodo")
-      .and()
-      .equalTo("name.familyName", "Baggins").build();
+      .or(f -> f.equalTo("name.givenName", "Frodo"))
+      .and(f -> f.equalTo("name.familyName", "Baggins"))
+      .build();
 
     Filter expected = new Filter("(name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\"");
 
-    assertThat(filter).isEqualTo(expected);
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @Test
@@ -75,8 +70,7 @@ public class FilterBuilderTest {
       .equalTo("name.givenName", "Bilbo")
       .and(FilterBuilder.create()
         .equalTo("name.givenName", "Frodo")
-        .and()
-        .equalTo("name.familyName", "Baggins")
+        .and(f -> f.equalTo("name.familyName", "Baggins"))
         .build())
       .build();
 
@@ -91,8 +85,7 @@ public class FilterBuilderTest {
       .equalTo("name.givenName", "Bilbo")
       .or(FilterBuilder.create()
         .equalTo("name.givenName", "Frodo")
-        .and()
-        .equalTo("name.familyName", "Baggins")
+        .and(f -> f.equalTo("name.familyName", "Baggins"))
         .build())
       .build();
 
@@ -106,36 +99,30 @@ public class FilterBuilderTest {
   
     FilterBuilder b1 = FilterBuilder.create()
       .equalTo("name.givenName", "Bilbo")
-      .or()
-      .equalTo("name.givenName", "Frodo")
-      .and()
-      .equalTo("name.familyName", "Baggins");
+      .or(f -> f.equalTo("name.givenName", "Frodo"))
+      .and(f -> f.equalTo("name.familyName", "Baggins"));
 
     FilterBuilder b2 = FilterBuilder.create().equalTo("address.streetAddress", "Underhill")
-      .or()
-      .equalTo("address.streetAddress", "Overhill")
-      .and()
-      .equalTo("address.postalCode", "16803");
+      .or(f -> f.equalTo("address.streetAddress", "Overhill"))
+      .and(f -> f.equalTo("address.postalCode", "16803"));
     
     Filter filter = FilterBuilder.create().and(b1.build(), b2.build()).build();
 
     Filter expected = new Filter("((name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\") AND ((address.streetAddress EQ \"Underhill\" OR address.streetAddress EQ \"Overhill\") AND address.postalCode EQ \"16803\")");
     
-    assertThat(filter).isEqualTo(expected);
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @Test
   public void testNot() throws FilterParseException {
     FilterBuilder b1 = FilterBuilder.create()
       .equalTo("name.givenName", "Bilbo")
-      .or()
-      .equalTo("name.givenName", "Frodo")
-      .and()
-      .equalTo("name.familyName", "Baggins");
+      .or(f -> f.equalTo("name.givenName", "Frodo"))
+      .and(f -> f.equalTo("name.familyName", "Baggins"));
 
     Filter filter = FilterBuilder.create().not(b1.build()).build();
     Filter expected = new Filter("NOT((name.givenName EQ \"Bilbo\" OR name.givenName EQ \"Frodo\") AND name.familyName EQ \"Baggins\")");
-    assertThat(filter).isEqualTo(expected);
+    assertThat(filter.getFilter()).isEqualTo(expected.getFilter());
   }
   
   @Test
@@ -157,10 +144,8 @@ public class FilterBuilderTest {
 
     FilterBuilder b1 = FilterBuilder.create()
       .equalTo("name.givenName", "Bilbo")
-      .or()
-      .equalTo("name.givenName", "Frodo")
-      .and()
-      .equalTo("name.familyName", "Baggins");
+      .or(f -> f.equalTo("name.givenName", "Frodo"))
+      .and(f -> f.equalTo("name.familyName", "Baggins"));
 
     FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.build());
     
@@ -176,11 +161,38 @@ public class FilterBuilderTest {
   @Test
   public void testAttributeContainsDeeplyEmbedded() throws FilterParseException {
 
-      FilterBuilder b1 = FilterBuilder.create().equalTo("name.givenName", "Bilbo").or().equalTo("name.givenName", "Frodo").and().equalTo("name.familyName", "Baggins");
+      FilterBuilder b1 = FilterBuilder.create()
+        .equalTo("name.givenName", "Bilbo")
+        .or(f -> f.equalTo("name.givenName", "Frodo"))
+        .and(f -> f.equalTo("name.familyName", "Baggins"));
       FilterBuilder b2 = FilterBuilder.create().attributeHas("address", b1.build());
       FilterBuilder b3 = FilterBuilder.create().equalTo("name.giveName", "Gandalf").and(b2.build());
       FilterBuilder b4 = FilterBuilder.create().attributeHas("address", b3.build());
 
       assertThrows(FilterParseException.class, () -> new Filter( b4.toString()));
+  }
+
+  @Test
+  public void complexOrPresent() throws FilterParseException {
+    Filter filter = FilterBuilder.create().or(l -> l.present("name.givenName"), r -> r.present("name.familyName")).build();
+    assertThat(filter).isEqualTo(new Filter("name.givenName PR OR name.familyName PR"));
+  }
+
+  @Test
+  public void complexPresentThenOr() throws FilterParseException {
+    Filter filter = FilterBuilder.create().present("name.givenName").or(f -> f.present("name.familyName")).build();
+    assertThat(filter).isEqualTo(new Filter("name.givenName PR OR name.familyName PR"));
+  }
+
+  @Test
+  public void expressionThenTwoAnds() {
+    Filter filter = FilterBuilder.create().present("name.givenName").and(l -> l.present("name.familyName"), r -> r.present("name.middleName")).build();
+    assertThat(filter.getFilter()).isEqualTo("(name.givenName PR AND name.familyName PR) AND name.middleName PR");
+  }
+
+  @Test
+  public void expressionThenTwoOrs() {
+    Filter filter = FilterBuilder.create().present("name.givenName").or(l -> l.present("name.familyName"), r -> r.present("name.middleName")).build();
+    assertThat(filter.getFilter()).isEqualTo("(name.givenName PR OR name.familyName PR) OR name.middleName PR");
   }
 }
