@@ -19,8 +19,6 @@
 
 package org.apache.directory.scim.server.rest;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,11 +29,10 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.core.Response.Status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.protocol.ServiceProviderConfigResource;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
+import org.apache.directory.scim.server.exception.EtagGenerationException;
 import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
 import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema;
@@ -97,7 +94,7 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
     try {
       EntityTag etag = etagGenerator.generateEtag(serviceProviderConfiguration);
       return Response.ok(serviceProviderConfiguration).tag(etag).build();
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+    } catch (EtagGenerationException e) {
       return createETagErrorResponse();
     }
   }
