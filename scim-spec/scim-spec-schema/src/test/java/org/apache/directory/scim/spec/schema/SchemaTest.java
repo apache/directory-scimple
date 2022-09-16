@@ -20,7 +20,7 @@
 package org.apache.directory.scim.spec.schema;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import org.apache.directory.scim.spec.ObjectMapperFactory;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -67,6 +67,7 @@ public class SchemaTest {
       "schemas/urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig.json",
       "schemas/urn:ietf:params:scim:schemas:extension:enterprise:2.0:User.json"
   })
+
   public void testUnmarshallingProvidedSchemas(String schemaFileName) {
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     InputStream inputStream = classLoader.getResourceAsStream(schemaFileName);

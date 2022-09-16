@@ -20,7 +20,8 @@
 package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import jakarta.enterprise.context.ApplicationScoped;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.Constants;
 
 import jakarta.inject.Inject;
@@ -34,10 +35,12 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 @Consumes(Constants.SCIM_CONTENT_TYPE)
 @Produces(Constants.SCIM_CONTENT_TYPE)
+@ApplicationScoped
 public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
 
   @Inject
-  public ScimJacksonXmlBindJsonProvider() {
-    super(ObjectMapperFactory.getObjectMapper(), DEFAULT_ANNOTATIONS);
+  public ScimJacksonXmlBindJsonProvider(SchemaRegistry schemaRegistry) {
+    super(ObjectMapperFactory.createObjectMapper(schemaRegistry), DEFAULT_ANNOTATIONS);
+
   }
 }

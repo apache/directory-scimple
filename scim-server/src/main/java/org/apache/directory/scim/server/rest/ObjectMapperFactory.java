@@ -24,10 +24,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.ext.Provider;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -37,23 +38,40 @@ import java.io.IOException;
 /**
  * Creates and configures an {@link ObjectMapper} used for {@code application/scim+json} parsing.
  */
-@Provider
-public class ObjectMapperFactory {
+class ObjectMapperFactory {
 
-  private final SchemaRegistry schemaRegistry;
+  private final static ObjectMapper objectMapper = createObjectMapper();
 
-  @Inject
-  public ObjectMapperFactory(SchemaRegistry schemaRegistry) {
-    this.schemaRegistry = schemaRegistry;
+  /**
+   * Returns an ObjectMapper configured for use with Jackson and Jakarta bindings.
+   * This ObjectMapper does NOT unmarshal SCIM Extension values, use {@link #createObjectMapper(SchemaRegistry)} when
+   * serializing REST response and requests.
+   * @return an ObjectMapper configured for use with Jackson and Jakarta bindings.
+   */
+  static ObjectMapper getObjectMapper() {
+    return objectMapper;
   }
 
-  @Produces
-  public ObjectMapper createObjectMapper() {
+  private static ObjectMapper createObjectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    ObjectMapper objectMapper = org.apache.directory.scim.spec.json.ObjectMapperFactory.getObjectMapper().copy();
+    AnnotationIntrospector pair = new AnnotationIntrospectorPair(
+      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
+      new JacksonAnnotationIntrospector());
+    objectMapper.setAnnotationIntrospector(pair);
+
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
+    return objectMapper;
+  }
+
+  /**
+   * Creates and configures an {@link ObjectMapper} SCIM Resource in REST request and responses {@code application/scim+json}.
+   */
+  static ObjectMapper createObjectMapper(SchemaRegistry schemaRegistry) {
+    ObjectMapper objectMapper = createObjectMapper().copy();
+    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
     objectMapper.registerModule(new ScimResourceModule(schemaRegistry));
     return objectMapper;
   }

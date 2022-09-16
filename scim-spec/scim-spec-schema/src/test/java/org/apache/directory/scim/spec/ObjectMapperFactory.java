@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.directory.scim.spec.json;
+package org.apache.directory.scim.spec;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;

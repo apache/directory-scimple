@@ -19,10 +19,14 @@
 
 package org.apache.directory.scim.core.repository;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
@@ -32,12 +36,13 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import com.flipkart.zjsonpatch.JsonDiff;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperation.Type;
@@ -75,7 +80,8 @@ public class UpdateRequest<T extends ScimResource> {
   private static final String PATH = "path";
   private static final String VALUE = "value";
 
-  private final ObjectMapper objectMapper;
+  // Create a Jackson ObjectMapper that reads JaxB annotations
+  private final ObjectMapper objectMapper = createObjectMapper();
 
   @Getter
   private String id;
@@ -93,10 +99,6 @@ public class UpdateRequest<T extends ScimResource> {
 
   public UpdateRequest(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
-
-    //Create a Jackson ObjectMapper that reads JaxB annotations
-    objectMapper = ObjectMapperFactory.getObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
   public UpdateRequest(String id, T original, T resource, SchemaRegistry schemaRegistry) {
@@ -598,4 +600,18 @@ public class UpdateRequest<T extends ScimResource> {
     }
   }
 
+  private static ObjectMapper createObjectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
+
+    AnnotationIntrospector pair = new AnnotationIntrospectorPair(
+      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
+      new JacksonAnnotationIntrospector());
+    objectMapper.setAnnotationIntrospector(pair);
+
+    return objectMapper;
+  }
 }

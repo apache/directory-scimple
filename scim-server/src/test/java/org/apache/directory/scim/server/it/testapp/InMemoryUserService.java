@@ -87,6 +87,8 @@ public class InMemoryUserService implements Repository<ScimUser> {
     email.setPrimary(true);
     user.setEmails(List.of(email));
 
+    user.addExtension(new LuckyNumberExtension().setLuckyNumber(DEFAULT_USER_LUCKY_NUMBER));
+
     users.put(user.getId(), user);
   }
 
@@ -174,6 +176,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
    */
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
-    return Collections.emptyList();
+    return List.of(LuckyNumberExtension.class);
   }
 }

@@ -28,7 +28,6 @@ import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.Address;
@@ -62,16 +61,16 @@ public class AttributeUtilTest {
 
   AttributeUtil attributeUtil;
 
-  private ObjectMapper objectMapper;
+  final private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   @BeforeEach
   public void setup() {
     schemaRegistry = Mockito.mock(SchemaRegistry.class);
+
     attributeUtil = new AttributeUtil(schemaRegistry);
     Schema scimUserSchema = Schemas.schemaFor(ScimUser.class);
     Schema scimEnterpriseUserSchema = Schemas.schemaForExtension(EnterpriseExtension.class);
     Schema scimExampleSchema = Schemas.schemaForExtension(ExampleObjectExtension.class);
-
 
     Mockito.when(schemaRegistry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
     Mockito.when(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(scimUserSchema);
@@ -79,11 +78,6 @@ public class AttributeUtilTest {
     Mockito.when(schemaRegistry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
     Mockito.when(schemaRegistry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
     Mockito.when(schemaRegistry.getAllSchemaUrns()).thenReturn(new HashSet<>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
-
-    objectMapper = ObjectMapperFactory.getObjectMapper();
-    objectMapper.setSerializationInclusion(Include.NON_NULL);
-    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
   }
 
   @Test
