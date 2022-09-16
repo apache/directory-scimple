@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
@@ -54,13 +53,8 @@ class AttributeUtil {
 
   SchemaRegistry schemaRegistry;
 
-  ObjectMapper objectMapper;
-
   AttributeUtil(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
-
-    // TODO move this to a CDI producer
-    objectMapper = new ObjectMapperFactory(schemaRegistry).createObjectMapper();
   }
 
   public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws AttributeException {

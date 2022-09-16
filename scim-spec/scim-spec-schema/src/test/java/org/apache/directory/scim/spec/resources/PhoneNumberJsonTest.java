@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import org.apache.directory.scim.spec.ObjectMapperFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,9 +39,7 @@ public class PhoneNumberJsonTest {
     ObjectMapper objectMapper = getObjectMapper();
     
     String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(phoneNumber);
-    
-    log.info(json);
-    
+
     PhoneNumber readValue = objectMapper.readValue(json, PhoneNumber.class);
     
     assertEquals(phoneNumber.getNumber(), readValue.getNumber());
@@ -65,5 +63,4 @@ public class PhoneNumberJsonTest {
     objectMapper.setSerializationInclusion(Include.NON_NULL);
     return objectMapper;
   }
-  
 }

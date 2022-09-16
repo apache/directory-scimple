@@ -42,7 +42,7 @@ public class ObjectMapperFactoryTest {
     ExampleObjectExtension extension = new ExampleObjectExtension().setValueDefault("test-value");
     resource.addExtension(extension);
 
-    ObjectMapper objectMapper = new ObjectMapperFactory(schemaRegistry).createObjectMapper();
+    ObjectMapper objectMapper = ObjectMapperFactory.createObjectMapper(schemaRegistry);
     String json = objectMapper.writeValueAsString(resource);
 
     ScimResource actual = objectMapper.readValue(json, ScimResource.class);

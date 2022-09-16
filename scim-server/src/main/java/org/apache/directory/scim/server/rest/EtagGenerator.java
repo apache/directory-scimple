@@ -19,12 +19,13 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.apache.directory.scim.spec.json.ObjectMapperFactory;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jdk.jfr.Name;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Meta;
 
@@ -38,13 +39,7 @@ import java.util.Base64;
 @ApplicationScoped
 public class EtagGenerator {
 
-  private final ObjectMapper objectMapper;
-
-  public EtagGenerator() {
-    objectMapper = ObjectMapperFactory.getObjectMapper();
-    objectMapper.setSerializationInclusion(Include.NON_NULL);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-  }
+  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   public EntityTag generateEtag(ScimResource resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
 
