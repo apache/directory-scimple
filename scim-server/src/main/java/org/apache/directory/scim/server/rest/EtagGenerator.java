@@ -22,15 +22,11 @@ package org.apache.directory.scim.server.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jdk.jfr.Name;
-import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.server.exception.EtagGenerationException;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Meta;
 
 import jakarta.ws.rs.core.EntityTag;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -41,23 +37,27 @@ public class EtagGenerator {
 
   private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
-  public EntityTag generateEtag(ScimResource resource) throws JsonProcessingException, NoSuchAlgorithmException, UnsupportedEncodingException {
+  public EntityTag generateEtag(ScimResource resource) throws EtagGenerationException {
 
-    Meta meta = resource.getMeta();
+    try {
+      Meta meta = resource.getMeta();
 
-    if (meta == null) {
-      meta = new Meta();
+      if (meta == null) {
+        meta = new Meta();
+      }
+
+      resource.setMeta(null);
+      String writeValueAsString = objectMapper.writeValueAsString(resource);
+
+      EntityTag etag = hash(writeValueAsString);
+      meta.setVersion(etag.getValue());
+
+      resource.setMeta(meta);
+
+      return etag;
+    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+      throw new EtagGenerationException("Failed to generate etag for SCIM resource: " + resource.getId(), e);
     }
-
-    resource.setMeta(null);
-    String writeValueAsString = objectMapper.writeValueAsString(resource);
-
-    EntityTag etag = hash(writeValueAsString);
-    meta.setVersion(etag.getValue());
-
-    resource.setMeta(meta);
-
-    return etag;
   }
   
   private static EntityTag hash(String input) throws NoSuchAlgorithmException {

@@ -394,7 +394,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   private EntityTag requireEtag(ScimResource resource) throws ScimException {
     try {
       return etagGenerator.generateEtag(resource);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+    } catch (EtagGenerationException e) {
       throw new ScimException(Status.INTERNAL_SERVER_ERROR, "Failed to generate the etag", e);
     }
   }
@@ -402,7 +402,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   private EntityTag etag(ScimResource resource) {
     try {
       return etagGenerator.generateEtag(resource);
-    } catch (JsonProcessingException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+    } catch (EtagGenerationException e) {
       log.warn("Failed to generate etag for resource", e);
       return null;
     }
