@@ -39,7 +39,7 @@
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
-        <artifactId>scim-tools-common</artifactId>
+        <artifactId>scim-tools</artifactId>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
