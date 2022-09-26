@@ -373,7 +373,7 @@
         <plugin>
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
-          <version>7.1.2</version>
+          <version>7.2.1</version>
           <configuration>
             <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
             <suppressionFile>${session.executionRootDirectory}/src/owasp/suppression.xml</suppressionFile>
