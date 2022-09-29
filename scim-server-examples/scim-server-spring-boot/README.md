@@ -17,4 +17,3 @@ http :8080/v2/Users
 # curl
 curl localhost:8080/v2/Users
 ```
-n
