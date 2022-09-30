@@ -35,9 +35,7 @@ public class ScimExceptionMapper implements ExceptionMapper<ScimException> {
 
   @Override
   public Response toResponse(ScimException e) {
-    ErrorResponse errorResponse = new ErrorResponse(e.getStatus(), e.getMessage());
-
-    Response response = errorResponse.toResponse();
+    Response response = e.getError().toResponse();
     response.getHeaders().putSingle(HttpHeaders.CONTENT_TYPE, Constants.SCIM_CONTENT_TYPE);
 
     return response;

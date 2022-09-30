@@ -103,7 +103,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   Repository<T> getRepositoryInternal() throws ScimException {
     Repository<T> repository = getRepository();
     if (repository == null) {
-      throw new ScimException(Status.INTERNAL_SERVER_ERROR, "Provider not defined");
+      throw new ScimException(Status.NOT_IMPLEMENTED, "Provider not defined");
     }
     return repository;
   }

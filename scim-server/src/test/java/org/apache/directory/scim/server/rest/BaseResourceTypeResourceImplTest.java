@@ -197,6 +197,22 @@ public class BaseResourceTypeResourceImplTest {
     assertThat(exception.getError().getDetail(), is("Cannot include both attributes and excluded attributes in a single request"));
   }
 
+  @Test
+  public void repositoryNotImplemented() throws ScimException {
+    // given
+    @SuppressWarnings("rawtypes")
+    BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    when(baseResourceImpl.getRepository()).thenReturn(null);
+    when(baseResourceImpl.getRepositoryInternal()).thenCallRealMethod();
+
+    // when
+    ScimException exception = assertThrows(ScimException.class, baseResourceImpl::getRepositoryInternal);
+
+    // then
+    assertEquals(exception.getStatus(), Status.NOT_IMPLEMENTED);
+    assertThat(exception.getError().getDetail(), is("Provider not defined"));
+  }
+
   private ScimUser getScimUser() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
 
