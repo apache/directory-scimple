@@ -20,10 +20,7 @@
 package org.apache.directory.scim.server.exception;
 
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import org.apache.directory.scim.protocol.Constants;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
@@ -31,13 +28,10 @@ import org.apache.directory.scim.protocol.exception.ScimException;
 
 @Provider
 @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-public class ScimExceptionMapper implements ExceptionMapper<ScimException> {
+public class ScimExceptionMapper extends BaseScimExceptionMapper<ScimException> {
 
   @Override
-  public Response toResponse(ScimException e) {
-    Response response = e.getError().toResponse();
-    response.getHeaders().putSingle(HttpHeaders.CONTENT_TYPE, Constants.SCIM_CONTENT_TYPE);
-
-    return response;
+  protected ErrorResponse errorResponse(ScimException e) {
+    return e.getError();
   }
 }

@@ -19,21 +19,23 @@
 
 package org.apache.directory.scim.server.exception;
 
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.ext.ExceptionMapper;
 
+import jakarta.ws.rs.ext.Provider;
+import org.apache.directory.scim.protocol.Constants;
 import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 
-public class FilterParseExceptionMapper implements ExceptionMapper<FilterParseException> {
+@Provider
+@Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+public class FilterParseExceptionMapper extends BaseScimExceptionMapper<FilterParseException> {
 
   @Override
-  public Response toResponse(FilterParseException exception) {
-    ErrorResponse er = new ErrorResponse(Status.BAD_REQUEST, exception.getMessage());
-    er.setScimType(ErrorMessageType.INVALID_FILTER);
-    return er.toResponse();
+  protected ErrorResponse errorResponse(FilterParseException exception) {
+    return new ErrorResponse(Status.BAD_REQUEST, exception.getMessage())
+      .setScimType(ErrorMessageType.INVALID_FILTER);
   }
-
 }
