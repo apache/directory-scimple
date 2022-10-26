@@ -21,7 +21,7 @@ parser grammar PhoneNumberParser;
 
 options {tokenVocab = PhoneNumberLexer;}
 
-phoneNumber: PrefixTel (global=globalNumber | local=localNumber);
+phoneNumber: PrefixTel (global=globalNumber | local=localNumber) EOF;
 
 globalNumber: globalDigits=Plus GlobalNumberDigits (SEMI (PrefixExt Ext | PrefixIsub Isub))? parameter*;
             
