@@ -30,8 +30,8 @@ import lombok.EqualsAndHashCode;
 public class ScimException extends Exception {
 
   private static final long serialVersionUID = 3643485564325176463L;
-  private ErrorResponse error;
-  private Status status;
+  private final ErrorResponse error;
+  private final Status status;
 
   public ScimException(Status status, String message, Throwable cause) {
     super(message, cause);
