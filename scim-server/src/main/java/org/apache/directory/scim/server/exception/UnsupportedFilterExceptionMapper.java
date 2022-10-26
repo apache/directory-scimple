@@ -26,12 +26,11 @@ import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.exception.UnsupportedFilterException;
 
-public class UnsupportedFilterExceptionMapper implements ExceptionMapper<UnsupportedFilterException> {
+public class UnsupportedFilterExceptionMapper extends BaseScimExceptionMapper<UnsupportedFilterException> {
 
   @Override
-  public Response toResponse(UnsupportedFilterException exception) {
-    ErrorResponse error = new ErrorResponse(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER.getDetail())
+  protected ErrorResponse errorResponse(UnsupportedFilterException throwable) {
+    return new ErrorResponse(Response.Status.BAD_REQUEST, ErrorMessageType.INVALID_FILTER.getDetail())
       .setScimType(ErrorMessageType.INVALID_FILTER);
-    return error.toResponse();
   }
 }
