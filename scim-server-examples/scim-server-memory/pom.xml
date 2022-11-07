@@ -57,7 +57,7 @@
       <plugin>
         <groupId>org.apache.tomee.maven</groupId>
         <artifactId>tomee-maven-plugin</artifactId>
-        <version>9.0.0-M8</version>
+        <version>9.0.0.RC1</version>
         <configuration>
           <context>ROOT</context>
           <warFile>target/${project.artifactId}-${project.version}.war</warFile>
