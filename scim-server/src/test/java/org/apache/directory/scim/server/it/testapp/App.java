@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.server.it.testapp;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.ws.rs.core.Application;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
 
+@ApplicationScoped
 public class App extends Application {
 
   @Override
