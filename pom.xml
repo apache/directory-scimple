@@ -44,6 +44,7 @@
     <version.slf4j>1.7.36</version.slf4j>
     <version.antlr4>4.11.1</version.antlr4>
     <version.resteasy>6.2.1.Final</version.resteasy>
+    <version.spring-boot>3.0.0</version.spring-boot>
 
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline></jacoco.argline>
@@ -56,7 +57,9 @@
     <module>scim-server</module>
     <module>scim-server-examples/scim-server-memory</module>
     <module>scim-server-examples/scim-server-jersey</module>
+    <module>scim-server-examples/scim-server-spring-boot</module>
     <module>scim-spec</module>
+    <module>support/spring-boot</module>
     <module>scim-tools</module>
     <module>scim-compliance-tests</module>
     <module>scim-coverage</module>
@@ -366,6 +369,26 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>17</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -526,6 +549,11 @@
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.8</version>
           </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>${version.spring-boot}</version>
+          </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -635,84 +663,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-
-    <!-- TODO: once this is finalized require Java 17 to build project, (we can still target Java 11 for everything else) -->
-    <profile>
-      <id>spring-boot</id>
-      <activation>
-        <jdk>[17,)</jdk>
-      </activation>
-
-      <properties>
-        <version.spring-boot>3.0.0-RC1</version.spring-boot>
-      </properties>
-
-      <modules>
-        <module>support/spring-boot</module>
-        <module>scim-server-examples/scim-server-spring-boot</module>
-      </modules>
-
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-dependencies</artifactId>
-            <version>${version.spring-boot}</version>
-            <type>pom</type>
-            <scope>import</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.springframework.boot</groupId>
-              <artifactId>spring-boot-maven-plugin</artifactId>
-              <version>${version.spring-boot}</version>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-
-      <repositories>
-        <repository>
-          <id>spring-milestones</id>
-          <name>Spring Milestones</name>
-          <url>https://repo.spring.io/milestone</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-        <repository>
-          <id>spring-snapshots</id>
-          <name>Spring Snapshots</name>
-          <url>https://repo.spring.io/snapshot</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-        </repository>
-      </repositories>
-      <pluginRepositories>
-        <pluginRepository>
-          <id>spring-milestones</id>
-          <name>Spring Milestones</name>
-          <url>https://repo.spring.io/milestone</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-          <id>spring-snapshots</id>
-          <name>Spring Snapshots</name>
-          <url>https://repo.spring.io/snapshot</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-        </pluginRepository>
-      </pluginRepositories>
     </profile>
   </profiles>
 </project>
