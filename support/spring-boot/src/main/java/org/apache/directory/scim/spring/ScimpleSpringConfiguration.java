@@ -162,6 +162,16 @@ public class ScimpleSpringConfiguration {
     }
 
     @Override
+    public Handle<T> getHandle() {
+      throw new NotImplementedException("This implementation does not support the `getHandle` method.");
+    }
+
+    @Override
+    public Iterable<? extends Handle<T>> handles() {
+      throw new NotImplementedException("This implementation does not support the `handles` method.");
+    }
+
+    @Override
     public T get() {
       if (isAmbiguous()) {
         throw new IllegalStateException("Multiple bean instances found, expecting only one.");
