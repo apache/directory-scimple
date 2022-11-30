@@ -22,12 +22,12 @@ package org.apache.directory.scim.example.jersey;
 import jakarta.enterprise.inject.Produces;
 import jakarta.ws.rs.core.UriBuilder;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import java.net.URI;
 import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
+import org.apache.directory.scim.server.rest.ScimpleFeature;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -46,7 +46,7 @@ public class JerseyApplication extends Application {
   
   @Override
   public Set<Class<?>> getClasses() {
-    return ScimResourceHelper.getScimClassesToLoad();
+    return Set.of(ScimpleFeature.class);
   }
 
   @Produces

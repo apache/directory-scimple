@@ -21,12 +21,12 @@ package org.apache.directory.scim.example.memory.rest;
 
 import jakarta.enterprise.inject.Produces;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import java.util.Set;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import org.apache.directory.scim.server.rest.ScimpleFeature;
 
 import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
 
@@ -35,7 +35,7 @@ public class RestApplication extends Application {
   
   @Override
   public Set<Class<?>> getClasses() {
-    return ScimResourceHelper.getScimClassesToLoad();
+    return Set.of(ScimpleFeature.class);
   }
 
   @Produces
