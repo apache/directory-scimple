@@ -44,6 +44,7 @@
     <version.slf4j>1.7.36</version.slf4j>
     <version.antlr4>4.11.1</version.antlr4>
     <version.resteasy>6.2.1.Final</version.resteasy>
+    <version.spring-boot>3.0.0</version.spring-boot>
 
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline></jacoco.argline>
@@ -56,7 +57,9 @@
     <module>scim-server</module>
     <module>scim-server-examples/scim-server-memory</module>
     <module>scim-server-examples/scim-server-jersey</module>
+    <module>scim-server-examples/scim-server-spring-boot</module>
     <module>scim-spec</module>
+    <module>support/spring-boot</module>
     <module>scim-tools</module>
     <module>scim-compliance-tests</module>
     <module>scim-coverage</module>
@@ -147,6 +150,11 @@
       <dependency>
         <groupId>org.apache.directory.scim</groupId>
         <artifactId>scim-compliance-tests</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.scim</groupId>
+        <artifactId>scim-spring-boot-starter</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
 
@@ -361,6 +369,26 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>17</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -520,6 +548,11 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.8</version>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>${version.spring-boot}</version>
           </plugin>
       </plugins>
     </pluginManagement>

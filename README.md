@@ -120,7 +120,8 @@ Clone the code and build it!
 
 **Prerequisites**
 
-* Java 11+
+* Java 17+
+> NOTE: The build runs with Java 17+, but compiles to Java 11.
 
 ```bash
 git clone https://github.com/apache/directory-scimple.git
