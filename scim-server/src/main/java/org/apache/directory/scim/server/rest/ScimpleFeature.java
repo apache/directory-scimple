@@ -17,30 +17,18 @@
  * under the License.
  */
 
-package org.apache.directory.scim.server.it.testapp;
+package org.apache.directory.scim.server.rest;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.ws.rs.core.Application;
-import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.server.rest.ScimpleFeature;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 
-import java.util.Set;
-
-import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
-
-@ApplicationScoped
-public class App extends Application {
+@Provider
+public class ScimpleFeature implements Feature {
 
   @Override
-  public Set<Class<?>> getClasses() {
-    return Set.of(ScimpleFeature.class);
-  }
-
-  @Produces
-  ServerConfiguration serverConfiguration() {
-    return new ServerConfiguration()
-      .setId("scimple-server-its")
-      .addAuthenticationSchema(httpBasic());
+  public boolean configure(FeatureContext context) {
+    ScimResourceHelper.getScimClassesToLoad().forEach(context::register);
+    return true;
   }
 }

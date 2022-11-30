@@ -29,10 +29,10 @@ import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.server.rest.RequestContext;
-import org.apache.directory.scim.server.rest.ScimResourceHelper;
-import org.apache.directory.scim.server.rest.UserResourceImpl;
 import org.apache.directory.scim.server.rest.EtagGenerator;
+import org.apache.directory.scim.server.rest.RequestContext;
+import org.apache.directory.scim.server.rest.ScimpleFeature;
+import org.apache.directory.scim.server.rest.UserResourceImpl;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -44,7 +44,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Autoconfigures default beans needed for Apache SCIMple.
@@ -111,7 +114,7 @@ public class ScimpleSpringConfiguration {
   static class ScimpleJaxRsApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
-      return new HashSet<>(ScimResourceHelper.getScimClassesToLoad());
+      return Set.of(ScimpleFeature.class);
     }
   }
 
