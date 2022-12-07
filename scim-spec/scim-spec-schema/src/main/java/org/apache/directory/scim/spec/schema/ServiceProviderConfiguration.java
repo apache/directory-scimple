@@ -175,12 +175,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   List<AuthenticationSchema> authenticationSchemes;
 
   public ServiceProviderConfiguration() {
-    super(SCHEMA_URI);
-  }
-
-  @Override
-  public String getResourceType() {
-    return RESOURCE_NAME;
+    super(SCHEMA_URI, RESOURCE_NAME);
   }
 
 }

@@ -63,11 +63,6 @@ public class ScimGroup extends ScimResource implements Serializable {
   }
 
   public ScimGroup() {
-    super(SCHEMA_URI);
-  }
-
-  @Override
-  public String getResourceType() {
-    return RESOURCE_NAME;
+    super(SCHEMA_URI, RESOURCE_NAME);
   }
 }
