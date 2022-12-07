@@ -17,35 +17,33 @@
  * under the License.
  */
 
-package org.apache.directory.scim.server.it;
+package org.apache.directory.scim.example.jersey;
 
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.core.UriBuilder;
 import org.apache.directory.scim.compliance.junit.EmbeddedServerExtension;
-import org.apache.directory.scim.server.it.testapp.App;
-import org.glassfish.jersey.server.JerseySeBootstrapConfiguration;
-import org.glassfish.jersey.server.internal.RuntimeDelegateImpl;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 public class JerseyTestServer implements EmbeddedServerExtension.ScimTestServer {
 
-  private SeBootstrap.Instance server;
-
   private SeContainer container;
+  private SeBootstrap.Instance server;
 
   @Override
   public URI start(int port) throws Exception {
+
+    // It doesn't look like Weld finds the beans in src/main/java, so enable implicit scanning
+    // NOTE: this isn't an issue for the scim-server tests, but those beans are located in src/test/java
     container = SeContainerInitializer.newInstance()
-      .addPackages(true, App.class.getPackage())
+      .addPackages(true, JerseyApplication.class)
       .initialize();
 
-    // There are multiple JAX-RS implementations on the classpath, Jersey for the server and RestEasy for testing
-    // explicitly use Jersey so the test implementation is not use to start the server
-     server = new RuntimeDelegateImpl().bootstrap(new App(), JerseySeBootstrapConfiguration.builder().port(port).build())
+    JerseyApplication app = new JerseyApplication();
+    server = SeBootstrap.start(app, SeBootstrap.Configuration.builder().port(port).build())
       .toCompletableFuture().get(1, TimeUnit.MINUTES);
 
     // shut down CDI container on stop
