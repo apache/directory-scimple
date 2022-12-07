@@ -68,12 +68,7 @@ public class RepositoryRegistryTest {
     final static String NAME = "Stub";
 
     public StubResource() {
-      super(URN);
-    }
-
-    @Override
-    public String getResourceType() {
-      return NAME;
+      super(URN, NAME);
     }
   }
 

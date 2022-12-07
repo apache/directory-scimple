@@ -135,12 +135,7 @@ public class ScimUser extends ScimResource implements Serializable {
   List<X509Certificate> x509Certificates;
 
   public ScimUser() {
-    super(SCHEMA_URI);
-  }
-
-  @Override
-  public String getResourceType() {
-    return RESOURCE_NAME;
+    super(SCHEMA_URI, RESOURCE_NAME);
   }
 
   public Optional<Address> getPrimaryAddress() {

@@ -73,11 +73,14 @@ public abstract class ScimResource extends BaseResource implements Serializable 
   // (XmlElementAny?)
   private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
 
-  private String baseUrn;
+  private final String baseUrn;
 
-  public ScimResource(String urn) {
+  private final String resourceType;
+
+  public ScimResource(String urn, String resourceType) {
     super(urn);
     this.baseUrn = urn;
+    this.resourceType = resourceType;
 
     ScimResourceType resourceTypeAnnotation = getClass().getAnnotation(ScimResourceType.class);
     if (resourceTypeAnnotation != null) {
@@ -129,8 +132,6 @@ public abstract class ScimResource extends BaseResource implements Serializable 
 
     return se[0];
   }
-
-  public abstract String getResourceType();
 
   public String getBaseUrn() {
     return baseUrn;
