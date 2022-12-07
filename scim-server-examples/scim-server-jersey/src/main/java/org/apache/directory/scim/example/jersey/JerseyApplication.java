@@ -19,7 +19,11 @@
 
 package org.apache.directory.scim.example.jersey;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
+import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.core.UriBuilder;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
@@ -28,19 +32,16 @@ import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
 import org.apache.directory.scim.server.rest.ScimpleFeature;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.jboss.weld.environment.se.Weld;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+
+import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;
 
 // @ApplicationPath("v2")
 // Embedded Jersey + Jetty ignores the ApplicationPath annotation
 // https://github.com/eclipse-ee4j/jersey/issues/3222
+@ApplicationScoped
 public class JerseyApplication extends Application {
-
-  private static final String BASE_URI = "http://localhost:8080/";
 
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(JerseyApplication.class);
   
@@ -54,10 +55,9 @@ public class JerseyApplication extends Application {
     return new ServerConfiguration()
       // Set any unique configuration bits
       .setId("scimple-jersey-example")
-      .setDocumentationUri("https://github.com/apache/directory-scimple");
-
+      .setDocumentationUri("https://github.com/apache/directory-scimple")
     // set the auth scheme too
-    // .addAuthenticationSchema(oauthBearer());
+     .addAuthenticationSchema(oauthBearer());
   }
 
   public static void main(String[] args) {
@@ -66,27 +66,17 @@ public class JerseyApplication extends Application {
     SLF4JBridgeHandler.install();
 
     try {
-      Weld weld = new Weld();
-      // ensure Weld discovers the beans in this project
-      weld.addPackages(true, JerseyApplication.class.getPackage());
-      weld.initialize();
 
-      ResourceConfig resourceConfig = ResourceConfig.forApplication(new JerseyApplication());
+      SeContainer container = SeContainerInitializer.newInstance()
+        .addPackages(true, JerseyApplication.class)
+        .initialize();
+
+      JerseyApplication app = new JerseyApplication();
+      SeBootstrap.start(app, SeBootstrap.Configuration.builder().port(8080).build())
+        .thenAccept(instance -> instance.stopOnShutdown(stopResult -> container.close()));
       URI uri = UriBuilder.fromUri("http://localhost/").port(8080).build();
-      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig);
 
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-        try {
-          System.out.println("Shutting down the application...");
-          server.shutdown();
-          weld.shutdown();
-          System.out.println("Done, exit.");
-        } catch (Exception e) {
-          LOG.error("Failed to shutdown service", e);
-        }
-      }));
-
-      System.out.printf("Application started: %s\nStop the application using CTRL+C%n", BASE_URI);
+      System.out.printf("Application started: %s\nStop the application using CTRL+C%n", uri.toString());
 
       // block and wait shut down signal, like CTRL+C
       Thread.currentThread().join();

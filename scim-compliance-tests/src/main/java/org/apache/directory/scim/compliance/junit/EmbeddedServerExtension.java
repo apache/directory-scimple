@@ -86,7 +86,7 @@ public class EmbeddedServerExtension implements BeforeAllCallback, BeforeEachCal
   }
 
   public interface ScimTestServer {
-    URI start(int port);
-    void shutdown();
+    URI start(int port) throws Exception;
+    void shutdown() throws Exception;
   }
 }
