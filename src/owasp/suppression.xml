@@ -57,4 +57,29 @@
     <cpe>cpe:/a:fan_platform_project:fan_platform</cpe>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[ file name: commons-codec-1.15.jar ]]></notes>
+    <packageUrl regex="true">^pkg:maven/commons\-codec/commons\-codec@.*$</packageUrl>
+    <cpe>cpe:/a:apache:commons_net</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[ file name: commons-logging-1.2.jar ]]></notes>
+    <packageUrl regex="true">^pkg:maven/commons\-logging/commons\-logging@.*$</packageUrl>
+    <cpe>cpe:/a:apache:commons_net</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[ file name: jcl-over-slf4j-1.7.36.jar ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.slf4j/jcl\-over\-slf4j@.*$</packageUrl>
+    <cpe>cpe:/a:apache:commons_net</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+    file name: snakeyaml-1.33.jar
+    Snakeyaml is a transitive dependency, the mitigation for this vuln is to use a different constructor.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
+    <vulnerabilityName>CVE-2022-1471</vulnerabilityName>
+  </suppress>
+
 </suppressions>
