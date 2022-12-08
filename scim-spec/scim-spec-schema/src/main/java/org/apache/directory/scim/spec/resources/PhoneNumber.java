@@ -23,7 +23,7 @@
 package org.apache.directory.scim.spec.resources;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -122,7 +122,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
   public void addParam(String name, String value) {
     if (this.params == null) {
-      this.params = new HashMap<String, String>();
+      this.params = new LinkedHashMap<>();
     }
 
     this.params.put(name, value);
@@ -270,8 +270,8 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     return result;
   }
 
-  HashMap<String, String> paramsToLowerCase() {
-    HashMap<String, String> paramsLowercase = new HashMap<String, String>();
+  Map<String, String> paramsToLowerCase() {
+    Map<String, String> paramsLowercase = new LinkedHashMap<>();
     for (Entry<String, String> entry : params.entrySet()) {
       paramsLowercase.put(entry.getKey().toLowerCase(), entry.getValue().toLowerCase());
     }
@@ -288,7 +288,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       return false;
     }
 
-    HashMap<String, String> paramsLowercase = paramsToLowerCase();
+    Map<String, String> paramsLowercase = paramsToLowerCase();
 
     for (Entry<String, String> entry : otherParams.entrySet()) {
       String foundValue = paramsLowercase.get(entry.getKey().toLowerCase());
@@ -323,7 +323,7 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     String extension;
     String subAddress;
     String phoneContext;
-    Map<String, String> params;
+    LinkedHashMap<String, String> params;
 
     boolean isGlobalNumber = false;
     boolean isDomainPhoneContext = false;
@@ -348,9 +348,14 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       return this;
     }
 
+    public PhoneNumberBuilder setParams(Map<String, String> params) {
+      this.params = params != null ? new LinkedHashMap<>(params) : null;
+      return this;
+    }
+
     public PhoneNumberBuilder param(String name, String value) {
       if (this.params == null) {
-        this.params = new HashMap<String, String>();
+        this.params = new LinkedHashMap<>();
       }
 
       this.params.put(name, value);
