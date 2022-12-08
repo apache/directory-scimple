@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.directory.scim.server.spi;
+package org.apache.directory.scim.core.spi;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
@@ -26,6 +26,7 @@ import jakarta.enterprise.inject.Produces;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.core.spi.Eager;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import java.util.stream.Collectors;

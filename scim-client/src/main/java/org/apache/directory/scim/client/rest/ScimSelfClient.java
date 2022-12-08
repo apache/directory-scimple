@@ -42,7 +42,7 @@ public class ScimSelfClient implements AutoCloseable {
   private RestCall invoke = Invocation::invoke;
 
   public ScimSelfClient(Client client, String baseUrl) {
-    this.client = client;
+    this.client = client.register(ScimJacksonXmlBindJsonProvider.class);
     this.target = this.client.target(baseUrl).path(SelfResource.PATH);
     this.selfResourceClient = new SelfResourceClient();
   }

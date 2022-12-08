@@ -66,7 +66,7 @@ public abstract class BaseScimClient<T extends ScimResource> implements AutoClos
     if (endpoint == null) {
       throw new IllegalArgumentException("scimResourceClass: " + scimResourceClass.getSimpleName() + " must have annotation " + ScimResourceType.class.getSimpleName() + " and annotation must have non-null endpoint");
     }
-    this.client = client;
+    this.client = client.register(ScimJacksonXmlBindJsonProvider.class);
     this.scimResourceClass = scimResourceClass;
     this.scimResourceListResponseGenericType = scimResourceListGenericType;
     this.target = this.client.target(baseUrl).path(endpoint);

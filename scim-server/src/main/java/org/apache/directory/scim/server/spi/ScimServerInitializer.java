@@ -27,32 +27,10 @@ import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
 
 public class ScimServerInitializer implements Extension {
 
   private final Logger log = LoggerFactory.getLogger(ScimServerInitializer.class);
-
-  private final Set<Bean<?>> eagerBeans = new HashSet<>();
-
-  public <T> void collect(@Observes ProcessBean<T> event) {
-    if (event.getAnnotated().isAnnotationPresent(Eager.class)) {
-      eagerBeans.add(event.getBean());
-    }
-  }
-
-  public <T, X> void collect(@Observes ProcessProducerMethod<T, X> event) {
-    if (event.getAnnotated().isAnnotationPresent(Eager.class)) {
-      eagerBeans.add(event.getBean());
-    }
-  }
-
-  public <T, X> void collect(@Observes ProcessProducerField<T, X> event) {
-    if (event.getAnnotated().isAnnotationPresent(Eager.class)) {
-      eagerBeans.add(event.getBean());
-    }
-  }
 
   public void defaultBeans(@Observes AfterBeanDiscovery afterBeanDiscovery, BeanManager beanManager) {
     if (beanManager.getBeans(ServerConfiguration.class).isEmpty()) {
@@ -67,12 +45,5 @@ public class ScimServerInitializer implements Extension {
           return beanManager.createBean(ba, ServerConfiguration.class, beanManager.getInjectionTargetFactory(at)).create(cc);
         });
     }
-  }
-
-  public void load(@Observes AfterDeploymentValidation event, BeanManager beanManager) {
-    eagerBeans.forEach(bean -> {
-      // call a real method so the proxied bean gets created
-      beanManager.getReference(bean, Object.class, beanManager.createCreationalContext(bean)).toString();
-    });
   }
 }

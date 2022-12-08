@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.directory.scim.server.spi;
+package org.apache.directory.scim.core.spi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

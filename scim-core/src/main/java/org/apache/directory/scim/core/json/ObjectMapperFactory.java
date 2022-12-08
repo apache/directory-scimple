@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.rest;
+package org.apache.directory.scim.core.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
@@ -38,7 +38,7 @@ import java.io.IOException;
 /**
  * Creates and configures an {@link ObjectMapper} used for {@code application/scim+json} parsing.
  */
-class ObjectMapperFactory {
+public class ObjectMapperFactory {
 
   private final static ObjectMapper objectMapper = createObjectMapper();
 
@@ -48,7 +48,7 @@ class ObjectMapperFactory {
    * serializing REST response and requests.
    * @return an ObjectMapper configured for use with Jackson and Jakarta bindings.
    */
-  static ObjectMapper getObjectMapper() {
+  public static ObjectMapper getObjectMapper() {
     return objectMapper;
   }
 
@@ -69,7 +69,7 @@ class ObjectMapperFactory {
   /**
    * Creates and configures an {@link ObjectMapper} SCIM Resource in REST request and responses {@code application/scim+json}.
    */
-  static ObjectMapper createObjectMapper(SchemaRegistry schemaRegistry) {
+  public static ObjectMapper createObjectMapper(SchemaRegistry schemaRegistry) {
     ObjectMapper objectMapper = createObjectMapper().copy();
     objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
     objectMapper.registerModule(new ScimResourceModule(schemaRegistry));

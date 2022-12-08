@@ -19,11 +19,10 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;

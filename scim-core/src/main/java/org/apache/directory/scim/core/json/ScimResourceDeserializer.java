@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.rest;
+package org.apache.directory.scim.core.json;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.DeserializationContext;
