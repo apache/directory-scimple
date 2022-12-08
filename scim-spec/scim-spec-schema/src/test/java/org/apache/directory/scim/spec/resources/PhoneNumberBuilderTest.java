@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.resources;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -709,7 +709,7 @@ public class PhoneNumberBuilderTest {
 
     assertEquals("+1-888-888-5555", phoneNumber.getNumber());
     assertEquals("1234", phoneNumber.getExtension());
-    assertEquals(("tel:+1-888-888-5555;ext=1234;milhouse=simpson;example=gh234"), phoneNumber.getValue());
+    assertEquals(("tel:+1-888-888-5555;ext=1234;example=gh234;milhouse=simpson"), phoneNumber.getValue());
   }
   
   @Test
@@ -725,7 +725,7 @@ public class PhoneNumberBuilderTest {
     assertEquals("888-5555", phoneNumber.getNumber());
     assertEquals("+1-888", phoneNumber.getPhoneContext());
     assertEquals("example.a.com", phoneNumber.getSubAddress());
-    assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888;milhouse=simpson;example=gh234"), phoneNumber.getValue());
+    assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888;example=gh234;milhouse=simpson"), phoneNumber.getValue());
   }
   
   @Test
@@ -937,7 +937,7 @@ public class PhoneNumberBuilderTest {
                      .param("NOPQR", "STUVWXYZ.-_")
                      .build();
     
-    HashMap<String, String> lowerP = ph.paramsToLowerCase();
+    Map<String, String> lowerP = ph.paramsToLowerCase();
     
     assertEquals(2, lowerP.size());
     assertEquals("fghijklm", lowerP.get("abcde"));
