@@ -709,7 +709,9 @@ public class PhoneNumberBuilderTest {
 
     assertEquals("+1-888-888-5555", phoneNumber.getNumber());
     assertEquals("1234", phoneNumber.getExtension());
-    assertEquals(("tel:+1-888-888-5555;ext=1234;milhouse=simpson;example=gh234"), phoneNumber.getValue());
+    assertTrue(phoneNumber.getValue().contains("tel:+1-888-888-5555;ext=1234;"));
+    assertTrue(phoneNumber.getValue().contains("milhouse=simpson"));
+    assertTrue(phoneNumber.getValue().contains("example=gh234"));
   }
   
   @Test
@@ -725,7 +727,9 @@ public class PhoneNumberBuilderTest {
     assertEquals("888-5555", phoneNumber.getNumber());
     assertEquals("+1-888", phoneNumber.getPhoneContext());
     assertEquals("example.a.com", phoneNumber.getSubAddress());
-    assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888;milhouse=simpson;example=gh234"), phoneNumber.getValue());
+    assertTrue(phoneNumber.getValue().contains("tel:888-5555;isub=example.a.com;phone-context=+1-888;"));
+    assertTrue(phoneNumber.getValue().contains("milhouse=simpson"));
+    assertTrue(phoneNumber.getValue().contains("example=gh234"));
   }
   
   @Test
