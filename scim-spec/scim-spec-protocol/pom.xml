@@ -22,8 +22,9 @@
 
 	<parent>
     <groupId>org.apache.directory.scim</groupId>
-    <artifactId>scim-spec</artifactId>
+    <artifactId>scim-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
 	<artifactId>scim-spec-protocol</artifactId>
