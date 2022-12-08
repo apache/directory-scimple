@@ -17,18 +17,17 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.rest;
+package org.apache.directory.scim.client.rest;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.apache.directory.scim.core.json.ObjectMapperFactory;
-import org.apache.directory.scim.core.schema.SchemaRegistry;
-import org.apache.directory.scim.protocol.Constants;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.directory.scim.core.json.ObjectMapperFactory;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.protocol.Constants;
 
 /**
  * Adds JacksonJaxbJsonProvider for custom MediaType {@code application/scim+json}.

@@ -19,6 +19,8 @@
 
 package org.apache.directory.scim.protocol.data;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -44,4 +46,12 @@ public class PatchRequest extends BaseResource {
   
   @XmlElement(name = "Operations")
   List<PatchOperation> patchOperationList;
+
+  public PatchRequest add(PatchOperation operation) {
+    if (patchOperationList == null){
+      patchOperationList = new ArrayList<>();
+    }
+    patchOperationList.add(operation);
+    return this;
+  }
 }

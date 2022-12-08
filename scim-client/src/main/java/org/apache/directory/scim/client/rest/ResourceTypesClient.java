@@ -40,7 +40,7 @@ public class ResourceTypesClient implements AutoCloseable {
   private final ResourceTypesResourceClient resourceTypesResourceClient = new ResourceTypesResourceClient();
 
   public ResourceTypesClient(Client client, String baseUrl) {
-    this.client = client;
+    this.client = client.register(ScimJacksonXmlBindJsonProvider.class);
     this.target = this.client.target(baseUrl).path("ResourceTypes");
   }
 
