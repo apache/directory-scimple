@@ -52,13 +52,14 @@
   </properties>
 
   <modules>
+    <module>scim-spec/scim-spec-schema</module>
+    <module>scim-spec/scim-spec-protocol</module>
     <module>scim-client</module>
     <module>scim-core</module>
     <module>scim-server</module>
     <module>scim-server-examples/scim-server-memory</module>
     <module>scim-server-examples/scim-server-jersey</module>
     <module>scim-server-examples/scim-server-spring-boot</module>
-    <module>scim-spec</module>
     <module>support/spring-boot</module>
     <module>scim-tools</module>
     <module>scim-compliance-tests</module>
