@@ -22,6 +22,7 @@ package org.apache.directory.scim.spec.resources;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -48,17 +49,24 @@ public abstract class BaseResource implements Serializable {
   @Size(min = 1)
   @Urn
   Set<String> schemas;
-  
-  public BaseResource(String urn) {
+
+  public BaseResource(@Urn String urn) {
     addSchema(urn);
   }
-  
-  public void addSchema(String urn) {
+
+  public void addSchema(@Urn String urn) {
     if (schemas == null){
-      schemas = new HashSet<>();
+      schemas = new TreeSet<>();
     }
-    
     schemas.add(urn);
+  }
+
+  public void setSchemas(@Urn Set<String> schemas) {
+    if (schemas == null) {
+      this.schemas.clear();
+    } else {
+      this.schemas = new TreeSet<>(schemas);
+    }
   }
   
 }
