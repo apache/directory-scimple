@@ -46,8 +46,6 @@ import org.apache.directory.scim.spec.exception.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.core.repository.annotations.ScimProcessingExtension;
 import org.apache.directory.scim.core.repository.extensions.AttributeFilterExtension;
