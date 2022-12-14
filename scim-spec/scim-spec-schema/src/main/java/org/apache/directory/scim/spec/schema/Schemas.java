@@ -288,6 +288,7 @@ public final class Schemas {
       attributeList.add(attribute);
     }
 
+    attributeList.sort(Comparator.comparing(o -> o.name));
     log.debug("Returning " + attributeList.size() + " attributes");
     return attributeList;
   }

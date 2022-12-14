@@ -38,6 +38,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -71,7 +72,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
 
   // TODO - Figure out JAXB equivalent of JsonAnyGetter and JsonAnySetter
   // (XmlElementAny?)
-  private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
+  private Map<String, ScimExtension> extensions = new LinkedHashMap<>();
 
   private final String baseUrn;
 
