@@ -21,12 +21,13 @@ package org.apache.directory.scim.core.spi;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.Startup;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
-import org.apache.directory.scim.core.spi.Eager;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import java.util.stream.Collectors;
@@ -41,9 +42,15 @@ public class ScimpleComponents {
   }
 
   @Produces
-  @Eager
   @ApplicationScoped
   public RepositoryRegistry repositoryRegistry(SchemaRegistry schemaRegistry, Instance<Repository<? extends ScimResource>> repositoryInstances) {
     return new RepositoryRegistry(schemaRegistry, repositoryInstances.stream().collect(Collectors.toList()));
+  }
+
+  /*
+   * Eagerly initialize the RepositoryRegistry bean on startup.
+   */
+  public void startup(@Observes Startup startup, RepositoryRegistry repositoryRegistry) {
+    repositoryRegistry.toString(); // call toString() to resolve real object from proxy
   }
 }
