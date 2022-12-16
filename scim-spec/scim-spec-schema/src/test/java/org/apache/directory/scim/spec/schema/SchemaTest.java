@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class SchemaTest {
 
-  static ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();;
+  static ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
   Validator validator;
 
   @BeforeEach
