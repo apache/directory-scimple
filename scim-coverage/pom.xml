@@ -28,6 +28,11 @@
   <name>SCIM - Total Test Coverage</name>
   <packaging>pom</packaging>
 
+  <properties>
+    <!-- The spring modules require 17 -->
+    <max.jdk.version>17</max.jdk.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.directory.scim</groupId>
@@ -76,17 +81,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>spring-boot</id>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.directory.scim</groupId>
-          <artifactId>scim-spring-boot-starter</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
-
 </project>
