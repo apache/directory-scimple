@@ -53,7 +53,8 @@ public class ServiceProviderConfigResourceImpl implements ServiceProviderConfigR
     this.etagGenerator = etagGenerator;
   }
 
-  ServiceProviderConfigResourceImpl() {
+  public ServiceProviderConfigResourceImpl() {
+    // CDI
     this(null, null);
   }
 

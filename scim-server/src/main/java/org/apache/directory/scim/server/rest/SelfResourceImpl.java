@@ -56,7 +56,8 @@ public class SelfResourceImpl implements SelfResource {
     this.requestContext = requestContext;
   }
 
-  SelfResourceImpl() {
+  public SelfResourceImpl() {
+    // CDI
     this(null, null, null);
   }
 

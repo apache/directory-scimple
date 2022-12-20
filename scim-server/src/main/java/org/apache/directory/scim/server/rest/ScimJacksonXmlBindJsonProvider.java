@@ -39,9 +39,12 @@ import jakarta.ws.rs.ext.Provider;
 @ApplicationScoped
 public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
 
+  public ScimJacksonXmlBindJsonProvider() {
+    // CDI
+  }
+
   @Inject
   public ScimJacksonXmlBindJsonProvider(SchemaRegistry schemaRegistry) {
     super(ObjectMapperFactory.createObjectMapper(schemaRegistry), DEFAULT_ANNOTATIONS);
-
   }
 }

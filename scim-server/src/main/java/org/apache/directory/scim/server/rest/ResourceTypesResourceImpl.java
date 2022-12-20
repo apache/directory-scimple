@@ -47,7 +47,8 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     this.requestContext = requestContext;
   }
 
-  ResourceTypesResourceImpl() {
+  public ResourceTypesResourceImpl() {
+    // CDI
     this(null, null);
   }
 

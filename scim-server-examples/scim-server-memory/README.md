@@ -8,7 +8,7 @@ This example WAR project demo's how to:
 
 Use this as a starter point on how to integrate Apache Directory SCIMple into your own project.
 
-Run: `mvn tomee:run` and then access one of the endpoints:
+Run: `mvn` and then access one of the endpoints:
 
 ```bash
 # httpie

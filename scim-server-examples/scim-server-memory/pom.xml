@@ -57,7 +57,7 @@
   </dependencies>
 
   <build>
-    <defaultGoal>package tomee:run</defaultGoal>
+    <defaultGoal>package wildfly:run</defaultGoal>
     <plugins>
       <plugin>
         <groupId>org.apache.geronimo.genesis.plugins</groupId>
@@ -67,20 +67,9 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.tomee.maven</groupId>
-        <artifactId>tomee-maven-plugin</artifactId>
-        <version>9.0.0-M8</version>
-        <configuration>
-          <context>ROOT</context>
-          <warFile>target/${project.artifactId}-${project.version}.war</warFile>
-          <tomeeClassifier>plus</tomeeClassifier>
-          <simpleLog>true</simpleLog>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
-        <version>4.0.0.Alpha2</version>
+        <version>4.0.0.Final</version>
         <configuration>
           <skip>false</skip>
           <filename>${project.artifactId}-${project.version}.war</filename>

@@ -45,7 +45,8 @@ public class SchemaResourceImpl implements SchemaResource {
     this.schemaRegistry = schemaRegistry;
   }
 
-  SchemaResourceImpl() {
+  public SchemaResourceImpl() {
+    // CDI
     this(null);
   }
 
