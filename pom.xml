@@ -34,6 +34,7 @@
 
   <properties>
     <jdk.version>11</jdk.version>
+    <max.jdk.version>${jdk.version}</max.jdk.version>
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
     <maven.compiler.target>${jdk.version}</maven.compiler.target>
     <maven.compiler.release>${jdk.version}</maven.compiler.release>
@@ -379,6 +380,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.1.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>extra-enforcer-rules</artifactId>
+            <version>1.6.1</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id>enforce-java</id>
@@ -391,6 +399,20 @@
                   <version>17</version>
                 </requireJavaVersion>
               </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>enforce-bytecode-version</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <enforceBytecodeVersion>
+                  <maxJdkVersion>${max.jdk.version}</maxJdkVersion>
+                </enforceBytecodeVersion>
+              </rules>
+              <fail>true</fail>
             </configuration>
           </execution>
         </executions>

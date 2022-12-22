@@ -29,6 +29,7 @@
 
   <properties>
     <module.name>org.apache.directory.scim.example.springboot</module.name>
+    <max.jdk.version>17</max.jdk.version>
   </properties>
 
   <dependencyManagement>
