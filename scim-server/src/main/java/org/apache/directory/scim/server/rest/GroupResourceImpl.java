@@ -39,7 +39,8 @@ public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> i
     super(schemaRegistry, repositoryRegistry, requestContext, etagGenerator, ScimGroup.class);
   }
 
-  GroupResourceImpl() {
+  public GroupResourceImpl() {
+    // CDI
     this(null, null, null, null);
   }
 }

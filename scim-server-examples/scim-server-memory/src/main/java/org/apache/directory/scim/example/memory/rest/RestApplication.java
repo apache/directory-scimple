@@ -22,29 +22,18 @@ package org.apache.directory.scim.example.memory.rest;
 import jakarta.enterprise.inject.Produces;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
-import java.util.Set;
-
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
-import org.apache.directory.scim.server.rest.ScimpleFeature;
 
 import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
 
 @ApplicationPath("v2")
 public class RestApplication extends Application {
-  
-  @Override
-  public Set<Class<?>> getClasses() {
-    return Set.of(ScimpleFeature.class);
-  }
 
   @Produces
   ServerConfiguration serverConfiguration() {
     return new ServerConfiguration()
       .setId("scimple-in-memory-example")
       .addAuthenticationSchema(httpBasic());
-
-    // set the auth scheme too
-    // .addAuthenticationSchema(oauthBearer());
   }
 }

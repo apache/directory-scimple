@@ -43,7 +43,8 @@ public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> imp
     super(schemaRegistry, repositoryRegistry, requestContext, etagGenerator, ScimUser.class);
   }
 
-  UserResourceImpl() {
+  public UserResourceImpl() {
+    // CDI
     this(null, null, null, null);
   }
 }

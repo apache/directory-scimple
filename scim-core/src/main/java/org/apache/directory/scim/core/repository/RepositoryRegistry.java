@@ -38,6 +38,10 @@ public class RepositoryRegistry {
 
   private Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap = new HashMap<>();
 
+  public RepositoryRegistry() {
+    // CDI
+  }
+
   public RepositoryRegistry(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
   }

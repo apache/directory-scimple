@@ -99,7 +99,8 @@ public class BulkResourceImpl implements BulkResource {
     this.repositoryRegistry = repositoryRegistry;
   }
 
-  BulkResourceImpl() {
+  public BulkResourceImpl() {
+    // CDI
     this(null, null);
   }
 
