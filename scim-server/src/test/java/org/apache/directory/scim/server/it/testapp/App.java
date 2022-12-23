@@ -23,7 +23,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.ws.rs.core.Application;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.server.rest.ScimpleFeature;
+import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import java.util.Set;
 
@@ -34,7 +34,7 @@ public class App extends Application {
 
   @Override
   public Set<Class<?>> getClasses() {
-    return Set.of(ScimpleFeature.class);
+    return ScimResourceHelper.scimpleFeatureAndResourceClasses();
   }
 
   @Produces

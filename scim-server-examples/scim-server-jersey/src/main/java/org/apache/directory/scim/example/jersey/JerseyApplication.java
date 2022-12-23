@@ -31,7 +31,7 @@ import java.net.URI;
 import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
-import org.apache.directory.scim.server.rest.ScimpleFeature;
+import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -47,7 +47,7 @@ public class JerseyApplication extends Application {
   
   @Override
   public Set<Class<?>> getClasses() {
-    return Set.of(ScimpleFeature.class);
+    return ScimResourceHelper.scimpleFeatureAndResourceClasses();
   }
 
   @Produces

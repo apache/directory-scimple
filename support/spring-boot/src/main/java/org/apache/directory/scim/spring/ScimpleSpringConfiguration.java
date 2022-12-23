@@ -31,7 +31,7 @@ import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.EtagGenerator;
 import org.apache.directory.scim.server.rest.RequestContext;
-import org.apache.directory.scim.server.rest.ScimpleFeature;
+import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.apache.directory.scim.server.rest.UserResourceImpl;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -114,7 +114,7 @@ public class ScimpleSpringConfiguration {
   static class ScimpleJaxRsApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
-      return Set.of(ScimpleFeature.class);
+      return ScimResourceHelper.scimpleFeatureAndResourceClasses();
     }
   }
 
