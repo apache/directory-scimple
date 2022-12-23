@@ -480,7 +480,7 @@
         <plugin>
           <groupId>org.wildfly.plugins</groupId>
           <artifactId>wildfly-maven-plugin</artifactId>
-          <version>3.0.1.Final</version>
+          <version>4.0.0.Final</version>
           <inherited>true</inherited>
           <configuration>
             <id>${jbossServerId}</id>
