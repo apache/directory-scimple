@@ -104,12 +104,6 @@ public class UpdateRequestTest {
   }
 
   @Test
-  public void testPatchToUpdate() throws Exception {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", createUser(), createUser1PatchOps(), schemaRegistry);
-    assertThrows(UnsupportedOperationException.class, () -> updateRequest.getResource());
-  }
-
-  @Test
   public void testAddSingleAttribute() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
