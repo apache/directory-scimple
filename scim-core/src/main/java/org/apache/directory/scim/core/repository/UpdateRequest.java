@@ -19,57 +19,32 @@
 
 package org.apache.directory.scim.core.repository;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+import com.fasterxml.jackson.databind.node.*;
 import com.flipkart.zjsonpatch.JsonDiff;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.spec.filter.*;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
-import org.apache.directory.scim.spec.filter.AttributeComparisonExpression;
-import org.apache.directory.scim.spec.filter.CompareOperator;
-import org.apache.directory.scim.spec.filter.FilterExpression;
-import org.apache.directory.scim.spec.filter.ValuePathExpression;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.TypedAttribute;
 import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
-import org.apache.directory.scim.core.schema.SchemaRegistry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.apache.directory.scim.core.repository.ObjectMapperProvider.createObjectMapper;
 
 @Slf4j
 @EqualsAndHashCode
@@ -93,6 +68,8 @@ public class UpdateRequest<T extends ScimResource> {
 
   private Schema schema;
 
+  private PatchHandler patchHandler;
+
   private SchemaRegistry schemaRegistry;
 
   private Map<Attribute, Integer> addRemoveOffsetMap = new HashMap<>();
@@ -106,6 +83,7 @@ public class UpdateRequest<T extends ScimResource> {
     this.id = id;
     this.original = original;
     this.resource = resource;
+    this.patchHandler = new PatchHandlerImpl(schemaRegistry);
     this.schema = schemaRegistry.getSchema(original.getBaseUrn());
     initialized = true;
   }
@@ -115,6 +93,7 @@ public class UpdateRequest<T extends ScimResource> {
     this.id = id;
     this.original = original;
     this.patchOperations = patchOperations;
+    this.patchHandler = new PatchHandlerImpl(schemaRegistry);
     this.schema = schemaRegistry.getSchema(original.getBaseUrn());
 
     initialized = true;
@@ -125,11 +104,11 @@ public class UpdateRequest<T extends ScimResource> {
       throw new IllegalStateException("UpdateRequest was not initialized");
     }
 
-    if (resource != null) {
-      return resource;
+    if (resource == null) {
+      this.resource = this.patchHandler.apply(this.original, this.patchOperations);
     }
 
-    return applyPatchOperations();
+    return this.resource;
   }
 
   public List<PatchOperation> getPatchOperations() {
@@ -189,10 +168,6 @@ public class UpdateRequest<T extends ScimResource> {
     return set1;
   }
 
-  private T applyPatchOperations() {
-    throw new java.lang.UnsupportedOperationException("PATCH operations are not implemented at this time.");
-  }
-  
   /**
    * There is a know issue with the diffing tool that the tool will attempt to move empty arrays. By
    * nulling out the empty arrays during comparison, this will prevent that error from occurring. Because
@@ -600,18 +575,4 @@ public class UpdateRequest<T extends ScimResource> {
     }
   }
 
-  private static ObjectMapper createObjectMapper() {
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
-
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(
-      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
-      new JacksonAnnotationIntrospector());
-    objectMapper.setAnnotationIntrospector(pair);
-
-    return objectMapper;
-  }
 }
