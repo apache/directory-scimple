@@ -9,11 +9,14 @@ import org.apache.directory.scim.spec.filter.*;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
+import org.apache.directory.scim.spec.resources.KeyedResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.apache.directory.scim.core.repository.ObjectMapperProvider.createObjectMapper;
 
@@ -69,20 +72,48 @@ public class PatchHandlerImpl implements PatchHandler {
   private <T extends ScimResource> T apply(final T source, final PatchOperation patchOperation) {
     Map<String, Object> sourceAsMap = objectAsMap(source);
 
-    final AttributeReference attributeReference = attributeReference(patchOperation);
+    final ValuePathExpression valuePathExpression = valuePathExpression(patchOperation);
+    final AttributeReference attributeReference = attributeReference(valuePathExpression);
+
     Schema baseSchema = this.schemaRegistry.getSchema(source.getBaseUrn());
     Attribute attribute = baseSchema.getAttribute(attributeReference.getAttributeName());
 
-    sourceAsMap.put(attribute.getName(), patchOperation.getValue());
+    Object attributeObject = attribute.getAccessor().get(source);
+    if (attributeObject == null && patchOperation.getOperation().equals(PatchOperation.Type.REPLACE)) {
+      throw new IllegalArgumentException("Cannot apply patch replace on missing property: " + attribute.getName());
+    }
 
+    if (valuePathExpression.getAttributeExpression() != null && attributeObject instanceof Collection<?>) {
+      // apply expression filter
+      Collection<Object> items = (Collection<Object>) attributeObject;
+      Collection<Object> updatedCollection = items.stream().map(item -> {
+        KeyedResource keyedResource = (KeyedResource) item;
+        Map<String, Object> keyedResourceAsMap = objectAsMap(item);
+        Predicate<KeyedResource> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema);
+        if (pred.test(keyedResource)) {
+          String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
+          if (keyedResourceAsMap.get(subAttributeName) == null && patchOperation.getOperation().equals(PatchOperation.Type.REPLACE)) {
+            throw new IllegalArgumentException("Cannot apply patch replace on missing property: " + valuePathExpression.toFilter());
+          }
+          keyedResourceAsMap.put(subAttributeName, patchOperation.getValue());
+          return keyedResourceAsMap;
+        } else {
+          // filter does not apply
+          return item;
+        }
+      }).collect(Collectors.toList());
+      sourceAsMap.put(attribute.getName(), updatedCollection);
+    } else {
+      // no filter expression
+      sourceAsMap.put(attribute.getName(), patchOperation.getValue());
+    }
     return (T) mapAsScimResource(sourceAsMap, source.getClass());
   }
 
   private PatchOperationPath tryGetOperationPath(String key) {
     try {
       return new PatchOperationPath(key);
-    }
-    catch (FilterParseException e) {
+    } catch (FilterParseException e) {
       log.warn("Parsing path failed with exception.", e);
       throw new IllegalArgumentException("Cannot parse path expression: " + e.getMessage());
     }
@@ -96,11 +127,15 @@ public class PatchHandlerImpl implements PatchHandler {
     return objectMapper.convertValue(object, MAP_TYPE);
   }
 
-  public static AttributeReference attributeReference(final PatchOperation operation) {
+  public static ValuePathExpression valuePathExpression(final PatchOperation operation) {
     return Optional.ofNullable(operation.getPath())
       .map(PatchOperationPath::getValuePathExpression)
-      .map(ValuePathExpression::getAttributePath)
       .orElseThrow(() -> new IllegalArgumentException("Patch operation must have a value path expression"));
+  }
+
+  public static AttributeReference attributeReference(final ValuePathExpression expression) {
+    return Optional.ofNullable(expression.getAttributePath())
+      .orElseThrow(() -> new IllegalArgumentException("Patch operation must have an expression with a valid attribute path"));
   }
 
 }

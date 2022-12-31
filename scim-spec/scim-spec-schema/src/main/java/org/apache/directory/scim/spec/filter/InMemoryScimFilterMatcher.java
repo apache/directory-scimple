@@ -158,8 +158,11 @@ final class InMemoryScimFilterMatcher {
 
           // now walk the attribute path again to get the accessor and value
           Schema.Attribute schemaAttribute = attributeContainer.getAttribute(attributeReference.getAttributeName());
-          actual = schemaAttribute.getAccessor().get(actual);
-
+          try {
+            actual = schemaAttribute.getAccessor().get(actual);
+          } catch (IllegalArgumentException e) {
+            // TODO: suppress for now, need to handle case when actual is the nested attribute instead of the scim resource
+          }
           // if the attribute has a sub-level, continue on
           String subAttribute = attributeReference.getSubAttributeName();
           if (subAttribute != null) {
