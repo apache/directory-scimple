@@ -18,8 +18,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.apache.directory.scim.core.repository.ObjectMapperProvider.createObjectMapper;
-
 @SuppressWarnings("unchecked")
 @Slf4j
 public class PatchHandlerImpl implements PatchHandler {
@@ -27,7 +25,7 @@ public class PatchHandlerImpl implements PatchHandler {
   private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
   };
 
-  private final ObjectMapper objectMapper = createObjectMapper();
+  private final ObjectMapper objectMapper = ObjectMapperProvider.getObjectMapper();
 
   private final SchemaRegistry schemaRegistry;
 

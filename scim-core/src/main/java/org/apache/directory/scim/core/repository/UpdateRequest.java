@@ -28,6 +28,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.filter.*;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
@@ -44,8 +45,6 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.directory.scim.core.repository.ObjectMapperProvider.createObjectMapper;
-
 @Slf4j
 @EqualsAndHashCode
 @ToString
@@ -56,7 +55,7 @@ public class UpdateRequest<T extends ScimResource> {
   private static final String VALUE = "value";
 
   // Create a Jackson ObjectMapper that reads JaxB annotations
-  private final ObjectMapper objectMapper = createObjectMapper();
+  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   @Getter
   private String id;

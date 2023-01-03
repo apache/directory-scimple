@@ -10,7 +10,14 @@ import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntr
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 
 public class ObjectMapperProvider {
-  protected static ObjectMapper createObjectMapper() {
+
+  private final static ObjectMapper objectMapper = createObjectMapper();
+
+  public static ObjectMapper getObjectMapper() {
+    return objectMapper;
+  }
+
+  private static ObjectMapper createObjectMapper() {
     ObjectMapper objectMapper = new ObjectMapper();
 
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
