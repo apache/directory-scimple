@@ -23,6 +23,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -225,7 +239,7 @@ public class UpdateRequest<T extends ScimResource> {
     nullEmptyLists(node1);
     JsonNode node2 = objectMapper.valueToTree(resource);
     nullEmptyLists(node2);
-    JsonNode differences = JsonDiff.asJson(node1, node2);
+    JsonNode differences = JsonDiff.asJson(node1, node2, DiffFlags.dontNormalizeOpIntoMoveAndCopy());
     
     
     /*
@@ -282,7 +296,7 @@ public class UpdateRequest<T extends ScimResource> {
   }
 
   private List<PatchOperation> convertNodeToPatchOperations(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
-    log.info(operationNode + ", " + diffPath);
+    log.debug("convertNodeToPatchOperations: {} , {}", operationNode, diffPath);
     List<PatchOperation> operations = new ArrayList<>();
     PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
 
@@ -316,7 +330,7 @@ public class UpdateRequest<T extends ScimResource> {
 
   @SuppressWarnings("unchecked")
   private List<PatchOperation> handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException, JsonProcessingException {
-    log.info("in handleAttributes");
+    log.trace("in handleAttributes");
     List<PatchOperation> operations = new ArrayList<>();
     
     List<String> attributeReferenceList = new ArrayList<>();
@@ -329,7 +343,7 @@ public class UpdateRequest<T extends ScimResource> {
     
     int i = 0;
     for (String pathPart : parseData.pathParts) {
-      log.info(pathPart);
+      log.trace("path part: {}", pathPart);
       if (done) {
         throw new RuntimeException("Path should be done... Attribute not supported by the schema: " + pathPart);
       } else if (processingMultiValued) {
@@ -347,7 +361,11 @@ public class UpdateRequest<T extends ScimResource> {
             Enum<?> tempEnum = (Enum<?>)parseData.originalObject;
             valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, tempEnum.name());
           } else {
-            log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+            if (parseData.originalObject != null) {
+              log.debug("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+            } else {
+              log.debug("Attribute: null doesn't implement TypedAttribute, can't create ValueFilterExpression");
+            }
             valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, "?");
           }
           processingMultiValued = false;
@@ -360,7 +378,7 @@ public class UpdateRequest<T extends ScimResource> {
           if (processedMultiValued) {
             subAttributes.add(pathPart);
           } else {
-            log.info("Adding " + pathPart + " to attributeReferenceList");
+            log.debug("Adding {} to attributeReferenceList", pathPart);
             attributeReferenceList.add(pathPart);
           }
   
@@ -573,5 +591,4 @@ public class UpdateRequest<T extends ScimResource> {
       return attribute.getAccessor().get(object);
     }
   }
-
 }
