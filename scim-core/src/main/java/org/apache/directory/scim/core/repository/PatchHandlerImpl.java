@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.filter.*;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
@@ -44,7 +45,7 @@ public class PatchHandlerImpl implements PatchHandler {
   private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
   };
 
-  private final ObjectMapper objectMapper = ObjectMapperProvider.getObjectMapper();
+  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   private final SchemaRegistry schemaRegistry;
 
