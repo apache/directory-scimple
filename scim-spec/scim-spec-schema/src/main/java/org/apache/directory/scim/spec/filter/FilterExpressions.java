@@ -1,6 +1,5 @@
 package org.apache.directory.scim.spec.filter;
 
-import org.apache.directory.scim.spec.resources.KeyedResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 
@@ -29,7 +28,7 @@ public final class FilterExpressions {
     return InMemoryScimFilterMatcher.toPredicate(expression, schema);
   }
 
-  public static Predicate<KeyedResource> inMemory(FilterExpression expression, Schema schema) {
+  public static Predicate<Object> inMemory(FilterExpression expression, Schema schema) {
     return InMemoryScimFilterMatcher.toPredicate(expression, schema);
   }
 }

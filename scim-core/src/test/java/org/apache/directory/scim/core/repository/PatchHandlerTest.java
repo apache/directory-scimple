@@ -23,6 +23,7 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
+import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.Schemas;
 import org.junit.jupiter.api.Test;
@@ -58,11 +59,40 @@ public class PatchHandlerTest {
     assertThat(updatedUser.getUserName()).isEqualTo("testUser_updated");
   }
 
+  @Test
+  public void applyWithFilterExpression() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(PatchOperation.Type.REPLACE);
+    op.setPath(new PatchOperationPath("emails[type EQ \"home\"].value"));
+    op.setValue("new-home@example.com");
+    ScimUser updatedUser = performPatch(op);
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("home")
+        .setValue("new-home@example.com") // updated email
+    ));
+  }
+
   private ScimUser performPatch(PatchOperation op) {
     when(mockSchemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(Schemas.schemaFor(ScimUser.class));
-    PatchHandlerImpl patchHandler = new PatchHandlerImpl(mockSchemaRegistry);
+    PatchHandler patchHandler = new PatchHandlerImpl(mockSchemaRegistry);
     ScimUser user = new ScimUser();
     user.setUserName("testUser");
+    user.setEmails(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("home")
+        .setValue("home@example.com")
+    ));
+
     return patchHandler.apply(user, List.of(op));
   }
 }

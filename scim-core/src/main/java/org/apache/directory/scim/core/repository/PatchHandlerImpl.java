@@ -19,34 +19,23 @@
 
 package org.apache.directory.scim.core.repository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.filter.*;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
-import org.apache.directory.scim.spec.resources.KeyedResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 @Slf4j
 public class PatchHandlerImpl implements PatchHandler {
-
-  private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-  };
-
-  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-
   private final SchemaRegistry schemaRegistry;
 
   public PatchHandlerImpl(SchemaRegistry schemaRegistry) {
@@ -88,7 +77,6 @@ public class PatchHandlerImpl implements PatchHandler {
   }
 
   private <T extends ScimResource> T apply(final T source, final PatchOperation patchOperation) {
-    Map<String, Object> sourceAsMap = objectAsMap(source);
 
     final ValuePathExpression valuePathExpression = valuePathExpression(patchOperation);
     final AttributeReference attributeReference = attributeReference(valuePathExpression);
@@ -104,28 +92,19 @@ public class PatchHandlerImpl implements PatchHandler {
     if (valuePathExpression.getAttributeExpression() != null && attributeObject instanceof Collection<?>) {
       // apply expression filter
       Collection<Object> items = (Collection<Object>) attributeObject;
-      Collection<Object> updatedCollection = items.stream().map(item -> {
-        KeyedResource keyedResource = (KeyedResource) item;
-        Map<String, Object> keyedResourceAsMap = objectAsMap(item);
-        Predicate<KeyedResource> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema);
-        if (pred.test(keyedResource)) {
+      items.forEach(item -> {
+        Predicate<Object> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema);
+        if (pred.test(item)) {
           String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
-          if (keyedResourceAsMap.get(subAttributeName) == null && patchOperation.getOperation().equals(PatchOperation.Type.REPLACE)) {
-            throw new IllegalArgumentException("Cannot apply patch replace on missing property: " + valuePathExpression.toFilter());
-          }
-          keyedResourceAsMap.put(subAttributeName, patchOperation.getValue());
-          return keyedResourceAsMap;
-        } else {
-          // filter does not apply
-          return item;
+          Schema.AttributeAccessor subAttributeAccessor = attribute.getAttribute(subAttributeName).getAccessor();
+          subAttributeAccessor.set(item, patchOperation.getValue());
         }
-      }).collect(Collectors.toList());
-      sourceAsMap.put(attribute.getName(), updatedCollection);
+      });
     } else {
-      // no filter expression
-      sourceAsMap.put(attribute.getName(), patchOperation.getValue());
+      // no filter expression, just set the value
+      attribute.getAccessor().set(source, patchOperation.getValue());
     }
-    return (T) mapAsScimResource(sourceAsMap, source.getClass());
+    return source;
   }
 
   private PatchOperationPath tryGetOperationPath(String key) {
@@ -135,14 +114,6 @@ public class PatchHandlerImpl implements PatchHandler {
       log.warn("Parsing path failed with exception.", e);
       throw new IllegalArgumentException("Cannot parse path expression: " + e.getMessage());
     }
-  }
-
-  private <T extends ScimResource> T mapAsScimResource(final Map<String, Object> scimResourceAsMap, final Class<T> clazz) {
-    return objectMapper.convertValue(scimResourceAsMap, clazz);
-  }
-
-  private Map<String, Object> objectAsMap(final Object object) {
-    return objectMapper.convertValue(object, MAP_TYPE);
   }
 
   public static ValuePathExpression valuePathExpression(final PatchOperation operation) {
@@ -155,5 +126,4 @@ public class PatchHandlerImpl implements PatchHandler {
     return Optional.ofNullable(expression.getAttributePath())
       .orElseThrow(() -> new IllegalArgumentException("Patch operation must have an expression with a valid attribute path"));
   }
-
 }
