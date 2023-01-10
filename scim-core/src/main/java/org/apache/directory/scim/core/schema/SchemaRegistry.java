@@ -174,7 +174,7 @@ public class SchemaRegistry {
 
     if (extensionList != null) {
 
-      List<ResourceType.SchemaExtentionConfiguration> extensionSchemaList = new ArrayList<>();
+      List<ResourceType.SchemaExtensionConfiguration> extensionSchemaList = new ArrayList<>();
 
       for (Class<? extends ScimExtension> se : extensionList) {
 
@@ -184,7 +184,7 @@ public class SchemaRegistry {
           throw new InvalidExtensionException("Missing annotation: @ScimExtensionType on ScimExtensionL " + se.getSimpleName());
         }
 
-        ResourceType.SchemaExtentionConfiguration ext = new ResourceType.SchemaExtentionConfiguration();
+        ResourceType.SchemaExtensionConfiguration ext = new ResourceType.SchemaExtensionConfiguration();
         ext.setRequired(extensionType.required());
         ext.setSchemaUrn(extensionType.id());
         extensionSchemaList.add(ext);

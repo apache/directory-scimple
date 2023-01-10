@@ -48,7 +48,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
 
   @Data
-  public static class SchemaExtentionConfiguration {
+  public static class SchemaExtensionConfiguration {
 
     @XmlElement(name = "schema")
     @Urn
@@ -76,7 +76,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
   String schemaUrn;
 
   @XmlElement
-  List<SchemaExtentionConfiguration> schemaExtensions;
+  List<SchemaExtensionConfiguration> schemaExtensions;
   
   public ResourceType() {
     super(SCHEMA_URI, RESOURCE_NAME);
