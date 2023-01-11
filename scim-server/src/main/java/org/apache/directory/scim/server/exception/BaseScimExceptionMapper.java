@@ -15,7 +15,12 @@ abstract class BaseScimExceptionMapper<E extends Throwable> implements Exception
   @Override
   public Response toResponse(E throwable) {
     Response response = errorResponse(throwable).toResponse();
-    log.warn("Returning error status: {}", response.getStatus(), throwable);
+    // log client errors (e.g. 404s) at debug, and anything else at warn
+    if (Response.Status.Family.CLIENT_ERROR.equals(response.getStatusInfo().getFamily())) {
+      log.debug("Returning error status: {}", response.getStatus(), throwable);
+    } else {
+      log.warn("Returning error status: {}", response.getStatus(), throwable);
+    }
     response.getHeaders().putSingle(HttpHeaders.CONTENT_TYPE, Constants.SCIM_CONTENT_TYPE);
     return response;
   }
