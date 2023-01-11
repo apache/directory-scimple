@@ -78,6 +78,46 @@ public class PatchHandlerTest {
     ));
   }
 
+  @Test
+  public void deleteItemWithFilter() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(PatchOperation.Type.REMOVE);
+    op.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+    ScimUser updatedUser = performPatch(op);
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com")
+    ));
+  }
+
+  @Test
+  public void addItem() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(PatchOperation.Type.ADD);
+    op.setPath(new PatchOperationPath("emails"));
+    op.setValue(new Email()
+      .setType("other")
+      .setValue("other@example.com"));
+
+    ScimUser updatedUser = performPatch(op);
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+        new Email()
+          .setPrimary(true)
+          .setType("work")
+          .setValue("work@example.com"),
+        new Email()
+          .setType("home")
+          .setValue("home@example.com"),
+        new Email()
+          .setType("other")
+          .setValue("other@example.com")
+      ));
+  }
+
   private ScimUser performPatch(PatchOperation op) {
     when(mockSchemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(Schemas.schemaFor(ScimUser.class));
     PatchHandler patchHandler = new PatchHandlerImpl(mockSchemaRegistry);

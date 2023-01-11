@@ -32,6 +32,7 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 @Slf4j
@@ -84,25 +85,43 @@ public class PatchHandlerImpl implements PatchHandler {
     Schema baseSchema = this.schemaRegistry.getSchema(source.getBaseUrn());
     Attribute attribute = baseSchema.getAttribute(attributeReference.getAttributeName());
 
-    Object attributeObject = attribute.getAccessor().get(source);
-    if (attributeObject == null && patchOperation.getOperation().equals(PatchOperation.Type.REPLACE)) {
+    Schema.AttributeAccessor attributeAccessor = attribute.getAccessor();
+    Object attributeObject = attributeAccessor.get(source);
+    if (attributeObject == null && PatchOperation.Type.REPLACE.equals(patchOperation.getOperation())) {
       throw new IllegalArgumentException("Cannot apply patch replace on missing property: " + attribute.getName());
     }
 
-    if (valuePathExpression.getAttributeExpression() != null && attributeObject instanceof Collection<?>) {
-      // apply expression filter
+    // Add item to list
+    if (PatchOperation.Type.ADD.equals(patchOperation.getOperation()) && attributeObject instanceof List<?>) {
+        List<Object> newItems = new ArrayList<>((Collection<Object>) attributeObject);
+        newItems.add(patchOperation.getValue());
+        attributeAccessor.set(source, newItems);
+    } else if (valuePathExpression.getAttributeExpression() != null && attributeObject instanceof List<?>) {
+      // change list
+      Predicate<Object> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema);
+      String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
+
       Collection<Object> items = (Collection<Object>) attributeObject;
-      items.forEach(item -> {
-        Predicate<Object> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema);
-        if (pred.test(item)) {
-          String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
-          Schema.AttributeAccessor subAttributeAccessor = attribute.getAttribute(subAttributeName).getAccessor();
-          subAttributeAccessor.set(item, patchOperation.getValue());
-        }
-      });
+
+      // remove item from list
+      if (PatchOperation.Type.REMOVE.equals(patchOperation.getOperation()) && subAttributeName == null) {
+        Object newItems = items.stream()
+          .filter(item -> !pred.test(item))
+          .collect(Collectors.toList());
+        attributeAccessor.set(source, newItems);
+      } else {
+      // update item in list
+        items.stream()
+          .filter(pred)
+          .findFirst()
+          .ifPresent(item -> {
+            Schema.AttributeAccessor subAttributeAccessor = attribute.getAttribute(subAttributeName).getAccessor();
+            subAttributeAccessor.set(item, patchOperation.getValue());
+          });
+      }
     } else {
-      // no filter expression, just set the value
-      attribute.getAccessor().set(source, patchOperation.getValue());
+      // just set the value
+      attributeAccessor.set(source, patchOperation.getValue());
     }
     return source;
   }
