@@ -67,10 +67,8 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
 
   private static final String VISUAL_SEPARATORS = "[\\(\\)\\-\\.]";
 
-  @Getter
-  @Setter
-  private static boolean strict = true;
-  
+  private static final Logger log = LoggerFactory.getLogger(PhoneNumber.class);
+
   @ScimAttribute(description = "Phone number of the User")
   String value;
 
@@ -137,12 +135,15 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
     return value;
   }
 
-  public void setValue(String value) throws PhoneNumberParseException {
+  public PhoneNumber setValue(String value) throws PhoneNumberParseException {
+    return this.setValue(value, false);
+  }
+
+  public PhoneNumber setValue(String value, boolean strict) throws PhoneNumberParseException {
     if (value == null) {
       throw new PhoneNumberParseException("null values are illegal for phone numbers");
     }
 
-    if (strict) {
       PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
       PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
       p.setBuildParseTree(true);
@@ -158,23 +159,26 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       try {
         ParseTree tree = p.phoneNumber();
         ParseTreeWalker.DEFAULT.walk(tpl, tree);
+        PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
+
+        this.value = parsedPhoneNumber.getValue();
+        this.number = parsedPhoneNumber.getNumber();
+        this.extension = parsedPhoneNumber.getExtension();
+        this.subAddress = parsedPhoneNumber.getSubAddress();
+        this.phoneContext = parsedPhoneNumber.getPhoneContext();
+        this.params = parsedPhoneNumber.getParams();
+        this.isGlobalNumber = parsedPhoneNumber.isGlobalNumber();
+        this.isDomainPhoneContext = parsedPhoneNumber.isDomainPhoneContext();
       } catch (IllegalStateException e) {
-        throw new PhoneNumberParseException(e);
+        // SCIM Core RFC section 4.1.2 states phone numbers SHOULD be formatted per RFC3966, e.g. 'tel:+1-201-555-0123'
+        // but this is not required, if exception is thrown while parsing, fall back to original value, unless `strict`
+        if (strict) {
+          throw new PhoneNumberParseException(e);
+        }
+        log.debug("Failed to parse phone number '{}'", value, e);
+        this.value = value;
       }
-  
-      PhoneNumber parsedPhoneNumber = tpl.getPhoneNumber();
-  
-      this.value = parsedPhoneNumber.getValue();
-      this.number = parsedPhoneNumber.getNumber();
-      this.extension = parsedPhoneNumber.getExtension();
-      this.subAddress = parsedPhoneNumber.getSubAddress();
-      this.phoneContext = parsedPhoneNumber.getPhoneContext();
-      this.params = parsedPhoneNumber.getParams();
-      this.isGlobalNumber = parsedPhoneNumber.isGlobalNumber();
-      this.isDomainPhoneContext = parsedPhoneNumber.isDomainPhoneContext();
-    } else {
-      this.value = value;
-    }
+      return this;
   }
 
   /*
@@ -444,12 +448,11 @@ public class PhoneNumber extends KeyedResource implements Serializable, TypedAtt
       }
 
       PhoneNumber phoneNumber = new PhoneNumber();
-      
       String formattedValue = getFormattedValue();
-      LOGGER.debug("" + formattedValue);
+      LOGGER.debug("Building phone number: '{}'", formattedValue);
 
       if (validate) {
-        phoneNumber.setValue(formattedValue);
+        phoneNumber.setValue(formattedValue, true);
       } else {
         phoneNumber.value = formattedValue;
         phoneNumber.extension = this.extension;

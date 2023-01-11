@@ -26,10 +26,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class PhoneNumberTest {
-  
-  private static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberTest.class);
-  
+
   @SuppressWarnings("unused")
   private static String[] getAllValidPhones() {
     return new String[] { 
@@ -159,18 +159,20 @@ public class PhoneNumberTest {
 	@ParameterizedTest
 	@MethodSource("getAllValidPhones")
 	public void test_parser_with_valid_phone_numbers(String phoneUri) throws Exception {
-	  LOGGER.info("valid phones (" + phoneUri + ") start");
 		PhoneNumber phoneNumber = new PhoneNumber();
-		phoneNumber.setValue(phoneUri);
+		phoneNumber.setValue(phoneUri, true);
+    assertThat(phoneNumber.getValue()).isEqualTo(phoneUri);
 	}
 	
-	@ParameterizedTest
+  @ParameterizedTest
   @MethodSource("getAllInvalidPhones")
   public void test_parser_with_invalid_phone_numbers(String phoneUri) throws PhoneNumberParseException {
-	  LOGGER.info("invalid phones (" + phoneUri + ") start");
     PhoneNumber phoneNumber = new PhoneNumber();
+    phoneNumber.setValue(phoneUri);
+    // non-strict parsing should work
+    assertThat(phoneNumber.getValue()).isEqualTo(phoneUri);
 
-    Assertions.assertThrows(PhoneNumberParseException.class, () -> phoneNumber.setValue(phoneUri));
+    // strict parsing should fail
+    Assertions.assertThrows(PhoneNumberParseException.class, () -> new PhoneNumber().setValue(phoneUri, true));
   }
-
 }
