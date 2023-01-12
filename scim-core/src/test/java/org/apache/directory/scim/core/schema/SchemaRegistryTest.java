@@ -47,7 +47,7 @@ public class SchemaRegistryTest {
     userType.setSchemaUrn(ScimUser.SCHEMA_URI);
     userType.setName(ScimUser.RESOURCE_NAME);
     userType.setDescription("Top level ScimUser");
-    userType.setSchemaExtensions(List.of(new ResourceType.SchemaExtentionConfiguration().setSchemaUrn(ExampleObjectExtension.URN)));
+    userType.setSchemaExtensions(List.of(new ResourceType.SchemaExtensionConfiguration().setSchemaUrn(ExampleObjectExtension.URN)));
 
     ResourceType groupType = new ResourceType();
     groupType.setId(ScimGroup.RESOURCE_NAME);

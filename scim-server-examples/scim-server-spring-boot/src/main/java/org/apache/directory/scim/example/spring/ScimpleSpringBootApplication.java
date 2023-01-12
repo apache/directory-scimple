@@ -20,10 +20,11 @@
 package org.apache.directory.scim.example.spring;
 
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
-import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
 
 @SpringBootApplication
 public class ScimpleSpringBootApplication {
@@ -37,9 +38,9 @@ public class ScimpleSpringBootApplication {
     // Set any unique configuration bits
     return new ServerConfiguration()
       .setId("scimple-spring-boot-example")
-      .setDocumentationUri("https://github.com/apache/directory-scimple");
+      .setDocumentationUri("https://github.com/apache/directory-scimple")
 
-    // set the auth scheme too
-    // .addAuthenticationSchema(oauthBearer());
+     // set the auth scheme
+     .addAuthenticationSchema(httpBasic());
   }
 }
