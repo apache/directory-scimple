@@ -22,6 +22,7 @@ package org.apache.directory.scim.example.spring.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
@@ -46,7 +47,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class InMemoryUserService implements Repository<ScimUser> {
 
-  static final String DEFAULT_USER_ID = "1";
+  static final String DEFAULT_USER_ID = UUID.randomUUID().toString();
   static final String DEFAULT_USER_EXTERNAL_ID = "e" + DEFAULT_USER_ID;
   static final String DEFAULT_USER_DISPLAY_NAME = "User " + DEFAULT_USER_ID;
   static final String DEFAULT_USER_EMAIL_VALUE = "e1@example.com";
@@ -96,14 +97,7 @@ public class InMemoryUserService implements Repository<ScimUser> {
    */
   @Override
   public ScimUser create(ScimUser resource) throws UnableToCreateResourceException {
-    String resourceId = resource.getId();
-    int idCandidate = resource.hashCode();
-    String id = resourceId != null ? resourceId : Integer.toString(idCandidate);
-
-    while (users.containsKey(id)) {
-      id = Integer.toString(idCandidate);
-      ++idCandidate;
-    }
+    String id = UUID.randomUUID().toString();
 
     // check to make sure the user doesn't already exist
     boolean existingUserFound = users.values().stream()
