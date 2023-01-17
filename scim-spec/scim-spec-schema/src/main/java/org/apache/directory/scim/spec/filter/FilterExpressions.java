@@ -15,7 +15,7 @@ public final class FilterExpressions {
    * the appropriate query language.
    * <p>
    *
-   * <b>This implementation should only be used for demo proposes.</b>
+   * <b>This implementation should only be used for small collections or demo proposes.</b>
    */
   public static Predicate<ScimResource> inMemory(Filter filter, Schema schema) {
     if (filter == null) {
@@ -25,6 +25,10 @@ public final class FilterExpressions {
     if (expression == null) {
       return x -> true;
     }
+    return InMemoryScimFilterMatcher.toPredicate(expression, schema);
+  }
+
+  public static Predicate<Object> inMemory(FilterExpression expression, Schema schema) {
     return InMemoryScimFilterMatcher.toPredicate(expression, schema);
   }
 }
