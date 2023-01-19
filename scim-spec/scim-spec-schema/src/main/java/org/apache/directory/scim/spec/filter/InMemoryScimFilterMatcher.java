@@ -21,6 +21,7 @@ package org.apache.directory.scim.spec.filter;
 
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.slf4j.Logger;
@@ -158,10 +159,10 @@ final class InMemoryScimFilterMatcher {
 
           // now walk the attribute path again to get the accessor and value
           Schema.Attribute schemaAttribute = attributeContainer.getAttribute(attributeReference.getAttributeName());
-          try {
+          if (actual instanceof ScimResource) {
+            // actual is the top level scim resource - need to extract the top attribute.
+            // otherwise we can move on directly to the sub-attribute
             actual = schemaAttribute.getAccessor().get(actual);
-          } catch (IllegalArgumentException e) {
-            // TODO: suppress for now, need to handle case when actual is the nested attribute instead of the scim resource
           }
           // if the attribute has a sub-level, continue on
           String subAttribute = attributeReference.getSubAttributeName();
