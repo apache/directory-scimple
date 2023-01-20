@@ -32,6 +32,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+import lombok.ToString;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -61,7 +62,8 @@ import lombok.Setter;
 
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-public class PhoneNumber extends KeyedResource implements Serializable, TypedAttribute {
+@ToString
+public class PhoneNumber implements Serializable, TypedAttribute {
 
   private static final long serialVersionUID = 607319505715224096L;
 
