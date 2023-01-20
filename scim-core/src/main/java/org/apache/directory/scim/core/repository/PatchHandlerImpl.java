@@ -186,12 +186,12 @@ public class PatchHandlerImpl implements PatchHandler {
     }
 
     // add schemas if necessary
-    Object schemaAttributeValue = sourceAsMap.get("Schemas");
+    Object schemaAttributeValue = sourceAsMap.get("schemas");
     if(schemaAttributeValue instanceof List) {
       final List<String> schemaUrns = (List<String>) schemaAttributeValue;
       if (!schemaUrns.contains(attributeReference.getUrn())) {
         schemaUrns.add(attributeReference.getUrn());
-        sourceAsMap.replace("Schemas", schemaUrns);
+        sourceAsMap.replace("schemas", schemaUrns);
       }
     }
 

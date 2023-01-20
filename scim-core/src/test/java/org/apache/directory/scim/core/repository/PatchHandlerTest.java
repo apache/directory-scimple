@@ -19,50 +19,137 @@
 
 package org.apache.directory.scim.core.repository;
 
+import lombok.SneakyThrows;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
-import org.apache.directory.scim.spec.filter.FilterParseException;
+import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.patch.PatchOperation;
+import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
+import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
+import org.apache.directory.scim.spec.resources.Name;
+import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.schema.Schemas;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class PatchHandlerTest {
 
-  SchemaRegistry mockSchemaRegistry = mock(SchemaRegistry.class);
+  PatchHandlerImpl patchHandler;
+  private ScimUser user;
 
-  @Test
-  public void applyReplaceUserName() throws FilterParseException {
-    PatchOperation op = new PatchOperation();
-    op.setOperation(PatchOperation.Type.REPLACE);
-    op.setPath(new PatchOperationPath("userName"));
-    op.setValue("testUser_updated");
-    ScimUser updatedUser = performPatch(op);
-    assertThat(updatedUser.getUserName()).isEqualTo("testUser_updated");
+  public PatchHandlerTest() {
+    SchemaRegistry schemaRegistry = new SchemaRegistry();
+    schemaRegistry.addSchema(ScimUser.class, List.of(EnterpriseExtension.class));
+    this.patchHandler = new PatchHandlerImpl(schemaRegistry);
+  }
+
+  @BeforeEach
+  public void init() throws PhoneNumberParseException {
+    this.user = new ScimUser();
+    this.user.setUserName("testUser@test.com");
+    this.user.setDisplayName("Test User");
+    Name name = new Name();
+    name.setFormatted("Berry");
+    this.user.setName(name);
+    PhoneNumber phone = new PhoneNumber();
+    phone.setType("mobile");
+    phone.setValue("tel:+1-111-111-1111");
+    this.user.setPhoneNumbers(List.of(phone));
+    this.user.setSchemas(Set.of(ScimUser.SCHEMA_URI));
   }
 
   @Test
-  public void applyReplaceUserNameWithMappedValue() {
-    PatchOperation op = new PatchOperation();
-    op.setOperation(PatchOperation.Type.REPLACE);
-    op.setValue(Map.ofEntries(entry("userName", "testUser_updated")));
-    ScimUser updatedUser = performPatch(op);
-    assertThat(updatedUser.getUserName()).isEqualTo("testUser_updated");
+  public void applyReplaceUserName()  {
+    String newUserName = "testUser_updated@test.com";
+    PatchOperation op = patchOperation(Type.REPLACE, "userName", newUserName);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getUserName()).isEqualTo(newUserName);
   }
 
-  private ScimUser performPatch(PatchOperation op) {
-    when(mockSchemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(Schemas.schemaFor(ScimUser.class));
-    PatchHandlerImpl patchHandler = new PatchHandlerImpl(mockSchemaRegistry);
-    ScimUser user = new ScimUser();
-    user.setUserName("testUser");
-    return patchHandler.apply(user, List.of(op));
+  @Test
+  public void applyReplaceMappedValueWhenPathIsNull() {
+    String newDisplayName = "Test User - Updated";
+    PatchOperation op = patchOperation(Type.REPLACE, null, Map.ofEntries(entry("displayName", newDisplayName)));
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getDisplayName()).isEqualTo(newDisplayName);
+  }
+
+  @Test
+  public void applyReplaceWithExpressionFilter()
+  {
+    String newNumber = "tel:+1-123-456-7890";
+    PatchOperation op = patchOperation(Type.REPLACE, "phoneNumbers[type eq \"mobile\"].value", newNumber);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getPhoneNumbers().get(0).getValue()).isEqualTo(newNumber);
+  }
+
+  @Test
+  public void applyReplaceSubAttribute() {
+    String newFormattedName = "Maverick";
+    PatchOperation op = patchOperation(Type.REPLACE, "name.formatted", newFormattedName);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getName().getFormatted()).isEqualTo(newFormattedName);
+  }
+
+  @Test
+  public void applyAddWhenFilterDoesNotMatchAny() {
+    String faxNumber = "tel:+1-123-456-7899";
+    PatchOperation op = patchOperation(Type.ADD, "phoneNumbers[type eq \"fax\"].value", faxNumber);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    List<PhoneNumber> phoneNumbers =  updatedUser.getPhoneNumbers();
+    assertThat(phoneNumbers.size()).isEqualTo(2);
+
+    Optional<PhoneNumber> addedFaxNumber = phoneNumbers.stream().filter(phoneNumber -> phoneNumber.getType().equals("fax")).findFirst();
+    assertThat(addedFaxNumber).isNotEmpty();
+    assertThat(addedFaxNumber.get().getValue()).isEqualTo(faxNumber);
+  }
+
+  @Test
+  public void applyAddToMultiValuedComplexAttribute() {
+    String postalCode = "ko4 8qq";
+    PatchOperation op = patchOperation(Type.ADD, "addresses[type eq \"work\"].postalCode", postalCode);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(1);
+    assertThat(updatedUser.getAddresses().get(0).getType()).isEqualTo("work");
+    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo(postalCode);
+  }
+
+  @Test
+  public void applyReplaceEnterpriseExtension() {
+    String employeeNumberUrn = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:employeeNumber";
+    String employeeNumber = "NCIR48XM6D84";
+    PatchOperation op = patchOperation(Type.ADD, null, Map.ofEntries(entry(employeeNumberUrn, employeeNumber)));
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getSchemas().size()).isEqualTo(2);
+    EnterpriseExtension enterpriseUser = (EnterpriseExtension) updatedUser.getExtension(EnterpriseExtension.URN);
+    assertThat(enterpriseUser.getEmployeeNumber()).isEqualTo(employeeNumber);
+  }
+
+  @Test
+  public void applyRemove() {
+    PatchOperation op = patchOperation(Type.REMOVE, "displayName", null);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getDisplayName()).isNull();
+  }
+
+  @SneakyThrows
+  private PatchOperation patchOperation(Type operationType, String path, Object value) {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(operationType);
+    if (path != null) {
+      op.setPath(new PatchOperationPath(path));
+    }
+    if (value != null) {
+      op.setValue(value);
+    }
+    return op;
   }
 }
