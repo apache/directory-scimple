@@ -20,13 +20,18 @@
 package org.apache.directory.scim.spec.schema;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
+import org.apache.directory.scim.spec.resources.ScimExtension;
+import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimResourceWithOptionalId;
 import org.apache.directory.scim.spec.validator.Urn;
 import lombok.Data;
@@ -88,5 +93,40 @@ public class ResourceType extends ScimResourceWithOptionalId {
     this.description = annotation.description();
     this.schemaUrn = annotation.schema();
     this.endpoint = annotation.endpoint();
+  }
+
+  @Override
+  public ResourceType setSchemas(Set<String> schemas) {
+    return (ResourceType) super.setSchemas(schemas);
+  }
+
+  @Override
+  public ResourceType setMeta(@NotNull Meta meta) {
+    return (ResourceType) super.setMeta(meta);
+  }
+
+  @Override
+  public ResourceType setExternalId(String externalId) {
+    return (ResourceType) super.setExternalId(externalId);
+  }
+
+  @Override
+  public ResourceType setExtensions(Map<String, ScimExtension> extensions) {
+    return (ResourceType) super.setExtensions(extensions);
+  }
+
+  @Override
+  public ResourceType setId(String id) {
+    return (ResourceType) super.setId(id);
+  }
+
+  @Override
+  public ResourceType addSchema(String urn) {
+    return (ResourceType) super.addSchema(urn);
+  }
+
+  @Override
+  public ResourceType addExtension(ScimExtension extension) {
+    return (ResourceType) super.addExtension(extension);
   }
 }

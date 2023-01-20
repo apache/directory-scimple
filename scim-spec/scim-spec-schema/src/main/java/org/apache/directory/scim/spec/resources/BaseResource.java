@@ -20,7 +20,6 @@
 package org.apache.directory.scim.spec.resources;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ import lombok.Data;
  */
 @Data
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class BaseResource implements Serializable {
+public abstract class BaseResource<SELF extends BaseResource<SELF>> implements Serializable {
 
   private static final long serialVersionUID = -7603956873008734403L;
 
@@ -54,19 +53,25 @@ public abstract class BaseResource implements Serializable {
     addSchema(urn);
   }
 
-  public void addSchema(@Urn String urn) {
+  public SELF addSchema(@Urn String urn) {
     if (schemas == null){
       schemas = new TreeSet<>();
     }
     schemas.add(urn);
+    return self();
   }
 
-  public void setSchemas(@Urn Set<String> schemas) {
+  public SELF setSchemas(@Urn Set<String> schemas) {
     if (schemas == null) {
       this.schemas.clear();
     } else {
       this.schemas = new TreeSet<>(schemas);
     }
+    return self();
   }
-  
+
+  @SuppressWarnings("unchecked")
+  protected SELF self() {
+    return (SELF) this;
+  }
 }

@@ -22,7 +22,11 @@ package org.apache.directory.scim.spec.resources;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -30,6 +34,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
+import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.ResourceReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -64,5 +69,40 @@ public class ScimGroup extends ScimResource implements Serializable {
 
   public ScimGroup() {
     super(SCHEMA_URI, RESOURCE_NAME);
+  }
+
+  @Override
+  public ScimGroup setSchemas(Set<String> schemas) {
+    return (ScimGroup) super.setSchemas(schemas);
+  }
+
+  @Override
+  public ScimGroup setMeta(@NotNull Meta meta) {
+    return (ScimGroup) super.setMeta(meta);
+  }
+
+  @Override
+  public ScimGroup setId(@Size(min = 1) String id) {
+    return (ScimGroup) super.setId(id);
+  }
+
+  @Override
+  public ScimGroup setExternalId(String externalId) {
+    return (ScimGroup) super.setExternalId(externalId);
+  }
+
+  @Override
+  public ScimGroup setExtensions(Map<String, ScimExtension> extensions) {
+    return (ScimGroup) super.setExtensions(extensions);
+  }
+
+  @Override
+  public ScimGroup addSchema(String urn) {
+    return (ScimGroup) super.addSchema(urn);
+  }
+
+  @Override
+  public ScimGroup addExtension(ScimExtension extension) {
+    return (ScimGroup) super.addExtension(extension);
   }
 }

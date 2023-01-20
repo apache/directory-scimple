@@ -37,7 +37,6 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class ScimResource extends BaseResource implements Serializable {
+public abstract class ScimResource extends BaseResource<ScimResource> implements Serializable {
 
   private static final long serialVersionUID = 3673404125396687366L;
 
@@ -94,7 +93,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
    * @param extension the scim extension
    * @throws InvalidExtensionException if the ScimExtension passed in is improperly configured.  
    */
-  public void addExtension(ScimExtension extension) {
+  public ScimResource addExtension(ScimExtension extension) {
     ScimExtensionType[] se = extension.getClass().getAnnotationsByType(ScimExtensionType.class);
 
     if (se.length != 1) {
@@ -105,6 +104,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
     extensions.put(extensionUrn, extension);
     
     addSchema(extensionUrn);
+    return this;
   }
 
   public ScimExtension getExtension(String urn) {
