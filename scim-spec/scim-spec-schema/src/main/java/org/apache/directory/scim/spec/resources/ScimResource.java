@@ -63,7 +63,7 @@ public abstract class ScimResource extends BaseResource implements Serializable 
 
   @XmlElement
   @Size(min = 1)
-  @ScimAttribute(required = true, returned = Returned.ALWAYS)
+  @ScimAttribute(required = true, returned = Returned.ALWAYS, description = "A unique identifier for a SCIM resource as defined by the service provider.")
   String id;
 
   @XmlElement

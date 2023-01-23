@@ -38,7 +38,7 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class Photo extends KeyedResource implements Serializable, TypedAttribute {
+public class Photo implements Serializable, TypedAttribute {
   
   private static final long serialVersionUID = 8821620834716156789L;
  
