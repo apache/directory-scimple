@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -206,17 +207,45 @@ public class PatchHandlerImpl implements PatchHandler {
     }
     // apply expression filter
     Collection<Object> items = (Collection<Object>) attributeObject;
-    return items.stream().map(item -> {
-      Map<String, Object> resourceAsMap = objectAsMap(item);
-      if (FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema).test(item)) {
-        String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
-        resourceAsMap.put(subAttributeName, patchOperation.getValue());
-        return resourceAsMap;
-      } else {
-        // filter does not apply
-        return item;
+    String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
+    Predicate<Object> filterPredicate = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema);
+
+    switch (patchOperation.getOperation()) {
+      case ADD:
+      case REPLACE:
+        return items.stream().map(item -> {
+            if (filterPredicate.test(item)) {
+              if (subAttributeName != null) {
+                Map<String, Object> resourceAsMap = objectAsMap(item);
+                resourceAsMap.put(subAttributeName, patchOperation.getValue());
+                return resourceAsMap;
+              } else {
+                return patchOperation.getValue();
+              }
+            } else {
+              return item;
+            }
+          })
+          .collect(Collectors.toList());
+      case REMOVE:
+        // if sub-attribute is null remove the item from the list
+        if (subAttributeName != null) {
+          return items.stream().map(item -> {
+            Map<String, Object> resourceAsMap = objectAsMap(item);
+            if (filterPredicate.test(item)) {
+              resourceAsMap.remove(subAttributeName);
+            }
+            return resourceAsMap;
+          })
+          .collect(Collectors.toList());
+        } else {
+          return items.stream()
+            // filter out any items that match
+            .filter(item -> !filterPredicate.test(item))
+            .collect(Collectors.toList());
+        }
       }
-    }).collect(Collectors.toList());
+      return items;
   }
   private PatchOperationPath tryGetOperationPath(String key) {
     try {
