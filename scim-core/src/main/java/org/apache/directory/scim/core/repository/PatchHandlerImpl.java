@@ -71,8 +71,7 @@ public class PatchHandlerImpl implements PatchHandler {
       throw new IllegalArgumentException("patchOperations is null. Cannot apply patch.");
     }
 
-    T updatedScimResource;
-    updatedScimResource = SerializationUtils.clone(original);
+    T updatedScimResource = SerializationUtils.clone(original);
     for (PatchOperation patchOperation : patchOperations) {
       if (patchOperation.getPath() == null) {
         if (!(patchOperation.getValue() instanceof Map)) {
@@ -113,18 +112,18 @@ public class PatchHandlerImpl implements PatchHandler {
       FilterExpression filterExpression = valuePathExpression.getAttributeExpression();
 
       if (filterExpression != null && isMultiValuedComplexAttribute(attribute)) {
-
         // try applying filter
         boolean attributeObjectExists = attributeValueObject != null && ((Collection<Object>) attributeValueObject).stream().anyMatch(item -> {
           KeyedResource keyedResource = (KeyedResource) item;
           return FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema).test(keyedResource);
         });
 
-        if (!attributeObjectExists &&
-          filterExpression instanceof AttributeComparisonExpression &&
-          ((AttributeComparisonExpression) filterExpression).getOperation() == CompareOperator.EQ) {
+        if (!attributeObjectExists && filterExpression instanceof AttributeComparisonExpression) {
+          AttributeComparisonExpression comparisonExpression = (AttributeComparisonExpression) filterExpression;
+          if (comparisonExpression.getOperation() != CompareOperator.EQ) {
+            throw new IllegalArgumentException("Cannot apply filter expression " + comparisonExpression + ". Only operator EQ is allowed");
+          }
           // need to first apply patch from the filter expression and then filter again
-          AttributeComparisonExpression comparisonExpression = (AttributeComparisonExpression)filterExpression;
           source = apply(source, toPatchOperation(comparisonExpression));
           attributeValueObject = attribute.getAccessor().get(source);
         }
@@ -140,8 +139,11 @@ public class PatchHandlerImpl implements PatchHandler {
         if (isMultiValuedComplexAttribute(attribute)){
           applyMultiValuedComplexAttribute(attribute, subAttribute, sourceAsMap, patchOperation);
         }
-        else {
+        else if (isComplexValuedAttribute(attribute)) {
           applyComplexValuedAttribute(attribute, subAttribute, sourceAsMap, patchOperation);
+        }
+        else {
+          applySingularValuedAttribute(attribute, sourceAsMap, patchOperation);
         }
       }
     }
@@ -264,7 +266,6 @@ public class PatchHandlerImpl implements PatchHandler {
           source.put(attribute.getName(), new ArrayList<Map<String,Object>>());
         }
         List<Map<String, Object>> items = (List<Map<String, Object>>) source.get(attribute.getName());
-
         Map<String, Object> newElement = new HashMap<>();
         applyComplexValuedAttribute(subAttribute, null, newElement, patchOperation);
         items.add(newElement);
@@ -338,16 +339,10 @@ public class PatchHandlerImpl implements PatchHandler {
         // same as REPLACE
       case REPLACE:
         if (subAttribute != null) {
-          Object complexSource = sourceAsMap.get(attribute.getName());
-          if (complexSource == null) {
-            complexSource = new HashMap<>();
-          }
-
-          if (complexSource instanceof Map) {
-            Map<String,Object> complexSourceMap = (Map<String,Object>) complexSource;
-            applySingularValuedAttribute(subAttribute, complexSourceMap, patchOperation);
-            sourceAsMap.put(attribute.getName(), complexSourceMap);
-          }
+          Object complexSource = sourceAsMap.getOrDefault(attribute.getName(), new HashMap<String,Object>());
+          Map<String,Object> complexSourceMap = (Map<String,Object>) complexSource;
+          applySingularValuedAttribute(subAttribute, complexSourceMap, patchOperation);
+          sourceAsMap.put(attribute.getName(), complexSourceMap);
         }
         else {
           applySingularValuedAttribute(attribute, sourceAsMap, patchOperation);
@@ -371,11 +366,7 @@ public class PatchHandlerImpl implements PatchHandler {
       case ADD:
         // same as REPLACE
       case REPLACE:
-        if (!singularAttributeSource.containsKey(attribute.getName())) {
-          singularAttributeSource.put(attribute.getName(), patchOperation.getValue());
-        } else { // otherwise, it does contain the attribute
-          singularAttributeSource.replace(attribute.getName(), patchOperation.getValue());
-        }
+        singularAttributeSource.put(attribute.getName(), patchOperation.getValue());
         break;
       case REMOVE:
         singularAttributeSource.remove(attribute.getName());

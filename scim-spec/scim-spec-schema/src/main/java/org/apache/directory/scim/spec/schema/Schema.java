@@ -251,6 +251,8 @@ public class Schema implements AttributeContainer {
     static AttributeAccessor forField(Field field) {
       return new FieldAttributeAccessor(field);
     }
+
+    boolean isAccessible(Object resource);
   }
 
   @EqualsAndHashCode
@@ -285,6 +287,17 @@ public class Schema implements AttributeContainer {
     @Override
     public Class<?> getType() {
       return field.getType();
+    }
+
+    @Override
+    public boolean isAccessible(Object resource)
+    {
+      try {
+        return field.canAccess(resource);
+      }
+      catch (IllegalArgumentException e) {
+        return false;
+      }
     }
   }
 }
