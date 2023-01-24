@@ -107,6 +107,8 @@ public class PatchHandlerImpl implements PatchHandler {
     }
     else {
       Attribute attribute = baseSchema.getAttribute(attributeReference.getAttributeName());
+      checkMutability(attribute);
+
       Object attributeValueObject = attribute.getAccessor().get(source);
       FilterExpression filterExpression = valuePathExpression.getAttributeExpression();
 
@@ -368,6 +370,15 @@ public class PatchHandlerImpl implements PatchHandler {
       case REMOVE:
         singularAttributeSource.remove(attribute.getName());
         break;
+    }
+  }
+
+  private static void checkMutability(Attribute attribute) throws IllegalArgumentException {
+    if (attribute.getMutability().equals(Attribute.Mutability.READ_ONLY) ||
+      attribute.getMutability().equals(Attribute.Mutability.IMMUTABLE)) {
+      String message = "Can not update a immutable attribute or a read-only attribute '" + attribute.getName() + "'";
+      log.error(message);
+      throw new IllegalArgumentException(message);
     }
   }
 }
