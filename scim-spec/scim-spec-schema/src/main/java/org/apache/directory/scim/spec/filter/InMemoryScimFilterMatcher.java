@@ -159,8 +159,8 @@ final class InMemoryScimFilterMatcher {
           // now walk the attribute path again to get the accessor and value
           Schema.Attribute schemaAttribute = attributeContainer.getAttribute(attributeReference.getAttributeName());
           if (schemaAttribute.getAccessor().isAccessible(actual)) {
-            // actual is the top level scim resource - need to extract the top attribute.
-            // otherwise we can move on directly to the sub-attribute
+            // the attribute is accessible from actual - need to extract it.
+            // otherwise we can move on directly to extract the sub-attribute
             actual = schemaAttribute.getAccessor().get(actual);
           }
           // if the attribute has a sub-level, continue on
