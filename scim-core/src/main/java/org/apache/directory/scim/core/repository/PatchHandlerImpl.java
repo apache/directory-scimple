@@ -34,7 +34,6 @@ import org.apache.directory.scim.spec.filter.ValuePathExpression;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
-import org.apache.directory.scim.spec.resources.KeyedResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
@@ -116,8 +115,7 @@ public class PatchHandlerImpl implements PatchHandler {
 
         // try applying filter
         boolean attributeObjectExists = attributeValueObject != null && ((Collection<Object>) attributeValueObject).stream().anyMatch(item -> {
-          KeyedResource keyedResource = (KeyedResource) item;
-          return FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema).test(keyedResource);
+          return FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema).test(item);
         });
 
         if (!attributeObjectExists &&
@@ -207,12 +205,11 @@ public class PatchHandlerImpl implements PatchHandler {
     // apply expression filter
     Collection<Object> items = (Collection<Object>) attributeObject;
     return items.stream().map(item -> {
-      KeyedResource keyedResource = (KeyedResource) item;
-      Map<String, Object> keyedResourceAsMap = objectAsMap(item);
-      if (FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema).test(keyedResource)) {
+      Map<String, Object> resourceAsMap = objectAsMap(item);
+      if (FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), baseSchema).test(item)) {
         String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
-        keyedResourceAsMap.put(subAttributeName, patchOperation.getValue());
-        return keyedResourceAsMap;
+        resourceAsMap.put(subAttributeName, patchOperation.getValue());
+        return resourceAsMap;
       } else {
         // filter does not apply
         return item;
