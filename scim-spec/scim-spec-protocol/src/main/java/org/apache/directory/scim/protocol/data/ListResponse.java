@@ -34,7 +34,7 @@ import org.apache.directory.scim.spec.resources.BaseResource;
 @EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class ListResponse<T> extends BaseResource {
+public class ListResponse<T> extends BaseResource<ListResponse<T>> {
 
   private static final long serialVersionUID = -2381780997440673136L;
 

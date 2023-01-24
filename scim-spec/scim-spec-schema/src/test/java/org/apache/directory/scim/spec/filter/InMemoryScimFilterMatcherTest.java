@@ -50,9 +50,8 @@ public class InMemoryScimFilterMatcherTest {
             .setLocality("Unknown")
             .setPostalCode("012345")
             .setCountry("USA")
-        )); static {
-            USER1.addExtension(new LuckyNumberExtension().setLuckyNumber(111));
-        }
+        ))
+        .addExtension(new LuckyNumberExtension().setLuckyNumber(111));
 
   private final static ScimUser USER2 = user("user2", "User", "Two")
         .setAddresses(List.of(
@@ -64,9 +63,8 @@ public class InMemoryScimFilterMatcherTest {
             .setLocality("CA")
             .setPostalCode("221134")
             .setCountry("USA")
-        )); static {
-            USER2.addExtension(new LuckyNumberExtension().setLuckyNumber(8));
-        }
+        ))
+        .addExtension(new LuckyNumberExtension().setLuckyNumber(8));
 
   @Test
   public void userNameMatch() {

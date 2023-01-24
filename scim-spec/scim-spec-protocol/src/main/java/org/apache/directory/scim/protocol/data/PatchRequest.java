@@ -37,7 +37,7 @@ import org.apache.directory.scim.spec.resources.BaseResource;
 @EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class PatchRequest extends BaseResource {
+public class PatchRequest extends BaseResource<PatchRequest> {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
   
   public PatchRequest() {

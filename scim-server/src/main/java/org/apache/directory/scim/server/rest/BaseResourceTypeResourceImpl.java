@@ -19,9 +19,7 @@
 
 package org.apache.directory.scim.server.rest;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -346,7 +344,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                   .build();
   }
 
-  private T attributesForDisplay(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws AttributeException {
+  private <T extends ScimResource> T attributesForDisplay(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws AttributeException {
     if (!excludedAttributes.isEmpty()) {
       resource = attributeUtil.setExcludedAttributesForDisplay(resource, excludedAttributes);
     } else {

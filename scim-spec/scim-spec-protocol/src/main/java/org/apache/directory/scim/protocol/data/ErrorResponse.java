@@ -36,7 +36,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class ErrorResponse extends BaseResource {
+public class ErrorResponse extends BaseResource<ErrorResponse> {
 
   private static final long serialVersionUID = 9045421198080348116L;
 

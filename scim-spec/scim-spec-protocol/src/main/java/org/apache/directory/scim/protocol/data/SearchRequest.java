@@ -49,7 +49,7 @@ import org.apache.directory.scim.spec.resources.BaseResource;
 @EqualsAndHashCode(callSuper = true)
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-public class SearchRequest extends BaseResource {
+public class SearchRequest extends BaseResource<SearchRequest> {
 
   private static final long serialVersionUID = 8217513543318598565L;
 

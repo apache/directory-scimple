@@ -36,7 +36,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-public class BulkResponse extends BaseResource {
+public class BulkResponse extends BaseResource<BulkResponse> {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:BulkResponse";
 
