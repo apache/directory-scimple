@@ -30,11 +30,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
-final class InMemoryScimFilterMatcher {
+final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<R>> {
 
   private static final Logger log = LoggerFactory.getLogger(InMemoryScimFilterMatcher.class);
-
-  private InMemoryScimFilterMatcher() {}
 
   /**
    * Converts a FilterExpression to a Predicate that can be used to later test a ScimResource (or child attribute).
@@ -50,84 +48,43 @@ final class InMemoryScimFilterMatcher {
    * @return A Predicate that can be used to later test a ScimResource (or child attribute).
    */
   static <R> Predicate<R> toPredicate(FilterExpression expression, AttributeContainer attributeContainer) {
+    return new InMemoryScimFilterMatcher<R>().apply(expression, attributeContainer);
+  }
 
-    // attribute EQ "something"
-    if (expression instanceof AttributeComparisonExpression) {
-      return new AttributeComparisonPredicate<>((AttributeComparisonExpression) expression, attributeContainer);
-    }
-    // (attribute EQ "something") AND (otherAttribute EQ "something else")
-    else if (expression instanceof LogicalExpression) {
-      LogicalExpression logicalExpression = (LogicalExpression) expression;
-      Predicate<R> left = toPredicate(logicalExpression.getLeft(), attributeContainer);
-      Predicate<R> right = toPredicate(logicalExpression.getRight(), attributeContainer);
+  @Override
+  protected Predicate<R> apply(AttributeComparisonExpression expression, AttributeContainer attributeContainer) {
+    return new AttributeComparisonPredicate<>(expression, attributeContainer);
+  }
 
-      LogicalOperator op = logicalExpression.getOperator();
-      if (op == LogicalOperator.AND) {
-        return left.and(right);
-      } else {
-        return left.or(right);
-      }
+  @Override
+  protected Predicate<R> apply(LogicalOperator op, Predicate<R> left, Predicate<R> right) {
+    if (op == LogicalOperator.AND) {
+      return left.and(right);
+    } else {
+      return left.or(right);
     }
-    // NOT (attribute EQ "something")
-    else if (expression instanceof GroupExpression) {
-      GroupExpression groupExpression = (GroupExpression) expression;
-      Predicate<R> predicate = toPredicate(groupExpression.getFilterExpression(), attributeContainer);
-      return groupExpression.isNot()
-        ? predicate.negate()
-        : predicate;
-    }
-    // attribute PR
-    else if (expression instanceof AttributePresentExpression) {
-      return new AttributePresentPredicate<>((AttributePresentExpression) expression, attributeContainer);
-    }
-    // addresses[type EQ "work"]
-    else if (expression instanceof ValuePathExpression) {
-      ValuePathExpression valuePathExpression = (ValuePathExpression) expression;
-      Predicate<Object> nestedPredicate = toPredicate(valuePathExpression.getAttributeExpression(), attribute(attributeContainer, valuePathExpression.getAttributePath()));
-      return new ValuePathPredicate<>(valuePathExpression, attributeContainer, nestedPredicate);
-    }
+  }
+
+  @Override
+  protected Predicate<R> negate(Predicate<R> expression) {
+    return expression.negate();
+  }
+
+  @Override
+  protected Predicate<R> apply(AttributePresentExpression expression, AttributeContainer attributeContainer) {
+    return new AttributePresentPredicate<>(expression, attributeContainer);
+  }
+
+  @Override
+  protected Predicate<R> apply(ValuePathExpression expression, AttributeContainer attributeContainer) {
+    Predicate<Object> nestedPredicate = new InMemoryScimFilterMatcher<>().apply(expression.getAttributeExpression(), attribute(attributeContainer, expression.getAttributePath()));
+    return new ValuePathPredicate<>(expression, attributeContainer, nestedPredicate);
+  }
+
+  @Override
+  protected Predicate<R> unhandledExpression(FilterExpression expression, AttributeContainer attributeContainer) {
     log.debug("Unsupported Filter expression of type: " + expression.getClass());
     return scimResource -> false;
-  }
-
-
-  private static boolean isStringExpression(Schema.Attribute attribute, Object compareValue) {
-    if (attribute.getType() != Schema.Attribute.Type.STRING) {
-      log.debug("Invalid query, non String value for expression : " + attribute.getType());
-      return false;
-    }
-    if (compareValue == null) {
-      log.debug("Invalid query, empty value for expression : " + attribute.getType());
-      return false;
-    }
-    return true;
-  }
-
-  private static Schema.Attribute attribute(AttributeContainer attributeContainer, AttributeReference attributeReference) {
-    String baseAttributeName = attributeReference.getAttributeName();
-
-    Schema.Attribute schemaAttribute = attributeContainer.getAttribute(baseAttributeName);
-    if (schemaAttribute == null) {
-      log.warn("Invalid filter: attribute '" + baseAttributeName + "' is NOT a valid SCIM attribute.");
-      return null;
-    }
-
-    String subAttribute = attributeReference.getSubAttributeName();
-    if (subAttribute != null) {
-      schemaAttribute = schemaAttribute.getAttribute(subAttribute);
-      if (schemaAttribute == null) {
-        log.warn("Invalid filter: attribute '" + attributeReference.getFullyQualifiedAttributeName() + "' is NOT a valid SCIM attribute.");
-        return null;
-      }
-    }
-
-    // filter out fields like passwords that should not be queried against
-    if (schemaAttribute.getReturned() == Schema.Attribute.Returned.NEVER) {
-      log.warn("Invalid filter: attribute '" + attributeReference.getAttributeName() + "' is not filterable.");
-      return null;
-    }
-
-    return schemaAttribute;
   }
 
   private static abstract class AbstractAttributePredicate<T extends FilterExpression, R> implements Predicate<R> {

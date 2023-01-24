@@ -20,7 +20,10 @@
 package org.apache.directory.scim.spec.schema;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -28,6 +31,8 @@ import jakarta.xml.bind.annotation.XmlEnumValue;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+import org.apache.directory.scim.spec.resources.ScimExtension;
+import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimResourceWithOptionalId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -178,4 +183,39 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
     super(SCHEMA_URI, RESOURCE_NAME);
   }
 
+
+  @Override
+  public ServiceProviderConfiguration setSchemas(Set<String> schemas) {
+    return (ServiceProviderConfiguration) super.setSchemas(schemas);
+  }
+
+  @Override
+  public ServiceProviderConfiguration setExtensions(Map<String, ScimExtension> extensions) {
+    return (ServiceProviderConfiguration) super.setExtensions(extensions);
+  }
+
+  @Override
+  public ServiceProviderConfiguration setExternalId(String externalId) {
+    return (ServiceProviderConfiguration) super.setExternalId(externalId);
+  }
+
+  @Override
+  public ServiceProviderConfiguration setMeta(@NotNull Meta meta) {
+    return (ServiceProviderConfiguration) super.setMeta(meta);
+  }
+
+  @Override
+  public ServiceProviderConfiguration setId(String id) {
+    return (ServiceProviderConfiguration) super.setId(id);
+  }
+
+  @Override
+  public ServiceProviderConfiguration addSchema(String urn) {
+    return (ServiceProviderConfiguration) super.addSchema(urn);
+  }
+
+  @Override
+  public ServiceProviderConfiguration addExtension(ScimExtension extension) {
+    return (ServiceProviderConfiguration) super.addExtension(extension);
+  }
 }

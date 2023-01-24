@@ -21,8 +21,12 @@ package org.apache.directory.scim.spec.resources;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -30,6 +34,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
+import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Uniqueness;
@@ -166,5 +171,40 @@ public class ScimUser extends ScimResource implements Serializable {
     return phoneNumbers.stream()
                        .filter(PhoneNumber::getPrimary)
                        .findFirst();
+  }
+
+  @Override
+  public ScimUser setSchemas(Set<String> schemas) {
+    return (ScimUser) super.setSchemas(schemas);
+  }
+
+  @Override
+  public ScimUser setMeta(@NotNull Meta meta) {
+    return (ScimUser) super.setMeta(meta);
+  }
+
+  @Override
+  public ScimUser setId(@Size(min = 1) String id) {
+    return (ScimUser) super.setId(id);
+  }
+
+  @Override
+  public ScimUser setExternalId(String externalId) {
+    return (ScimUser) super.setExternalId(externalId);
+  }
+
+  @Override
+  public ScimUser setExtensions(Map<String, ScimExtension> extensions) {
+    return (ScimUser) super.setExtensions(extensions);
+  }
+
+  @Override
+  public ScimUser addSchema(String urn) {
+    return (ScimUser) super.addSchema(urn);
+  }
+
+  @Override
+  public ScimUser addExtension(ScimExtension extension) {
+    return (ScimUser) super.addExtension(extension);
   }
 }
