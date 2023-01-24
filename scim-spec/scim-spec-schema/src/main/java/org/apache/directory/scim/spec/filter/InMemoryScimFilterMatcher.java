@@ -158,9 +158,9 @@ final class InMemoryScimFilterMatcher {
 
           // now walk the attribute path again to get the accessor and value
           Schema.Attribute schemaAttribute = attributeContainer.getAttribute(attributeReference.getAttributeName());
-          if (schemaAttribute.getAccessor().isAccessible(actual)) {
-            // the attribute is accessible from actual - need to extract it.
-            // otherwise we can move on directly to extract the sub-attribute
+
+          // check if the filter is nested such as: `emails[type eq "work"].value`
+          if (!(attributeReference.hasSubAttribute() && schemaAttribute.isMultiValued())) {
             actual = schemaAttribute.getAccessor().get(actual);
           }
           // if the attribute has a sub-level, continue on
