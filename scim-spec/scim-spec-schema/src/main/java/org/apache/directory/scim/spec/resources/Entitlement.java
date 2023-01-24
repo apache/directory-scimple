@@ -38,7 +38,7 @@ import lombok.EqualsAndHashCode;
 @XmlAccessorType(XmlAccessType.NONE)
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class Entitlement extends KeyedResource implements Serializable, TypedAttribute {
+public class Entitlement implements Serializable, TypedAttribute {
 
   private static final long serialVersionUID = -5657063764529902479L;
 

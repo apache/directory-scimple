@@ -399,7 +399,7 @@ public class UpdateRequestTest {
     localAddress.setType("local");
     
     user2.getAddresses().add(localAddress);
-    user1.getAddresses().get(0).setKey("asdf");
+    user1.getAddresses().get(0).setPostalCode("01234");
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> result = updateRequest.getPatchOperations();

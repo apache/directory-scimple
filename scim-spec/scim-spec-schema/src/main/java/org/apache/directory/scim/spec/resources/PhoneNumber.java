@@ -63,7 +63,7 @@ import lombok.Setter;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 @ToString
-public class PhoneNumber extends KeyedResource implements Serializable, TypedAttribute {
+public class PhoneNumber implements Serializable, TypedAttribute {
 
   private static final long serialVersionUID = 607319505715224096L;
 
