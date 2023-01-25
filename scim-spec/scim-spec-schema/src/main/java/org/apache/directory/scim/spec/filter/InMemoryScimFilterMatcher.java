@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
-final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<R>> {
+class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<R>> {
 
   private static final Logger log = LoggerFactory.getLogger(InMemoryScimFilterMatcher.class);
 
@@ -87,9 +87,11 @@ final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Pred
     return scimResource -> false;
   }
 
-  private static abstract class AbstractAttributePredicate<T extends FilterExpression, R> implements Predicate<R> {
+  public <A> A get(Schema.Attribute attribute, A actual) {
+    return attribute.getAccessor().get(actual);
+  }
 
-    private static final Logger log = LoggerFactory.getLogger(InMemoryScimFilterMatcher.class);
+  private abstract class AbstractAttributePredicate<T extends FilterExpression, R> implements Predicate<R> {
 
     final T expression;
 
@@ -115,13 +117,16 @@ final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Pred
 
           // now walk the attribute path again to get the accessor and value
           Schema.Attribute schemaAttribute = attributeContainer.getAttribute(attributeReference.getAttributeName());
-          actual = schemaAttribute.getAccessor().get(actual);
 
+          // check if the filter is nested such as: `emails[type eq "work"].value`
+          if (!(attributeReference.hasSubAttribute() && schemaAttribute.isMultiValued())) {
+            actual = get(schemaAttribute, actual);
+          }
           // if the attribute has a sub-level, continue on
           String subAttribute = attributeReference.getSubAttributeName();
           if (subAttribute != null) {
             schemaAttribute = schemaAttribute.getAttribute(subAttribute);
-            actual = schemaAttribute.getAccessor().get(actual);
+            actual = get(schemaAttribute, actual);
           }
           return test(schemaAttribute, actual);
         }
@@ -134,7 +139,7 @@ final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Pred
     }
   }
 
-  private static class ValuePathPredicate<R> extends AbstractAttributePredicate<ValuePathExpression, R> {
+  private class ValuePathPredicate<R> extends AbstractAttributePredicate<ValuePathExpression, R> {
 
     final private Predicate<Object> nestedPredicate;
 
@@ -154,7 +159,7 @@ final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Pred
     }
   }
 
-  private static class AttributeComparisonPredicate<R> extends AbstractAttributePredicate<AttributeComparisonExpression, R> {
+  private class AttributeComparisonPredicate<R> extends AbstractAttributePredicate<AttributeComparisonExpression, R> {
 
     private AttributeComparisonPredicate(AttributeComparisonExpression expression, AttributeContainer attributeContainer) {
       super(expression, attributeContainer, expression.getAttributePath());
@@ -247,7 +252,7 @@ final class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Pred
     }
   }
 
-  private static class AttributePresentPredicate<R> extends AbstractAttributePredicate<AttributePresentExpression, R> {
+  private class AttributePresentPredicate<R> extends AbstractAttributePredicate<AttributePresentExpression, R> {
     private AttributePresentPredicate(AttributePresentExpression expression, AttributeContainer attributeContainer) {
       super(expression, attributeContainer, expression.getAttributePath());
     }
