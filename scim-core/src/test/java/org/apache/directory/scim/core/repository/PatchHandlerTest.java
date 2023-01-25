@@ -26,6 +26,7 @@ import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
+import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -120,6 +121,121 @@ public class PatchHandlerTest {
     assertThat(updatedUser.getAddresses().size()).isEqualTo(1);
     assertThat(updatedUser.getAddresses().get(0).getType()).isEqualTo("work");
     assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo(postalCode);
+  }
+
+  @Test
+  public void applyRemoveItemWithFilter() {
+    this.user.setAddresses(List.of(
+      new Address()
+        .setType("work")
+        .setStreetAddress("101 Main Street")
+        .setRegion("Springfield")
+        .setPostalCode("01234"),
+      new Address()
+        .setType("home")
+        .setStreetAddress("202 Maple Street")
+        .setRegion("Otherton")
+        .setPostalCode("43210")
+    ));
+
+    PatchOperation op = patchOperation(Type.REMOVE, "addresses[type eq \"work\"]", null);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(1);
+    assertThat(updatedUser.getAddresses().get(0).getType()).isEqualTo("home");
+    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo("43210");
+  }
+
+  @Test
+  public void applyRemoveAttributeWithFilter() {
+    Address workAddress = new Address()
+      .setType("work")
+      .setStreetAddress("101 Main Street")
+      .setRegion("Springfield")
+      .setPostalCode("01234");
+
+    Address homeAddress = new Address()
+      .setType("home")
+      .setStreetAddress("202 Maple Street")
+      .setRegion("Otherton")
+      .setPostalCode("43210");
+
+    Address updatedWorkAddress = new Address()
+      .setType("work")
+      .setStreetAddress("101 Main Street")
+      .setRegion("Springfield");
+
+    this.user.setAddresses(List.of(workAddress, homeAddress));
+
+    PatchOperation op = patchOperation(Type.REMOVE, "addresses[type eq \"work\"].postalCode", null);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0)).isEqualTo(updatedWorkAddress);
+  }
+
+  @Test
+  public void applyReplaceItemWithFilter() {
+    Address workAddress = new Address()
+      .setType("work")
+      .setStreetAddress("101 Main Street")
+      .setRegion("Springfield")
+      .setPostalCode("01234");
+
+    Address homeAddress = new Address()
+      .setType("home")
+      .setStreetAddress("202 Maple Street")
+      .setRegion("Othertown")
+      .setPostalCode("43210");
+
+    Address otherAddress = new Address()
+      .setType("other")
+      .setStreetAddress("303 Loop Road")
+      .setRegion("Thirdtown")
+      .setPostalCode("11223")
+      .setPrimary(true);
+
+    Map<String, Object> newAddress = Map.of(
+      "type", otherAddress.getType(),
+      "streetAddress", otherAddress.getStreetAddress(),
+      "region", otherAddress.getRegion(),
+      "postalCode", otherAddress.getPostalCode(),
+      "primary", otherAddress.getPrimary()
+    );
+
+    this.user.setAddresses(List.of(workAddress, homeAddress));
+    PatchOperation op = patchOperation(Type.REPLACE, "addresses[type eq \"work\"]", newAddress);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0)).isEqualTo(otherAddress);
+    assertThat(updatedUser.getAddresses().get(1)).isEqualTo(homeAddress);
+  }
+
+  @Test
+  public void applyReplaceItemAttributeWithFilter() {
+    Address workAddress = new Address()
+      .setType("work")
+      .setStreetAddress("101 Main Street")
+      .setRegion("Springfield")
+      .setPostalCode("01234");
+
+    Address homeAddress = new Address()
+      .setType("home")
+      .setStreetAddress("202 Maple Street")
+      .setRegion("Othertown")
+      .setPostalCode("43210");
+
+    Address updatedHome = new Address()
+      .setType("home")
+      .setStreetAddress("202 Maple Street")
+      .setRegion("Othertown")
+      .setPostalCode("43210")
+      .setPrimary(true);
+
+    this.user.setAddresses(List.of(workAddress, homeAddress));
+    PatchOperation op = patchOperation(Type.REPLACE, "addresses[type eq \"home\"].primary", true);
+    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0)).isEqualTo(workAddress);
+    assertThat(updatedUser.getAddresses().get(1)).isEqualTo(updatedHome);
   }
 
   @Test
