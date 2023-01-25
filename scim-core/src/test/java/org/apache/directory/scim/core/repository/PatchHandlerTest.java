@@ -22,29 +22,29 @@ package org.apache.directory.scim.core.repository;
 import lombok.SneakyThrows;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
+import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.Address;
+import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.apache.directory.scim.spec.patch.PatchOperation.Type.*;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public class PatchHandlerTest {
 
   PatchHandlerImpl patchHandler;
-  private ScimUser user;
 
   public PatchHandlerTest() {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
@@ -52,34 +52,19 @@ public class PatchHandlerTest {
     this.patchHandler = new PatchHandlerImpl(schemaRegistry);
   }
 
-  @BeforeEach
-  public void init() throws PhoneNumberParseException {
-    this.user = new ScimUser();
-    this.user.setUserName("testUser@test.com");
-    this.user.setDisplayName("Test User");
-    Name name = new Name();
-    name.setFormatted("Berry");
-    this.user.setName(name);
-    PhoneNumber phone = new PhoneNumber();
-    phone.setType("mobile");
-    phone.setValue("tel:+1-111-111-1111");
-    this.user.setPhoneNumbers(List.of(phone));
-    this.user.setSchemas(Set.of(ScimUser.SCHEMA_URI));
-  }
-
   @Test
   public void applyReplaceUserName()  {
     String newUserName = "testUser_updated@test.com";
-    PatchOperation op = patchOperation(Type.REPLACE, "userName", newUserName);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REPLACE, "userName", newUserName);
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getUserName()).isEqualTo(newUserName);
   }
 
   @Test
   public void applyReplaceMappedValueWhenPathIsNull() {
     String newDisplayName = "Test User - Updated";
-    PatchOperation op = patchOperation(Type.REPLACE, null, Map.ofEntries(entry("displayName", newDisplayName)));
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REPLACE, null, Map.ofEntries(entry("displayName", newDisplayName)));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getDisplayName()).isEqualTo(newDisplayName);
   }
 
@@ -87,24 +72,24 @@ public class PatchHandlerTest {
   public void applyReplaceWithExpressionFilter()
   {
     String newNumber = "tel:+1-123-456-7890";
-    PatchOperation op = patchOperation(Type.REPLACE, "phoneNumbers[type eq \"mobile\"].value", newNumber);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REPLACE, "phoneNumbers[type eq \"mobile\"].value", newNumber);
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getPhoneNumbers().get(0).getValue()).isEqualTo(newNumber);
   }
 
   @Test
   public void applyReplaceSubAttribute() {
     String newFormattedName = "Maverick";
-    PatchOperation op = patchOperation(Type.REPLACE, "name.formatted", newFormattedName);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REPLACE, "name.formatted", newFormattedName);
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getName().getFormatted()).isEqualTo(newFormattedName);
   }
 
   @Test
   public void applyAddWhenFilterDoesNotMatchAny() {
     String faxNumber = "tel:+1-123-456-7899";
-    PatchOperation op = patchOperation(Type.ADD, "phoneNumbers[type eq \"fax\"].value", faxNumber);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(ADD, "phoneNumbers[type eq \"fax\"].value", faxNumber);
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     List<PhoneNumber> phoneNumbers =  updatedUser.getPhoneNumbers();
     assertThat(phoneNumbers.size()).isEqualTo(2);
 
@@ -115,17 +100,43 @@ public class PatchHandlerTest {
 
   @Test
   public void applyAddToMultiValuedComplexAttribute() {
-    String postalCode = "ko4 8qq";
-    PatchOperation op = patchOperation(Type.ADD, "addresses[type eq \"work\"].postalCode", postalCode);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
-    assertThat(updatedUser.getAddresses().size()).isEqualTo(1);
-    assertThat(updatedUser.getAddresses().get(0).getType()).isEqualTo("work");
-    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo(postalCode);
+
+    Address workAddress = new Address()
+      .setType("work")
+      .setStreetAddress("101 Main Street")
+      .setRegion("Springfield");
+
+    Address homeAddress = new Address()
+      .setType("home")
+      .setStreetAddress("202 Maple Street")
+      .setRegion("Otherton")
+      .setPostalCode("43210");
+
+    List<Address> expectedAddresses = List.of(
+      new Address()
+        .setType("work")
+        .setStreetAddress("101 Main Street")
+        .setRegion("Springfield")
+        .setPostalCode("ko4 8qq"),
+      homeAddress);
+
+    ScimUser user = user().setAddresses(List.of(workAddress, homeAddress));
+
+    PatchOperation op = patchOperation(ADD, "addresses[type eq \"work\"].postalCode", "ko4 8qq");
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    assertThat(updatedUser.getAddresses()).isEqualTo(expectedAddresses);
+  }
+
+  @Test
+  public void applyRemoveSubAttribute() {
+    PatchOperation op = patchOperation(REMOVE, "name.formatted", null);
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    assertThat(updatedUser.getName().getFormatted()).isNull();
   }
 
   @Test
   public void applyRemoveItemWithFilter() {
-    this.user.setAddresses(List.of(
+    ScimUser user = user().setAddresses(List.of(
       new Address()
         .setType("work")
         .setStreetAddress("101 Main Street")
@@ -138,8 +149,8 @@ public class PatchHandlerTest {
         .setPostalCode("43210")
     ));
 
-    PatchOperation op = patchOperation(Type.REMOVE, "addresses[type eq \"work\"]", null);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REMOVE, "addresses[type eq \"work\"]", null);
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
     assertThat(updatedUser.getAddresses().size()).isEqualTo(1);
     assertThat(updatedUser.getAddresses().get(0).getType()).isEqualTo("home");
     assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo("43210");
@@ -164,10 +175,10 @@ public class PatchHandlerTest {
       .setStreetAddress("101 Main Street")
       .setRegion("Springfield");
 
-    this.user.setAddresses(List.of(workAddress, homeAddress));
+    ScimUser user = user().setAddresses(List.of(workAddress, homeAddress));
 
-    PatchOperation op = patchOperation(Type.REMOVE, "addresses[type eq \"work\"].postalCode", null);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REMOVE, "addresses[type eq \"work\"].postalCode", null);
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
     assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
     assertThat(updatedUser.getAddresses().get(0)).isEqualTo(updatedWorkAddress);
   }
@@ -201,9 +212,9 @@ public class PatchHandlerTest {
       "primary", otherAddress.getPrimary()
     );
 
-    this.user.setAddresses(List.of(workAddress, homeAddress));
-    PatchOperation op = patchOperation(Type.REPLACE, "addresses[type eq \"work\"]", newAddress);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    ScimUser user = user().setAddresses(List.of(workAddress, homeAddress));
+    PatchOperation op = patchOperation(REPLACE, "addresses[type eq \"work\"]", newAddress);
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
     assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
     assertThat(updatedUser.getAddresses().get(0)).isEqualTo(otherAddress);
     assertThat(updatedUser.getAddresses().get(1)).isEqualTo(homeAddress);
@@ -230,9 +241,9 @@ public class PatchHandlerTest {
       .setPostalCode("43210")
       .setPrimary(true);
 
-    this.user.setAddresses(List.of(workAddress, homeAddress));
-    PatchOperation op = patchOperation(Type.REPLACE, "addresses[type eq \"home\"].primary", true);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    ScimUser user = user().setAddresses(List.of(workAddress, homeAddress));
+    PatchOperation op = patchOperation(REPLACE, "addresses[type eq \"home\"].primary", true);
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
     assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
     assertThat(updatedUser.getAddresses().get(0)).isEqualTo(workAddress);
     assertThat(updatedUser.getAddresses().get(1)).isEqualTo(updatedHome);
@@ -242,8 +253,8 @@ public class PatchHandlerTest {
   public void applyReplaceEnterpriseExtension() {
     String employeeNumberUrn = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:employeeNumber";
     String employeeNumber = "NCIR48XM6D84";
-    PatchOperation op = patchOperation(Type.ADD, null, Map.ofEntries(entry(employeeNumberUrn, employeeNumber)));
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(ADD, null, Map.ofEntries(entry(employeeNumberUrn, employeeNumber)));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getSchemas().size()).isEqualTo(2);
     EnterpriseExtension enterpriseUser = (EnterpriseExtension) updatedUser.getExtension(EnterpriseExtension.URN);
     assertThat(enterpriseUser.getEmployeeNumber()).isEqualTo(employeeNumber);
@@ -251,9 +262,283 @@ public class PatchHandlerTest {
 
   @Test
   public void applyRemove() {
-    PatchOperation op = patchOperation(Type.REMOVE, "displayName", null);
-    ScimUser updatedUser = patchHandler.apply(this.user, List.of(op));
+    PatchOperation op = patchOperation(REMOVE, "displayName", null);
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getDisplayName()).isNull();
+  }
+
+  @Test
+  public void applyWithFilterExpression() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REPLACE);
+    op.setPath(new PatchOperationPath("emails[type EQ \"home\"].value"));
+    op.setValue("new-home@example.com");
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("home")
+        .setValue("new-home@example.com") // updated email
+    ));
+  }
+
+  @Test
+  public void replaceItem() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REPLACE);
+    op.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+    op.setValue(Map.of(
+      "type", "other",
+      "value", "other@example.com"
+    ));
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("other")
+        .setValue("other@example.com")
+    ));
+  }
+
+  @Test
+  public void replaceMultipleAttributes() {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REPLACE);
+    op.setValue(Map.of(
+      "emails", List.of(
+        Map.of(
+          "type", "home",
+          "value", "first@example.com"),
+        Map.of(
+          "type", "work",
+          "value", "second@example.com",
+          "primary", true)
+      ),
+      "nickName", "Babs"
+    ));
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setType("home")
+        .setValue("first@example.com"),
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("second@example.com")
+    ));
+    assertThat(updatedUser.getNickName()).isEqualTo("Babs");
+  }
+
+  @Test
+  public void replaceCollection() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REPLACE);
+    op.setPath(new PatchOperationPath("emails"));
+    op.setValue(List.of(
+      Map.of(
+        "value", "first@example.com",
+        "type", "home"),
+      Map.of(
+        "primary", true,
+        "value", "second@example.com",
+        "type", "work")
+    ));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setType("home")
+        .setValue("first@example.com"),
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("second@example.com")
+    ));
+  }
+
+  @Test
+  public void deleteItemWithFilter() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REMOVE);
+    op.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com")
+    ));
+  }
+
+  @Test
+  public void deleteAttributeWithPath() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REMOVE);
+    op.setPath(new PatchOperationPath("nickName"));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    assertThat(updatedUser.getNickName()).isNull();
+  }
+
+  @Test
+  public void deleteCollectionWithPath() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REMOVE);
+    op.setPath(new PatchOperationPath("emails"));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    assertThat(updatedUser.getEmails()).isNull();
+  }
+
+  @Test
+  public void deleteItemWithComplexFilter() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REMOVE);
+    op.setPath(new PatchOperationPath("emails[type EQ \"home\"] and value ew \"example.com\""));
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    assertThat(updatedUser.getEmails()).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com")
+    ));
+  }
+
+  @Test
+  public void addAttribute() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(ADD);
+    op.setPath(new PatchOperationPath("profileUrl"));
+    op.setValue("https://profile.example.com");
+
+    ScimUser expectedUser = user()
+      .setProfileUrl("https://profile.example.com");
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    assertThat(updatedUser).isEqualTo(expectedUser);
+  }
+
+  @Test
+  public void addItem() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(ADD);
+    op.setPath(new PatchOperationPath("emails"));
+    op.setValue(Map.of(
+      "type", "other",
+      "value", "other@example.com"));
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("home")
+        .setValue("home@example.com"),
+      new Email()
+        .setType("other")
+        .setValue("other@example.com")
+    ));
+  }
+
+  @Test
+  public void addMultipleProperties() throws FilterParseException {
+    // From Section 3.5.2.1 Add Operation of SCIM Protocol RFC
+    PatchOperation op = new PatchOperation();
+    op.setOperation(ADD);
+    op.setValue(Map.of(
+      "emails", Map.of(
+        "value", "babs@example.com",
+        "type", "other"),
+      "profileUrl", "https://profile.example.com"
+    ));
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("home")
+        .setValue("home@example.com"),
+      new Email()
+        .setType("other")
+        .setValue("babs@example.com")
+    ));
+    assertThat(updatedUser.getProfileUrl()).isEqualTo("https://profile.example.com");
+  }
+
+  @Test
+  public void multiplePatchOperations() throws FilterParseException {
+    PatchOperation opRm = new PatchOperation();
+    opRm.setOperation(REMOVE);
+    opRm.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+
+    PatchOperation opAdd = new PatchOperation();
+    opAdd.setOperation(ADD);
+    opAdd.setPath(new PatchOperationPath("emails"));
+    opAdd.setValue(Map.of(
+      "value", "babs@example.com",
+      "type", "other")
+    );
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(opRm, opAdd));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setType("other")
+        .setValue("babs@example.com")
+    ));
+  }
+
+  @Test
+  public void replaceCollectionWithMultipleOps() throws FilterParseException {
+    PatchOperation opRm = new PatchOperation();
+    opRm.setOperation(REMOVE);
+    opRm.setPath(new PatchOperationPath("emails"));
+
+    PatchOperation opAdd = new PatchOperation();
+    opAdd.setOperation(ADD);
+    opAdd.setPath(new PatchOperationPath("emails"));
+    opAdd.setValue(List.of(
+      Map.of(
+        "value", "first@example.com",
+        "type", "home"),
+      Map.of(
+        "primary", true,
+        "value", "second@example.com",
+        "type", "work")
+    ));
+
+    ScimUser updatedUser = patchHandler.apply(user(), List.of(opRm, opAdd));
+    List<Email> emails = updatedUser.getEmails();
+    assertThat(emails).isEqualTo(List.of(
+      new Email()
+        .setType("home")
+        .setValue("first@example.com"),
+      new Email()
+        .setPrimary(true)
+        .setType("work")
+        .setValue("second@example.com")
+    ));
   }
 
   @SneakyThrows
@@ -267,5 +552,30 @@ public class PatchHandlerTest {
       op.setValue(value);
     }
     return op;
+  }
+
+  private static ScimUser user() {
+    try {
+      return new ScimUser()
+        .setUserName("testUser@test.com")
+        .setDisplayName("Test User")
+        .setNickName("tester")
+        .setName(new Name()
+          .setFormatted("Berry"))
+        .setPhoneNumbers(List.of(new PhoneNumber()
+          .setType("mobile")
+          .setValue("tel:+1-111-111-1111")))
+        .setEmails(List.of(
+          new Email()
+            .setPrimary(true)
+            .setType("work")
+            .setValue("work@example.com"),
+          new Email()
+            .setType("home")
+            .setValue("home@example.com")
+        ));
+    } catch (PhoneNumberParseException e) {
+      throw new IllegalStateException("Invalid phone number", e);
+    }
   }
 }
