@@ -19,13 +19,27 @@
 
 package org.apache.directory.scim.core.repository;
 
+import org.apache.directory.scim.spec.exception.UnsupportedFilterException;
+import org.apache.directory.scim.spec.exception.MutabilityException;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import java.util.List;
 
+/**
+ *  A PatchHandler applies PatchOperations to a ScimResource. PatchOperations are a payload in a PATCH REST request.
+ */
 public interface PatchHandler {
 
+  /**
+   * Applies patch operations to a ScimResource.
+   *
+   * @param original The source ScimResource to apply patches to.
+   * @param patchOperations The list of patch operations to apply.
+   * @return An updated ScimResource with all patches applied
+   * @param <T> The type of ScimResource.
+   * @throws UnsupportedFilterException if the patch operations are invalid.
+   * @throws MutabilityException if an attribute is not allowed to be updated.
+   */
   <T extends ScimResource> T apply(final T original, final List<PatchOperation> patchOperations);
-
 }

@@ -54,6 +54,7 @@ public final class ScimResourceHelper {
     FilterParseExceptionMapper.class,
     WebApplicationExceptionMapper.class,
     UnsupportedOperationExceptionMapper.class,
+    MutabilityExceptionMapper.class,
     GenericExceptionMapper.class);
 
   static final Set<Class<?>> MEDIA_TYPE_SUPPORT_CLASSES = Set.of(

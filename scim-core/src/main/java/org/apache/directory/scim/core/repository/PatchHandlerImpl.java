@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.spec.exception.MutabilityException;
+import org.apache.directory.scim.spec.exception.UnsupportedFilterException;
 import org.apache.directory.scim.spec.filter.AttributeComparisonExpression;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterParseException;
@@ -46,6 +48,10 @@ import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * The default implementation of a PatchHandler that applies PatchOperations by walking an map equivalent
+ * of ScimResource.
+ */
 @SuppressWarnings("unchecked")
 @Slf4j
 public class PatchHandlerImpl implements PatchHandler {
@@ -67,19 +73,20 @@ public class PatchHandlerImpl implements PatchHandler {
     this.objectMapper = ObjectMapperFactory.createObjectMapper(this.schemaRegistry);
   }
 
+  @Override
   public <T extends ScimResource> T apply(final T original, final List<PatchOperation> patchOperations) {
     if (original == null) {
-      throw new IllegalArgumentException("Original resource is null. Cannot apply patch.");
+      throw new UnsupportedFilterException("Original resource is null. Cannot apply patch.");
     }
     if (patchOperations == null) {
-      throw new IllegalArgumentException("patchOperations is null. Cannot apply patch.");
+      throw new UnsupportedFilterException("patchOperations is null. Cannot apply patch.");
     }
 
     Map<String, Object> sourceAsMap = objectAsMap(original);
     for (PatchOperation patchOperation : patchOperations) {
       if (patchOperation.getPath() == null) {
         if (!(patchOperation.getValue() instanceof Map)) {
-          throw new IllegalArgumentException("Cannot apply patch. value is required");
+          throw new UnsupportedFilterException("Cannot apply patch. value is required");
         }
         Map<String, Object> properties = (Map<String, Object>) patchOperation.getValue();
 
@@ -128,7 +135,7 @@ public class PatchHandlerImpl implements PatchHandler {
       return new PatchOperationPath(key);
     } catch (FilterParseException e) {
       log.warn("Parsing path failed with exception.", e);
-      throw new IllegalArgumentException("Cannot parse path expression: " + e.getMessage());
+      throw new UnsupportedFilterException("Cannot parse path expression: " + e.getMessage());
     }
   }
 
@@ -139,28 +146,28 @@ public class PatchHandlerImpl implements PatchHandler {
   public static ValuePathExpression valuePathExpression(final PatchOperation operation) {
     return Optional.ofNullable(operation.getPath())
       .map(PatchOperationPath::getValuePathExpression)
-      .orElseThrow(() -> new IllegalArgumentException("Patch operation must have a value path expression"));
+      .orElseThrow(() -> new UnsupportedFilterException("Patch operation must have a value path expression"));
   }
 
   public static AttributeReference attributeReference(final ValuePathExpression expression) {
     return Optional.ofNullable(expression.getAttributePath())
-      .orElseThrow(() -> new IllegalArgumentException("Patch operation must have an expression with a valid attribute path"));
+      .orElseThrow(() -> new UnsupportedFilterException("Patch operation must have an expression with a valid attribute path"));
   }
 
-  private static void checkMutability(Attribute attribute) throws IllegalArgumentException {
+  private static void checkMutability(Attribute attribute) throws MutabilityException {
     if (attribute.getMutability().equals(Attribute.Mutability.READ_ONLY)) {
       String message = "Can not update a read-only attribute '" + attribute.getName() + "'";
       log.error(message);
-      throw new IllegalArgumentException(message);
+      throw new MutabilityException(message);
     }
   }
 
-  private static void checkMutability(Attribute attribute, Object currentValue) throws IllegalArgumentException {
+  private static void checkMutability(Attribute attribute, Object currentValue) throws MutabilityException {
     checkMutability(attribute);
     if (attribute.getMutability().equals(Attribute.Mutability.IMMUTABLE) && currentValue != null) {
       String message = "Can not update a immutable attribute that contains a value '" + attribute.getName() + "'";
       log.error(message);
-      throw new IllegalArgumentException(message);
+      throw new MutabilityException(message);
     }
   }
 
@@ -195,7 +202,7 @@ public class PatchHandlerImpl implements PatchHandler {
       }
     }
 
-    <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value);
+    void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value);
     <T extends ScimResource> void applyMultiValue(final T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, AttributeReference attributeReference, Object value);
     <T extends ScimResource> void applyMultiValue(final T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, Object value);
   }
@@ -218,7 +225,7 @@ public class PatchHandlerImpl implements PatchHandler {
     }
 
     @Override
-    public <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
+    public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       String attributeName = attribute.getName();
       checkMutability(attribute, sourceAsMap.get(attributeName));
       sourceAsMap.put(attributeName, value);
@@ -247,7 +254,7 @@ public class PatchHandlerImpl implements PatchHandler {
       String attributeName = valuePathExpression.getAttributePath().getAttributeName();
 
       if (!valuePathExpression.getAttributePath().hasSubAttribute()) {
-        throw new IllegalArgumentException("Invalid filter, expecting patch filter with expression to have a sub-attribute.");
+        throw new UnsupportedFilterException("Invalid filter, expecting patch filter with expression to have a sub-attribute.");
       }
 
       // apply expression filter
@@ -269,7 +276,7 @@ public class PatchHandlerImpl implements PatchHandler {
       // the map will contain `type: "work", value: "foo@example.com"`
       if (!matchFound) {
         if (!(valuePathExpression.getAttributeExpression() instanceof AttributeComparisonExpression)) {
-          throw new IllegalArgumentException("Attribute cannot be added, only comparison expressions are supported when the existing item does not exist.");
+          throw new UnsupportedFilterException("Attribute cannot be added, only comparison expressions are supported when the existing item does not exist.");
         }
         AttributeComparisonExpression comparisonExpression = (AttributeComparisonExpression) valuePathExpression.getAttributeExpression();
 
@@ -283,7 +290,7 @@ public class PatchHandlerImpl implements PatchHandler {
   private class ReplaceOperationHandler implements PatchOperationHandler {
 
     @Override
-    public <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
+    public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       if (attributeReference.hasSubAttribute()) {
         Map<String, Object> parentValue = (Map<String, Object>) sourceAsMap.get(attributeReference.getAttributeName());
         String subAttributeName = attributeReference.getSubAttributeName();
@@ -337,7 +344,7 @@ public class PatchHandlerImpl implements PatchHandler {
   private class RemoveOperationHandler implements PatchOperationHandler {
 
     @Override
-    public <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
+    public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       if (attributeReference.hasSubAttribute()) {
         Map<String, Object> child = (Map<String, Object>) sourceAsMap.get(attributeReference.getAttributeName());
         String subAttributeName = attributeReference.getSubAttributeName();
