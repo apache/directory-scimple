@@ -241,6 +241,20 @@ public class Schema implements AttributeContainer {
     return attributeNamesMap.get(name.toLowerCase());
   }
 
+  public Attribute getAttributeFromPath(String path) {
+    if (path == null) {
+      return null;
+    }
+
+    String[] parts = path.split("\\.");
+    Attribute attribute = getAttribute(parts[0]);
+    for (int index = 1; index < parts.length; index++) {
+      attribute = attribute.getAttribute(parts[index]);
+    }
+
+    return attribute;
+  }
+
   public interface AttributeAccessor {
     <T> T get(Object resource);
 
