@@ -22,7 +22,6 @@ package org.apache.directory.scim.core.repository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.filter.AttributeComparisonExpression;
@@ -39,6 +38,7 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,7 +75,7 @@ public class PatchHandlerImpl implements PatchHandler {
       throw new IllegalArgumentException("patchOperations is null. Cannot apply patch.");
     }
 
-    T updatedScimResource = SerializationUtils.clone(original);
+    Map<String, Object> sourceAsMap = objectAsMap(original);
     for (PatchOperation patchOperation : patchOperations) {
       if (patchOperation.getPath() == null) {
         if (!(patchOperation.getValue() instanceof Map)) {
@@ -90,18 +90,17 @@ public class PatchHandlerImpl implements PatchHandler {
           newPatchOperation.setPath(tryGetOperationPath(entry.getKey()));
           newPatchOperation.setValue(entry.getValue());
 
-          updatedScimResource = apply(updatedScimResource, newPatchOperation);
+          apply(original, sourceAsMap, newPatchOperation);
         }
       } else {
-        updatedScimResource = apply(updatedScimResource, patchOperation);
+        apply(original, sourceAsMap, patchOperation);
       }
 
     }
-    return updatedScimResource;
+    return (T) objectMapper.convertValue(sourceAsMap, original.getClass());
   }
 
-  private <T extends ScimResource> T apply(T source, final PatchOperation patchOperation) {
-    Map<String, Object> sourceAsMap = objectAsMap(source);
+  private <T extends ScimResource> void apply(T source, Map<String, Object> sourceAsMap, final PatchOperation patchOperation) {
 
     final ValuePathExpression valuePathExpression = valuePathExpression(patchOperation);
     final AttributeReference attributeReference = attributeReference(valuePathExpression);
@@ -122,7 +121,6 @@ public class PatchHandlerImpl implements PatchHandler {
 
       patchOperationHandler.applyValue(source, sourceAsMap, schema, attribute, valuePathExpression, patchOperation.getValue());
     }
-    return (T) objectMapper.convertValue(sourceAsMap, source.getClass());
   }
 
   private PatchOperationPath tryGetOperationPath(String key) {
@@ -150,9 +148,17 @@ public class PatchHandlerImpl implements PatchHandler {
   }
 
   private static void checkMutability(Attribute attribute) throws IllegalArgumentException {
-    if (attribute.getMutability().equals(Attribute.Mutability.READ_ONLY) ||
-      attribute.getMutability().equals(Attribute.Mutability.IMMUTABLE)) {
-      String message = "Can not update a immutable attribute or a read-only attribute '" + attribute.getName() + "'";
+    if (attribute.getMutability().equals(Attribute.Mutability.READ_ONLY)) {
+      String message = "Can not update a read-only attribute '" + attribute.getName() + "'";
+      log.error(message);
+      throw new IllegalArgumentException(message);
+    }
+  }
+
+  private static void checkMutability(Attribute attribute, Object currentValue) throws IllegalArgumentException {
+    checkMutability(attribute);
+    if (attribute.getMutability().equals(Attribute.Mutability.IMMUTABLE) && currentValue != null) {
+      String message = "Can not update a immutable attribute that contains a value '" + attribute.getName() + "'";
       log.error(message);
       throw new IllegalArgumentException(message);
     }
@@ -214,17 +220,15 @@ public class PatchHandlerImpl implements PatchHandler {
     @Override
     public <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       String attributeName = attribute.getName();
-      if (sourceAsMap.get(attributeName) == null) {
-        sourceAsMap.put(attributeName, value);
-      } else {
-        log.debug("Resource '{}' with attribute '{}' already contains value and cannot be patched with an ADD operation", sourceAsMap.get("id"), attribute.getUrn());
-      }
+      checkMutability(attribute, sourceAsMap.get(attributeName));
+      sourceAsMap.put(attributeName, value);
     }
 
     @Override
     public <T extends ScimResource> void applyMultiValue(T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, AttributeReference attributeReference, Object value) {
 
       Collection<Object> items = (Collection<Object>) sourceAsMap.get(attributeReference.getAttributeName());
+      checkMutability(attribute, items);
       if (items == null) {
         items = new ArrayList<>();
         sourceAsMap.put(attributeReference.getAttributeName(), items);
@@ -247,58 +251,53 @@ public class PatchHandlerImpl implements PatchHandler {
       }
 
       // apply expression filter
-      Collection<Object> items = attribute.getAccessor().get(source);
-      Predicate<Object> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), schema);
+      Collection<Map<String, Object>> items = (Collection<Map<String, Object>>) sourceAsMap.get(attributeName);
+      Predicate<Object> pred = FilterExpressions.inMemoryMap(valuePathExpression.getAttributeExpression(), schema);
       String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
 
-      Collection<Object> updatedCollection = new ArrayList<>(items.size());
       boolean matchFound = false;
-      for (Object item: items) {
-        Map<String, Object> resourceAsMap = objectAsMap(item);
+      for (Map<String, Object> item: items) {
         if (pred.test(item)) {
           matchFound = true;
-          resourceAsMap.put(subAttributeName, value);
+          checkMutability(attribute, item.get(subAttributeName));
+          item.put(subAttributeName, value);
         }
-        updatedCollection.add(resourceAsMap);
       }
 
+      // if the value was not added to an existing item, create a new value and add the patch value and the expression
+      // values for example in the expression `emails[type eq "work"].value` with a patch value of `foo@example.com`
+      // the map will contain `type: "work", value: "foo@example.com"`
       if (!matchFound) {
-
         if (!(valuePathExpression.getAttributeExpression() instanceof AttributeComparisonExpression)) {
           throw new IllegalArgumentException("Attribute cannot be added, only comparison expressions are supported when the existing item does not exist.");
         }
         AttributeComparisonExpression comparisonExpression = (AttributeComparisonExpression) valuePathExpression.getAttributeExpression();
 
-        updatedCollection.add(Map.of(
+      items.add(Map.of(
           comparisonExpression.getAttributePath().getSubAttributeName(), comparisonExpression.getCompareValue(),
           subAttributeName, value));
       }
-      sourceAsMap.put(attributeName, updatedCollection);
     }
   }
 
-  /*
-   * 3.5.2.1.  Add Operation
-   *  o If the target location exists, the value is replaced.
-   *
-   * 3.5.2.3.  Replace Operation
-   *  o If the target location is a multi-valued attribute and no filter is specified, the attribute and
-   *    all values are replaced.
-   */
   private class ReplaceOperationHandler implements PatchOperationHandler {
 
     @Override
     public <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       if (attributeReference.hasSubAttribute()) {
         Map<String, Object> parentValue = (Map<String, Object>) sourceAsMap.get(attributeReference.getAttributeName());
-        parentValue.put(attributeReference.getSubAttributeName(), value);
+        String subAttributeName = attributeReference.getSubAttributeName();
+        checkMutability(attribute.getAttribute(subAttributeName), parentValue.get(subAttributeName));
+        parentValue.put(subAttributeName, value);
       } else {
+        checkMutability(attribute, sourceAsMap.get(attribute.getName()));
         sourceAsMap.put(attribute.getName(), value);
       }
     }
 
     @Override
     public <T extends ScimResource> void applyMultiValue(T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, AttributeReference attributeReference, Object value) {
+      checkMutability(attribute, sourceAsMap.get(attribute.getName()));
       // replace the collection
       sourceAsMap.put(attribute.getName(), value);
     }
@@ -306,22 +305,26 @@ public class PatchHandlerImpl implements PatchHandler {
     @Override
     public <T extends ScimResource> void applyMultiValue(T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, Object value) {
 
+      String attributeName = attribute.getName();
+      checkMutability(attribute, sourceAsMap.get(attributeName));
+
       // apply expression filter
-      Collection<Object> items = attribute.getAccessor().get(source);
-      Predicate<Object> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), schema);
+      Collection<Map<String, Object>> items = (Collection<Map<String, Object>>) sourceAsMap.get(attributeName);
+      Predicate<Object> pred = FilterExpressions.inMemoryMap(valuePathExpression.getAttributeExpression(), schema);
 
       Collection<Object> updatedCollection = items.stream()
         .map(item -> {
-          Map<String, Object> resourceAsMap = objectAsMap(item);
           // find items that need to be updated
           if (pred.test(item)) {
             String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
-            if (resourceAsMap.get(subAttributeName) == null) {
-              resourceAsMap = (Map<String, Object>) value;
+            // if there is a sub-attribute set it, otherwise replace the whole item
+            if (item.containsKey(subAttributeName)) {
+              checkMutability(attribute.getAttribute(subAttributeName), item.get(subAttributeName));
+              item.put(subAttributeName, value);
             } else {
-              resourceAsMap.put(subAttributeName, value);
+              item = (Map<String, Object>) value;
             }
-            return resourceAsMap;
+            return item;
           } else {
             // filter does not apply
             return item;
@@ -337,14 +340,18 @@ public class PatchHandlerImpl implements PatchHandler {
     public <T extends ScimResource> void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       if (attributeReference.hasSubAttribute()) {
         Map<String, Object> child = (Map<String, Object>) sourceAsMap.get(attributeReference.getAttributeName());
+        String subAttributeName = attributeReference.getSubAttributeName();
+        checkMutability(attribute.getAttribute(subAttributeName), child.get(subAttributeName));
         child.remove(attributeReference.getSubAttributeName());
       } else {
+        checkMutability(attribute, sourceAsMap.get(attributeReference.getAttributeName()));
         sourceAsMap.remove(attributeReference.getAttributeName());
       }
     }
 
     @Override
     public <T extends ScimResource> void applyMultiValue(T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, AttributeReference attributeReference, Object value) {
+      checkMutability(attribute, sourceAsMap.get(attribute.getName()));
       // remove the collection
       sourceAsMap.remove(attribute.getName());
     }
@@ -353,28 +360,29 @@ public class PatchHandlerImpl implements PatchHandler {
     public <T extends ScimResource> void applyMultiValue(T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, Object value) {
 
       AttributeReference attributeReference = valuePathExpression.getAttributePath();
-      Collection<Object> items = attribute.getAccessor().get(source);
-      Predicate<Object> pred = FilterExpressions.inMemory(valuePathExpression.getAttributeExpression(), schema);
+      Collection<Map<String, Object>> items = (Collection<Map<String, Object>>) sourceAsMap.get(attributeReference.getAttributeName());
+      Predicate<Object> pred = FilterExpressions.inMemoryMap(valuePathExpression.getAttributeExpression(), schema);
 
       // if there is a sub-attribute in the filter, only that sub-attribute is removed, otherwise the whole item is
       // removed from the collection
-      Collection<Object> updatedCollection;
       if(attributeReference.hasSubAttribute()) {
-        updatedCollection = items.stream().map(item -> {
-            Map<String, Object> resourceAsMap = objectAsMap(item);
-            if (pred.test(item)) {
-              resourceAsMap.remove(attributeReference.getSubAttributeName());
-            }
-            return resourceAsMap;
-          })
-          .collect(toList());
+        items.forEach(item -> {
+          if (pred.test(item)) {
+            String subAttributeName = attributeReference.getSubAttributeName();
+            checkMutability(attribute.getAttribute(subAttributeName), item.get(subAttributeName));
+            item.remove(subAttributeName);
+          }
+        });
       } else {
-        // filter out any items that match
-        updatedCollection = items.stream()
-          .filter(item -> !pred.test(item))
-          .collect(toList());
+        // remove any items that match
+        for (Iterator<Map<String, Object>> iter = items.iterator(); iter.hasNext();) {
+          Map<String, Object> item = iter.next();
+          if (pred.test(item)) {
+            checkMutability(attribute, item);
+            iter.remove();
+          }
+        }
       }
-      sourceAsMap.put(attribute.getName(), updatedCollection);
     }
   }
 }
