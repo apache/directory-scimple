@@ -19,14 +19,9 @@
 
 package org.apache.directory.scim.core.repository;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
@@ -36,39 +31,27 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.directory.scim.core.json.ObjectMapperFactory;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.spec.filter.*;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
-import org.apache.directory.scim.spec.filter.AttributeComparisonExpression;
-import org.apache.directory.scim.spec.filter.CompareOperator;
-import org.apache.directory.scim.spec.filter.FilterExpression;
-import org.apache.directory.scim.spec.filter.ValuePathExpression;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.TypedAttribute;
 import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
-import org.apache.directory.scim.core.schema.SchemaRegistry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -81,7 +64,7 @@ public class UpdateRequest<T extends ScimResource> {
   private static final String VALUE = "value";
 
   // Create a Jackson ObjectMapper that reads JaxB annotations
-  private final ObjectMapper objectMapper = createObjectMapper();
+  private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
   @Getter
   private String id;
@@ -92,6 +75,8 @@ public class UpdateRequest<T extends ScimResource> {
   private boolean initialized = false;
 
   private Schema schema;
+
+  private PatchHandler patchHandler;
 
   private SchemaRegistry schemaRegistry;
 
@@ -106,6 +91,7 @@ public class UpdateRequest<T extends ScimResource> {
     this.id = id;
     this.original = original;
     this.resource = resource;
+    this.patchHandler = new PatchHandlerImpl(schemaRegistry);
     this.schema = schemaRegistry.getSchema(original.getBaseUrn());
     initialized = true;
   }
@@ -115,6 +101,7 @@ public class UpdateRequest<T extends ScimResource> {
     this.id = id;
     this.original = original;
     this.patchOperations = patchOperations;
+    this.patchHandler = new PatchHandlerImpl(schemaRegistry);
     this.schema = schemaRegistry.getSchema(original.getBaseUrn());
 
     initialized = true;
@@ -125,11 +112,11 @@ public class UpdateRequest<T extends ScimResource> {
       throw new IllegalStateException("UpdateRequest was not initialized");
     }
 
-    if (resource != null) {
-      return resource;
+    if (resource == null) {
+      this.resource = this.patchHandler.apply(this.original, this.patchOperations);
     }
 
-    return applyPatchOperations();
+    return this.resource;
   }
 
   public List<PatchOperation> getPatchOperations() {
@@ -189,10 +176,6 @@ public class UpdateRequest<T extends ScimResource> {
     return set1;
   }
 
-  private T applyPatchOperations() {
-    throw new java.lang.UnsupportedOperationException("PATCH operations are not implemented at this time.");
-  }
-  
   /**
    * There is a know issue with the diffing tool that the tool will attempt to move empty arrays. By
    * nulling out the empty arrays during comparison, this will prevent that error from occurring. Because
@@ -251,7 +234,7 @@ public class UpdateRequest<T extends ScimResource> {
     nullEmptyLists(node1);
     JsonNode node2 = objectMapper.valueToTree(resource);
     nullEmptyLists(node2);
-    JsonNode differences = JsonDiff.asJson(node1, node2);
+    JsonNode differences = JsonDiff.asJson(node1, node2, DiffFlags.dontNormalizeOpIntoMoveAndCopy());
     
     
     /*
@@ -308,7 +291,7 @@ public class UpdateRequest<T extends ScimResource> {
   }
 
   private List<PatchOperation> convertNodeToPatchOperations(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
-    log.info(operationNode + ", " + diffPath);
+    log.debug("convertNodeToPatchOperations: {} , {}", operationNode, diffPath);
     List<PatchOperation> operations = new ArrayList<>();
     PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
 
@@ -342,7 +325,7 @@ public class UpdateRequest<T extends ScimResource> {
 
   @SuppressWarnings("unchecked")
   private List<PatchOperation> handleAttributes(JsonNode valueNode, PatchOperation.Type patchOpType, ParseData parseData) throws IllegalAccessException, JsonProcessingException {
-    log.info("in handleAttributes");
+    log.trace("in handleAttributes");
     List<PatchOperation> operations = new ArrayList<>();
     
     List<String> attributeReferenceList = new ArrayList<>();
@@ -355,7 +338,7 @@ public class UpdateRequest<T extends ScimResource> {
     
     int i = 0;
     for (String pathPart : parseData.pathParts) {
-      log.info(pathPart);
+      log.trace("path part: {}", pathPart);
       if (done) {
         throw new RuntimeException("Path should be done... Attribute not supported by the schema: " + pathPart);
       } else if (processingMultiValued) {
@@ -373,7 +356,11 @@ public class UpdateRequest<T extends ScimResource> {
             Enum<?> tempEnum = (Enum<?>)parseData.originalObject;
             valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, tempEnum.name());
           } else {
-            log.info("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+            if (parseData.originalObject != null) {
+              log.debug("Attribute: {} doesn't implement TypedAttribute, can't create ValueFilterExpression", parseData.originalObject.getClass());
+            } else {
+              log.debug("Attribute: null doesn't implement TypedAttribute, can't create ValueFilterExpression");
+            }
             valueFilterExpression = new AttributeComparisonExpression(new AttributeReference("value"), CompareOperator.EQ, "?");
           }
           processingMultiValued = false;
@@ -386,7 +373,7 @@ public class UpdateRequest<T extends ScimResource> {
           if (processedMultiValued) {
             subAttributes.add(pathPart);
           } else {
-            log.info("Adding " + pathPart + " to attributeReferenceList");
+            log.debug("Adding {} to attributeReferenceList", pathPart);
             attributeReferenceList.add(pathPart);
           }
   
@@ -598,20 +585,5 @@ public class UpdateRequest<T extends ScimResource> {
       Attribute attribute = ac.getAttribute(attributeName);
       return attribute.getAccessor().get(object);
     }
-  }
-
-  private static ObjectMapper createObjectMapper() {
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
-
-    AnnotationIntrospector pair = new AnnotationIntrospectorPair(
-      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
-      new JacksonAnnotationIntrospector());
-    objectMapper.setAnnotationIntrospector(pair);
-
-    return objectMapper;
   }
 }

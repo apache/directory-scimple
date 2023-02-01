@@ -241,6 +241,20 @@ public class Schema implements AttributeContainer {
     return attributeNamesMap.get(name.toLowerCase());
   }
 
+  public Attribute getAttributeFromPath(String path) {
+    if (path == null) {
+      return null;
+    }
+
+    String[] parts = path.split("\\.");
+    Attribute attribute = getAttribute(parts[0]);
+    for (int index = 1; index < parts.length; index++) {
+      attribute = attribute.getAttribute(parts[index]);
+    }
+
+    return attribute;
+  }
+
   public interface AttributeAccessor {
     <T> T get(Object resource);
 
@@ -251,6 +265,8 @@ public class Schema implements AttributeContainer {
     static AttributeAccessor forField(Field field) {
       return new FieldAttributeAccessor(field);
     }
+
+    boolean isAccessible(Object resource);
   }
 
   @EqualsAndHashCode
@@ -285,6 +301,17 @@ public class Schema implements AttributeContainer {
     @Override
     public Class<?> getType() {
       return field.getType();
+    }
+
+    @Override
+    public boolean isAccessible(Object resource)
+    {
+      try {
+        return field.canAccess(resource);
+      }
+      catch (IllegalArgumentException e) {
+        return false;
+      }
     }
   }
 }

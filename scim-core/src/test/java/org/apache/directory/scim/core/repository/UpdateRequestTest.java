@@ -19,15 +19,12 @@
 
 package org.apache.directory.scim.core.repository;
 
+import static org.apache.directory.scim.core.repository.UpdateRequestTest.PatchOperationCondition.op;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,6 +46,8 @@ import org.apache.directory.scim.spec.resources.Photo;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.schema.Schemas;
+import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -60,6 +59,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.groups.Tuple.tuple;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -101,12 +101,6 @@ public class UpdateRequestTest {
     log.info("testPatchPassthrough: " + result);
     assertThat(result)
               .isNotNull();
-  }
-
-  @Test
-  public void testPatchToUpdate() throws Exception {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", createUser(), createUser1PatchOps(), schemaRegistry);
-    assertThrows(UnsupportedOperationException.class, () -> updateRequest.getResource());
   }
 
   @Test
@@ -523,8 +517,6 @@ public class UpdateRequestTest {
   }
   
   @Test
-  @Disabled
-  //TODO: do asserts
   public void testNonTypedAttributeListGetUseablePath() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
@@ -539,15 +531,17 @@ public class UpdateRequestTest {
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
-    
-    //TODO: perform assert that proper add and remove paths are correct
+
+    assertThat(operations)
+      .hasSize(1);
+    PatchOperation patchOp = operations.get(0);
+    PatchOperationAssert.assertThat(patchOp)
+        .hasType(Type.REPLACE)
+        .hashPath(ExampleObjectExtension.URN + ":list[value EQ \"third\"]")
+        .hasValue(FOURTH);
   }
   
   @Test
-  @Disabled
-  //TODO: do asserts
   public void testMoveFormatNameToNicknamePart1() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
@@ -559,13 +553,13 @@ public class UpdateRequestTest {
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+
+    assertThat(operations).hasSize(2);
+    assertThat(operations).filteredOn(op(Type.ADD, "name.formatted", nickname)).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REMOVE, "nickName")).hasSize(1);
   }
   
   @Test
-  @Disabled
-  //TODO: do asserts
   public void testMoveFormatNameToNicknamePart2() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
@@ -573,19 +567,19 @@ public class UpdateRequestTest {
     String nickname = "John Xander Anyman";
     user1.setNickName(nickname);
     user2.setNickName("");
-    
-    user2.getName().setFormatted(nickname);
+
     user1.getName().setFormatted("");
+    user2.getName().setFormatted(nickname);
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+
+    assertThat(operations).hasSize(2);
+    assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", nickname)).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REPLACE, "nickName", "")).hasSize(1);
   }
   
   @Test
-  @Disabled
-  //TODO: do asserts
   public void testMoveFormatNameToNicknamePart3() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
@@ -593,19 +587,19 @@ public class UpdateRequestTest {
     String nickname = "John Xander Anyman";
     user1.setNickName(nickname);
     user2.setNickName(null);
-    
-    user2.getName().setFormatted(nickname);
+
     user1.getName().setFormatted("");
+    user2.getName().setFormatted(nickname);
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+
+    assertThat(operations).hasSize(2);
+    assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", nickname)).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REMOVE, "nickName")).hasSize(1);
   }
   
   @Test
-  @Disabled
-  //TODO: do asserts
   public void testMoveFormatNameToNicknamePart4() throws Exception {
 
     ScimUser user1 = createUser();
@@ -614,19 +608,19 @@ public class UpdateRequestTest {
     String nickname = "John Xander Anyman";
     user1.setNickName(nickname);
     user2.setNickName("");
-    
-    user2.getName().setFormatted(nickname);
+
     user1.getName().setFormatted(null);
+    user2.getName().setFormatted(nickname);
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+
+    assertThat(operations).hasSize(2);
+    assertThat(operations).filteredOn(op(Type.ADD, "name.formatted", nickname)).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REPLACE, "nickName", "")).hasSize(1);
   }
   
   @Test
-  @Disabled
-  //TODO: do asserts
   public void testMoveFormatNameToNicknamePart5() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
@@ -634,14 +628,16 @@ public class UpdateRequestTest {
     String nickname = "John Xander Anyman";
     user1.setNickName("");
     user2.setNickName(nickname);
-    
-    user2.getName().setFormatted(null);
+
     user1.getName().setFormatted(nickname);
+    user2.getName().setFormatted(null);
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+
+    assertThat(operations).hasSize(2);
+    assertThat(operations).filteredOn(op(Type.REMOVE, "name.formatted")).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REPLACE, "nickName", nickname)).hasSize(1);
   }
   
   @ParameterizedTest
@@ -671,10 +667,7 @@ public class UpdateRequestTest {
       } else {
         assertEquals(expectedOp.getValue(), actualOp.getValue().toString());
       }
-      
     }
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
   }
   
   @SuppressWarnings("unused")
@@ -715,7 +708,7 @@ public class UpdateRequestTest {
   }
   
   @Test
-  //TODO: do parameterized test
+  @Disabled
   public void offsetTest1() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
@@ -733,7 +726,14 @@ public class UpdateRequestTest {
     List<PatchOperation> operations = updateRequest.getPatchOperations();
     System.out.println("Number of operations: "+operations.size());
     operations.stream().forEach(op -> System.out.println(op));
-    
+
+    // TODO this is likely a flaky test, below, "A" replaces one of the "Z" values, but per order of the lists it should be "D"
+    assertThat(operations).hasSize(7);
+    assertThat(operations).filteredOn(op(Type.REPLACE, ExampleObjectExtension.URN + ":list[value EQ \"Z\"]", "A")).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"Z\"]")).hasSize(3);
+    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"D\"]")).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"M\"]")).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"Y\"]")).hasSize(1);
   }
   
   @Test
@@ -745,41 +745,47 @@ public class UpdateRequestTest {
     String nickname = "John Xander Anyman";
     user1.setNickName(null);
     user2.setNickName(nickname);
-    
-    user2.getName().setFormatted("");
+
     user1.getName().setFormatted(nickname);
+    user2.getName().setFormatted("");
 
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
     List<PatchOperation> operations = updateRequest.getPatchOperations();
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
+
+    assertThat(operations).hasSize(2);
+    assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", "")).hasSize(1);
+    assertThat(operations).filteredOn(op(Type.ADD, "nickName", nickname)).hasSize(1);
   }
   
   /**
    * This is used to test an error condition. In this scenario a user has multiple phone numbers where home is marked primary and work is not. A SCIM update
-   * is performed in which the new user only contains a work phone number where the type is null. When this happens it should only only be a single DELETE 
+   * is performed in which the new user only contains a work phone number where the type is null. When this happens it should only be a single DELETE
    * operation. Instead it creates four operations: replace value of the home number with the work number value, replace the home type to work,
    * remove the primary flag, and remove the work number 
    */
   @Test
   @Disabled
   public void testShowBugWhereDeleteIsTreatedAsMultipleReplace() throws Exception {
-//    final int expectedNumberOfOperationsWithoutBug = 1;
-//    final int expectedNumberOfOperationsWithBug = 4;
-//
-//    ScimUser user1 = createUser1();
-//    ScimUser user2 = createUser();
-//    user2.getPhoneNumbers().removeIf(p -> p.getType().equals("home"));
-//    
-//    PhoneNumber workNumber = user2.getPhoneNumbers().stream().filter(p -> p.getType().equals("work")).findFirst().orElse(null);
-//    workNumber.setType("home");
-//    assertNotNull(workNumber);
-//    
-//    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, registry);
-//    List<PatchOperation> operations = updateRequest.getPatchOperations();
-//    assertNotNull(operations);
-//    assertEquals(expectedNumberOfOperationsWithBug, operations.size());
-//    assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
+    final int expectedNumberOfOperationsWithoutBug = 1;
+    final int expectedNumberOfOperationsWithBug = 4;
+
+    ScimUser user1 = createUser();
+    ScimUser user2 = createUser();
+    user2.getPhoneNumbers().removeIf(p -> p.getType().equals("home"));
+
+    PhoneNumber workNumber = user2.getPhoneNumbers().stream().filter(p -> p.getType().equals("work")).findFirst().orElse(null);
+    assertNotNull(workNumber);
+    workNumber.setType(null);
+
+    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
+    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    assertNotNull(operations);
+
+    System.out.println("Number of operations: "+operations.size());
+    operations.stream().forEach(op -> System.out.println(op));
+
+    assertEquals(expectedNumberOfOperationsWithBug, operations.size());
+    assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
   }
 
   private PatchOperation assertSingleResult(List<PatchOperation> result) {
@@ -916,4 +922,73 @@ public class UpdateRequestTest {
     return patchOperations;
   }
 
+  static class PatchOperationAssert extends AbstractAssert<PatchOperationAssert, PatchOperation> {
+
+    public PatchOperationAssert(PatchOperation actual) {
+      super(actual, PatchOperationAssert.class);
+    }
+
+    public PatchOperationAssert hashPath(String path) {
+      isNotNull();
+      PatchOperationPath actualPath = actual.getPath();
+      if (actualPath == null || !actualPath.toString().equals(path)) {
+        failWithMessage("Expecting path in:\n  <%s>\nto be:    <%s>\nbut was: <%s>", actual, actualPath, path);
+      }
+      return this;
+    }
+
+    public PatchOperationAssert hasType(Type opType) {
+      isNotNull();
+      Type actualType = actual.getOperation();
+      if (!Objects.equals(actualType, opType)) {
+        failWithMessage("Expecting operation type in:\n  <%s>\nto be:   <%s>\nbut was: <%s>", actual, actualType, opType);
+      }
+      return this;
+    }
+
+    public PatchOperationAssert hasValue(Object value) {
+      isNotNull();
+      Object actualValue = actual.getValue();
+      if (!Objects.equals(actualValue, value)) {
+        failWithMessage("Expecting value in:\n  <%s>\nto be:    <%s>\nbut was: <%s>", actual, actualValue, value);
+      }
+      return this;
+    }
+
+    public PatchOperationAssert nullValue() {
+      return hasValue(null);
+    }
+
+    public static PatchOperationAssert assertThat(PatchOperation actual) {
+      return new PatchOperationAssert(actual);
+    }
+  }
+
+  static class PatchOperationCondition extends Condition<PatchOperation> {
+
+    private final Type type;
+    private final String path;
+    private final Object value;
+
+    public PatchOperationCondition(Type type, String path, Object value) {
+      this.type = type;
+      this.path = path;
+      this.value = value;
+    }
+
+    @Override
+    public boolean matches(PatchOperation patchOperation){
+      return Objects.equals(type, patchOperation.getOperation()) &&
+        Objects.equals(path, Objects.toString(patchOperation.getPath().toString())) &&
+        Objects.equals(value, patchOperation.getValue());
+    }
+
+    static PatchOperationCondition op(Type type, String path, Object value) {
+      return new PatchOperationCondition(type, path, value);
+    }
+
+    static PatchOperationCondition op(Type type, String path) {
+      return op(type, path, null);
+    }
+  }
 }

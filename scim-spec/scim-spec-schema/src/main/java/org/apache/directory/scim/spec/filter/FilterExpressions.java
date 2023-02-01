@@ -29,7 +29,7 @@ public final class FilterExpressions {
     return InMemoryScimFilterMatcher.toPredicate(expression, schema);
   }
 
-  public static Predicate<Object> inMemory(FilterExpression expression, Schema schema) {
+  public static <R> Predicate<R> inMemory(FilterExpression expression, Schema schema) {
     return InMemoryScimFilterMatcher.toPredicate(expression, schema);
   }
 
