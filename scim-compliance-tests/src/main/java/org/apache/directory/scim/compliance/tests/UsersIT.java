@@ -33,8 +33,8 @@ import static org.hamcrest.Matchers.*;
 @ExtendWith(EmbeddedServerExtension.class)
 public class UsersIT extends ScimpleITSupport {
 
-  private final String givenName = "Given-" + RandomStringUtils.randomAlphanumeric(10);
-  private final String familyName = "Family-" + RandomStringUtils.randomAlphanumeric(10);
+  private final String givenName = randomName("Given-");
+  private final String familyName = randomName("Family-");
   private final String displayName = givenName + " " + familyName;
   private final String email = givenName + "." + familyName + "@example.com";
 
@@ -156,6 +156,50 @@ public class UsersIT extends ScimpleITSupport {
   }
 
   @Test
+  @DisplayName("Update User")
+  public void updateUser() {
+
+    String body = "{" +
+      "\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"]," +
+      "\"userName\":\"updateUser@example.com\"," +
+      "\"name\":{" +
+        "\"givenName\":\"Given-updateUser\"," +
+        "\"familyName\":\"Family-updateUser\"}," +
+      "\"emails\":[{" +
+        "\"primary\":true," +
+        "\"value\":\"updateUser@example.com\"," +
+        "\"type\":\"work\"}]," +
+      "\"displayName\":\"Given-updateUser Family-updateUser\"," +
+      "\"active\":true" +
+      "}";
+
+    String id = post("/Users", body)
+      .statusCode(201)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:schemas:core:2.0:User"),
+        "active", is(true),
+        "id", not(emptyString())
+      )
+      .extract().jsonPath().get("id");
+
+    String updatedBody = body.replaceFirst("}$",
+      ",\"phoneNumbers\": [{\"value\": \"555-555-5555\",\"type\": \"work\"}]}");
+
+    put("/Users/" + id, updatedBody)
+      .statusCode(200)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:schemas:core:2.0:User"),
+        "active", is(true),
+        "id", not(emptyString()),
+        "name.givenName", is("Given-updateUser"),
+        "name.familyName", is("Family-updateUser"),
+        "userName", equalToIgnoringCase("updateUser@example.com"),
+        "phoneNumbers[0].value", is("555-555-5555"),
+        "phoneNumbers[0].type", is("work")
+      );
+  }
+
+  @Test
   @DisplayName("Username Case Sensitivity Check")
   public void userNameByFilter() {
     String userName = get("/Users", Map.of("count", "1","startIndex", "1"))
@@ -174,6 +218,47 @@ public class UsersIT extends ScimpleITSupport {
       .body(
         "schemas", contains(SCHEMA_LIST_RESPONSE),
         "totalResults", is(1)
+      );
+  }
+
+  @Test
+  @DisplayName("Deactivate user with PATCH")
+  public void deactivateWithPatch() {
+    String body = "{" +
+      "\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"]," +
+      "\"userName\":\"deactivateWithPatch@example.com\"," +
+      "\"name\":{" +
+        "\"givenName\":\"Given-deactivateWithPatch\"," +
+        "\"familyName\":\"Family-deactivateWithPatch\"}," +
+      "\"emails\":[{" +
+        "\"primary\":true," +
+        "\"value\":\"deactivateWithPatch@example.com\"," +
+        "\"type\":\"work\"}]," +
+      "\"displayName\":\"Given-deactivateWithPatch Family-deactivateWithPatch\"," +
+      "\"active\":true" +
+      "}";
+
+    String id = post("/Users", body)
+      .statusCode(201)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:schemas:core:2.0:User"),
+        "active", is(true),
+        "id", not(emptyString())
+      )
+      .extract().jsonPath().get("id");
+
+    String patchBody = "{" +
+      "\"schemas\": [\"urn:ietf:params:scim:api:messages:2.0:PatchOp\"]," +
+      "\"Operations\": [{" +
+        "\"op\": \"replace\"," +
+        "\"value\": {" +
+          "\"active\": false" +
+        "}}]}";
+
+    patch("/Users/" + id, patchBody)
+      .statusCode(200)
+      .body(
+        "active", is(false)
       );
   }
 }

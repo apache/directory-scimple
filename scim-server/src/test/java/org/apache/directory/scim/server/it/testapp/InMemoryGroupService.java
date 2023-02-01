@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
@@ -41,6 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Named
@@ -61,7 +63,9 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   @PostConstruct
   public void init() {
     ScimGroup group = new ScimGroup();
-    group.setId("example-group");
+    group.setId(UUID.randomUUID().toString());
+    group.setDisplayName("example-group");
+    group.setExternalId("example-group");
     groups.put(group.getId(), group);
   }
 
@@ -72,18 +76,16 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public ScimGroup create(ScimGroup resource) throws UnableToCreateResourceException {
-    String resourceId = resource.getId();
-    int idCandidate = resource.hashCode();
-    String id = resourceId != null ? resourceId : Integer.toString(idCandidate);
+    String id = UUID.randomUUID().toString();
 
-    while (groups.containsKey(id)) {
-      id = Integer.toString(idCandidate);
-      ++idCandidate;
+    // if the external ID is not set, use the displayName instead
+    if (StringUtils.isEmpty(resource.getExternalId())) {
+      resource.setExternalId(resource.getDisplayName());
     }
 
     // check to make sure the group doesn't already exist
     boolean existingUserFound = groups.values().stream()
-      .anyMatch(group -> group.getExternalId().equals(resource.getExternalId()));
+      .anyMatch(group -> resource.getExternalId().equals(group.getExternalId()));
     if (existingUserFound) {
       // HTTP leaking into data layer
       throw new UnableToCreateResourceException(Response.Status.CONFLICT, "Group '" + resource.getExternalId() + "' already exists.");

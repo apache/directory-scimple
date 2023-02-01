@@ -64,8 +64,9 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   @PostConstruct
   public void init() {
     ScimGroup group = new ScimGroup();
-    group.setDisplayName("example-group");
     group.setId(UUID.randomUUID().toString());
+    group.setDisplayName("example-group");
+    group.setExternalId("example-group");
     groups.put(group.getId(), group);
   }
 
@@ -79,7 +80,7 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     String id = UUID.randomUUID().toString();
 
     // if the external ID is not set, use the displayName instead
-    if (!StringUtils.isEmpty(resource.getExternalId())) {
+    if (StringUtils.isEmpty(resource.getExternalId())) {
       resource.setExternalId(resource.getDisplayName());
     }
 

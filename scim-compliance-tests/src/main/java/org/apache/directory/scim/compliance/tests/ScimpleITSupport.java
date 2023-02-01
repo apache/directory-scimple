@@ -27,6 +27,7 @@ import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.FilterableRequestSpecification;
 import io.restassured.specification.FilterableResponseSpecification;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.directory.scim.compliance.junit.EmbeddedServerExtension.ScimServerUri;
 import org.hamcrest.Matcher;
 
@@ -123,10 +124,79 @@ public class ScimpleITSupport {
     return responseSpec;
   }
 
+  protected ValidatableResponse put(String path, String body) {
+    ValidatableResponse responseSpec =
+      given()
+        .urlEncodingEnabled(false) // URL encoding is handled but the URI
+        .redirects().follow(false)
+        .accept(SCIM_MEDIA_TYPE)
+        .contentType(SCIM_MEDIA_TYPE)
+        .headers(requestHeaders)
+      .when()
+        .filter(logging(loggingEnabled))
+        .body(body)
+        .put(uri(path))
+      .then()
+        .contentType(SCIM_MEDIA_TYPE);
+
+    if (loggingEnabled) {
+      responseSpec.log().everything();
+    }
+    return responseSpec;
+  }
+
+  protected ValidatableResponse patch(String path, String body) {
+    ValidatableResponse responseSpec =
+      given()
+        .urlEncodingEnabled(false) // URL encoding is handled but the URI
+        .redirects().follow(false)
+        .accept(SCIM_MEDIA_TYPE)
+        .contentType(SCIM_MEDIA_TYPE)
+        .headers(requestHeaders)
+      .when()
+        .filter(logging(loggingEnabled))
+        .body(body)
+        .patch(uri(path))
+      .then()
+        .contentType(SCIM_MEDIA_TYPE);
+
+    if (loggingEnabled) {
+      responseSpec.log().everything();
+    }
+    return responseSpec;
+  }
+
+  protected ValidatableResponse delete(String path) {
+    ValidatableResponse responseSpec =
+      given()
+        .urlEncodingEnabled(false) // URL encoding is handled but the URI
+        .redirects().follow(false)
+        .accept(SCIM_MEDIA_TYPE)
+        .contentType(SCIM_MEDIA_TYPE)
+        .headers(requestHeaders)
+      .when()
+        .filter(logging(loggingEnabled))
+      .delete(uri(path))
+        .then();
+
+    if (loggingEnabled) {
+      responseSpec.log().everything();
+    }
+    return responseSpec;
+  }
+
   static Filter logging(boolean enabled) {
     return enabled
       ? new RequestLoggingFilter(LogDetail.ALL)
       : new NoOpFilter();
+  }
+
+  static String randomName(String base) {
+    return base + RandomStringUtils.randomAlphanumeric(10);
+  }
+
+  static String randomEmail(String base) {
+    return base + "-" + RandomStringUtils.randomAlphanumeric(10) + "@example.com";
   }
 
   static Matcher<?> isBoolean() {
