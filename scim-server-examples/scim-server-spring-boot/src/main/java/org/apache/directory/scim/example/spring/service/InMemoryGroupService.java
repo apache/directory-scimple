@@ -56,6 +56,7 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     ScimGroup group = new ScimGroup();
     group.setId(UUID.randomUUID().toString());
     group.setDisplayName("example-group");
+    group.setExternalId("example-group");
     groups.put(group.getId(), group);
   }
 
