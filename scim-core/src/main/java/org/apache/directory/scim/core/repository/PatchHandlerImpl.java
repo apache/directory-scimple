@@ -171,6 +171,18 @@ public class PatchHandlerImpl implements PatchHandler {
     }
   }
 
+  private static void checkPrimary(String subAttributeName, Collection<Map<String, Object>> items, Object value)
+  {
+    if (subAttributeName.equals("primary") && value.equals(true)) {
+      // reset all other values with primary -> false
+      items.forEach(item -> {
+        if (item.containsKey("primary")) {
+          item.put("primary", false);
+        }
+      });
+    }
+  }
+
   private interface PatchOperationHandler {
 
     default <T extends ScimResource> void applyValue(final T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, Object value) {
@@ -228,7 +240,15 @@ public class PatchHandlerImpl implements PatchHandler {
     public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       String attributeName = attribute.getName();
       checkMutability(attribute, sourceAsMap.get(attributeName));
-      sourceAsMap.put(attributeName, value);
+      if (attributeReference.hasSubAttribute()) {
+        Map<String, Object> parentValue = (Map<String, Object>) sourceAsMap.getOrDefault(attributeName, new HashMap<String, Object>());
+        String subAttributeName = attributeReference.getSubAttributeName();
+        checkMutability(attribute.getAttribute(subAttributeName), parentValue.get(subAttributeName));
+        parentValue.put(subAttributeName, value);
+        sourceAsMap.put(attributeName, parentValue);
+      } else {
+        sourceAsMap.put(attributeName, value);
+      }
     }
 
     @Override
@@ -238,7 +258,6 @@ public class PatchHandlerImpl implements PatchHandler {
       checkMutability(attribute, items);
       if (items == null) {
         items = new ArrayList<>();
-        sourceAsMap.put(attributeReference.getAttributeName(), items);
       }
 
       if (value instanceof Collection) {
@@ -246,6 +265,7 @@ public class PatchHandlerImpl implements PatchHandler {
       } else {
         items.add(value);
       }
+      sourceAsMap.put(attributeReference.getAttributeName(), items);
     }
 
     @Override
@@ -258,15 +278,16 @@ public class PatchHandlerImpl implements PatchHandler {
       }
 
       // apply expression filter
-      Collection<Map<String, Object>> items = (Collection<Map<String, Object>>) sourceAsMap.get(attributeName);
+      Collection<Map<String, Object>> items = (Collection<Map<String, Object>>) sourceAsMap.getOrDefault(attributeName, new ArrayList<Map<String, Object>>());
       Predicate<Object> pred = FilterExpressions.inMemoryMap(valuePathExpression.getAttributeExpression(), schema);
       String subAttributeName = valuePathExpression.getAttributePath().getSubAttributeName();
 
       boolean matchFound = false;
-      for (Map<String, Object> item: items) {
+      for (Map<String, Object> item : items) {
         if (pred.test(item)) {
           matchFound = true;
           checkMutability(attribute, item.get(subAttributeName));
+          checkPrimary(subAttributeName, items, value);
           item.put(subAttributeName, value);
         }
       }
@@ -279,11 +300,14 @@ public class PatchHandlerImpl implements PatchHandler {
           throw new UnsupportedFilterException("Attribute cannot be added, only comparison expressions are supported when the existing item does not exist.");
         }
         AttributeComparisonExpression comparisonExpression = (AttributeComparisonExpression) valuePathExpression.getAttributeExpression();
+        checkPrimary(subAttributeName, items, value);
 
-      items.add(Map.of(
+        items.add(new HashMap<>(Map.of(
           comparisonExpression.getAttributePath().getSubAttributeName(), comparisonExpression.getCompareValue(),
-          subAttributeName, value));
+          subAttributeName, value)));
       }
+
+      sourceAsMap.put(attributeName, items);
     }
   }
 
@@ -327,15 +351,13 @@ public class PatchHandlerImpl implements PatchHandler {
             // if there is a sub-attribute set it, otherwise replace the whole item
             if (item.containsKey(subAttributeName)) {
               checkMutability(attribute.getAttribute(subAttributeName), item.get(subAttributeName));
+              checkPrimary(subAttributeName, items, value);
               item.put(subAttributeName, value);
             } else {
               item = (Map<String, Object>) value;
             }
-            return item;
-          } else {
-            // filter does not apply
-            return item;
           }
+          return item;
         }).collect(toList());
       sourceAsMap.put(attribute.getName(), updatedCollection);
     }
