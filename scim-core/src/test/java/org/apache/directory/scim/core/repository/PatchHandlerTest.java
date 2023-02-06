@@ -149,7 +149,7 @@ public class PatchHandlerTest {
   }
 
   @Test
-  public void applySingleComplexAttribute() {
+  public void applyAddToMissingSingleComplexAttribute() {
     ScimUser user =  user();
     PatchOperation op = patchOperation(ADD, "addresses[type eq \"work\"].postalCode", "ko4 8qq");
     ScimUser updatedUser = patchHandler.apply(user, List.of(op));
