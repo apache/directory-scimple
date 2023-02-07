@@ -56,6 +56,8 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class PatchHandlerImpl implements PatchHandler {
 
+  public static final String PRIMARY = "primary";
+
   private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {};
 
   private final Map<PatchOperation.Type, PatchOperationHandler> patchOperationHandlers = Map.of(
@@ -173,11 +175,11 @@ public class PatchHandlerImpl implements PatchHandler {
 
   private static void checkPrimary(String subAttributeName, Collection<Map<String, Object>> items, Object value)
   {
-    if (subAttributeName.equals("primary") && value.equals(true)) {
+    if (subAttributeName.equals(PRIMARY) && value.equals(true)) {
       // reset all other values with primary -> false
       items.forEach(item -> {
-        if (item.containsKey("primary")) {
-          item.put("primary", false);
+        if (item.containsKey(PRIMARY)) {
+          item.put(PRIMARY, false);
         }
       });
     }
