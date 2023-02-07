@@ -302,6 +302,7 @@ public class PatchHandlerImpl implements PatchHandler {
         AttributeComparisonExpression comparisonExpression = (AttributeComparisonExpression) valuePathExpression.getAttributeExpression();
         checkPrimary(subAttributeName, items, value);
 
+        // Add a new mutable map
         items.add(new HashMap<>(Map.of(
           comparisonExpression.getAttributePath().getSubAttributeName(), comparisonExpression.getCompareValue(),
           subAttributeName, value)));
