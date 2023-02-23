@@ -233,7 +233,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                                             .size());
       listResponse.setItemsPerPage(filterResp.getResources()
                                              .size());
-      listResponse.setStartIndex(filterResp.getPageRequest().getStartIndex());
+      int startIndex = Optional.ofNullable(filterResp.getPageRequest().getStartIndex()).orElse(1);
+      listResponse.setStartIndex(startIndex);
       listResponse.setTotalResults(filterResp.getTotalResults());
 
       List<T> results = new ArrayList<>();
