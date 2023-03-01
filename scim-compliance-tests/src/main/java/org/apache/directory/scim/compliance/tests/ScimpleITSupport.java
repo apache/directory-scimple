@@ -19,6 +19,9 @@
 
 package org.apache.directory.scim.compliance.tests;
 
+import io.restassured.RestAssured;
+import io.restassured.config.Config;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.Filter;
 import io.restassured.filter.FilterContext;
 import io.restassured.filter.log.LogDetail;
@@ -50,6 +53,9 @@ public class ScimpleITSupport {
   private URI uri = URI.create("http://localhost:8080/v2");
 
   private final boolean loggingEnabled = Boolean.getBoolean("scim.tests.logging.enabled");
+
+  private final RestAssuredConfig config = RestAssured.config()
+    .logConfig(RestAssured.config().getLogConfig().enableLoggingOfRequestAndResponseIfValidationFails());
 
   private final Map<String, String> requestHeaders = Map.of(
     "User-Agent", "Apache SCIMple Compliance Tests",
@@ -86,6 +92,7 @@ public class ScimpleITSupport {
   protected ValidatableResponse get(String path, Map<String, String> query) {
     ValidatableResponse responseSpec =
       given()
+        .config(config)
         .urlEncodingEnabled(false) // URL encoding is handled but the URI
         .redirects().follow(false)
         .accept(SCIM_MEDIA_TYPE)
@@ -93,19 +100,20 @@ public class ScimpleITSupport {
       .when()
         .filter(logging(loggingEnabled))
         .get(uri(path, query))
-      .then();
-
-      if (loggingEnabled) {
-        responseSpec.log().everything();
-      }
-
-      return responseSpec
+      .then()
         .contentType(SCIM_MEDIA_TYPE);
+
+    if (loggingEnabled) {
+      responseSpec.log().everything();
+    }
+
+      return responseSpec;
   }
 
   protected ValidatableResponse post(String path, String body) {
     ValidatableResponse responseSpec =
       given()
+        .config(config)
         .urlEncodingEnabled(false) // URL encoding is handled but the URI
         .redirects().follow(false)
         .accept(SCIM_MEDIA_TYPE)
@@ -127,6 +135,7 @@ public class ScimpleITSupport {
   protected ValidatableResponse put(String path, String body) {
     ValidatableResponse responseSpec =
       given()
+        .config(config)
         .urlEncodingEnabled(false) // URL encoding is handled but the URI
         .redirects().follow(false)
         .accept(SCIM_MEDIA_TYPE)
@@ -148,6 +157,7 @@ public class ScimpleITSupport {
   protected ValidatableResponse patch(String path, String body) {
     ValidatableResponse responseSpec =
       given()
+        .config(config)
         .urlEncodingEnabled(false) // URL encoding is handled but the URI
         .redirects().follow(false)
         .accept(SCIM_MEDIA_TYPE)
@@ -169,6 +179,7 @@ public class ScimpleITSupport {
   protected ValidatableResponse delete(String path) {
     ValidatableResponse responseSpec =
       given()
+        .config(config)
         .urlEncodingEnabled(false) // URL encoding is handled but the URI
         .redirects().follow(false)
         .accept(SCIM_MEDIA_TYPE)

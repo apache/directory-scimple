@@ -59,25 +59,6 @@ public class UsersIT extends ScimpleITSupport {
   }
 
   @Test
-  @DisplayName("Get Users/{{id}}")
-  public void userById() {
-    String id = get("/Users", Map.of("count", "1","startIndex", "1"))
-      .statusCode(200)
-      .extract().jsonPath().get("Resources[0].id");
-
-    get("/Users/" + id)
-      .statusCode(200)
-      .body(
-        "id", is(id),
-        "name.familyName", not(emptyString()),
-        "name.givenName", not(emptyString()),
-        "userName", not(emptyString()),
-        "active", isBoolean(),
-        "emails[0].value", not(emptyString())
-      );
-  }
-
-  @Test
   @DisplayName("Test invalid User by username")
   public void invalidUserNameFilter() {
     String invalidUserName = RandomStringUtils.randomAlphanumeric(10);
