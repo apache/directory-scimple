@@ -128,6 +128,57 @@ public class PatchHandlerTest {
   }
 
   @Test
+  public void applyAddSingleComplexAttribute() {
+    ScimUser user =  user();
+    PatchOperation op = patchOperation(ADD, "name.honorificSuffix", "II");
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    Name expectedName = new Name()
+      .setFormatted(user.getName().getFormatted())
+      .setHonorificSuffix("II");
+    assertThat(updatedUser.getName()).isEqualTo(expectedName);
+  }
+
+  @Test
+  public void applyReplaceSingleComplexAttribute() {
+    ScimUser user =  user();
+    PatchOperation op = patchOperation(REPLACE, "name.formatted", "Charlie");
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    Name expectedName = new Name()
+      .setFormatted("Charlie");
+    assertThat(updatedUser.getName()).isEqualTo(expectedName);
+  }
+
+  @Test
+  public void applyAddToMissingSingleComplexAttribute() {
+    ScimUser user =  user();
+    PatchOperation op = patchOperation(ADD, "addresses[type eq \"work\"].postalCode", "ko4 8qq");
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    List<Address> expectedAddresses = List.of(
+      new Address()
+        .setType("work")
+        .setPostalCode("ko4 8qq"));
+    assertThat(updatedUser.getAddresses()).isEqualTo(expectedAddresses);
+  }
+
+  @Test
+  public void settingPrimaryOnMultiValuedShouldResetAllOthersToFalse() {
+    // https://www.rfc-editor.org/rfc/rfc7644#section-3.5.2
+    ScimUser user =  user();
+    PatchOperation op = patchOperation(REPLACE, "emails[type eq \"home\"].primary", true);
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    List<Email> expectedEmails = List.of(
+      new Email()
+        .setPrimary(false)
+        .setType("work")
+        .setValue("work@example.com"),
+      new Email()
+        .setPrimary(true)
+        .setType("home")
+        .setValue("home@example.com"));
+    assertThat(updatedUser.getEmails()).isEqualTo(expectedEmails);
+  }
+
+  @Test
   public void applyRemoveSubAttribute() {
     PatchOperation op = patchOperation(REMOVE, "name.formatted", null);
     ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
