@@ -85,9 +85,9 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     }
 
     // check to make sure the group doesn't already exist
-    boolean existingUserFound = groups.values().stream()
+    boolean existingGroupFound = groups.values().stream()
       .anyMatch(group -> resource.getExternalId().equals(group.getExternalId()));
-    if (existingUserFound) {
+    if (existingGroupFound) {
       // HTTP leaking into data layer
       throw new UnableToCreateResourceException(Response.Status.CONFLICT, "Group '" + resource.getExternalId() + "' already exists.");
     }
