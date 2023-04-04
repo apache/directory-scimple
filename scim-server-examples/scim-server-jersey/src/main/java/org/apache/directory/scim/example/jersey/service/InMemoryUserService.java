@@ -36,6 +36,7 @@ import org.apache.directory.scim.server.exception.UnableToCreateResourceExceptio
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.UpdateRequest;
+import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.Filter;
@@ -93,6 +94,13 @@ public class InMemoryUserService implements Repository<ScimUser> {
     luckyNumberExtension.setLuckyNumber(DEFAULT_USER_LUCKY_NUMBER);
 
     user.addExtension(luckyNumberExtension);
+
+    EnterpriseExtension enterpriseExtension = new EnterpriseExtension();
+    enterpriseExtension.setEmployeeNumber("12345");
+    EnterpriseExtension.Manager manager = new EnterpriseExtension.Manager();
+    manager.setValue("bulkId:qwerty");
+    enterpriseExtension.setManager(manager);
+    user.addExtension(enterpriseExtension);
 
     users.put(user.getId(), user);
   }
@@ -174,6 +182,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
    */
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
-    return List.of(LuckyNumberExtension.class);
+    return List.of(LuckyNumberExtension.class, EnterpriseExtension.class);
   }
 }
