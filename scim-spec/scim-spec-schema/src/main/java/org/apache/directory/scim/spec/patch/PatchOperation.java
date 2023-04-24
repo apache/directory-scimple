@@ -33,7 +33,7 @@ import org.apache.directory.scim.spec.adapter.PatchOperationPathAdapter;
 
 @Data
 @EqualsAndHashCode
-@XmlType(propOrder={"opreration", "path", "value"})
+@XmlType(propOrder={"operation", "path", "value"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class PatchOperation {
   
