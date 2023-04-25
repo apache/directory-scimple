@@ -61,6 +61,7 @@ public class ObjectMapperFactory {
     objectMapper.setAnnotationIntrospector(pair);
 
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     return objectMapper;
