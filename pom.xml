@@ -450,8 +450,7 @@
                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               </manifest>
               <manifestEntries>
-                <Build-Number>${build.number}</Build-Number>
-                <Build-Date>${timestamp}</Build-Date>
+                <Build-Number>${buildNumber}</Build-Number>
                 <SCM-Revision>${buildNumber}</SCM-Revision>
                 <SCM-Branch>${scmBranch}</SCM-Branch>
               </manifestEntries>
@@ -469,8 +468,7 @@
               </manifest>
               <manifestEntries>
                 <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
-                <Build-Number>${build.number}</Build-Number>
-                <Build-Date>${timestamp}</Build-Date>
+                <Build-Number>${buildNumber}</Build-Number>
                 <SCM-Revision>${buildNumber}</SCM-Revision>
                 <SCM-Branch>${scmBranch}</SCM-Branch>
               </manifestEntries>
