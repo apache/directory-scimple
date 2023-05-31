@@ -43,7 +43,7 @@
     <version.lombok.plugin>1.18.20.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
     <version.slf4j>1.7.36</version.slf4j>
-    <version.antlr4>4.12.0</version.antlr4>
+    <version.antlr4>4.13.0</version.antlr4>
     <version.resteasy>6.2.4.Final</version.resteasy>
     <version.spring-boot>3.0.6</version.spring-boot>
 
