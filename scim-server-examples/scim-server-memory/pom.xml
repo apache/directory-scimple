@@ -60,13 +60,6 @@
     <defaultGoal>package wildfly:run</defaultGoal>
     <plugins>
       <plugin>
-        <groupId>org.apache.geronimo.genesis.plugins</groupId>
-        <artifactId>tools-maven-plugin</artifactId>
-        <configuration>
-          <requiredFiles></requiredFiles>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
         <version>4.0.0.Final</version>
