@@ -233,7 +233,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>32.0.0-android</version>
+        <version>32.0.1-android</version>
       </dependency>
       <!-- later version of logback and other deps in the examples don't play well together,
            this version works seems to work with Spring, Jersey, and embedded examples -->
