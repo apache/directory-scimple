@@ -103,13 +103,5 @@
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <!-- TODO: Spring pulls in an older version of logback-classic, using newer versions fails to start -->
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.2.11</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>
