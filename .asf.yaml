@@ -19,7 +19,7 @@ github:
   homepage: https://directory.apache.org/scimple/
   features:
     wiki: false
-    issues: false
+    issues: true
     projects: false
   dependabot_alerts:  true
   dependabot_updates: true
