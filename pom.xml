@@ -536,6 +536,8 @@
               <exclude>**/*.iml</exclude>
               <exclude>mvnw</exclude>
               <exclude>mvnw.cmd</exclude>
+              <exclude>.mvn/maven.config</exclude>
+              <exclude>**/target/**</exclude>
             </excludes>
           </configuration>
           </plugin>
