@@ -47,3 +47,6 @@ jobs:
         run: ./mvnw verify -V -B --no-transfer-progress
         env:
           GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+
+      - name: Check License Headers
+        run: ./mvnw apache-rat:check -V -B --no-transfer-progress
