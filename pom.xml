@@ -574,6 +574,18 @@
             <version>3.1.0</version>
           </plugin>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>3.0.1</version>
+            <configuration>
+              <!-- do not update upstream, with a pending release. -->
+              <pushChanges>false</pushChanges>
+              <signTag>true</signTag>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <preparationGoals>verify</preparationGoals>
+            </configuration>
+          </plugin>
+          <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.10</version>
