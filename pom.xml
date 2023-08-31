@@ -24,12 +24,12 @@
     <version>47</version>
   </parent>
 
-  <groupId>org.apache.directory.scim</groupId>
+  <groupId>org.apache.directory.scimple</groupId>
   <artifactId>scim-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SCIM - Parent</name>
-  <description>Apache Directory SCIMple - JavaEE implementation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
+  <name>SCIMple - Parent</name>
+  <description>Apache Directory SCIMple - Jakarta EE implementation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
   <url>https://github.com/apache/directory-scimple</url>
 
   <properties>
@@ -120,42 +120,43 @@
     <dependencies>
       <!-- Project Modules -->
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-spec-protocol</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-spec-schema</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-core</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-tools</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-server</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-client</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-compliance-tests</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.apache.directory.scim</groupId>
+        <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-spring-boot-starter</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
@@ -566,7 +567,7 @@
                 <include>**/*IT.java</include>
               </includes>
               <dependenciesToScan>
-                <dependency>org.apache.directory.scim:scim-compliance-tests</dependency>
+                <dependency>org.apache.directory.scimple:scim-compliance-tests</dependency>
               </dependenciesToScan>
             </configuration>
           </plugin>
