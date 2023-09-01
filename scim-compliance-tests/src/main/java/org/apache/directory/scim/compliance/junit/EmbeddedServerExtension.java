@@ -24,6 +24,8 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -39,37 +41,46 @@ import java.util.ServiceLoader;
 
 public class EmbeddedServerExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback {
 
+  private static final Logger logger = LoggerFactory.getLogger(EmbeddedServerExtension.class);
+
   private ScimTestServer server;
   private URI uri;
 
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
-
     ServiceLoader<ScimTestServer> serviceLoader = ServiceLoader.load(ScimTestServer.class);
-    server = serviceLoader.findFirst().orElseThrow(() -> new RuntimeException("Failed to find implementation of ScimTestServer via ServiceLoader"));
-    uri = server.start(randomPort());
+    if (serviceLoader.findFirst().isPresent()) {
+      server = serviceLoader.findFirst().get();
+      uri = server.start(randomPort());
+    } else {
+      logger.info("Could not find implementation of ScimTestServer via ServiceLoader, assuming server is started using different technique");
+    }
   }
 
   @Override
   public void beforeEach(ExtensionContext context) throws Exception {
-    final List<Object> testInstances = context.getRequiredTestInstances().getAllInstances();
-    testInstances.forEach(test -> {
-        Field[] fields = FieldUtils.getFieldsWithAnnotation(test.getClass(), ScimServerUri.class);
-        Arrays.stream(fields).forEach(field -> {
-          try {
-            field.setAccessible(true);
-            FieldUtils.writeField(field, test, uri);
-          } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-          }
-        });
-      }
-    );
+    if (uri != null) {
+      final List<Object> testInstances = context.getRequiredTestInstances().getAllInstances();
+      testInstances.forEach(test -> {
+          Field[] fields = FieldUtils.getFieldsWithAnnotation(test.getClass(), ScimServerUri.class);
+          Arrays.stream(fields).forEach(field -> {
+            try {
+              field.setAccessible(true);
+              FieldUtils.writeField(field, test, uri);
+            } catch (IllegalAccessException e) {
+              throw new RuntimeException("Failed to assign value to field annotated with '@ScimServerUri'", e);
+            }
+          });
+        }
+      );
+    }
   }
 
   @Override
   public void afterAll(ExtensionContext context) throws Exception {
-    server.shutdown();
+    if (server != null) {
+      server.shutdown();
+    }
   }
 
   private static int randomPort() {
