@@ -86,7 +86,7 @@ public class BaseResourceTypeResourceImplTest {
     BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
     UriInfo uriInfo = mock(UriInfo.class);
     MultivaluedMap queryParams = mock(MultivaluedMap.class);
-    baseResourceImpl.requestContext = new RequestContext().setUriInfo(uriInfo);
+    baseResourceImpl.uriInfo = uriInfo;
 
     when(uriInfo.getQueryParameters()).thenReturn(queryParams);
     when(queryParams.getFirst("filter")).thenReturn("not null");

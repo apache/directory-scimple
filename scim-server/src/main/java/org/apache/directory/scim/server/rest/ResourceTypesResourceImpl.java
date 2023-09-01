@@ -25,7 +25,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.ResourceTypesResource;
@@ -39,17 +39,19 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
 
   private final SchemaRegistry schemaRegistry;
 
-  private final RequestContext requestContext;
+  // TODO: Field injection of UriInfo should work with all implementations
+  // CDI can be used directly in Jakarta WS 4
+  @Context
+  UriInfo uriInfo;
 
   @Inject
-  public ResourceTypesResourceImpl(SchemaRegistry schemaRegistry, RequestContext requestContext) {
+  public ResourceTypesResourceImpl(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
-    this.requestContext = requestContext;
   }
 
   public ResourceTypesResourceImpl() {
     // CDI
-    this(null, null);
+    this(null);
   }
 
   @Override
@@ -63,7 +65,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     
     for (ResourceType resourceType : resourceTypes) {
       Meta meta = new Meta();
-      meta.setLocation(requestContext.getUriInfo().getAbsolutePathBuilder().path(resourceType.getName()).build().toString());
+      meta.setLocation(uriInfo.getAbsolutePathBuilder().path(resourceType.getName()).build().toString());
       meta.setResourceType(resourceType.getResourceType());
       
       resourceType.setMeta(meta);
@@ -88,7 +90,7 @@ public class ResourceTypesResourceImpl implements ResourceTypesResource {
     }
     
     Meta meta = new Meta();
-    meta.setLocation(requestContext.getUriInfo().getAbsolutePath().toString());
+    meta.setLocation(uriInfo.getAbsolutePath().toString());
     meta.setResourceType(resourceType.getResourceType());
     
     resourceType.setMeta(meta);
