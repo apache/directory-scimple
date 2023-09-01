@@ -21,7 +21,6 @@ package org.apache.directory.scim.spec.filter.attribute;
 
 import java.util.Set;
 
-import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

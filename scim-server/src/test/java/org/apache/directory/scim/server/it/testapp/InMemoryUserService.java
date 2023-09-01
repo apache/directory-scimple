@@ -36,7 +36,6 @@ import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.*;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

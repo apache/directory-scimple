@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.security.Principal;
-import java.util.List;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
@@ -35,7 +34,6 @@ import org.apache.directory.scim.server.exception.UnableToResolveIdResourceExcep
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.protocol.UserResource;
-import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.junit.jupiter.api.Test;
 

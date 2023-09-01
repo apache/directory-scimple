@@ -20,9 +20,6 @@
 package org.apache.directory.scim.spec.filter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.scim.spec.filter.Filter;
-import org.apache.directory.scim.spec.filter.FilterBuilder;
-import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

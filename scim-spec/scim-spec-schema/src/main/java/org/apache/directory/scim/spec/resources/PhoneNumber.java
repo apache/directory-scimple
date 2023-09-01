@@ -249,12 +249,8 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       return false;
 
     if (type == null) {
-      if (other.type != null)
-        return false;
-    } else if (!type.equalsIgnoreCase(other.type))
-      return false;
-
-    return true;
+        return other.type == null;
+    } else return type.equalsIgnoreCase(other.type);
   }
 
   /*
@@ -444,7 +440,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       }
 
       if (params != null && !params.isEmpty()) {
-        if (params.get("") != null || params.get(null) != null || params.values().contains(null) || params.values().contains("")) {
+        if (params.get("") != null || params.get(null) != null || params.containsValue(null) || params.containsValue("")) { //NOPMD - suppressed CollapsibleIfStatements
           throw new IllegalArgumentException("PhoneNumberBuilder params names and values cannot be null or empty.");
         }
       }

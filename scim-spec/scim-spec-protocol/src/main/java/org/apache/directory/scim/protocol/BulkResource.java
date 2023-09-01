@@ -31,7 +31,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
@@ -39,6 +38,7 @@ import jakarta.ws.rs.core.UriInfo;
 import org.apache.directory.scim.protocol.data.BulkRequest;
 import org.apache.directory.scim.protocol.data.BulkResponse;
 
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
@@ -66,8 +66,8 @@ public interface BulkResource {
    * @return
    */
   @POST
-  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})
+  @Consumes({SCIM_CONTENT_TYPE, APPLICATION_JSON})
   @Operation(description="Bulk Operations")
   @ApiResponses(value={
     @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE, schema = @Schema(implementation = BulkResponse.class))),

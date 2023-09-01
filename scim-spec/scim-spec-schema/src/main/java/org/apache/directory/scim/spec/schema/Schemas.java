@@ -266,7 +266,7 @@ public final class Schemas {
       attribute.setUniqueness(sa.uniqueness());
 
       //if (sa.type().equals(Type.COMPLEX))
-      org.apache.directory.scim.spec.annotation.ScimType st = f.getType().getAnnotation(ScimType.class);
+      ScimType st = f.getType().getAnnotation(ScimType.class);
 
       if (attribute.getType() == Schema.Attribute.Type.COMPLEX || st != null) {
         Class<?> componentType;

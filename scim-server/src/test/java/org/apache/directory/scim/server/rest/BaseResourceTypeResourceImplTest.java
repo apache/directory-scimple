@@ -38,7 +38,6 @@ import org.apache.directory.scim.spec.exception.ResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.server.utility.ExampleObjectExtension;
@@ -70,7 +69,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testGetProviderInternal_ScimServerExceptionThrownWhenNoProvider() throws ScimException {
     // given
     @SuppressWarnings("rawtypes")
-    BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     
     when(baseResourceImpl.getRepositoryInternal()).thenCallRealMethod();
     
@@ -83,7 +82,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testGetById_ForbiddenIfNoFilter() throws ScimException, ResourceException {
     // given
     @SuppressWarnings("rawtypes")
-    BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     UriInfo uriInfo = mock(UriInfo.class);
     MultivaluedMap queryParams = mock(MultivaluedMap.class);
     baseResourceImpl.uriInfo = uriInfo;
@@ -104,7 +103,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testQuery_NullParametersValid() throws ScimException, ResourceException {
     // given
     @SuppressWarnings("rawtypes")
-    BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.setAttributes(Collections.emptySet());
@@ -127,7 +126,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testCreate_ErrorIfBothAttributesAndExcludedAttributesExist() throws ScimException, ResourceException, PhoneNumberParseException {
     // given
     @SuppressWarnings("unchecked")
-    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     
     ScimUser scimUser = getScimUser();
     
@@ -145,7 +144,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testFind_ErrorIfBothAttributesAndExcludedAttributesExist() throws ScimException, ResourceException {
     // given
     @SuppressWarnings("rawtypes")
-    BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.setAttributes(includedAttributeList.getAttributeReferences());
@@ -165,7 +164,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testUpdate_ErrorIfBothAttributesAndExcludedAttributesExist() throws ScimException, ResourceException, PhoneNumberParseException {
     // given
     @SuppressWarnings("unchecked")
-    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     
     ScimUser scimUser = getScimUser();
     
@@ -183,7 +182,7 @@ public class BaseResourceTypeResourceImplTest {
   public void testPatch_ErrorIfBothAttributesAndExcludedAttributesExist() throws Exception {
     // given
     @SuppressWarnings("unchecked")
-    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl<ScimUser> baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     
     PatchRequest patchRequest = new PatchRequest();
     
@@ -201,7 +200,7 @@ public class BaseResourceTypeResourceImplTest {
   public void repositoryNotImplemented() throws ScimException {
     // given
     @SuppressWarnings("rawtypes")
-    BaseResourceTypeResourceImpl baseResourceImpl = Mockito.mock(BaseResourceTypeResourceImpl.class);
+    BaseResourceTypeResourceImpl baseResourceImpl = mock(BaseResourceTypeResourceImpl.class);
     when(baseResourceImpl.getRepository()).thenReturn(null);
     when(baseResourceImpl.getRepositoryInternal()).thenCallRealMethod();
 

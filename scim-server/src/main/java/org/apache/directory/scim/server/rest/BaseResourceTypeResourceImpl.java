@@ -244,7 +244,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       List<T> results = new ArrayList<>();
 
       for (T resource : filterResp.getResources()) {
-        EntityTag etag = requireEtag(resource);
+        requireEtag(resource);
 
         // Process Attributes
         resource = processFilterAttributeExtensions(repository, resource, attributeReferences, excludedAttributeReferences);

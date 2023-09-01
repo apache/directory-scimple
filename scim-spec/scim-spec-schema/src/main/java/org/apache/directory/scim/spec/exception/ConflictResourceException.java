@@ -25,7 +25,7 @@ public class ConflictResourceException extends ResourceException {
     super(409, message);
   }
 
-  public ConflictResourceException(int statusCode, String message, Throwable cause) {
+  public ConflictResourceException(String message, Throwable cause) {
     super(409, message, cause);
   }
 }

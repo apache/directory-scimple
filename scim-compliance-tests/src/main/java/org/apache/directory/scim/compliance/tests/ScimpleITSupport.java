@@ -20,7 +20,6 @@
 package org.apache.directory.scim.compliance.tests;
 
 import io.restassured.RestAssured;
-import io.restassured.config.Config;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.Filter;
 import io.restassured.filter.FilterContext;

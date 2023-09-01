@@ -30,13 +30,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
+import static jakarta.ws.rs.core.MediaType.*;
 import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
@@ -69,7 +69,7 @@ public interface SearchResource {
    * @return
    */
   @POST
-  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})
   @Operation(description="Search")
   @ApiResponses(value={
     @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE, array = @ArraySchema(schema = @Schema(implementation = ScimResource.class)))),
