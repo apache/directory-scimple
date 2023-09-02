@@ -76,7 +76,7 @@ public class JerseyApplication extends Application {
         .thenAccept(instance -> instance.stopOnShutdown(stopResult -> container.close()));
       URI uri = UriBuilder.fromUri("http://localhost/").port(8080).build();
 
-      System.out.printf("Application started: %s\nStop the application using CTRL+C%n", uri.toString());
+      System.out.printf("Application started: %s%nStop the application using CTRL+C%n", uri.toString());
 
       // block and wait shut down signal, like CTRL+C
       Thread.currentThread().join();

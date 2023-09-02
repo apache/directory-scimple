@@ -71,7 +71,7 @@ public class Filter implements Serializable {
   }
 
   protected FilterExpression parseFilter(String filter) throws FilterParseException {
-    FilterLexer l = new FilterLexer(new ANTLRInputStream(filter));
+    FilterLexer l = new FilterLexer(CharStreams.fromString(filter));
     FilterParser p = new FilterParser(new CommonTokenStream(l));
     p.setBuildParseTree(true);
 

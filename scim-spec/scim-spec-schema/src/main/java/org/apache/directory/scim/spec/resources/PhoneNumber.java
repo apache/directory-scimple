@@ -149,13 +149,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
       PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
       p.setBuildParseTree(true);
-  
-      p.addErrorListener(new BaseErrorListener() {
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-          throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
-        }
-      });
+      p.addErrorListener(new PhoneNumberErrorListener());
   
       PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
       try {
@@ -301,6 +295,13 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     }
 
     return true;
+  }
+
+  private static class PhoneNumberErrorListener extends BaseErrorListener {
+    @Override
+    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+      throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+    }
   }
 
   @Data

@@ -40,7 +40,7 @@ public class ErrorResponse extends BaseResource<ErrorResponse> {
 
   private static final long serialVersionUID = 9045421198080348116L;
 
-  public static String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:Error";
+  public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:Error";
 
   @XmlElement(nillable = true)
   private String detail;

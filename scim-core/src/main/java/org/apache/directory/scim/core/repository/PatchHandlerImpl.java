@@ -221,7 +221,7 @@ public class PatchHandlerImpl implements PatchHandler {
     <T extends ScimResource> void applyMultiValue(final T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, Object value);
   }
 
-  private class AddOperationHandler implements PatchOperationHandler {
+  private static class AddOperationHandler implements PatchOperationHandler {
 
     @Override
     public <T extends ScimResource> void applyExtensionValue(T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, String urn, Object value) {
@@ -314,7 +314,7 @@ public class PatchHandlerImpl implements PatchHandler {
     }
   }
 
-  private class ReplaceOperationHandler implements PatchOperationHandler {
+  private static class ReplaceOperationHandler implements PatchOperationHandler {
 
     @Override
     public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
@@ -366,7 +366,7 @@ public class PatchHandlerImpl implements PatchHandler {
     }
   }
 
-  private class RemoveOperationHandler implements PatchOperationHandler {
+  private static class RemoveOperationHandler implements PatchOperationHandler {
 
     @Override
     public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
