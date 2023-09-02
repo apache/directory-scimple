@@ -31,12 +31,16 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.adapter.PatchOperationPathAdapter;
 
+import java.io.Serializable;
+
 @Data
 @EqualsAndHashCode
 @XmlType(propOrder={"operation", "path", "value"})
 @XmlAccessorType(XmlAccessType.NONE)
-public class PatchOperation {
-  
+public class PatchOperation implements Serializable {
+
+  private static final long serialVersionUID = 7748584008639433236L;
+
   @XmlEnum(String.class)
   public enum Type {
     @XmlEnumValue("add") ADD,

@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.core.schema;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
@@ -33,8 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.schema.Schemas;
 
 @Slf4j
-public class SchemaRegistry {
+public class SchemaRegistry implements Serializable {
 
+  private static final long serialVersionUID = 2644269305703474835L;
   private final Map<String, Schema> schemaMap = new HashMap<>();
   
   private final Map<String, Class<? extends ScimResource>> schemaUrnToScimResourceClass = new HashMap<>();

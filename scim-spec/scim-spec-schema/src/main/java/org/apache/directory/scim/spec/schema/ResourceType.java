@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.schema;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,9 +51,12 @@ public class ResourceType extends ScimResourceWithOptionalId {
   
   public static final String RESOURCE_NAME = "ResourceType";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
+  private static final long serialVersionUID = -696969911228870476L;
 
   @Data
-  public static class SchemaExtensionConfiguration {
+  public static class SchemaExtensionConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 7351651561572744255L;
 
     @XmlElement(name = "schema")
     @Urn

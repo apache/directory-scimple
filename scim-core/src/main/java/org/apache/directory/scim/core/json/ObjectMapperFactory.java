@@ -79,6 +79,8 @@ public class ObjectMapperFactory {
 
   static class ScimResourceModule extends SimpleModule {
 
+    private static final long serialVersionUID = 6849840952304999849L;
+
     private final SchemaRegistry schemaRegistry;
 
     public ScimResourceModule(SchemaRegistry schemaRegistry) {

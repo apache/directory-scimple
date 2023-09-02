@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.schema;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,11 +45,14 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
   public static final String RESOURCE_NAME = "ServiceProviderConfig";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
+  private static final long serialVersionUID = -6526116522184446474L;
 
   @Data
   @XmlType
   @XmlAccessorType(XmlAccessType.NONE)
-  public static class AuthenticationSchema {
+  public static class AuthenticationSchema implements Serializable {
+
+    private static final long serialVersionUID = 1286852277186580002L;
 
     public enum Type {
       @XmlEnumValue("oauth") OAUTH(
@@ -137,13 +141,15 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   }
 
   @Data
-  public static class SupportedConfiguration {
+  public static class SupportedConfiguration implements Serializable {
+    private static final long serialVersionUID = 3646886915978382920L;
     boolean supported;
   }
 
   @Data
   @EqualsAndHashCode(callSuper = true)
   public static class BulkConfiguration extends SupportedConfiguration {
+    private static final long serialVersionUID = 8312025367100671778L;
     int maxOperations;
     int maxPayloadSize;
   }
@@ -151,6 +157,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   @Data
   @EqualsAndHashCode(callSuper = true)
   public static class FilterConfiguration extends SupportedConfiguration {
+    private static final long serialVersionUID = 1887771731291732875L;
     int maxResults;
   }
 

@@ -19,11 +19,12 @@
 
 package org.apache.directory.scim.spec.schema;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
-public interface AttributeContainer {
+public interface AttributeContainer extends Serializable {
   List<Attribute> getAttributes();
 
   Attribute getAttribute(String attributeName);
