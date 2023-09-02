@@ -44,7 +44,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: ./mvnw verify -V -B --no-transfer-progress
+        run: ./mvnw verify -Pci -V -B --no-transfer-progress
         env:
           GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
