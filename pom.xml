@@ -619,6 +619,30 @@
             <rulesets>
               <ruleset>${session.executionRootDirectory}/src/pmd/ruleset.xml</ruleset>
             </rulesets>
+            <excludeRoots>
+              <excludeRoot>${project.build.directory}/generated-sources/</excludeRoot>
+            </excludeRoots>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>4.7.3.5</version>
+          <configuration>
+            <plugins>
+              <plugin>
+                <groupId>com.h3xstream.findsecbugs</groupId>
+                <artifactId>findsecbugs-plugin</artifactId>
+                <version>1.12.0</version>
+              </plugin>
+            </plugins>
+            <effort>Max</effort>
+            <threshold>Medium</threshold>
+            <failOnError>true</failOnError>
+            <omitVisitors>CrlfLogInjectionDetector</omitVisitors>
+            <xmlOutput>true</xmlOutput>
+            <fork>false</fork>
+            <excludeFilterFile>${session.executionRootDirectory}/src/spotbugs/excludes.xml</excludeFilterFile>
           </configuration>
         </plugin>
       </plugins>
@@ -644,6 +668,19 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>scan</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-maven-plugin</artifactId>
             <executions>
               <execution>
                 <id>scan</id>
