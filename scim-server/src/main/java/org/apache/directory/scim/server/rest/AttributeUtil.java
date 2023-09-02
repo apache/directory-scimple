@@ -19,8 +19,10 @@
 
 package org.apache.directory.scim.server.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
 import org.apache.directory.scim.server.exception.AttributeException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
@@ -35,11 +37,6 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,8 +50,11 @@ class AttributeUtil {
 
   SchemaRegistry schemaRegistry;
 
+  private final ObjectMapper objectMapper;
+
   AttributeUtil(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
+    this.objectMapper = ObjectMapperFactory.createObjectMapper(schemaRegistry);
   }
 
   public <T extends ScimResource> T keepAlwaysAttributesForDisplay(T resource) throws AttributeException {
@@ -165,20 +165,8 @@ class AttributeUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private <T extends ScimResource> T cloneScimResource(T original) throws AttributeException {
-    try {
-    ByteArrayOutputStream boas = new ByteArrayOutputStream();
-    ObjectOutputStream oos = new ObjectOutputStream(boas);
-    oos.writeObject(original);
-
-    ByteArrayInputStream bais = new ByteArrayInputStream(boas.toByteArray());
-    ObjectInputStream ois = new ObjectInputStream(bais);
-    return (T) ois.readObject();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IOException e) {
-      throw new AttributeException(e);
-    }
+  private <T extends ScimResource> T cloneScimResource(T original) {
+      return (T) this.objectMapper.convertValue(original, original.getClass());
   }
 
   private void removeAttributesOfType(Object object, AttributeContainer attributeContainer, Returned returned) throws AttributeException {

@@ -64,19 +64,10 @@ public class AttributeUtilTest {
 
   @BeforeEach
   public void setup() {
-    schemaRegistry = Mockito.mock(SchemaRegistry.class);
+    schemaRegistry = new SchemaRegistry();
+    schemaRegistry.addSchema(ScimUser.class, List.of(EnterpriseExtension.class, ExampleObjectExtension.class));
 
     attributeUtil = new AttributeUtil(schemaRegistry);
-    Schema scimUserSchema = Schemas.schemaFor(ScimUser.class);
-    Schema scimEnterpriseUserSchema = Schemas.schemaForExtension(EnterpriseExtension.class);
-    Schema scimExampleSchema = Schemas.schemaForExtension(ExampleObjectExtension.class);
-
-    Mockito.when(schemaRegistry.getBaseSchemaOfResourceType(ScimUser.RESOURCE_NAME)).thenReturn(scimUserSchema);
-    Mockito.when(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(scimUserSchema);
-    Mockito.when(schemaRegistry.getSchema(EnterpriseExtension.URN)).thenReturn(scimEnterpriseUserSchema);
-    Mockito.when(schemaRegistry.getSchema(ExampleObjectExtension.URN)).thenReturn(scimExampleSchema);
-    Mockito.when(schemaRegistry.getAllSchemas()).thenReturn(Arrays.asList(scimUserSchema, scimEnterpriseUserSchema, scimExampleSchema));
-    Mockito.when(schemaRegistry.getAllSchemaUrns()).thenReturn(new HashSet<>(Arrays.asList(ScimUser.SCHEMA_URI, EnterpriseExtension.URN, ExampleObjectExtension.URN)));
   }
 
   @Test
