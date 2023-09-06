@@ -612,6 +612,15 @@
               </execution>
             </executions>
           </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <configuration>
+            <rulesets>
+              <ruleset>${session.executionRootDirectory}/src/pmd/ruleset.xml</ruleset>
+            </rulesets>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -626,6 +635,19 @@
             <artifactId>dependency-check-maven</artifactId>
             <executions>
               <execution>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>scan</id>
+                <phase>verify</phase>
                 <goals>
                   <goal>check</goal>
                 </goals>

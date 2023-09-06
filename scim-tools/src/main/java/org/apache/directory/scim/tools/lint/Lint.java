@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.tools.lint;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,7 +36,7 @@ import java.io.InputStream;
  */
 public class Lint {
 
-  JsonNode convert(InputStream inputStream) throws JsonProcessingException, IOException {
+  JsonNode convert(InputStream inputStream) throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
     return objectMapper.readTree(inputStream);
   }
@@ -59,35 +58,35 @@ public class Lint {
     return schema;
   }
   
-  public boolean lint(InputStream inputStream) throws JsonProcessingException, IOException {
+  public boolean lint(InputStream inputStream) throws LintException, IOException {
     return lint(convert(inputStream));
   }
   
-  boolean lint(JsonNode jsonNode) {
+  boolean lint(JsonNode jsonNode) throws LintException {
     boolean output = true;
     if(jsonNode.isArray()) {
       output = lintArray(jsonNode);
     } else if(jsonNode.isObject()) {
       output = lintObject(jsonNode);
     } else {
-      // TODO - this is some sort of error
+      throw new LintException("Unsupported JSON node type: " + jsonNode.getNodeType().name());
     }
     return output;
   }
   
-  boolean lintArray(JsonNode arrayJsonNode) {
+  boolean lintArray(JsonNode arrayJsonNode) throws LintException {
     boolean output = true;
     for(JsonNode jsonNode: arrayJsonNode) {
       if(jsonNode.isObject()) {
         output = output && lintObject(jsonNode);
       } else {
-        // TODO - this is some sort of error
+        throw new LintException("Unsupported JSON node type, expected Object, found " + jsonNode.getNodeType().name());
       }
     }
     return output;
   }
   
-  boolean lintObject(JsonNode objectJsonNode) {
+  boolean lintObject(JsonNode objectJsonNode) throws LintException {
     boolean output = true;
     if(objectJsonNode.isObject()) {
       if(isSchema(objectJsonNode)) {
@@ -96,7 +95,7 @@ public class Lint {
         output = lintResource(objectJsonNode);
       }
     } else {
-      // TODO - this is some sort of error
+      throw new LintException("Unsupported JSON node type, expected Object, found " + objectJsonNode.getNodeType().name());
     }
     return output;
   }

@@ -36,7 +36,6 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -47,6 +46,7 @@ import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWra
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 
+import static jakarta.ws.rs.core.MediaType.*;
 import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off
@@ -73,7 +73,7 @@ import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 @Tag(name="SCIM")
 public interface SelfResource {
 
-  public static final String PATH = "Me";
+  String PATH = "Me";
 
   /**
    * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.4.1">Scim spec,
@@ -82,7 +82,7 @@ public interface SelfResource {
    * @throws UnableToRetrieveResourceException 
    */
   @GET
-  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})
   @Operation(description="Get self record")
   @ApiResponses(value={
     @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
@@ -103,8 +103,8 @@ public interface SelfResource {
    * @return
    */
   @POST
-  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Consumes({SCIM_CONTENT_TYPE, APPLICATION_JSON})
+  @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})
   @Operation(description = "Create self record")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "201",
@@ -128,8 +128,8 @@ public interface SelfResource {
    * @return
    */
   @PUT
-  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Consumes({SCIM_CONTENT_TYPE, APPLICATION_JSON})
+  @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})
   @Operation(description = "Update self record")
   @ApiResponses(value = {
     @ApiResponse(content = @Content(mediaType = SCIM_CONTENT_TYPE,
@@ -146,8 +146,8 @@ public interface SelfResource {
   }
 
   @PATCH
-  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
-  @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Consumes({SCIM_CONTENT_TYPE, APPLICATION_JSON})
+  @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})
   @Operation(description = "Patch a portion of the backing store")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "204",

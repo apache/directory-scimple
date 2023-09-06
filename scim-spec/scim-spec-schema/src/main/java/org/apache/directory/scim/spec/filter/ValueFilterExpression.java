@@ -21,6 +21,6 @@ package org.apache.directory.scim.spec.filter;
 
 public interface ValueFilterExpression {
 
-  public String toFilter();
+  String toFilter();
 
 }

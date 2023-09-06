@@ -17,15 +17,15 @@
  * under the License.
  */
 
-package org.apache.directory.scim.spec.exception;
+package org.apache.directory.scim.tools.lint;
 
-public class ConflictResourceException extends ResourceException {
+public class LintException extends Exception {
 
-  public ConflictResourceException(String message) {
-    super(409, message);
+  public LintException(String message) {
+    super(message);
   }
 
-  public ConflictResourceException(String message, Throwable cause) {
-    super(409, message, cause);
+  public LintException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

@@ -31,7 +31,6 @@ import jakarta.xml.bind.annotation.XmlElement;
 
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimResourceWithOptionalId;
 import org.apache.directory.scim.spec.validator.Urn;
 import lombok.Data;
