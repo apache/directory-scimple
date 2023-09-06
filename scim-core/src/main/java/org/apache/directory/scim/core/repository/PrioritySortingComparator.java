@@ -19,14 +19,16 @@
 
 package org.apache.directory.scim.core.repository;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Set;
 
 import org.apache.directory.scim.spec.resources.TypedAttribute;
 
-class PrioritySortingComparator implements Comparator<Object> {
+class PrioritySortingComparator implements Comparator<Object>, Serializable {
 
-  private Set<Object> priorities;
+  private static final long serialVersionUID = -8759531575215428525L;
+  private final Set<Object> priorities;
 
   public PrioritySortingComparator(Set<Object> priorities) {
     this.priorities = priorities;

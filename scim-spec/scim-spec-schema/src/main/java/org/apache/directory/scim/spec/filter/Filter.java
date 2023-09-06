@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.io.Serializable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
@@ -38,8 +39,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 @Data
 @Slf4j
-public class Filter {
-  
+public class Filter implements Serializable {
+
+  private static final long serialVersionUID = -363511683199922297L;
+
   @Setter(AccessLevel.NONE)
   private FilterExpression expression;
   private String filter;
@@ -68,7 +71,7 @@ public class Filter {
   }
 
   protected FilterExpression parseFilter(String filter) throws FilterParseException {
-    FilterLexer l = new FilterLexer(new ANTLRInputStream(filter));
+    FilterLexer l = new FilterLexer(CharStreams.fromString(filter));
     FilterParser p = new FilterParser(new CommonTokenStream(l));
     p.setBuildParseTree(true);
 

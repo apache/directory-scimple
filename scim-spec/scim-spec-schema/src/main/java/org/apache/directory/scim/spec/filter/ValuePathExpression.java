@@ -28,6 +28,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ValuePathExpression implements FilterExpression {
+
+  private static final long serialVersionUID = 2615135752981305135L;
   // urn:parentAttribute[attributeExpression].subAttribute
 
   AttributeReference attributePath;

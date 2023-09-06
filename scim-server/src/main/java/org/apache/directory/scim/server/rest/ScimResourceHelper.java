@@ -72,18 +72,6 @@ public final class ScimResourceHelper {
     // Make this a utility class
   }
 
-  /**
-   * Provides a set of JAX-RS annotated classes for the basic SCIM protocol
-   * functionality.
-   * 
-   * @return the JAX-RS annotated classes.
-   * @deprecated use {@link ScimResourceHelper#scimpleFeatureAndResourceClasses}
-   */
-  @Deprecated
-  public static Set<Class<?>> getScimClassesToLoad() {
-    return SCIMPLE_CLASSES;
-  }
-
   public static Set<Class<?>> scimpleFeatureAndResourceClasses() {
     Set<Class<?>> classes = new HashSet<>(RESOURCE_CLASSES);
     classes.add(ScimpleFeature.class);

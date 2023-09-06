@@ -293,7 +293,7 @@ public class UpdateRequest<T extends ScimResource> {
   private List<PatchOperation> convertNodeToPatchOperations(String operationNode, String diffPath, JsonNode valueNode) throws IllegalArgumentException, IllegalAccessException, JsonProcessingException {
     log.debug("convertNodeToPatchOperations: {} , {}", operationNode, diffPath);
     List<PatchOperation> operations = new ArrayList<>();
-    PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase());
+    PatchOperation.Type patchOpType = PatchOperation.Type.valueOf(operationNode.toUpperCase(Locale.ROOT));
 
     if (diffPath != null && diffPath.length() >= 1) {
       ParseData parseData = new ParseData(diffPath);

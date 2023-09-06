@@ -24,8 +24,10 @@ package org.apache.directory.scim.spec.resources;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -149,13 +151,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
       PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
       p.setBuildParseTree(true);
-  
-      p.addErrorListener(new BaseErrorListener() {
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-          throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
-        }
-      });
+      p.addErrorListener(new PhoneNumberErrorListener());
   
       PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
       try {
@@ -219,7 +215,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     if (subAddress == null) {
       if (other.subAddress != null)
         return false;
-    } else if (!subAddress.equalsIgnoreCase(other.subAddress))
+    } else if (!equalsIgnoreCase(subAddress, other.subAddress))
       return false;
 
     String phoneContextTemp = phoneContext;
@@ -235,7 +231,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     if (phoneContextTemp == null) {
       if (otherPhoneContextTemp != null)
         return false;
-    } else if (!phoneContextTemp.equalsIgnoreCase(otherPhoneContextTemp))
+    } else if (!equalsIgnoreCase(phoneContextTemp, otherPhoneContextTemp))
       return false;
 
     if (!equalsIgnoreCaseAndOrderParams(other.params)) {
@@ -250,7 +246,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     if (type == null) {
         return other.type == null;
-    } else return type.equalsIgnoreCase(other.type);
+    } else return equalsIgnoreCase(type, other.type);
   }
 
   /*
@@ -264,21 +260,31 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     result = prime * result + (isGlobalNumber ? 1231 : 1237);
     result = prime * result + ((number == null) ? 0 : number.replaceAll(VISUAL_SEPARATORS, "").hashCode());
     result = prime * result + ((extension == null) ? 0 : extension.replaceAll(VISUAL_SEPARATORS, "").hashCode());
-    result = prime * result + ((subAddress == null) ? 0 : subAddress.toLowerCase().hashCode());
-    result = prime * result + ((phoneContext == null) ? 0 : (isDomainPhoneContext ? phoneContext.toLowerCase().hashCode() : phoneContext.replaceAll(VISUAL_SEPARATORS, "").hashCode()));
+    result = prime * result + ((subAddress == null) ? 0 : subAddress.toLowerCase(Locale.ROOT).hashCode());
+    result = prime * result + ((phoneContext == null) ? 0 : (isDomainPhoneContext ? phoneContext.toLowerCase(Locale.ROOT).hashCode() : phoneContext.replaceAll(VISUAL_SEPARATORS, "").hashCode()));
     result = prime * result + ((params == null) ? 0 : paramsToLowerCase().hashCode());
     result = prime * result + ((primary == null) ? 0 : primary.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.toLowerCase().hashCode());
+    result = prime * result + ((type == null) ? 0 : type.toLowerCase(Locale.ROOT).hashCode());
     return result;
   }
 
   Map<String, String> paramsToLowerCase() {
     Map<String, String> paramsLowercase = new LinkedHashMap<>();
     for (Entry<String, String> entry : params.entrySet()) {
-      paramsLowercase.put(entry.getKey().toLowerCase(), entry.getValue().toLowerCase());
+      paramsLowercase.put(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue().toLowerCase(Locale.ROOT));
     }
 
     return paramsLowercase;
+  }
+
+  private static boolean equalsIgnoreCase(String a, String b) {
+    if (a == b) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return false;
+    }
+    return a.toLowerCase(Locale.ROOT).equals(b.toLowerCase(Locale.ROOT));
   }
 
   boolean equalsIgnoreCaseAndOrderParams(Map<String, String> otherParams) {
@@ -293,14 +299,21 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     Map<String, String> paramsLowercase = paramsToLowerCase();
 
     for (Entry<String, String> entry : otherParams.entrySet()) {
-      String foundValue = paramsLowercase.get(entry.getKey().toLowerCase());
+      String foundValue = paramsLowercase.get(entry.getKey().toLowerCase(Locale.ROOT));
 
-      if (!entry.getValue().equalsIgnoreCase(foundValue)) {
+      if (!entry.getValue().toLowerCase(Locale.ROOT).equals(foundValue)) {
         return false;
       }
     }
 
     return true;
+  }
+
+  private static class PhoneNumberErrorListener extends BaseErrorListener {
+    @Override
+    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+      throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+    }
   }
 
   @Data
@@ -390,11 +403,10 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     String getFormattedParams() {
       String paramsFormatted = "";
-
       if (params != null) {
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-          paramsFormatted += String.format(PARAMS_STRING, entry.getKey(), entry.getValue() != null ? entry.getValue() : "");
-        }
+        paramsFormatted = params.entrySet().stream()
+          .map(entry -> String.format(PARAMS_STRING, entry.getKey(), entry.getValue() != null ? entry.getValue() : ""))
+          .collect(Collectors.joining());
       }
 
       return !paramsFormatted.isEmpty() ? paramsFormatted : null;

@@ -21,6 +21,7 @@ package org.apache.directory.scim.spec.filter;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
     AttributeComparisonExpression attributeComparisonExpression;
     String attributePathText = ctx.attributePath.getText();
     AttributeReference attributePath = new AttributeReference(attributePathText);
-    CompareOperator compareOperator = CompareOperator.valueOf(ctx.op.getText().toUpperCase());
+    CompareOperator compareOperator = CompareOperator.valueOf(ctx.op.getText().toUpperCase(Locale.ROOT));
     String compareValueText = ctx.compareValue.getText();
     Object compareValue = parseJsonType(compareValueText);
     attributeComparisonExpression = new AttributeComparisonExpression(attributePath, compareOperator, compareValue);
@@ -102,7 +103,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   @Override
   public void exitFilterLogicExpression(FilterLogicExpressionContext ctx) {
-    String op = ctx.op.getText().toUpperCase();
+    String op = ctx.op.getText().toUpperCase(Locale.ROOT);
     LogicalOperator logicalOperator = LogicalOperator.valueOf(op);
     FilterExpression right = expressionStack.pop();
     FilterExpression left = expressionStack.pop();
@@ -113,7 +114,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   @Override
   public void exitAttributeLogicExpression(AttributeLogicExpressionContext ctx) {
-    String op = ctx.op.getText().toUpperCase();
+    String op = ctx.op.getText().toUpperCase(Locale.ROOT);
     LogicalOperator logicalOperator = LogicalOperator.valueOf(op);
     FilterExpression right = expressionStack.pop();
     FilterExpression left = expressionStack.pop();
@@ -134,7 +135,7 @@ public class ExpressionBuildingListener extends FilterBaseListener {
   @Override
   public void exitAttributeCompareExpression(AttributeCompareExpressionContext ctx) {
     String attributeName = ctx.attributeName.getText();
-    CompareOperator compareOperator = CompareOperator.valueOf(ctx.op.getText().toUpperCase());
+    CompareOperator compareOperator = CompareOperator.valueOf(ctx.op.getText().toUpperCase(Locale.ROOT));
     Object value = parseJsonType(ctx.compareValue.getText());
     AttributeReference attributeReference = new AttributeReference(attributeName);
     AttributeComparisonExpression expression = new AttributeComparisonExpression(attributeReference, compareOperator, value);

@@ -24,6 +24,7 @@ import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 
 @Value
 public class AttributePresentExpression implements FilterExpression, ValueFilterExpression {
+  private static final long serialVersionUID = -4491412651236977273L;
   AttributeReference attributePath;
 
   @Override

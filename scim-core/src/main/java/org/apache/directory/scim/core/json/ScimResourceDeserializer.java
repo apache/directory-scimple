@@ -32,6 +32,8 @@ import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 public class ScimResourceDeserializer extends StdDeserializer<ScimResource> {
+
+  private static final long serialVersionUID = -2125441391108866034L;
   private final SchemaRegistry schemaRegistry;
 
   public ScimResourceDeserializer(SchemaRegistry schemaRegistry) {

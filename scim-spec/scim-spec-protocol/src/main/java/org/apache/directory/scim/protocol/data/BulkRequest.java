@@ -37,7 +37,9 @@ import lombok.EqualsAndHashCode;
 public class BulkRequest extends BaseResource<BulkRequest> {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
-  
+
+  private static final long serialVersionUID = -296570866318702047L;
+
   @XmlElement
   Integer failOnErrors;
   

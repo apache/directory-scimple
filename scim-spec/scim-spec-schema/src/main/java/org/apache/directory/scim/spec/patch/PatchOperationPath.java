@@ -34,9 +34,13 @@ import org.apache.directory.scim.spec.filter.ValuePathExpression;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
+
 @Data
 @Slf4j
-public class PatchOperationPath {
+public class PatchOperationPath implements Serializable {
+
+  private static final long serialVersionUID = 449365558879593512L;
 
   private ValuePathExpression valuePathExpression;
 

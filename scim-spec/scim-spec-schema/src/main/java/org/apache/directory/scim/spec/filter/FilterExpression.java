@@ -19,9 +19,10 @@
 
 package org.apache.directory.scim.spec.filter;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
-public interface FilterExpression {
+public interface FilterExpression extends Serializable {
   
   String toFilter();
 

@@ -49,8 +49,9 @@ public class Schema implements AttributeContainer {
   
   public static final String RESOURCE_NAME = "Schema";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:Schema";
-  
-  
+  private static final long serialVersionUID = 1869782412244161741L;
+
+
   /**
    * Defines the structure of attributes included in SCIM schemas as defined by
    * section 7 of the SCIM schema specification. See
@@ -63,6 +64,8 @@ public class Schema implements AttributeContainer {
   @XmlAccessorType(XmlAccessType.NONE)
   @Data
   public static class Attribute implements AttributeContainer {
+
+    private static final long serialVersionUID = 1683400114899587851L;
 
     public enum Mutability {
 
@@ -148,7 +151,7 @@ public class Schema implements AttributeContainer {
     @XmlElement
     List<String> referenceTypes;
 
-    AttributeAccessor accessor;
+    transient AttributeAccessor accessor;
 
     private boolean scimResourceIdReference;
 
@@ -169,7 +172,7 @@ public class Schema implements AttributeContainer {
           LOG.warn("Attribute name was null, skipping name indexing");
           continue;
         }
-        subAttributeNamesMap.put(name.toLowerCase(), attribute);
+        subAttributeNamesMap.put(name.toLowerCase(Locale.ENGLISH), attribute);
       }
       
       if(action.equals(AddAction.REPLACE)) {
@@ -186,7 +189,7 @@ public class Schema implements AttributeContainer {
       if (name == null) {
         return null;
       }
-      return subAttributeNamesMap.get(name.toLowerCase());
+      return subAttributeNamesMap.get(name.toLowerCase(Locale.ENGLISH));
     }
 
   }
@@ -228,7 +231,7 @@ public class Schema implements AttributeContainer {
         LOG.warn("Attribute name was null, skipping name indexing");
         continue;
       }
-      attributeNamesMap.put(name.toLowerCase(), attribute);
+      attributeNamesMap.put(name.toLowerCase(Locale.ENGLISH), attribute);
     }
     
     this.attributes = attributes;
@@ -238,7 +241,7 @@ public class Schema implements AttributeContainer {
     if (name == null) {
       return null;
     }
-    return attributeNamesMap.get(name.toLowerCase());
+    return attributeNamesMap.get(name.toLowerCase(Locale.ENGLISH));
   }
 
   public Attribute getAttributeFromPath(String path) {

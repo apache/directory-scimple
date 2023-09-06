@@ -31,7 +31,7 @@ public class StatusAdapter extends XmlAdapter<String, Status> {
     }
 
     for (Status status : Status.values()) {
-      if (status.getStatusCode() == Integer.valueOf(v)) {
+      if (status.getStatusCode() == Integer.parseInt(v)) {
         return status;
       }
     }

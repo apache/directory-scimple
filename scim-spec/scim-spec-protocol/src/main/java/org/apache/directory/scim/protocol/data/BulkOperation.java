@@ -32,10 +32,14 @@ import org.apache.directory.scim.spec.resources.ScimResource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @XmlType(propOrder = {"method","path","bulkId","data"})
 @XmlAccessorType(XmlAccessType.NONE)
-public class BulkOperation {
+public class BulkOperation implements Serializable {
+
+  private static final long serialVersionUID = 6528874816710788132L;
 
   public enum Method {
     @XmlEnumValue("POST") POST,
@@ -47,8 +51,10 @@ public class BulkOperation {
   @Data
   @AllArgsConstructor
   @XmlAccessorType(XmlAccessType.NONE)
-  public static class StatusWrapper {
-    
+  public static class StatusWrapper implements Serializable {
+
+    private static final long serialVersionUID = 1544738718748608248L;
+
     public static StatusWrapper wrap(Status code) {
       return new StatusWrapper(code);
     }

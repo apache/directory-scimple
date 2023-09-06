@@ -32,6 +32,7 @@ import lombok.Value;
 
 @Value
 public class AttributeComparisonExpression implements FilterExpression, ValueFilterExpression {
+  private static final long serialVersionUID = -2865840428089850575L;
   AttributeReference attributePath;
   CompareOperator operation;
   Object compareValue;
