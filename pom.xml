@@ -60,6 +60,7 @@
     <module>scim-server</module>
     <module>scim-server-examples/scim-server-memory</module>
     <module>scim-server-examples/scim-server-jersey</module>
+    <module>scim-server-examples/scim-server-quarkus</module>
     <module>scim-server-examples/scim-server-spring-boot</module>
     <module>support/spring-boot</module>
     <module>scim-tools</module>
