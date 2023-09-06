@@ -30,7 +30,6 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.EtagGenerator;
-import org.apache.directory.scim.server.rest.RequestContext;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.apache.directory.scim.server.rest.UserResourceImpl;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -101,7 +100,6 @@ public class ScimpleSpringConfiguration {
     config.register(new AbstractBinder() {
       @Override
       protected void configure() {
-        bind(RequestContext.class).to(RequestContext.class); // needs to load from HK2 to include @Context
         bind(UserResourceImpl.class).to(UserResource.class); // Used by SelfResource
       }
     });

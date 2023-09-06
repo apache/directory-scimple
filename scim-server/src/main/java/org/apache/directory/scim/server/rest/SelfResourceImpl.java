@@ -24,7 +24,7 @@ import java.security.Principal;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.spec.exception.ResourceException;
@@ -33,7 +33,6 @@ import org.apache.directory.scim.core.repository.SelfIdResolver;
 import org.apache.directory.scim.protocol.SelfResource;
 import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
-import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -47,18 +46,20 @@ public class SelfResourceImpl implements SelfResource {
 
   private final Instance<SelfIdResolver> selfIdResolver;
 
-  private final RequestContext requestContext;
+  // TODO: Field injection of SecurityContext should work with all implementations
+  // CDI can be used directly in Jakarta WS 4
+  @Context
+  SecurityContext securityContext;
 
   @Inject
-  public SelfResourceImpl(UserResource userResource, Instance<SelfIdResolver> selfIdResolver, RequestContext requestContext) {
+  public SelfResourceImpl(UserResource userResource, Instance<SelfIdResolver> selfIdResolver) {
     this.userResource = userResource;
     this.selfIdResolver = selfIdResolver;
-    this.requestContext = requestContext;
   }
 
   public SelfResourceImpl() {
     // CDI
-    this(null, null, null);
+    this(null, null);
   }
 
   @Override
@@ -94,7 +95,7 @@ public class SelfResourceImpl implements SelfResource {
   }
 
   private String getInternalId() throws ResourceException {
-    Principal callerPrincipal = requestContext.getSecurityContext().getUserPrincipal();
+    Principal callerPrincipal = securityContext.getUserPrincipal();
 
     if (callerPrincipal != null) {
       log.debug("Resolved SelfResource principal to : {}", callerPrincipal.getName());

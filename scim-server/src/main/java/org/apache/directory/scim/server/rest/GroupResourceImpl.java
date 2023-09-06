@@ -24,6 +24,10 @@ package org.apache.directory.scim.server.rest;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.protocol.GroupResource;
@@ -35,12 +39,12 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> implements GroupResource {
 
   @Inject
-  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, RequestContext requestContext, EtagGenerator etagGenerator) {
-    super(schemaRegistry, repositoryRegistry, requestContext, etagGenerator, ScimGroup.class);
+  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, EtagGenerator etagGenerator) {
+    super(schemaRegistry, repositoryRegistry, etagGenerator, ScimGroup.class);
   }
 
   public GroupResourceImpl() {
     // CDI
-    this(null, null, null, null);
+    this(null, null, null);
   }
 }

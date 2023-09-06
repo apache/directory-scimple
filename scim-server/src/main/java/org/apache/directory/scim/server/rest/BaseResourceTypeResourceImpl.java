@@ -29,8 +29,7 @@ import java.util.function.Function;
 
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.EntityTag;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
@@ -77,16 +76,21 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private final  AttributeUtil attributeUtil;
 
-  RequestContext requestContext;
-
   private final  EtagGenerator etagGenerator;
 
   private final Class<T> resourceClass;
 
-  public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, RequestContext requestContext, EtagGenerator etagGenerator, Class<T> resourceClass) {
+  // TODO: Field injection of UriInfo, Request should work with all implementations
+  // CDI can be used directly in Jakarta WS 4
+  @Context
+  UriInfo uriInfo;
+
+  @Context
+  Request request;
+
+  public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, EtagGenerator etagGenerator, Class<T> resourceClass) {
     this.schemaRegistry = schemaRegistry;
     this.repositoryRegistry = repositoryRegistry;
-    this.requestContext = requestContext;
     this.etagGenerator = etagGenerator;
     this.resourceClass = resourceClass;
     this.attributeUtil = new AttributeUtil(schemaRegistry);
@@ -106,7 +110,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response getById(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    if (requestContext.getUriInfo().getQueryParameters().getFirst("filter") != null) {
+    if (uriInfo.getQueryParameters().getFirst("filter") != null) {
       return Response.status(Status.FORBIDDEN).build();
     }
 
@@ -124,7 +128,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     if (resource != null) {
       EntityTag backingETag = requireEtag(resource);
-      ResponseBuilder evaluatePreconditionsResponse = requestContext.getRequest().evaluatePreconditions(backingETag);
+      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
 
       if (evaluatePreconditionsResponse != null) {
         return Response.status(Status.NOT_MODIFIED).build();
@@ -339,7 +343,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       LOG.warn("Repository must supply an id for a resource");
       id = "unknown";
     }
-    return requestContext.getUriInfo().getAbsolutePathBuilder()
+    return uriInfo.getAbsolutePathBuilder()
                   .path(id)
                   .build();
   }
@@ -379,7 +383,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   private void validatePreconditions(String id, EntityTag etag) {
-    ResponseBuilder response = requestContext.getRequest().evaluatePreconditions(etag);
+    ResponseBuilder response = request.evaluatePreconditions(etag);
     if (response != null) {
       throw new WebApplicationException(response
         .entity(new ErrorResponse(Status.PRECONDITION_FAILED, "Failed to update record, backing record has changed - " + id))

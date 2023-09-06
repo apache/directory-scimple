@@ -53,7 +53,8 @@ public class SelfResourceImplTest {
     when(principal.getName()).thenReturn("test-user");
     when(selfIdResolverInstance.isUnsatisfied()).thenReturn(true);
 
-    SelfResourceImpl selfResource = new SelfResourceImpl(null, selfIdResolverInstance, new RequestContext().setSecurityContext(securityContext));
+    SelfResourceImpl selfResource = new SelfResourceImpl(null, selfIdResolverInstance);
+    selfResource.securityContext = securityContext;
 
     UnableToResolveIdResourceException exception = assertThrows(UnableToResolveIdResourceException.class, () -> selfResource.getSelf(null, null));
 
@@ -79,7 +80,8 @@ public class SelfResourceImplTest {
     when(selfIdResolver.resolveToInternalId(principal)).thenReturn(internalId);
     when(userResource.getById(internalId, null, null)).thenReturn(mockResponse);
 
-    SelfResourceImpl selfResource = new SelfResourceImpl(userResource, selfIdResolverInstance, new RequestContext().setSecurityContext(securityContext));
+    SelfResourceImpl selfResource = new SelfResourceImpl(userResource, selfIdResolverInstance);
+    selfResource.securityContext = securityContext;
 
     // the response is just a passed along from the UserResource, so just validate it is the same instance.
     assertThat(selfResource.getSelf(null, null), sameInstance(mockResponse));
