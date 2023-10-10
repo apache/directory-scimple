@@ -113,7 +113,7 @@ public interface BaseResourceTypeResource<T> {
    * @return
    */
   @POST
-  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Consumes(Constants.SCIM_CONTENT_TYPE)
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @Operation(description = "Create")
   @ApiResponses(value = {
@@ -160,7 +160,7 @@ public interface BaseResourceTypeResource<T> {
    */
   @PUT
   @Path("{id}")
-  @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+  @Consumes(Constants.SCIM_CONTENT_TYPE)
   @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
   @Operation(description = "Update")
   @ApiResponses(value = {
