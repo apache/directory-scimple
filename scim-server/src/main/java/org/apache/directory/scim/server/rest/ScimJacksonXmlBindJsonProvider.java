@@ -21,6 +21,7 @@ package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.Constants;
@@ -29,15 +30,26 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.directory.scim.protocol.data.ListResponse;
+import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
 /**
- * Adds JacksonJaxbJsonProvider for custom MediaType {@code application/scim+json}.
+ * Adds JacksonJaxbJsonProvider for custom MediaType {@code application/scim+json} and application/json.
  */
 @Provider
-@Consumes(Constants.SCIM_CONTENT_TYPE)
-@Produces(Constants.SCIM_CONTENT_TYPE)
+@Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
+@Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
 @ApplicationScoped
 public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
+
+  private static final Set<Package> SUPPORTED_PACKAGES = Set.of(ScimResource.class.getPackage(),
+                                                                ListResponse.class.getPackage(),
+                                                                ServiceProviderConfiguration.class.getPackage());
 
   public ScimJacksonXmlBindJsonProvider() {
     // CDI
@@ -46,5 +58,17 @@ public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
   @Inject
   public ScimJacksonXmlBindJsonProvider(SchemaRegistry schemaRegistry) {
     super(ObjectMapperFactory.createObjectMapper(schemaRegistry), DEFAULT_ANNOTATIONS);
+  }
+
+  @Override
+  public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    return super.isReadable(type, genericType, annotations, mediaType)
+      && SUPPORTED_PACKAGES.contains(type.getPackage());
+  }
+
+  @Override
+  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    return super.isWriteable(type, genericType, annotations, mediaType)
+      && SUPPORTED_PACKAGES.contains(type.getPackage());
   }
 }
