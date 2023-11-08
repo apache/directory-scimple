@@ -231,7 +231,7 @@ public class AttributeUtilTest {
   private void debugJson(Object resource) throws JsonGenerationException, JsonMappingException, IOException {
     StringWriter sw = new StringWriter();
     objectMapper.writeValue(sw, resource);
-    LOG.info(sw.toString());
+    LOG.debug(sw.toString());
   }
   
   private ScimUser getScimUser() throws PhoneNumberParseException {

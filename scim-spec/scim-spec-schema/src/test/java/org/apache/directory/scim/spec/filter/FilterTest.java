@@ -37,10 +37,10 @@ public class FilterTest extends AbstractLexerParserTest {
   @ParameterizedTest
   @MethodSource("getAllFilters")
   public void test(String filterText) throws Exception {
-    LOG.info("Running Filter Parser test on input: " + filterText);
+    LOG.debug("Running Filter Parser test on input: {}", filterText);
     Filter filter = new Filter(filterText);
     FilterExpression expression = filter.getExpression();
-    LOG.info("Parsed String: " + expression.toFilter());
+    LOG.debug("Parsed String: {}", expression.toFilter());
     Assertions.assertNotNull(expression);
   }
 }

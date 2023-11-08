@@ -89,7 +89,7 @@ public class UpdateRequestTest {
   public void testResourcePassthrough() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", createUser(), createUser(), schemaRegistry);
     ScimUser result = updateRequest.getResource();
-    log.info("testResourcePassthrough: " + result);
+    log.debug("testResourcePassthrough: {}", result);
     assertThat(result)
               .isNotNull();
   }
@@ -98,7 +98,7 @@ public class UpdateRequestTest {
   public void testPatchPassthrough() throws Exception {
     UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", createUser(), createUser1PatchOps(), schemaRegistry);
     List<PatchOperation> result = updateRequest.getPatchOperations();
-    log.info("testPatchPassthrough: " + result);
+    log.debug("testPatchPassthrough: {}", result);
     assertThat(result)
               .isNotNull();
   }
