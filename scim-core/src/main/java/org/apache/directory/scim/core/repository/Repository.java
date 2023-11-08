@@ -98,7 +98,35 @@ public interface Repository<T extends ScimResource> {
    *         cannot be retrieved.
    */
   FilterResponse<T> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws ResourceException;
-  
+
+  /**
+   * Finds and retrieves all ScimResource objects known to the persistence
+   * layer that match the criteria specified by the FindRequest.The results
+   * may be truncated by the scope specified by the passed PageRequest and
+   * the order of the returned resources may be controlled by the passed
+   * SortRequest.
+   * <b>
+   * NOTE: The default implementation of this method ignores the include/exclude attributes.
+   *
+   * @param findRequest the find request that determines the ScimResources that will be
+   *        part of the ResultList
+   * @return A list of the ScimResources that pass the filter criteria,
+   *        truncated to match the requested "page" and sorted according
+   *        to the provided requirements.
+   * @throws ResourceException If one or more ScimResources
+   *         cannot be retrieved.
+   */
+  default FilterResponse<T> find(FindRequest findRequest) throws ResourceException {
+
+    Filter filter = findRequest.getFilter();
+    PageRequest pageRequest = findRequest.getPageRequest();
+    SortRequest sortRequest = findRequest.getSortRequest();
+
+    // TODO: Implement the include/exclude attributes, this is currently done in BaseResourceTypeResourceImpl
+    // it calculates the etag before excluding attributes, that logic may need to move to this layer?
+    return find(filter, pageRequest, sortRequest);
+  }
+
   /**
    * Deletes the ScimResource with the provided identifier (if it exists).
    * This interface makes no distinction between hard and soft deletes but

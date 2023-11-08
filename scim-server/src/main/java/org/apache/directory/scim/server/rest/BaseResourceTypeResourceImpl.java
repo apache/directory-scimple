@@ -34,6 +34,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
+import org.apache.directory.scim.core.repository.FindRequest;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.server.exception.*;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
@@ -224,7 +225,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     ListResponse<T> listResponse = new ListResponse<>();
 
-    FilterResponse<T> filterResp = repository.find(filter, pageRequest, sortRequest);
+    FindRequest findRequest = new FindRequest(attributeReferences, excludedAttributeReferences, filter, sortRequest.getSortBy(), sortRequest.getSortOrder(), pageRequest.getStartIndex(), pageRequest.getCount());
+    FilterResponse<T> filterResp = repository.find(findRequest);
 
     // If no resources are found, we should still return a ListResponse with
     // the totalResults set to 0;
