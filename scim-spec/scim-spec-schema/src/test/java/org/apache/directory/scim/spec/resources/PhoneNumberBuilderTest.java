@@ -31,12 +31,12 @@ import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.PhoneNumber.LocalPhoneNumberBuilder;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PhoneNumberBuilderTest {
 
@@ -102,47 +102,33 @@ public class PhoneNumberBuilderTest {
 	@MethodSource("getInvalidSubscriberNumbers")
   public void test_invalid_subscriberNumber_for_LocalPhoneNumberBuilder(String invalidSubscriberNumber) throws Exception {
 
-    LOGGER.info("invalid subscriber number '" + invalidSubscriberNumber + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber(invalidSubscriberNumber).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(SUBSCRIBER_NUMBER));
-    }
+    assertThatIllegalArgumentException()
+      .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber(invalidSubscriberNumber).build())
+      .withMessageContaining(SUBSCRIBER_NUMBER);
+
     
-    String temp = invalidSubscriberNumber != null ? (" " + invalidSubscriberNumber + " ") : null; 
-    LOGGER.info("invalid subscriber number '" + temp + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber(temp).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(SUBSCRIBER_NUMBER));
-    }
-    
+    String temp = invalidSubscriberNumber != null ? (" " + invalidSubscriberNumber + " ") : null;
+    assertThatIllegalArgumentException()
+      .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber(temp).build())
+      .withMessageContaining(SUBSCRIBER_NUMBER);
   }
   
   @Test
   public void test_invalid_padded_subscriberNumber_for_LocalPhoneNumberBuilder() throws Exception {
     //parameterized value coming into test method has spaces stripped from beginning and end; need to test that spaces are not allowed at all
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber(" 23 ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(SUBSCRIBER_NUMBER));
-    }
+    assertThatIllegalArgumentException()
+      .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber(" 23 ").build())
+      .withMessageContaining(SUBSCRIBER_NUMBER);
   }
   
   @ParameterizedTest
   @MethodSource("getValidSubscriberNumbers")
   public void test_valid_subscriberNumber_for_LocalPhoneNumberBuilder(String validSubscriberNumber) throws Exception {
 
-    LOGGER.info("valid subscriber number '" + validSubscriberNumber + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber(validSubscriberNumber).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assertTrue(ex.getMessage().contains(COUNTRY_CODE), "Exception should have been for country code.");
-    }
+    LOGGER.debug("valid subscriber number '{}' start", validSubscriberNumber);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber(validSubscriberNumber).build())
+        .withMessageContaining(COUNTRY_CODE, "Exception should have been for country code.");
   }
   
   @SuppressWarnings("unused")
@@ -190,30 +176,23 @@ public class PhoneNumberBuilderTest {
     @MethodSource("getInvalidCountryCodes")
     public void test_invalid_countryCode_for_LocalPhoneNumberBuilder(String invalidCountryCode) throws Exception {
 
-      LOGGER.info("invalid country code '" + invalidCountryCode + "' start");
-      try {
-        new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(invalidCountryCode).build();
-        fail(FAILURE_MESSAGE);
-      } catch (IllegalArgumentException ex) {
-        LOGGER.info(ex.getMessage());
-        assert (ex.getMessage().contains(COUNTRY_CODE));
-      }
+      LOGGER.debug("invalid country code '{}' start", invalidCountryCode);
+      assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(invalidCountryCode).build())
+        .withMessageContaining(COUNTRY_CODE);
       
       String temp = invalidCountryCode != null ? (" " + invalidCountryCode + " ") : null; 
-      LOGGER.info("invalid country code '" + temp + "' start");
-      try {
-        new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(temp).build();
-        fail(FAILURE_MESSAGE);
-      } catch (IllegalArgumentException ex) {
-        assert (ex.getMessage().contains(COUNTRY_CODE));
-      }
+      LOGGER.debug("invalid country code '{}' start", temp);
+      assertThatIllegalArgumentException()
+          .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(temp).build())
+          .withMessageContaining(COUNTRY_CODE);
     }
     
     @ParameterizedTest
     @MethodSource("getValidCountryCodes")
     public void test_valid_countryCode_for_LocalPhoneNumberBuilder(String validCountryCode) throws Exception {
 
-      LOGGER.info("valid country code '" + validCountryCode + "' start");
+      LOGGER.debug("valid country code '{}' start", validCountryCode);
 
       PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode(validCountryCode).build();
       assertNull(phoneNumber.getExtension(), "Extension should be null");
@@ -259,44 +238,29 @@ public class PhoneNumberBuilderTest {
     @MethodSource("getInvalidAreaCodes")
     public void test_invalid_areaCode_for_LocalPhoneNumberBuilder(String invalidAreaCode) throws Exception {
 
-    LOGGER.info("invalid area code '" + invalidAreaCode + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(invalidAreaCode).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      LOGGER.info(ex.getMessage());
-      assert (ex.getMessage().contains(AREA_CODE));
-    }
-    
-    String temp = invalidAreaCode != null ? (" " + invalidAreaCode + " ") : null; 
-    LOGGER.info("invalid area code '" + temp + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(temp).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(AREA_CODE));
-    }
+    LOGGER.debug("invalid area code '{}' start", invalidAreaCode);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(invalidAreaCode).build())
+        .withMessageContaining(AREA_CODE);
+
+    String temp = invalidAreaCode != null ? (" " + invalidAreaCode + " ") : null;
+    LOGGER.debug("invalid area code '{}' start", temp);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(temp).build())
+        .withMessageContaining(AREA_CODE);
   }
-  
+
   @Test
   public void test_invalid_padded_areaCode_for_LocalPhoneNumberBuilder() throws Exception {
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(" 2 ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      LOGGER.info("padded areaCode ->" + ex.getMessage());
-      assert (ex.getMessage().contains(AREA_CODE));
-    }
-    
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode("  ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      LOGGER.info("padded areaCode ->" + ex.getMessage());
-      assert (ex.getMessage().contains(AREA_CODE));
-    }
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(" 2 ").build())
+        .withMessageContaining(AREA_CODE);
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode("  ").build())
+        .withMessageContaining(AREA_CODE);
   }
-  
+
   @Test
   public void test_areaCode_can_be_null_for_LocalPhoneNumberBuilder() throws Exception {
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").build();
@@ -304,15 +268,15 @@ public class PhoneNumberBuilderTest {
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertEquals("123-4567", phoneNumber.getNumber());
     assertEquals("+23", phoneNumber.getPhoneContext());
-    assertEquals("tel:123-4567;phone-context=+23", phoneNumber.getValue());    
-  } 
-  
+    assertEquals("tel:123-4567;phone-context=+23", phoneNumber.getValue());
+  }
+
   @ParameterizedTest
   @MethodSource("getValidAreaCodes")
   public void test_valid_areaCode_for_LocalPhoneNumberBuilder(String validAreaCode) throws Exception {
 
-    LOGGER.info("valid area code '" + validAreaCode + "' start");
-    
+    LOGGER.debug("valid area code '{}' start", validAreaCode);
+
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("123-4567").countryCode("23").areaCode(validAreaCode).build();
     assertNull(phoneNumber.getExtension(), "Extension should be null");
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
@@ -320,10 +284,10 @@ public class PhoneNumberBuilderTest {
     assertEquals(("+23-" + validAreaCode), phoneNumber.getPhoneContext());
     assertEquals(("tel:123-4567;phone-context=+23-"+validAreaCode), phoneNumber.getValue());
   }
-  
+
   @SuppressWarnings("unused")
   private static String[] getInvalidGlobalNumbers() {
-    return new String[] { 
+    return new String[] {
        null,
        "",
        "A",
@@ -339,10 +303,10 @@ public class PhoneNumberBuilderTest {
        "+1 888 888 8888"
     };
   }
-  
+
   @SuppressWarnings("unused")
   private static String[] getValidGlobalNumbers() {
-    return new String[] { 
+    return new String[] {
       "+44-20-1234-5678",//global with visualSeparator -
       "+44.20.1234.5678",//global with visualSeparator .
       "+1-201-555-0123",//US global format with visualSeparator -
@@ -428,58 +392,48 @@ public class PhoneNumberBuilderTest {
   @MethodSource("getInvalidGlobalNumbers")
   public void test_invalid_globalNumber_for_GlobalPhoneNumberBuilder(String invalidGlobalNumber) throws Exception {
 
-    LOGGER.info("invalid global number '" + invalidGlobalNumber + "' start");
-    try {
-      new GlobalPhoneNumberBuilder().globalNumber(invalidGlobalNumber).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(GLOBAL_NUMBER));
-    }
-    
-    String temp = invalidGlobalNumber != null ? (" " + invalidGlobalNumber + " ") : null; 
-    LOGGER.info("invalid global number '" + temp + "' start");
-    try {
-      new GlobalPhoneNumberBuilder().globalNumber(temp).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(GLOBAL_NUMBER));
-    }
-    
+    LOGGER.debug("invalid global number '{}' start", invalidGlobalNumber);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new GlobalPhoneNumberBuilder().globalNumber(invalidGlobalNumber).build())
+        .withMessageContaining(GLOBAL_NUMBER);
+
+    String temp = invalidGlobalNumber != null ? (" " + invalidGlobalNumber + " ") : null;
+    LOGGER.debug("invalid global number '{}' start", temp);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new GlobalPhoneNumberBuilder().globalNumber(temp).build())
+        .withMessageContaining(GLOBAL_NUMBER);
   }
-  
+
   @Test
   public void test_invalid_padded_gloablNumber_for_GlobalPhoneNumberBuilder() throws Exception {
     //parameterized value coming into test method has spaces stripped from beginning and end; need to test that spaces are not allowed at all
-    try {
-      new GlobalPhoneNumberBuilder().globalNumber(" 23 ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(GLOBAL_NUMBER));
-    }
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new GlobalPhoneNumberBuilder().globalNumber(" 23 ").build())
+        .withMessageContaining(GLOBAL_NUMBER);
   }
-  
+
   @ParameterizedTest
   @MethodSource("getValidGlobalNumbers")
   public void test_valid_globalNumber_for_GlobalPhoneNumberBuilder(String validGlobalNumber) throws Exception {
 
-    LOGGER.info("valid global number '" + validGlobalNumber + "' start");
-    
+    LOGGER.debug("valid global number '{}' start", validGlobalNumber);
+
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber(validGlobalNumber).build();
     assertNull(phoneNumber.getExtension(), "Extension should be null");
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
-    
+
     assertEquals(validGlobalNumber, phoneNumber.getNumber());
     assertEquals(("tel:"+validGlobalNumber), phoneNumber.getValue());
 
   }
-  
+
   @ParameterizedTest
   @MethodSource("getValidGlobalNumbers")
   public void test_valid_noPlusSymbol_globalNumber_for_GlobalPhoneNumberBuilder(String validGlobalNumber) throws Exception {
     String temp = validGlobalNumber.replace("+", "");
-    LOGGER.info("valid global number '" + temp + "' start");
-    
+    LOGGER.debug("valid global number '{}' start", temp);
+
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber(temp).build();
     assertNull(phoneNumber.getExtension(), "Extension should be null");
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
@@ -488,10 +442,10 @@ public class PhoneNumberBuilderTest {
     assertEquals("+" + temp, phoneNumber.getNumber());
     assertEquals(("tel:+" + temp), phoneNumber.getValue());
   }
-  
+
   @SuppressWarnings("unused")
   private static String[] getInvalidDomainNames() {
-    return new String[] { 
+    return new String[] {
        "#1",
        "*1",
        "@1",
@@ -503,141 +457,115 @@ public class PhoneNumberBuilderTest {
        "hhH@ExaMPlE.CoM2"
     };
   }
-  
+
   @SuppressWarnings("unused")
   private static String[] getValidDomainNames() {
-    return new String[] { 
+    return new String[] {
       "google.com",
       "2xkcd-ex.com",
       "Ab0c1d2e3f4g5H6i7-J8K9l0m.org",
       "Ab0c1d2e3f4g5H6i7-J8K9l0m"
     };
   }
-  
+
   @ParameterizedTest
   @MethodSource("getInvalidDomainNames")
   public void test_invalid_domainName_for_LocalPhoneNumberBuilder(String invalidDomainName) throws Exception {
 
-    LOGGER.info("invalid domain name '" + invalidDomainName + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(invalidDomainName).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME));
-    }
-    
-    String temp = invalidDomainName != null ? (" " + invalidDomainName + " ") : null; 
-    LOGGER.info("invalid domain name '" + temp + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(temp).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME));
-    }
-    
+    LOGGER.debug("invalid domain name '{}' start", invalidDomainName);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(invalidDomainName).build())
+        .withMessageContaining(DOMAIN_NAME);
+
+    String temp = invalidDomainName != null ? (" " + invalidDomainName + " ") : null;
+    LOGGER.debug("invalid domain name '{}' start", temp);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(temp).build())
+        .withMessageContaining(DOMAIN_NAME);
   }
-  
+
   @Test
   public void test_invalid_padded_domainName_for_LocalPhoneNumberBuilder() throws Exception {
     //parameterized value coming into test method has spaces stripped from beginning and end; need to test that spaces are not allowed at all
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(" 23 ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME));
-    }
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(" 23 ").build())
+        .withMessageContaining(DOMAIN_NAME);
   }
-  
+
   @Test
   public void test_no_domainName_coutryCode_or_areaCode_for_LocalPhoneNumberBuilder() throws Exception {
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(null).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
-    }
-    
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
-    }
-    
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("  ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
-    }
-    
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("222-1707").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
-    }
-    
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("222-1707").countryCode("").areaCode("").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
-    }
-    
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("222-1707").countryCode("  ").areaCode("  ").build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(DOMAIN_NAME) && ex.getMessage().contains(COUNTRY_CODE));
-    }
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(null).build())
+        .withMessageContaining(DOMAIN_NAME)
+        .withMessageContaining(COUNTRY_CODE);
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("").build())
+        .withMessageContaining(DOMAIN_NAME)
+        .withMessageContaining(COUNTRY_CODE);
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("  ").build())
+        .withMessageContaining(DOMAIN_NAME)
+        .withMessageContaining(COUNTRY_CODE);
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("222-1707").build())
+        .withMessageContaining(DOMAIN_NAME)
+        .withMessageContaining(COUNTRY_CODE);
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("222-1707").countryCode("").areaCode("").build())
+        .withMessageContaining(DOMAIN_NAME)
+        .withMessageContaining(COUNTRY_CODE);
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("222-1707").countryCode("  ").areaCode("  ").build())
+        .withMessageContaining(DOMAIN_NAME)
+        .withMessageContaining(COUNTRY_CODE);
   }
-  
+
   @ParameterizedTest
   @MethodSource("getValidDomainNames")
   public void test_valid_domainName_for_LocalPhoneNumberBuilder(String validDomainName) throws Exception {
 
-    LOGGER.info("valid domain name '" + validDomainName + "' start");
-    
+    LOGGER.debug("valid domain name '{}' start", validDomainName);
+
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName(validDomainName).build();
     assertNull(phoneNumber.getExtension(), "Extension should be null");
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
-   
+
     assertEquals("1707", phoneNumber.getNumber());
     assertEquals(validDomainName, phoneNumber.getPhoneContext());
     assertEquals(("tel:1707;phone-context="+validDomainName), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_extension_subAddress_conflict_for_GlobalPhoneNumberBuilder() throws PhoneNumberParseException {
     GlobalPhoneNumberBuilder builder = new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555");
     builder.build(); //should be valid builder at this point
-    
+
     builder.extension("1234");
     builder.subAddress("example.a.com");
-    
-    try {
-      builder.build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(EXTENSION) && ex.getMessage().contains(SUBADDRESS));
-    }
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> builder.build())
+        .withMessageContaining(EXTENSION)
+        .withMessageContaining(SUBADDRESS);
   }
-  
+
   @Test
   public void test_extension_subAddress_conflict_for_LocalPhoneNumberBuilder() throws PhoneNumberParseException {
     LocalPhoneNumberBuilder builder = new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("888");
     builder.build(); //should be valid builder at this point
-    
+
     builder.extension("1234");
     builder.subAddress("example.a.com");
-    
-    try {
-      builder.build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(EXTENSION) && ex.getMessage().contains(SUBADDRESS));
-    }
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> builder.build())
+        .withMessageContaining(EXTENSION)
+        .withMessageContaining(SUBADDRESS);
   }
 
   @Test
@@ -645,7 +573,7 @@ public class PhoneNumberBuilderTest {
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555")
                               .extension("1234")
                               .build();
-    
+
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
@@ -653,13 +581,13 @@ public class PhoneNumberBuilderTest {
     assertEquals("1234", phoneNumber.getExtension());
     assertEquals(("tel:+1-888-888-5555;ext=1234"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_extension_for_LocalPhoneNumberBuilder() throws PhoneNumberParseException {
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("888")
                               .extension("1234")
                               .build();
-    
+
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
 
     assertEquals("888-5555", phoneNumber.getNumber());
@@ -667,13 +595,13 @@ public class PhoneNumberBuilderTest {
     assertEquals("1234", phoneNumber.getExtension());
     assertEquals(("tel:888-5555;ext=1234;phone-context=+1-888"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_subAddress_for_GlobalPhoneNumberBuilder() throws PhoneNumberParseException {
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555")
                               .subAddress("example.a.com")
                               .build();
-    
+
     assertNull(phoneNumber.getExtension(), "Extension should be null");
     assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
@@ -681,13 +609,13 @@ public class PhoneNumberBuilderTest {
     assertEquals("example.a.com", phoneNumber.getSubAddress());
     assertEquals(("tel:+1-888-888-5555;isub=example.a.com"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_subAddress_for_LocalPhoneNumberBuilder() throws PhoneNumberParseException {
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("888")
                               .subAddress("example.a.com")
                               .build();
-    
+
     assertNull(phoneNumber.getExtension(), "Extension should be null");
 
     assertEquals("888-5555", phoneNumber.getNumber());
@@ -695,7 +623,7 @@ public class PhoneNumberBuilderTest {
     assertEquals("example.a.com", phoneNumber.getSubAddress());
     assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_adding_params_for_GlobalPhoneNumberBuilder() throws PhoneNumberParseException {
     PhoneNumber phoneNumber = new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555")
@@ -703,7 +631,7 @@ public class PhoneNumberBuilderTest {
         .param("example", "gh234")
         .param("milhouse", "simpson")
         .build();
-    
+
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertNull(phoneNumber.getPhoneContext(), "PhoneContext should be null");
 
@@ -711,7 +639,7 @@ public class PhoneNumberBuilderTest {
     assertEquals("1234", phoneNumber.getExtension());
     assertEquals(("tel:+1-888-888-5555;ext=1234;example=gh234;milhouse=simpson"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_adding_params_for_LocalPhoneNumberBuilder() throws PhoneNumberParseException {
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("888")
@@ -719,106 +647,102 @@ public class PhoneNumberBuilderTest {
         .param("example", "gh234")
         .param("milhouse", "simpson")
         .build();
-    
+
     assertNull(phoneNumber.getExtension(), "Extension should be null");
-    
+
     assertEquals("888-5555", phoneNumber.getNumber());
     assertEquals("+1-888", phoneNumber.getPhoneContext());
     assertEquals("example.a.com", phoneNumber.getSubAddress());
     assertEquals(("tel:888-5555;isub=example.a.com;phone-context=+1-888;example=gh234;milhouse=simpson"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_adding_invalid_param_to_GlobalPhoneNumberBuilder() throws PhoneNumberParseException {
-    try{ 
+    try{
       new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555").param("example_", "gh234").build();
       fail(FAILURE_MESSAGE);
     } catch (PhoneNumberParseException ex) {
-      assert (ex.getMessage().contains(FAILED_TO_PARSE));
-      assert (ex.getMessage().contains("'_'"));
+      assertThat(ex).message().contains(FAILED_TO_PARSE).contains("'_'");
     }
-    
-    try{ 
+
+    try{
       new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555").param("example", "gh234^").build();
       fail(FAILURE_MESSAGE);
     } catch (PhoneNumberParseException ex) {
-      assert (ex.getMessage().contains(FAILED_TO_PARSE));
-      assert (ex.getMessage().contains("'^'"));
+      assertThat(ex).message().contains(FAILED_TO_PARSE).contains("'^'");
     }
-    
-    try{ 
+
+    try{
       new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555").param(null, "gh234").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-    
-    try{ 
+
+    try{
       new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555").param("", "gh234").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-    
-    try{ 
+
+    try{
       new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555").param("a", null).build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-    
-    try{ 
+
+    try{
       new GlobalPhoneNumberBuilder().globalNumber("+1-888-888-5555").param("a", "").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-  }  
-  
+  }
+
   @Test
   public void test_adding_invalid_param_to_LocalPhoneNumberBuilder() throws PhoneNumberParseException {
-    try{ 
+    try{
       new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("814").param("example*", "gh234").build();
       fail(FAILURE_MESSAGE);
     } catch (PhoneNumberParseException ex) {
-      assert (ex.getMessage().contains(FAILED_TO_PARSE));
-      assert (ex.getMessage().contains("'*'"));
+      assertThat(ex).message().contains(FAILED_TO_PARSE).contains("'*'");
     }
-    
-    try{ 
+
+    try{
       new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("814").param("example", "gh234\\").build();
       fail(FAILURE_MESSAGE);
     } catch (PhoneNumberParseException ex) {
-      assert (ex.getMessage().contains(FAILED_TO_PARSE));
-      assert (ex.getMessage().contains("'\\'"));
+      assertThat(ex).message().contains(FAILED_TO_PARSE).contains("'\\'");
     }
-    
-    try{ 
+
+    try{
       new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("814").param(null, "gh234").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-    
-    try{ 
+
+    try{
       new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("814").param("", "gh234").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-    
-    try{ 
+
+    try{
       new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("814").param("a", null).build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
-    
-    try{ 
+
+    try{
       new LocalPhoneNumberBuilder().subscriberNumber("888-5555").countryCode("+1").areaCode("814").param("a", "").build();
       fail(FAILURE_MESSAGE);
     } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(PARAMS_NAME_VALUE));
+      assertThat(ex).message().contains(PARAMS_NAME_VALUE);
     }
   }
 
@@ -827,28 +751,25 @@ public class PhoneNumberBuilderTest {
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("example.a.com")
                               .subAddress("%20azAZ09?@=,+$&/:_!~.-()")
                               .build();
-    
+
     assertNull(phoneNumber.getExtension(), "Extension should be null");
-    
+
     assertEquals("1707", phoneNumber.getNumber());
     assertEquals("example.a.com", phoneNumber.getPhoneContext());
     assertEquals("%20azAZ09?@=,+$&/:_!~.-()", phoneNumber.getSubAddress());
     assertEquals(("tel:1707;isub=%20azAZ09?@=,+$&/:_!~.-();phone-context=example.a.com"), phoneNumber.getValue());
   }
-  
+
   @Test
   public void test_invalid_subAddress() {
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("example.a.com").subAddress("azAZ09^example.(com)").build();
-      fail(FAILURE_MESSAGE);
-    } catch (PhoneNumberParseException ex) {
-      assert (ex.getMessage().contains(FAILED_TO_PARSE));
-    }
+  assertThatExceptionOfType(PhoneNumberParseException.class)
+      .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1707").domainName("example.a.com").subAddress("azAZ09^example.(com)").build())
+      .withMessageContaining(FAILED_TO_PARSE);
   }
-  
+
   @SuppressWarnings("unused")
   private static String[] getInvalidExtensions() {
-    return new String[] { 
+    return new String[] {
        "",
        "A",
        "b",
@@ -863,10 +784,10 @@ public class PhoneNumberBuilderTest {
        "+1-888-888-8888"
     };
   }
-  
+
   @SuppressWarnings("unused")
   private static String[] getValidExtensions() {
-    return new String[] { 
+    return new String[] {
        "1",
        "1234",
        "12345",
@@ -890,44 +811,37 @@ public class PhoneNumberBuilderTest {
        "(22).33.44.55",
     };
   }
-  
+
   @ParameterizedTest
   @MethodSource("getValidExtensions")
   public void test_valid_extension(String validExtension) throws PhoneNumberParseException {
-    LOGGER.info("valid extension '" + validExtension + "' start");
-    
+    LOGGER.debug("valid extension '{}' start", validExtension);
+
     PhoneNumber phoneNumber = new LocalPhoneNumberBuilder().subscriberNumber("1234-5678").countryCode("+44").areaCode("20")
                               .extension(validExtension)
                               .build();
-    
+
     assertEquals(validExtension, phoneNumber.getExtension());
     assertNull(phoneNumber.getSubAddress(), "SubAddress should be null");
     assertEquals("1234-5678", phoneNumber.getNumber());
     assertEquals("+44-20", phoneNumber.getPhoneContext());
-    
+
     assertEquals(("tel:1234-5678;ext=" + validExtension + ";phone-context=+44-20"), phoneNumber.getValue());
   }
-  
+
   @ParameterizedTest
   @MethodSource("getInvalidExtensions")
   public void test_invalid_extension(String invalidExtension) throws PhoneNumberParseException {
-    LOGGER.info("invalid extension " + invalidExtension);
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1234-5678").countryCode("+44").areaCode("20").extension(invalidExtension).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(EXTENSION));
-    }
-    
-    String temp = invalidExtension != null ? (" " + invalidExtension + " ") : null; 
-    LOGGER.info("invalid extension '" + temp + "' start");
-    try {
-      new LocalPhoneNumberBuilder().subscriberNumber("1234-5678").countryCode("+44").areaCode("20").extension(invalidExtension).build();
-      fail(FAILURE_MESSAGE);
-    } catch (IllegalArgumentException ex) {
-      assert (ex.getMessage().contains(EXTENSION));
-    }
-    
+    LOGGER.debug("invalid extension {}", invalidExtension);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1234-5678").countryCode("+44").areaCode("20").extension(invalidExtension).build())
+        .withMessageContaining(EXTENSION);
+
+    String temp = invalidExtension != null ? (" " + invalidExtension + " ") : null;
+    LOGGER.debug("invalid extension '{}' start", temp);
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new LocalPhoneNumberBuilder().subscriberNumber("1234-5678").countryCode("+44").areaCode("20").extension(invalidExtension).build())
+        .withMessageContaining(EXTENSION);
   }
   
   @Test
