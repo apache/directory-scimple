@@ -40,10 +40,10 @@ public class PatchOperationPathTest {
   @MethodSource("pathValues")
   public void testPathParsing(String value) throws Exception {
     PatchOperationPath path = new PatchOperationPath(value);
-    log.info("ValuePathExpression: " + path.getValuePathExpression());
+    log.debug("ValuePathExpression: {}", path.getValuePathExpression());
     
     String result = path.toString();
-    log.info(result);
+    log.debug(result);
     Assertions.assertNotNull(path.getValuePathExpression());
     Assertions.assertEquals(value.toLowerCase(), result.toLowerCase());
   }

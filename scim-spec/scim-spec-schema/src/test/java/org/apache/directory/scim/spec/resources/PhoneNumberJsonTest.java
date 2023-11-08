@@ -22,13 +22,11 @@ package org.apache.directory.scim.spec.resources;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.ObjectMapperFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Slf4j
 public class PhoneNumberJsonTest {
 
   @Test
@@ -52,9 +50,6 @@ public class PhoneNumberJsonTest {
     assertEquals(phoneNumber.getDisplay(), readValue.getDisplay());
     assertEquals(phoneNumber.getType(), readValue.getType());
     assertEquals(phoneNumber.getValue(), readValue.getValue());
-
-    
-    log.info("done");
   }
   
   private ObjectMapper getObjectMapper() {

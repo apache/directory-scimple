@@ -47,7 +47,9 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   @Override
   public void exitFilter(FilterContext ctx) {
-    assert expressionStack.size() == 1 : "wrong number (" + expressionStack.size() + ") of expressions on stack, should be 1";
+    if (expressionStack.size() != 1) {
+      throw new IllegalStateException("Wrong number (" + expressionStack.size() + ") of expressions on stack, should be 1");
+    }
   }
 
   @Override
