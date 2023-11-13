@@ -36,7 +36,6 @@ import org.apache.directory.scim.server.exception.UnableToRetrieveResourceExcept
 import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
-import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.protocol.BulkResource;
 import org.apache.directory.scim.protocol.data.BulkOperation;
 import org.apache.directory.scim.protocol.data.BulkOperation.Method;
@@ -288,10 +287,7 @@ public class BulkResourceImpl implements BulkResource {
         Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
         Repository<ScimResource> repository = repositoryRegistry.getRepository(scimResourceClass);
 
-        ScimResource original = repository.get(scimResourceId);
-
-        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(scimResourceId, original, scimResource, schemaRegistry);
-        repository.update(updateRequest);
+        repository.update(scimResourceId, null, scimResource, Collections.emptySet(), Collections.emptySet());
       } catch (UnresolvableOperationException unresolvableOperationException) {
         log.error("Could not complete final resolution pass, unresolvable bulkId", unresolvableOperationException);
 
@@ -464,11 +460,7 @@ public class BulkResourceImpl implements BulkResource {
                                      + 1);
 
       try {
-        ScimResource original = repository.get(id);
-
-        UpdateRequest<ScimResource> updateRequest = new UpdateRequest<>(id, original, scimResource, schemaRegistry);
-        
-        repository.update(updateRequest);
+        repository.update(id, null, scimResource, Collections.emptySet(), Collections.emptySet());
         operationResult.setStatus(StatusWrapper.wrap(Status.OK));
       } catch (UnableToRetrieveResourceException e) {
         operationResult.setStatus(StatusWrapper.wrap(Status.NOT_FOUND));

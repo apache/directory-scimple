@@ -22,12 +22,15 @@ package org.apache.directory.scim.spring.it.app;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.scim.core.repository.PatchHandler;
+import org.apache.directory.scim.core.repository.PatchHandlerImpl;
 import org.apache.directory.scim.core.repository.Repository;
-import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
-import org.apache.directory.scim.server.exception.UnableToUpdateResourceException;
+import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.filter.*;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -87,9 +91,15 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   }
 
   @Override
-  public ScimGroup update(UpdateRequest<ScimGroup> updateRequest) throws UnableToUpdateResourceException {
-    String id = updateRequest.getId();
-    ScimGroup resource = updateRequest.getResource();
+  public ScimGroup update(String id, String version, ScimGroup resource, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+    groups.put(id, resource);
+    return resource;
+  }
+
+  @Override
+  public ScimGroup patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+    PatchHandler patchHandler = new PatchHandlerImpl(schemaRegistry);
+    ScimGroup resource = patchHandler.apply(get(id), patchOperations);
     groups.put(id, resource);
     return resource;
   }

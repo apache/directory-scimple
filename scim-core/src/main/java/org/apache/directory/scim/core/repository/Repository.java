@@ -21,12 +21,15 @@ package org.apache.directory.scim.core.repository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortRequest;
+import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
@@ -60,14 +63,38 @@ public interface Repository<T extends ScimResource> {
   /**
    * Allows the SCIM server's REST implementation to update and existing
    * resource via a PUT to a valid end-point.
-   * 
-   * @param updateRequest The ScimResource to update and persist.
+   * <br>
+   * <b>SCIM Implementation NOTE:</b> SCIM supports <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.14">versioning of resources via HTTP ETags</a>, if the (optional) {@code version} parameter is present, (and supported by the server),
+   * it can be used as a mechanism for caching and to ensure clients do not inadvertently overwrite other changes.
+   *
+   *
+   * @param id the identifier of the ScimResource to update and persist.
+   * @param version an optional version (usually used as an ETag) that can be used to optimize update requests, may be compared against, the current {@code ScimResource.meta.version}.
+   * @param resource an updated resource to persist
+   * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
+   * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
    * @return The newly updated ScimResource.
-   * @throws ResourceException When the ScimResource cannot be
-   *         updated.
+   * @throws ResourceException When the ScimResource cannot be updated.
    */
-  T update(UpdateRequest<T> updateRequest) throws ResourceException;
-  
+  T update(String id, String version, T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+
+  /**
+   * Allows the SCIM server's REST implementation to update and existing
+   * resource via a PATCH to a valid end-point.
+   * <br>
+   * <b>SCIM Implementation NOTE:</b> SCIM supports <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.14">versioning of resources via HTTP ETags</a>, if the (optional) {@code version} parameter is present, (and supported by the server),
+   * it can be used as a mechanism for caching and to ensure clients do not inadvertently overwrite other changes.
+   *
+   * @param id the identifier of the ScimResource to update and persist.
+   * @param version an optional version (usually used as an ETag) that can be used to optimize update requests, may be compared against, the current {@code ScimResource.meta.version}.
+   * @param patchOperations a list of patch operations to apply to an existing resource.
+   * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
+   * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
+   * @return The newly updated ScimResource.
+   * @throws ResourceException When the ScimResource cannot be updated.
+   */
+  T patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+
   /**
    * Retrieves the ScimResource associated with the provided identifier.
    * @param id The identifier of the target ScimResource.

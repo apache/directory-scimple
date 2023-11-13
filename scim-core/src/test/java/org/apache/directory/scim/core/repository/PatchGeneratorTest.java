@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.core.repository;
 
-import static org.apache.directory.scim.core.repository.UpdateRequestTest.PatchOperationCondition.op;
+import static org.apache.directory.scim.core.repository.PatchGeneratorTest.PatchOperationCondition.op;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Slf4j
-public class UpdateRequestTest {
+public class PatchGeneratorTest {
   
   private static final String FIRST = "first";
   private static final String SECOND = "second";
@@ -85,31 +85,13 @@ public class UpdateRequestTest {
     when(schemaRegistry.getSchema(ExampleObjectExtension.URN)).thenReturn(Schemas.schemaForExtension(ExampleObjectExtension.class));
   }
 
-  @Test
-  public void testResourcePassthrough() throws Exception {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", createUser(), createUser(), schemaRegistry);
-    ScimUser result = updateRequest.getResource();
-    log.debug("testResourcePassthrough: {}", result);
-    assertThat(result)
-              .isNotNull();
-  }
-
-  @Test
-  public void testPatchPassthrough() throws Exception {
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", createUser(), createUser1PatchOps(), schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
-    log.debug("testPatchPassthrough: {}", result);
-    assertThat(result)
-              .isNotNull();
-  }
 
   @Test
   public void testAddSingleAttribute() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
     user2.setNickName("Jon");
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -123,8 +105,7 @@ public class UpdateRequestTest {
     ScimUser user2 = createUser();
     user2.addExtension(ext);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -138,8 +119,7 @@ public class UpdateRequestTest {
     user2.getName()
          .setHonorificPrefix("Dr.");
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -155,8 +135,7 @@ public class UpdateRequestTest {
     mobilePhone.setPrimary(false);
     user2.getPhoneNumbers().add(mobilePhone);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -181,8 +160,8 @@ public class UpdateRequestTest {
     mobilePhone.setPrimary(true);
     user2.getPhoneNumbers().add(mobilePhone);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
+
     assertNotNull(operations);
     assertThat(operations).hasSize(1);
     PatchOperation operation = operations.get(0);
@@ -210,8 +189,7 @@ public class UpdateRequestTest {
     user2.getPhoneNumbers().add(homePhone);
 
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     assertNotNull(operations);
     assertEquals(2, operations.size());
     
@@ -232,8 +210,7 @@ public class UpdateRequestTest {
     ScimUser user2 = createUser();
     user2.setActive(false);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -246,8 +223,7 @@ public class UpdateRequestTest {
     ScimUser user2 = createUser();
     user2.getExtension(EnterpriseExtension.class).setDepartment("Dept XYZ.");
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -261,8 +237,7 @@ public class UpdateRequestTest {
     user2.getName()
          .setFamilyName("Nobody");
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -279,8 +254,7 @@ public class UpdateRequestTest {
                        .equals("work"))
          .forEach(e -> e.setValue("nobody@example.com"));
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -293,8 +267,7 @@ public class UpdateRequestTest {
     ScimUser user2 = createUser();
     user2.setUserName(null);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -307,8 +280,7 @@ public class UpdateRequestTest {
     ScimUser user2 = createUser();
     user2.removeExtension(EnterpriseExtension.class);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -322,9 +294,7 @@ public class UpdateRequestTest {
     user2.getName()
          .setMiddleName(null);
 
-
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -337,8 +307,7 @@ public class UpdateRequestTest {
     ScimUser user2 = createUser();
     user2.setName(null);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -356,8 +325,7 @@ public class UpdateRequestTest {
                                  .collect(Collectors.toList());
     user2.setEmails(newEmails);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -378,8 +346,7 @@ public class UpdateRequestTest {
     
     user1.getAddresses().add(localAddress);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     PatchOperation actual = assertSingleResult(result);
 
@@ -401,8 +368,7 @@ public class UpdateRequestTest {
     user2.getAddresses().add(localAddress);
     user1.getAddresses().get(0).setPostalCode("01234");
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> result = updateRequest.getPatchOperations();
+    List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertEquals(2, result.size());
 
@@ -422,8 +388,7 @@ public class UpdateRequestTest {
     ext2.setList(new ArrayList<>());
     user2.addExtension(ext2);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     assertTrue(operations.isEmpty(), "Empty Arrays caused a diff");
   }
   
@@ -431,18 +396,19 @@ public class UpdateRequestTest {
   public void verifyEmptyArraysAreNulled() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
-    
+
+    PatchGenerator patchGenerator = new PatchGenerator(schemaRegistry);
+
     //Set empty list on root object and verify no differences
     user1.setPhotos(new ArrayList<>());
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = patchGenerator.diff(user1, user2);
     assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
     
     //Reset user 1 and empty list on Extension and verify no differences
     user1 = createUser();
     ExampleObjectExtension ext = new ExampleObjectExtension();
     ext.setList(new ArrayList<>());
-    operations = updateRequest.getPatchOperations();
+    operations = patchGenerator.diff(user1, user2);
     assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
     
     //Reset extension and set empty list on element of extension then verify no differences
@@ -450,7 +416,7 @@ public class UpdateRequestTest {
     subobject.setList1(new ArrayList<>());
     ext = new ExampleObjectExtension();
     ext.setSubobject(subobject);
-    operations = updateRequest.getPatchOperations();
+    operations = patchGenerator.diff(user1, user2);
     assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
   }
   
@@ -476,8 +442,7 @@ public class UpdateRequestTest {
     ext2.setList(Stream.of(FIRST,SECOND).collect(Collectors.toList()));
     user2.addExtension(ext2);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations)
       .hasSize(3)
@@ -507,8 +472,7 @@ public class UpdateRequestTest {
     ext2.setList(null);
     user2.addExtension(ext2);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     assertNotNull(operations);
     assertEquals(2, operations.size());
     PatchOperation operation = operations.get(0);
@@ -529,8 +493,7 @@ public class UpdateRequestTest {
     ext2.setList(Stream.of(FIRST,SECOND,FOURTH).collect(Collectors.toList()));
     user2.addExtension(ext2);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations)
       .hasSize(1);
@@ -551,8 +514,7 @@ public class UpdateRequestTest {
     
     user2.getName().setFormatted(nickname);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations).hasSize(2);
     assertThat(operations).filteredOn(op(Type.ADD, "name.formatted", nickname)).hasSize(1);
@@ -571,8 +533,7 @@ public class UpdateRequestTest {
     user1.getName().setFormatted("");
     user2.getName().setFormatted(nickname);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations).hasSize(2);
     assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", nickname)).hasSize(1);
@@ -591,8 +552,7 @@ public class UpdateRequestTest {
     user1.getName().setFormatted("");
     user2.getName().setFormatted(nickname);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations).hasSize(2);
     assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", nickname)).hasSize(1);
@@ -612,8 +572,7 @@ public class UpdateRequestTest {
     user1.getName().setFormatted(null);
     user2.getName().setFormatted(nickname);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations).hasSize(2);
     assertThat(operations).filteredOn(op(Type.ADD, "name.formatted", nickname)).hasSize(1);
@@ -632,8 +591,7 @@ public class UpdateRequestTest {
     user1.getName().setFormatted(nickname);
     user2.getName().setFormatted(null);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations).hasSize(2);
     assertThat(operations).filteredOn(op(Type.REMOVE, "name.formatted")).hasSize(1);
@@ -654,8 +612,7 @@ public class UpdateRequestTest {
     ext2.setList(list2);
     user2.addExtension(ext2);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     assertEquals(ops.size(), operations.size());
     for(int i = 0; i < operations.size(); i++) {
       PatchOperation actualOp = operations.get(i);
@@ -722,8 +679,7 @@ public class UpdateRequestTest {
     ext2.setList(Stream.of("A","Z").collect(Collectors.toList()));
     user2.addExtension(ext2);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     System.out.println("Number of operations: "+operations.size());
     operations.stream().forEach(op -> System.out.println(op));
 
@@ -749,8 +705,7 @@ public class UpdateRequestTest {
     user1.getName().setFormatted(nickname);
     user2.getName().setFormatted("");
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     assertThat(operations).hasSize(2);
     assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", "")).hasSize(1);
@@ -777,8 +732,7 @@ public class UpdateRequestTest {
     assertNotNull(workNumber);
     workNumber.setType(null);
 
-    UpdateRequest<ScimUser> updateRequest = new UpdateRequest<>("1234", user1, user2, schemaRegistry);
-    List<PatchOperation> operations = updateRequest.getPatchOperations();
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     assertNotNull(operations);
 
     System.out.println("Number of operations: "+operations.size());

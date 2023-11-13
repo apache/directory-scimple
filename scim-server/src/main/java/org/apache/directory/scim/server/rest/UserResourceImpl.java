@@ -39,12 +39,12 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> implements UserResource {
 
   @Inject
-  public UserResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, EtagGenerator etagGenerator) {
-    super(schemaRegistry, repositoryRegistry, etagGenerator, ScimUser.class);
+  public UserResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
+    super(schemaRegistry, repositoryRegistry, ScimUser.class);
   }
 
   public UserResourceImpl() {
     // CDI
-    this(null, null, null);
+    this(null, null);
   }
 }
