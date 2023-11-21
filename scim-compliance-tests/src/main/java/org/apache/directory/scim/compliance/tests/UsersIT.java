@@ -188,7 +188,7 @@ public class UsersIT extends ScimpleITSupport {
 
     get("/Users", Map.of("filter", "userName eq \"" + userName + "\""))
       .statusCode(200)
-      .contentType("application/scim+json")
+      .contentType(SCIM_MEDIA_TYPE)
       .body(
         "schemas", contains(SCHEMA_LIST_RESPONSE),
         "totalResults", is(1)
