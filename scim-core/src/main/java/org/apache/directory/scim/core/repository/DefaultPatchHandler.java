@@ -21,6 +21,8 @@ package org.apache.directory.scim.core.repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
@@ -49,12 +51,13 @@ import java.util.function.Predicate;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The default implementation of a PatchHandler that applies PatchOperations by walking an map equivalent
+ * The default implementation of a PatchHandler that applies PatchOperations by walking a map equivalent
  * of ScimResource.
  */
 @SuppressWarnings("unchecked")
 @Slf4j
-public class PatchHandlerImpl implements PatchHandler {
+@ApplicationScoped
+public class DefaultPatchHandler implements PatchHandler {
 
   public static final String PRIMARY = "primary";
 
@@ -70,9 +73,16 @@ public class PatchHandlerImpl implements PatchHandler {
 
   private final SchemaRegistry schemaRegistry;
 
-  public PatchHandlerImpl(SchemaRegistry schemaRegistry) {
+  @Inject
+  public DefaultPatchHandler(SchemaRegistry schemaRegistry) {
     this.schemaRegistry = schemaRegistry;
     this.objectMapper = ObjectMapperFactory.createObjectMapper(this.schemaRegistry);
+  }
+
+  // For CDI
+  protected DefaultPatchHandler() {
+    this.objectMapper = null;
+    this.schemaRegistry = null;
   }
 
   @Override

@@ -44,12 +44,12 @@ import java.util.Optional;
 
 public class PatchHandlerTest {
 
-  PatchHandlerImpl patchHandler;
+  DefaultPatchHandler patchHandler;
 
   public PatchHandlerTest() {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
     schemaRegistry.addSchema(ScimUser.class, List.of(EnterpriseExtension.class));
-    this.patchHandler = new PatchHandlerImpl(schemaRegistry);
+    this.patchHandler = new DefaultPatchHandler(schemaRegistry);
   }
 
   @Test

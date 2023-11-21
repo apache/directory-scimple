@@ -33,7 +33,6 @@ import jakarta.inject.Named;
 
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.PatchHandlerImpl;
 import org.apache.directory.scim.example.memory.extensions.LuckyNumberExtension;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
@@ -70,9 +69,12 @@ public class InMemoryUserService implements Repository<ScimUser> {
 
   private SchemaRegistry schemaRegistry;
 
+  private PatchHandler patchHandler;
+
   @Inject
-  public InMemoryUserService(SchemaRegistry schemaRegistry) {
+  public InMemoryUserService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
     this.schemaRegistry = schemaRegistry;
+    this.patchHandler = patchHandler;
   }
 
   protected InMemoryUserService() {}
@@ -142,7 +144,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
 
   @Override
   public ScimUser patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
-    PatchHandler patchHandler = new PatchHandlerImpl(schemaRegistry);
     ScimUser resource = patchHandler.apply(get(id), patchOperations);
     users.put(id, resource);
     return resource;

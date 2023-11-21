@@ -26,7 +26,6 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.PatchHandlerImpl;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.spec.exception.ResourceException;
@@ -52,9 +51,12 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   private SchemaRegistry schemaRegistry;
 
+  private PatchHandler patchHandler;
+
   @Inject
-  public InMemoryGroupService(SchemaRegistry schemaRegistry) {
+  public InMemoryGroupService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
     this.schemaRegistry = schemaRegistry;
+    this.patchHandler = patchHandler;
   }
 
   protected InMemoryGroupService() {}
@@ -103,7 +105,6 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public ScimGroup patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
-    PatchHandler patchHandler = new PatchHandlerImpl(schemaRegistry);
     ScimGroup resource = patchHandler.apply(get(id), patchOperations);
     groups.put(id, resource);
     return resource;

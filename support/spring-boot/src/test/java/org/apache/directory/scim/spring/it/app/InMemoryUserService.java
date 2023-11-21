@@ -22,7 +22,6 @@ package org.apache.directory.scim.spring.it.app;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.PatchHandlerImpl;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
@@ -60,8 +59,11 @@ public class InMemoryUserService implements Repository<ScimUser> {
 
   private final SchemaRegistry schemaRegistry;
 
-  public InMemoryUserService(SchemaRegistry schemaRegistry) {
+  private final PatchHandler patchHandler;
+
+  public InMemoryUserService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
     this.schemaRegistry = schemaRegistry;
+    this.patchHandler = patchHandler;
   }
 
   @PostConstruct
@@ -129,7 +131,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
 
   @Override
   public ScimUser patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
-    PatchHandler patchHandler = new PatchHandlerImpl(schemaRegistry);
     ScimUser resource = patchHandler.apply(get(id), patchOperations);
     users.put(id, resource);
     return resource;

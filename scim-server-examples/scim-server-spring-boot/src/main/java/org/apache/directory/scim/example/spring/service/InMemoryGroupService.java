@@ -22,7 +22,6 @@ package org.apache.directory.scim.example.spring.service;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.PatchHandlerImpl;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
@@ -51,8 +50,11 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   private final SchemaRegistry schemaRegistry;
 
-  public InMemoryGroupService(SchemaRegistry schemaRegistry) {
+  private final PatchHandler patchHandler;
+
+  public InMemoryGroupService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
     this.schemaRegistry = schemaRegistry;
+    this.patchHandler = patchHandler;
   }
 
   @PostConstruct
@@ -99,7 +101,6 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public ScimGroup patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
-    PatchHandler patchHandler = new PatchHandlerImpl(schemaRegistry);
     ScimGroup resource = patchHandler.apply(get(id), patchOperations);
     groups.put(id, resource);
     return resource;
