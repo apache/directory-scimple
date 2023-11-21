@@ -313,9 +313,7 @@ public class UpdateRequest<T extends ScimResource> {
     operation.setOperation(patchOpType);
     
     AttributeReference attributeReference = new AttributeReference(parseData.pathUri, null);
-    PatchOperationPath patchOperationPath = new PatchOperationPath();
-    ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference);
-    patchOperationPath.setValuePathExpression(valuePathExpression);
+    PatchOperationPath patchOperationPath = new PatchOperationPath(new ValuePathExpression(attributeReference));
     
     operation.setPath(patchOperationPath);
     operation.setValue(determineValue(patchOpType, valueNode, parseData));
@@ -447,9 +445,7 @@ public class UpdateRequest<T extends ScimResource> {
       subAttribute = subAttributes.get(0);
     }
     AttributeReference attributeReference = new AttributeReference(parseData.pathUri, attribute, subAttribute);
-    PatchOperationPath patchOperationPath = new PatchOperationPath();
-    ValuePathExpression valuePathExpression = new ValuePathExpression(attributeReference, valueFilterExpression);
-    patchOperationPath.setValuePathExpression(valuePathExpression);
+    PatchOperationPath patchOperationPath = new PatchOperationPath(new ValuePathExpression(attributeReference, valueFilterExpression));
 
     operation.setPath(patchOperationPath);
     operation.setValue(value);

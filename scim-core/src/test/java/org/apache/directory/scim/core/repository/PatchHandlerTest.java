@@ -322,7 +322,7 @@ public class PatchHandlerTest {
   public void applyWithFilterExpression() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REPLACE);
-    op.setPath(new PatchOperationPath("emails[type EQ \"home\"].value"));
+    op.setPath(PatchOperationPath.fromString("emails[type EQ \"home\"].value"));
     op.setValue("new-home@example.com");
     ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     List<Email> emails = updatedUser.getEmails();
@@ -341,7 +341,7 @@ public class PatchHandlerTest {
   public void replaceItem() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REPLACE);
-    op.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+    op.setPath(PatchOperationPath.fromString("emails[type EQ \"home\"]"));
     op.setValue(Map.of(
       "type", "other",
       "value", "other@example.com"
@@ -395,7 +395,7 @@ public class PatchHandlerTest {
   public void replaceCollection() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REPLACE);
-    op.setPath(new PatchOperationPath("emails"));
+    op.setPath(PatchOperationPath.fromString("emails"));
     op.setValue(List.of(
       Map.of(
         "value", "first@example.com",
@@ -422,7 +422,7 @@ public class PatchHandlerTest {
   public void deleteItemWithFilter() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REMOVE);
-    op.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+    op.setPath(PatchOperationPath.fromString("emails[type EQ \"home\"]"));
     ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     List<Email> emails = updatedUser.getEmails();
     assertThat(emails).isEqualTo(List.of(
@@ -437,7 +437,7 @@ public class PatchHandlerTest {
   public void deleteAttributeWithPath() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REMOVE);
-    op.setPath(new PatchOperationPath("nickName"));
+    op.setPath(PatchOperationPath.fromString("nickName"));
     ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getNickName()).isNull();
   }
@@ -446,7 +446,7 @@ public class PatchHandlerTest {
   public void deleteCollectionWithPath() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REMOVE);
-    op.setPath(new PatchOperationPath("emails"));
+    op.setPath(PatchOperationPath.fromString("emails"));
     ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getEmails()).isNull();
   }
@@ -455,7 +455,7 @@ public class PatchHandlerTest {
   public void deleteItemWithComplexFilter() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(REMOVE);
-    op.setPath(new PatchOperationPath("emails[type EQ \"home\"] and value ew \"example.com\""));
+    op.setPath(PatchOperationPath.fromString("emails[type EQ \"home\"] and value ew \"example.com\""));
     ScimUser updatedUser = patchHandler.apply(user(), List.of(op));
     assertThat(updatedUser.getEmails()).isEqualTo(List.of(
       new Email()
@@ -469,7 +469,7 @@ public class PatchHandlerTest {
   public void addAttribute() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(ADD);
-    op.setPath(new PatchOperationPath("profileUrl"));
+    op.setPath(PatchOperationPath.fromString("profileUrl"));
     op.setValue("https://profile.example.com");
 
     ScimUser expectedUser = user()
@@ -483,7 +483,7 @@ public class PatchHandlerTest {
   public void addItem() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(ADD);
-    op.setPath(new PatchOperationPath("emails"));
+    op.setPath(PatchOperationPath.fromString("emails"));
     op.setValue(Map.of(
       "type", "other",
       "value", "other@example.com"));
@@ -537,11 +537,11 @@ public class PatchHandlerTest {
   public void multiplePatchOperations() throws FilterParseException {
     PatchOperation opRm = new PatchOperation();
     opRm.setOperation(REMOVE);
-    opRm.setPath(new PatchOperationPath("emails[type EQ \"home\"]"));
+    opRm.setPath(PatchOperationPath.fromString("emails[type EQ \"home\"]"));
 
     PatchOperation opAdd = new PatchOperation();
     opAdd.setOperation(ADD);
-    opAdd.setPath(new PatchOperationPath("emails"));
+    opAdd.setPath(PatchOperationPath.fromString("emails"));
     opAdd.setValue(Map.of(
       "value", "babs@example.com",
       "type", "other")
@@ -564,11 +564,11 @@ public class PatchHandlerTest {
   public void replaceCollectionWithMultipleOps() throws FilterParseException {
     PatchOperation opRm = new PatchOperation();
     opRm.setOperation(REMOVE);
-    opRm.setPath(new PatchOperationPath("emails"));
+    opRm.setPath(PatchOperationPath.fromString("emails"));
 
     PatchOperation opAdd = new PatchOperation();
     opAdd.setOperation(ADD);
-    opAdd.setPath(new PatchOperationPath("emails"));
+    opAdd.setPath(PatchOperationPath.fromString("emails"));
     opAdd.setValue(List.of(
       Map.of(
         "value", "first@example.com",
@@ -597,7 +597,7 @@ public class PatchHandlerTest {
     PatchOperation op = new PatchOperation();
     op.setOperation(operationType);
     if (path != null) {
-      op.setPath(new PatchOperationPath(path));
+      op.setPath(PatchOperationPath.fromString(path));
     }
     if (value != null) {
       op.setValue(value);

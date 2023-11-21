@@ -134,7 +134,7 @@ public class PatchHandlerImpl implements PatchHandler {
 
   private PatchOperationPath tryGetOperationPath(String key) {
     try {
-      return new PatchOperationPath(key);
+      return PatchOperationPath.fromString(key);
     } catch (FilterParseException e) {
       log.warn("Parsing path failed with exception.", e);
       throw new UnsupportedFilterException("Cannot parse path expression: " + e.getMessage());

@@ -46,17 +46,16 @@ public class RepositoryRegistry {
     this.schemaRegistry = schemaRegistry;
   }
 
-  public RepositoryRegistry(SchemaRegistry schemaRegistry, List<Repository<? extends ScimResource>> scimRepositories) {
-    this.schemaRegistry = schemaRegistry;
+  public void registerRepositories(List<Repository<? extends ScimResource>> scimRepositories) {
     scimRepositories.stream()
-      .map(repository -> (Repository<ScimResource>) repository)
+      .map(repository -> (Repository<? extends ScimResource>) repository)
       .forEach(repository -> {
-      try {
-        registerRepository(repository.getResourceClass(), repository);
-      } catch (InvalidRepositoryException e) {
-        throw new ScimResourceInvalidException("Failed to register repository " + repository.getClass() + " for ScimResource type " + repository.getResourceClass(), e);
-      }
-    });
+        try {
+          registerRepository(repository.getResourceClass(), repository);
+        } catch (InvalidRepositoryException e) {
+          throw new ScimResourceInvalidException("Failed to register repository " + repository.getClass() + " for ScimResource type " + repository.getResourceClass(), e);
+        }
+      });
   }
 
   public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException {

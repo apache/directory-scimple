@@ -61,4 +61,9 @@
   <!-- doesn't seem to play well with lombok -->
   <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
 
+  <Match>
+    <Class name="org.apache.directory.scim.client.rest.BaseScimClient"/>
+    <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+  </Match>
+
 </FindBugsFilter>

@@ -83,7 +83,9 @@ public class ScimpleSpringConfiguration {
   @Bean
   @ConditionalOnMissingBean
   RepositoryRegistry repositoryRegistry(SchemaRegistry schemaRegistry, List<Repository<? extends ScimResource>> scimResources) {
-    return new RepositoryRegistry(schemaRegistry, scimResources);
+    RepositoryRegistry registry = new RepositoryRegistry(schemaRegistry);
+    registry.registerRepositories(scimResources);
+    return registry;
   }
 
   @Bean

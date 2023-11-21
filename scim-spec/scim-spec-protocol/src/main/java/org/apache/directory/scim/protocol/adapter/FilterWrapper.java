@@ -33,9 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Data
-public class FilterWrapper {
+final public class FilterWrapper {
 
-  public Filter filter;
+  final public Filter filter;
   
   public FilterWrapper(String string) {
     
