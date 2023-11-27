@@ -321,17 +321,17 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberBuilder.class);
 
-    final String HYPHEN = "-";
-    final String INTERNATIONAL_PREFIX = "+";
-    final String PREFIX = "tel:%s";
-    final String EXTENSTION_PREFIX = ";ext=%s";
-    final String ISUB_PREFIX = ";isub=%s";
-    final String CONTEXT_PREFIX = ";phone-context=%s";
-    final String PARAMS_STRING = ";%s=%s";
-    final String LOCAL_SUBSCRIBER_NUMBER_REGEX = "^[\\d\\.\\-\\(\\)]+$";
-    final String DOMAIN_NAME_REGEX = "^[a-zA-Z0-9\\.\\-]+$";
-    final String GLOBAL_NUMBER_REGEX = "^(\\+)?[\\d\\.\\-\\(\\)]+$";
-    final String COUNTRY_CODE_REGEX = "^(\\+)?[1-9][0-9]{0,2}$";
+    static final String HYPHEN = "-";
+    static final String INTERNATIONAL_PREFIX = "+";
+    static final String PREFIX = "tel:%s";
+    static final String EXTENSTION_PREFIX = ";ext=%s";
+    static final String ISUB_PREFIX = ";isub=%s";
+    static final String CONTEXT_PREFIX = ";phone-context=%s";
+    static final String PARAMS_STRING = ";%s=%s";
+    static final String LOCAL_SUBSCRIBER_NUMBER_REGEX = "^[\\d\\.\\-\\(\\)]+$";
+    static final String DOMAIN_NAME_REGEX = "^[a-zA-Z0-9\\.\\-]+$";
+    static final String GLOBAL_NUMBER_REGEX = "^(\\+)?[\\d\\.\\-\\(\\)]+$";
+    static final String COUNTRY_CODE_REGEX = "^(\\+)?[1-9][0-9]{0,2}$";
 
     String number;
     String display;

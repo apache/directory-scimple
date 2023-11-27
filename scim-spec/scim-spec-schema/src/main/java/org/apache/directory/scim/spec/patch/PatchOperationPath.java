@@ -19,8 +19,10 @@
 
 package org.apache.directory.scim.spec.patch;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -31,29 +33,25 @@ import org.apache.directory.scim.spec.filter.FilterLexer;
 import org.apache.directory.scim.spec.filter.FilterParser;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.filter.ValuePathExpression;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
-@Data
 @Slf4j
+@EqualsAndHashCode
 public class PatchOperationPath implements Serializable {
 
   private static final long serialVersionUID = 449365558879593512L;
 
-  private ValuePathExpression valuePathExpression;
+  @Getter
+  private final ValuePathExpression valuePathExpression;
 
-  public PatchOperationPath() {
-    
+  public PatchOperationPath(ValuePathExpression valuePathExpression) {
+    this. valuePathExpression = valuePathExpression;
   }
 
-  public PatchOperationPath(String patchPath) throws FilterParseException {
-    parsePatchPath(patchPath);
-  }
-
-  protected void parsePatchPath(String patchPath) throws FilterParseException {
-    FilterLexer l = new FilterLexer(new ANTLRInputStream(patchPath));
+  static ValuePathExpression parsePatchPath(String patchPath) throws FilterParseException {
+    FilterLexer l = new FilterLexer(CharStreams.fromString(patchPath));
     FilterParser p = new FilterParser(new CommonTokenStream(l));
     p.setBuildParseTree(true);
 
@@ -69,7 +67,7 @@ public class PatchOperationPath implements Serializable {
       PatchPathListener patchPathListener = new PatchPathListener();
       ParseTreeWalker.DEFAULT.walk(patchPathListener, tree);
 
-      this.valuePathExpression = patchPathListener.getValuePathExpression();
+      return patchPathListener.getValuePathExpression();
     } catch (IllegalStateException e) {
       throw new FilterParseException(e);
     }
@@ -78,6 +76,10 @@ public class PatchOperationPath implements Serializable {
   @Override
   public String toString() {
     return valuePathExpression.toFilter();
+  }
+
+  public static PatchOperationPath fromString(String patchPath) throws FilterParseException {
+    return new PatchOperationPath(parsePatchPath(patchPath));
   }
 
 }

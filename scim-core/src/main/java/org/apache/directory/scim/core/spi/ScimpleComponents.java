@@ -44,7 +44,9 @@ public class ScimpleComponents {
   @Produces
   @ApplicationScoped
   public RepositoryRegistry repositoryRegistry(SchemaRegistry schemaRegistry, Instance<Repository<? extends ScimResource>> repositoryInstances) {
-    return new RepositoryRegistry(schemaRegistry, repositoryInstances.stream().collect(Collectors.toList()));
+    RepositoryRegistry registry = new RepositoryRegistry(schemaRegistry);
+    registry.registerRepositories(repositoryInstances.stream().collect(Collectors.toList()));
+    return registry;
   }
 
   /*

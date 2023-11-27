@@ -44,7 +44,7 @@ public class RepositoryRegistryTest {
 
     doThrow(new InvalidRepositoryException("test exception")).when(repository).getExtensionList();
 
-    assertThrows(ScimResourceInvalidException.class, () -> new RepositoryRegistry(schemaRegistry, List.of(repository)));
+    assertThrows(ScimResourceInvalidException.class, () -> new RepositoryRegistry(schemaRegistry).registerRepositories(List.of(repository)));
   }
 
   @Test

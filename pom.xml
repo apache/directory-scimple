@@ -438,6 +438,13 @@
             <!-- parent pom currently defines v1.7 -->
             <source>${maven.compiler.source}</source>
             <target>${maven.compiler.target}</target>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${version.lombok}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>
@@ -627,7 +634,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.7.3.6</version>
+          <version>4.8.1.0</version>
           <configuration>
             <plugins>
               <plugin>

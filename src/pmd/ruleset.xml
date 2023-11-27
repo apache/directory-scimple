@@ -22,6 +22,10 @@ under the License.
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
+  <description>
+    PMD Ruleset for used by Apache SCIMple.
+  </description>
+
   <rule ref="category/java/bestpractices.xml/AvoidUsingHardCodedIP" />
   <rule ref="category/java/bestpractices.xml/CheckResultSet" />
   <rule ref="category/java/bestpractices.xml/PrimitiveWrapperInstantiation" />

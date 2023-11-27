@@ -207,7 +207,7 @@ public class ScimUserClientTest extends ClientTestSupport {
     PatchRequest patchRequest = new PatchRequest().add(
       new PatchOperation()
         .setOperation(PatchOperation.Type.REMOVE)
-        .setPath(new PatchOperationPath("name.honorificPrefix"))
+        .setPath(PatchOperationPath.fromString("name.honorificPrefix"))
     );
 
     ScimUser expectedUser = new ScimUser();

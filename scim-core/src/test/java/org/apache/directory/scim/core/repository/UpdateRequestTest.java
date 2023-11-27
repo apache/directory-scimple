@@ -917,7 +917,7 @@ public class UpdateRequestTest {
     List<PatchOperation> patchOperations = new ArrayList<>();
     PatchOperation removePhoneNumberOp = new PatchOperation();
     removePhoneNumberOp.setOperation(Type.REMOVE);
-    removePhoneNumberOp.setPath(new PatchOperationPath("phoneNumbers[type eq \"home\"]"));
+    removePhoneNumberOp.setPath(PatchOperationPath.fromString("phoneNumbers[type eq \"home\"]"));
     patchOperations.add(removePhoneNumberOp);
     return patchOperations;
   }

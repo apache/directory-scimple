@@ -39,7 +39,7 @@ public class PatchOperationPathTest {
   @ParameterizedTest
   @MethodSource("pathValues")
   public void testPathParsing(String value) throws Exception {
-    PatchOperationPath path = new PatchOperationPath(value);
+    PatchOperationPath path = PatchOperationPath.fromString(value);
     log.debug("ValuePathExpression: {}", path.getValuePathExpression());
     
     String result = path.toString();
