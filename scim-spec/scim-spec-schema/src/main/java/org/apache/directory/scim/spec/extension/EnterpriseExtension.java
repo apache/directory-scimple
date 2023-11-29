@@ -54,7 +54,7 @@ public class EnterpriseExtension implements ScimExtension {
     @XmlElement
     private String value;
 
-    @ScimAttribute(description = "The URI of the SCIM resource representing the User's manager.  RECOMMENDED.")
+    @ScimAttribute(name="$ref", description = "The URI of the SCIM resource representing the User's manager.  RECOMMENDED.")
     @XmlElement(name="$ref")
     private String ref;
 
