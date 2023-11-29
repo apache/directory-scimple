@@ -203,8 +203,15 @@ public final class Schemas {
         case STRING_TYPE_IDENTIFIER:
         case CHARACTER_ARRAY_TYPE_IDENTIFIER:
         case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
-          log.debug("Setting type to String");
-          attribute.setType(Schema.Attribute.Type.STRING);
+        case RESOURCE_REFERENCE_TYPE_IDENTIFIER:
+          // Check whether referenceTypes were not set. The default value is [""]
+          if (sa.referenceTypes().length == 1 && sa.referenceTypes()[0].isEmpty()) {
+            log.debug("Setting type to String");
+            attribute.setType(Schema.Attribute.Type.STRING);
+          } else {
+            log.debug("Setting type to reference");
+            attribute.setType(Schema.Attribute.Type.REFERENCE);
+          }
           attributeIsAString = true;
           break;
         case INT_TYPE_IDENTIFIER:
@@ -234,10 +241,6 @@ public final class Schemas {
         case LOCAL_DATE_TYPE_IDENTIFER:
           log.debug("Setting type to date time");
           attribute.setType(Schema.Attribute.Type.DATE_TIME);
-          break;
-        case RESOURCE_REFERENCE_TYPE_IDENTIFIER:
-          log.debug("Setting type to reference");
-          attribute.setType(Schema.Attribute.Type.REFERENCE);
           break;
         default:
           log.debug("Setting type to complex");
