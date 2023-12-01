@@ -23,6 +23,8 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.util.TypeLiteral;
 import jakarta.ws.rs.core.Application;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.directory.scim.core.repository.DefaultPatchHandler;
+import org.apache.directory.scim.core.repository.PatchHandler;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
@@ -71,6 +73,12 @@ public class ScimpleSpringConfiguration {
   @ConditionalOnMissingBean
   SchemaRegistry schemaRegistry() {
     return new SchemaRegistry();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  PatchHandler patchHandler(SchemaRegistry schemaRegistry) {
+    return new DefaultPatchHandler(schemaRegistry);
   }
 
   @Bean

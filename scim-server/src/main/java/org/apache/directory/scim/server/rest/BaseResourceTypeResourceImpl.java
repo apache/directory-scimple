@@ -25,10 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import jakarta.enterprise.inject.spi.CDI;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
@@ -40,10 +38,10 @@ import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.exception.ResourceException;
+import org.apache.directory.scim.spec.schema.Meta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.directory.scim.core.repository.UpdateRequest;
 import org.apache.directory.scim.core.repository.annotations.ScimProcessingExtension;
 import org.apache.directory.scim.core.repository.extensions.AttributeFilterExtension;
 import org.apache.directory.scim.core.repository.extensions.ProcessingExtension;
@@ -53,7 +51,6 @@ import org.apache.directory.scim.protocol.adapter.FilterWrapper;
 import org.apache.directory.scim.protocol.BaseResourceTypeResource;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
-import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.protocol.data.ListResponse;
 import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.data.SearchRequest;
@@ -70,13 +67,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
-  private final SchemaRegistry schemaRegistry;
-
   private final RepositoryRegistry repositoryRegistry;
 
   private final  AttributeUtil attributeUtil;
-
-  private final  EtagGenerator etagGenerator;
 
   private final Class<T> resourceClass;
 
@@ -88,10 +81,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   @Context
   Request request;
 
-  public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, EtagGenerator etagGenerator, Class<T> resourceClass) {
-    this.schemaRegistry = schemaRegistry;
+  @Context
+  HttpHeaders headers;
+
+  public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, Class<T> resourceClass) {
     this.repositoryRegistry = repositoryRegistry;
-    this.etagGenerator = etagGenerator;
     this.resourceClass = resourceClass;
     this.attributeUtil = new AttributeUtil(schemaRegistry);
   }
@@ -126,10 +120,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       }
     }
 
-    if (resource != null) {
-      EntityTag backingETag = requireEtag(resource);
-      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(backingETag);
+    if (resource == null) {
+      throw notFoundException(id);
+    }
 
+    EntityTag etag = fromVersion(resource);
+    if (etag != null) {
+      ResponseBuilder evaluatePreconditionsResponse = request.evaluatePreconditions(etag);
       if (evaluatePreconditionsResponse != null) {
         return Response.status(Status.NOT_MODIFIED).build();
       }
@@ -138,12 +135,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
-
-    if (resource == null) {
-      throw notFoundException(id);
-    }
-
-    EntityTag etag = requireEtag(resource);
 
     // Process Attributes
     resource = processFilterAttributeExtensions(repository, resource, attributeReferences, excludedAttributeReferences);
@@ -186,7 +177,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T created = repository.create(resource);
 
-    EntityTag etag = etag(created);
+    EntityTag etag = fromVersion(created);
 
     // Process Attributes
     created = processFilterAttributeExtensions(repository, created, attributeReferences, excludedAttributeReferences);
@@ -195,10 +186,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       created = attributesForDisplay(created, attributeReferences, excludedAttributeReferences);
     } catch (AttributeException e) {
         log.debug("Exception thrown while processing attributes", e);
-        return Response.status(Status.CREATED)
-                .location(buildLocationTag(created))
-                .tag(etag)
-                .build();
     }
 
     return Response.status(Status.CREATED)
@@ -244,7 +231,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       List<T> results = new ArrayList<>();
 
       for (T resource : filterResp.getResources()) {
-        requireEtag(resource);
 
         // Process Attributes
         resource = processFilterAttributeExtensions(repository, resource, attributeReferences, excludedAttributeReferences);
@@ -262,15 +248,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(id, attributes, excludedAttributes, (stored) ->
-      new UpdateRequest<>(id, stored, resource, schemaRegistry));
+    return update(attributes, excludedAttributes, (etag, includeAttributes, excludeAttributes, repository)
+      -> repository.update(id, etag,resource, includeAttributes, excludeAttributes));
   }
 
   @Override
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-
-    return update(id, attributes, excludedAttributes, (stored) ->
-      new UpdateRequest<>(id, stored, patchRequest.getPatchOperationList(), schemaRegistry));
+    return update(attributes, excludedAttributes, (etag, includeAttributes, excludeAttributes, repository)
+      -> repository.patch(id, etag, patchRequest.getPatchOperationList(), includeAttributes, excludeAttributes));
   }
 
   @Override
@@ -281,7 +266,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         .build();
   }
 
-  private Response update(String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, Function<T, UpdateRequest<T>> updateRequestFunction) throws ScimException, ResourceException {
+  private Response update(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, UpdateFunction<T> updateFunction) throws ScimException, ResourceException {
 
     Repository<T> repository = getRepositoryInternal();
 
@@ -289,23 +274,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
-    T stored = repository.get(id);
-
-    if (stored == null) {
-      throw notFoundException(id);
-    }
-
-    EntityTag backingETag = requireEtag(stored);
-    validatePreconditions(id, backingETag);
-
-    UpdateRequest<T> updateRequest = updateRequestFunction.apply(stored);
-    T updated = repository.update(updateRequest);
+    String requestEtag = headers.getHeaderString("ETag");
+    T updated = updateFunction.update(requestEtag, attributeReferences, excludedAttributeReferences, repository);
 
     // Process Attributes
     updated = processFilterAttributeExtensions(repository, updated, attributeReferences, excludedAttributeReferences);
     updated = attributesForDisplayIgnoreErrors(updated, attributeReferences, excludedAttributeReferences);
 
-    EntityTag etag = etag(updated);
+    EntityTag etag = fromVersion(updated);
     return Response.ok(updated)
       .location(buildLocationTag(updated))
       .tag(etag)
@@ -382,35 +358,25 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     return new ScimException(Status.NOT_FOUND, "Resource " + id + " not found");
   }
 
-  private void validatePreconditions(String id, EntityTag etag) {
-    ResponseBuilder response = request.evaluatePreconditions(etag);
-    if (response != null) {
-      throw new WebApplicationException(response
-        .entity(new ErrorResponse(Status.PRECONDITION_FAILED, "Failed to update record, backing record has changed - " + id))
-        .build());
-    }
-  }
-
-  private EntityTag requireEtag(ScimResource resource) throws ScimException {
-    try {
-      return etagGenerator.generateEtag(resource);
-    } catch (EtagGenerationException e) {
-      throw new ScimException(Status.INTERNAL_SERVER_ERROR, "Failed to generate the etag", e);
-    }
-  }
-
-  private EntityTag etag(ScimResource resource) {
-    try {
-      return etagGenerator.generateEtag(resource);
-    } catch (EtagGenerationException e) {
-      log.warn("Failed to generate etag for resource", e);
-      return null;
-    }
-  }
-
   private void validateAttributes(Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ScimException {
     if (!attributeReferences.isEmpty() && !excludedAttributeReferences.isEmpty()) {
       throw new ScimException(Status.BAD_REQUEST, "Cannot include both attributes and excluded attributes in a single request");
     }
+  }
+
+  private EntityTag fromVersion(ScimResource resource) {
+    Meta meta = resource.getMeta();
+    if (meta != null) {
+      String version = meta.getVersion();
+      if (version != null) {
+        return new EntityTag(version);
+      }
+    }
+    return null;
+  }
+
+  @FunctionalInterface
+  private interface UpdateFunction<T extends ScimResource> {
+    T update(String etag, Set<AttributeReference> includeAttributes, Set<AttributeReference> excludeAttributes, Repository<T> repository) throws ResourceException;
   }
 }

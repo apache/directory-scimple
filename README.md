@@ -114,6 +114,32 @@ public class InMemoryUserService implements Respository<ScimUser> {
 
 Implementing the repository interface allows the customization of create, retrieve, update, and delete methods (as well as find).  Customization is flexible - if your system implements soft deletes, create a delete method that simply sets a flag and alter the find and retrieve methods to only return "undeleted" resources.
 
+## Requests to Repository Mappings
+
+At a high level SCIMple provides the marshaling and unmarshaling of SCIM requests and responses to and from the appropriate repository methods and supporting endpoints (e.g. `/Schema`, `/ServiceProvider`, and `/ResourceTypes`).  The following table shows the mapping of SCIM requests to repository methods:
+
+| SCIM Endpoint | HTTP Method   | Repository Method       |
+|---------------|---------------|-------------------------|
+| **Users**     |               |                         |
+| /Users        | GET           | `repository.find()`     |
+| /Users        | POST          | `repository.create()`   |
+| /Users/{id}   | GET           | `repository.get()`      |
+| /Users/{id}   | PUT           | `repository.update()`   |
+| /Users/{id}   | PATCH         | `repository.patch()`    |
+| /Users/{id}   | DELETE        | `repository.delete()`   |
+| **Groups**    |               |                         |
+| /Groups       | GET           | `repository.find()`     |
+| /Groups       | POST          | `repository.create()`   |
+| /Groups/{id}  | GET           | `repository.get()`      |
+| /Groups/{id}  | PUT           | `repository.update()`   |
+| /Groups/{id}  | PATCH         | `repository.patch()`    |
+| /Groups/{id}  | DELETE        | `repository.delete()`   |
+| **Other**     |               |                         |
+| /Bulk         | POST          | `repository.*`          |
+
+> **NOTE:** The `/Bulk` endpoint enables clients to send a potentially large collection of resource operations
+in a single request, replacing the need to send multiple requests.
+
 ## Building & Contributing
 
 Clone the code and build it!

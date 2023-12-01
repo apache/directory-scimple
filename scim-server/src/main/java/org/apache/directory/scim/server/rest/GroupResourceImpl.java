@@ -35,12 +35,12 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> implements GroupResource {
 
   @Inject
-  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, EtagGenerator etagGenerator) {
-    super(schemaRegistry, repositoryRegistry, etagGenerator, ScimGroup.class);
+  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
+    super(schemaRegistry, repositoryRegistry, ScimGroup.class);
   }
 
   public GroupResourceImpl() {
     // CDI
-    this(null, null, null);
+    this(null, null);
   }
 }
