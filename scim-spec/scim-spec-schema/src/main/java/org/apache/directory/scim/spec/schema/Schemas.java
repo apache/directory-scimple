@@ -39,6 +39,7 @@ import java.util.*;
 public final class Schemas {
 
   private static final String STRING_TYPE_IDENTIFIER = "class java.lang.String";
+  private static final String STRING_TYPE = "java.lang.String"; // TODO this is ugly
   private static final String CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [C";
   private static final String BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [Ljava.lang.Character;";
   private static final String INT_TYPE_IDENTIFIER = "int";
@@ -201,6 +202,7 @@ public final class Schemas {
       log.debug("Attempting to set the attribute type, raw value = " + typeName);
       switch (typeName) {
         case STRING_TYPE_IDENTIFIER:
+        case STRING_TYPE:
         case CHARACTER_ARRAY_TYPE_IDENTIFIER:
         case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
           log.debug("Setting type to String");
