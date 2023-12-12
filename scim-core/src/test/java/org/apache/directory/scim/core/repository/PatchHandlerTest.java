@@ -31,7 +31,9 @@ import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
+import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
+import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.directory.scim.spec.patch.PatchOperation.Type.*;
@@ -466,6 +468,39 @@ public class PatchHandlerTest {
   }
 
   @Test
+  public void addItemToCollection() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(ADD);
+    op.setPath(PatchOperationPath.fromString("members"));
+    op.setValue(List.of(
+      Map.of(
+        "value", "9876",
+        "display", "testUser2",
+        "type", "User")
+    ));
+
+    ScimGroup updatedGroup = patchHandler.apply(group(), List.of(op));
+    assertThat(updatedGroup.getMembers().size()).isEqualTo(3);
+  }
+
+  /**
+   * This test covers Azure-style remove member operations, where a value is
+   * specified in the operation body, rather than in the path.
+   * For example: { "op": "remove", "path": "members", "value": [ { "value": "1234" } ] }
+   */
+  @Test
+  public void removeItemFromCollection() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REMOVE);
+    op.setPath(PatchOperationPath.fromString("members"));
+    op.setValue(List.of(Map.of("value", "1234")));
+
+    ScimGroup updatedGroup = patchHandler.apply(group(), List.of(op));
+    assertThat(updatedGroup.getMembers()).isNotNull();
+    assertThat(updatedGroup.getMembers().size()).isEqualTo(1);
+  }
+
+  @Test
   public void addAttribute() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(ADD);
@@ -628,5 +663,25 @@ public class PatchHandlerTest {
     } catch (PhoneNumberParseException e) {
       throw new IllegalStateException("Invalid phone number", e);
     }
+  }
+
+  private static ScimGroup group() {
+    ResourceReference member1 = userRef("1234");
+    ResourceReference member2 = userRef("5678");
+
+    return new ScimGroup()
+      .setDisplayName("Test Group")
+      .setExternalId("test-group-external-id")
+      .setMembers(List.of(member1, member2));
+  }
+
+  private static ResourceReference userRef(String id) {
+    ResourceReference member = new ResourceReference();
+    member.setType(ResourceReference.ReferenceType.USER);
+    member.setValue(id);
+    member.setRef("https://example.com/Users/" + id);
+    member.setDisplay("Test User" + id);
+
+    return member;
   }
 }
