@@ -22,7 +22,7 @@ package org.apache.directory.scim.core.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
-import org.apache.directory.scim.core.utility.ExampleObjectExtension;
+import org.apache.directory.scim.test.stub.ExampleObjectExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.assertj.core.api.Assertions;

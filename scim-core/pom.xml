@@ -63,6 +63,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.directory.scimple</groupId>
+      <artifactId>scim-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>

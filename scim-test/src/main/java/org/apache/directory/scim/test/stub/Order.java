@@ -17,42 +17,28 @@
 * under the License.
 */
 
-package org.apache.directory.scim.server.utility;
+package org.apache.directory.scim.test.stub;
 
-import java.io.Serializable;
-import java.util.List;
-
-import jakarta.xml.bind.annotation.XmlElement;
-
-import org.apache.directory.scim.spec.annotation.ScimAttribute;
-import lombok.Data;
-
-@Data
-public class Subobject implements Serializable {
+public enum Order {
   
-  private static final long serialVersionUID = -8081556701833520316L;
+  FIRST("first"),
+  SECOND("second"),
+  THIRD("third"),
+  FOURTH("fourth");
+  
+  Order(String value) {
+    this.value = value;
+  }
+  
+  private final String value;
+  
+  public String getValue() {
+    return value;
+  }
+  
+  @Override
+  public String toString() {
+    return value;
+  }
 
-  @ScimAttribute
-  @XmlElement
-  private String string1;
-  
-  @ScimAttribute
-  @XmlElement
-  private String string2;
-  
-  @ScimAttribute
-  @XmlElement
-  private Boolean boolean1;
-  
-  @ScimAttribute
-  @XmlElement
-  private Boolean boolean2;
-  
-  @ScimAttribute
-  @XmlElement
-  private List<String> list1;
-
-  @ScimAttribute
-  @XmlElement
-  private List<String> list2;
 }

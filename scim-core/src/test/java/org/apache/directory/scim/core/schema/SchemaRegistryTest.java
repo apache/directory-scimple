@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.core.schema;
 
-import org.apache.directory.scim.core.repository.utility.ExampleObjectExtension;
+import org.apache.directory.scim.test.stub.ExampleObjectExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.ResourceType;
