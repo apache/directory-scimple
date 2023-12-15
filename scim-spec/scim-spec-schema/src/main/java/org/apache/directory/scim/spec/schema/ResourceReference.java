@@ -52,7 +52,7 @@ public class ResourceReference implements Serializable {
   @XmlElement
   String value;
 
-  @ScimAttribute(description="The URI of the corresponding resource ", referenceTypes={"User", "Group"})
+  @ScimAttribute(name = "$ref", description="The URI of the corresponding resource ", referenceTypes={"User", "Group"})
   @XmlElement(name = "$ref")
   String ref;
 
