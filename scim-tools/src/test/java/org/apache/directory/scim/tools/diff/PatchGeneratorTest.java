@@ -17,53 +17,49 @@
 * under the License.
 */
 
-package org.apache.directory.scim.core.repository;
+package org.apache.directory.scim.tools.diff;
 
-import static org.apache.directory.scim.core.repository.PatchGeneratorTest.PatchOperationCondition.op;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.directory.scim.test.stub.ExampleObjectExtension;
 import org.apache.directory.scim.test.stub.Subobject;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
-import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
+import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
-import org.apache.directory.scim.spec.filter.FilterParseException;
+import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBuilder;
 import org.apache.directory.scim.spec.resources.Photo;
+import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.spec.schema.Schemas;
-import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
-import static org.assertj.core.groups.Tuple.tuple;
+import static java.util.Collections.emptyList;
+import static org.apache.directory.scim.test.assertj.ScimpleAssertions.patchOpMatching;
+import static org.apache.directory.scim.test.assertj.ScimpleAssertions.scimAssertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Slf4j
 public class PatchGeneratorTest {
   
   private static final String FIRST = "first";
@@ -83,8 +79,9 @@ public class PatchGeneratorTest {
     when(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).thenReturn(Schemas.schemaFor(ScimUser.class));
     when(schemaRegistry.getSchema(EnterpriseExtension.URN)).thenReturn(Schemas.schemaForExtension(EnterpriseExtension.class));
     when(schemaRegistry.getSchema(ExampleObjectExtension.URN)).thenReturn(Schemas.schemaForExtension(ExampleObjectExtension.class));
-  }
 
+    when(schemaRegistry.getSchema(ScimGroup.SCHEMA_URI)).thenReturn(Schemas.schemaFor(ScimGroup.class));
+  }
 
   @Test
   public void testAddSingleAttribute() throws Exception {
@@ -93,9 +90,8 @@ public class PatchGeneratorTest {
     user2.setNickName("Jon");
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.ADD, "nickName", "Jon");
+    scimAssertThat(result).single()
+        .matches(Type.ADD, "nickName", "Jon");
   }
   
   @Test
@@ -107,9 +103,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.ADD, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", ext);
+    scimAssertThat(result).single()
+      .matches(Type.ADD, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", ext);
   }
 
   @Test
@@ -121,9 +116,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.ADD, "name.honorificPrefix", "Dr.");
+    scimAssertThat(result).single()
+      .matches(Type.ADD, "name.honorificPrefix", "Dr.");
   }
 
   @Test
@@ -137,9 +131,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.ADD, "phoneNumbers", mobilePhone);
+    scimAssertThat(result).single()
+      .matches(Type.ADD, "phoneNumbers", mobilePhone);
   }
   
   /**
@@ -212,9 +205,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REPLACE, "active", false);
+    scimAssertThat(result).single()
+      .matches(Type.REPLACE, "active", false);
   }
   
   @Test
@@ -225,9 +217,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REPLACE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "Dept XYZ.");
+    scimAssertThat(result).single()
+      .matches(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "Dept XYZ.");
   }
 
   @Test
@@ -239,26 +230,24 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REPLACE, "name.familyName", "Nobody");
+    scimAssertThat(result).single()
+      .matches(Type.REPLACE, "name.familyName", "Nobody");
   }
 
   @Test
   public void testReplaceMultiValuedAttribute() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
-    user2.getEmails()
-         .stream()
-         .filter(e -> e.getType()
-                       .equals("work"))
-         .forEach(e -> e.setValue("nobody@example.com"));
+    Email workEmail = user2.getEmails().get(1);
+    workEmail.setValue("nobody@example.com");
+    workEmail.setDisplay("nobody@example.com");
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REPLACE, "emails[type EQ \"work\"].value", "nobody@example.com");
+    // Changing contents of a collection, should REMOVE the old and ADD a new
+    scimAssertThat(result).containsOnly(
+        patchOpMatching(Type.REMOVE, "emails[type EQ \"work\"]"),
+        patchOpMatching(Type.ADD, "emails", workEmail));
   }
 
   @Test
@@ -269,9 +258,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REMOVE, "userName", null);
+    scimAssertThat(result).single()
+      .matches(Type.REMOVE, "userName", null);
   }
   
   @Test
@@ -282,9 +270,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REMOVE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", null);
+    scimAssertThat(result).single()
+      .matches(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", null);
   }
 
   @Test
@@ -296,9 +283,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REMOVE, "name.middleName", null);
+    scimAssertThat(result).single()
+      .matches(Type.REMOVE, "name.middleName", null);
   }
 
   @Test
@@ -309,9 +295,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REMOVE, "name", null);
+    scimAssertThat(result).single()
+      .matches(Type.REMOVE, "name", null);
   }
 
   @Test
@@ -327,9 +312,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REMOVE, "emails[type EQ \"home\"]", null);
+    scimAssertThat(result).single()
+      .matches(Type.REMOVE, "emails[type EQ \"home\"]", null);
   }
   
   @Test
@@ -348,9 +332,8 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    PatchOperation actual = assertSingleResult(result);
-
-    checkAssertions(actual, Type.REMOVE, "addresses[type EQ \"local\"]", null);
+    scimAssertThat(result).single()
+      .matches(Type.REMOVE, "addresses[type EQ \"local\"]", null);
   }
   
   @Test
@@ -364,32 +347,50 @@ public class PatchGeneratorTest {
     localAddress.setRegion("PA");
     localAddress.setCountry("USA");
     localAddress.setType("local");
-    
-    user2.getAddresses().add(localAddress);
-    user1.getAddresses().get(0).setPostalCode("01234");
+
+    Address newWorkAddress = user2.getAddresses().get(0);
+    newWorkAddress.setPostalCode("01234"); // changes whole address, expect REMOVE/ADD
+
+    user2.getAddresses().add(localAddress); // ADD new Address
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertEquals(2, result.size());
-
-    checkAssertions(result.get(1), Type.ADD, "addresses", localAddress);
+    scimAssertThat(result)
+      .containsOnly(
+          patchOpMatching(Type.REMOVE, "addresses[type EQ \"work\"]"),
+          patchOpMatching(Type.ADD, "addresses", newWorkAddress),
+          patchOpMatching(Type.ADD, "addresses", localAddress));
   }
   
   @Test
-  public void verifyEmptyArraysDoNotCauseMove() throws Exception {
+  public void verifyEmptyArraysDoNotCauseDiff() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
     
     user1.setPhotos(new ArrayList<>());
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
+    scimAssertThat(operations)
+      .describedAs("Empty Arrays caused a diff")
+      .isEmpty();
+  }
+
+  @Test
+  public void verifyEmptyExtensionArraysDoNotCauseDiff() throws Exception {
+    ScimUser user1 = createUser();
+    ScimUser user2 = createUser();
+
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
     user1.addExtension(ext1);
-    
+
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
     ext2.setList(new ArrayList<>());
     user2.addExtension(ext2);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
-    assertTrue(operations.isEmpty(), "Empty Arrays caused a diff");
+    scimAssertThat(operations)
+      .describedAs("Empty Arrays caused a diff")
+      .isEmpty();
   }
   
   @Test
@@ -419,10 +420,7 @@ public class PatchGeneratorTest {
     operations = patchGenerator.diff(user1, user2);
     assertTrue(operations.isEmpty(), "Empty Arrays are not being nulled out");
   }
-  
-  /**
-   * This unit test is to replicate the issue where
-   */
+
   @Test
   public void testAddArray() throws Exception {
     ScimUser user1 = createUser();
@@ -432,52 +430,68 @@ public class PatchGeneratorTest {
     photo.setType("photo");
     photo.setValue("photo1.png");
     user2.setPhotos(Stream.of(photo).collect(Collectors.toList()));
-    
-    
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
+
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.ADD, "photos", photo)
+    );
+  }
+
+  @Test
+  public void testAddExtensionArray() throws Exception {
+    ScimUser user1 = createUser();
+    ScimUser user2 = createUser();
+
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
     ext1.setList(null);
     user1.addExtension(ext1);
-    
+
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
-    ext2.setList(Stream.of(FIRST,SECOND).collect(Collectors.toList()));
+    ext2.setList(List.of(FIRST,SECOND));
     user2.addExtension(ext2);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations)
-      .hasSize(3)
-      .extracting("operation","value")
-      .contains(
-        tuple(Type.ADD, photo),
-        tuple(Type.ADD, "first"),
-        tuple(Type.ADD, "second"));
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.ADD, ExampleObjectExtension.URN + ":list", List.of(FIRST,SECOND))
+    );
   }
   
   @Test
   public void testRemoveArray() throws Exception {
     ScimUser user1 = createUser();
-    ScimUser user2 = createUser();
-    
     Photo photo = new Photo();
     photo.setType("photo");
     photo.setValue("photo1.png");
-    user1.setPhotos(Stream.of(photo).collect(Collectors.toList()));
-    
-    
+    user1.setPhotos(List.of(photo));
+
+    ScimUser user2 = createUser();
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
+
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REMOVE, "photos")
+    );
+  }
+
+  @Test
+  public void testRemoveExtensionArray() throws Exception {
+    ScimUser user1 = createUser();
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
-    ext1.setList(Stream.of(FIRST,SECOND).collect(Collectors.toList()));
+    ext1.setList(List.of(FIRST,SECOND));
     user1.addExtension(ext1);
-    
+
+    ScimUser user2 = createUser();
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
     ext2.setList(null);
     user2.addExtension(ext2);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
-    assertNotNull(operations);
-    assertEquals(2, operations.size());
-    PatchOperation operation = operations.get(0);
-    assertEquals(Type.REMOVE, operation.getOperation());
-    assertNull(operation.getValue());
+
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REMOVE, ExampleObjectExtension.URN + ":list")
+    );
   }
   
   @Test
@@ -486,22 +500,18 @@ public class PatchGeneratorTest {
     ScimUser user2 = createUser();
     
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
-    ext1.setList(Stream.of(FIRST,SECOND,THIRD).collect(Collectors.toList()));
+    ext1.setList(List.of(FIRST,SECOND,THIRD));
     user1.addExtension(ext1);
     
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
-    ext2.setList(Stream.of(FIRST,SECOND,FOURTH).collect(Collectors.toList()));
+    ext2.setList(List.of(FIRST,SECOND,FOURTH));
     user2.addExtension(ext2);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations)
-      .hasSize(1);
-    PatchOperation patchOp = operations.get(0);
-    PatchOperationAssert.assertThat(patchOp)
-        .hasType(Type.REPLACE)
-        .hashPath(ExampleObjectExtension.URN + ":list[value EQ \"third\"]")
-        .hasValue(FOURTH);
+    // Changing content of list should REMOVE old, and ADD new
+    scimAssertThat(operations).containsOnly(
+        patchOpMatching(Type.REPLACE, ExampleObjectExtension.URN + ":list", List.of(FIRST,SECOND,FOURTH)));
   }
   
   @Test
@@ -516,9 +526,10 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations).hasSize(2);
-    assertThat(operations).filteredOn(op(Type.ADD, "name.formatted", nickname)).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REMOVE, "nickName")).hasSize(1);
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.ADD, "name.formatted", nickname),
+      patchOpMatching(Type.REMOVE, "nickName", null)
+    );
   }
   
   @Test
@@ -535,9 +546,9 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations).hasSize(2);
-    assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", nickname)).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REPLACE, "nickName", "")).hasSize(1);
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REPLACE, "name.formatted", nickname),
+      patchOpMatching(Type.REPLACE, "nickName", ""));
   }
   
   @Test
@@ -554,9 +565,9 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations).hasSize(2);
-    assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", nickname)).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REMOVE, "nickName")).hasSize(1);
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REPLACE, "name.formatted", nickname),
+      patchOpMatching(Type.REMOVE, "nickName"));
   }
   
   @Test
@@ -574,9 +585,9 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations).hasSize(2);
-    assertThat(operations).filteredOn(op(Type.ADD, "name.formatted", nickname)).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REPLACE, "nickName", "")).hasSize(1);
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.ADD, "name.formatted", nickname),
+      patchOpMatching(Type.REPLACE, "nickName", ""));
   }
   
   @Test
@@ -593,14 +604,14 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations).hasSize(2);
-    assertThat(operations).filteredOn(op(Type.REMOVE, "name.formatted")).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REPLACE, "nickName", nickname)).hasSize(1);
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REMOVE, "name.formatted"),
+      patchOpMatching(Type.REPLACE, "nickName", nickname));
   }
   
   @ParameterizedTest
   @MethodSource("testListOfStringsParameters")
-  public void testListOfStringsParameterized(List<String> list1, List<String> list2, List<ExpectedPatchOperation> ops) throws Exception {
+  public void testListOfStringsParameterized(List<String> list1, List<String> list2, List<Condition<PatchOperation>> opConditions) throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
     
@@ -613,18 +624,7 @@ public class PatchGeneratorTest {
     user2.addExtension(ext2);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
-    assertEquals(ops.size(), operations.size());
-    for(int i = 0; i < operations.size(); i++) {
-      PatchOperation actualOp = operations.get(i);
-      ExpectedPatchOperation expectedOp = ops.get(i);
-      assertEquals(expectedOp.getOp(), actualOp.getOperation().toString());
-      assertEquals(expectedOp.getPath(), actualOp.getPath().toString());
-      if (expectedOp.getValue() == null) {
-        assertNull(actualOp.getValue());
-      } else {
-        assertEquals(expectedOp.getValue(), actualOp.getValue().toString());
-      }
-    }
+    scimAssertThat(operations).containsOnly(opConditions);
   }
   
   @SuppressWarnings("unused")
@@ -639,57 +639,48 @@ public class PatchGeneratorTest {
     //  3b Path
     //  3c Value
     
-    List<ExpectedPatchOperation> multipleOps = new ArrayList<ExpectedPatchOperation>();
-    multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A"));
-    multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "B"));
-    multipleOps.add(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "C"));
-    params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), null, Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {null, Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A")).collect(Collectors.toList())});
-    params.add(new Object[] {null, Stream.of(C,B,A).collect(Collectors.toList()), multipleOps});
-    params.add(new Object[] {Stream.of(A,B,C).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {Stream.of(C,B,A).collect(Collectors.toList()), new ArrayList<String>(), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", null)).collect(Collectors.toList())});
-    params.add(new Object[] {new ArrayList<String>(), Stream.of(A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A")).collect(Collectors.toList())});
-    params.add(new Object[] {new ArrayList<String>(), Stream.of(C,B,A).collect(Collectors.toList()), multipleOps});
+    List<Condition<PatchOperation>> multipleOps = new ArrayList<>();
+    multipleOps.add(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A"));
+    multipleOps.add(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "B"));
+    multipleOps.add(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "C"));
+
+    params.add(new Object[] {List.of(A), emptyList(), List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {List.of(A), null, List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {null, List.of(A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A)))});
+    params.add(new Object[] {null, List.of(C,B,A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(C,B,A)))});
+    params.add(new Object[] {List.of(A,B,C), emptyList(), List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {List.of(C,B,A), emptyList(), List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {emptyList(), List.of(A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A)))});
+    params.add(new Object[] {emptyList(), List.of(C,B,A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(C,B,A)))});
+
+    params.add(new Object[] {List.of(A, B), List.of(B), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B)))});
+    params.add(new Object[] {List.of(B, A), List.of(B), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B)))});
     
+    params.add(new Object[] {List.of(B), List.of(A,B), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A,B)))});
+    params.add(new Object[] {List.of(B), List.of(B,A), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B,A)))});
     
-    params.add(new Object[] {Stream.of(A, B).collect(Collectors.toList()), Stream.of(B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list[value EQ \"A\"]", null)).collect(Collectors.toList())});
-    params.add(new Object[] {Stream.of(B, A).collect(Collectors.toList()), Stream.of(B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("REMOVE", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list[value EQ \"A\"]", null)).collect(Collectors.toList())});
-    
-    params.add(new Object[] {Stream.of(B).collect(Collectors.toList()), Stream.of(A,B).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", A)).collect(Collectors.toList())});
-    params.add(new Object[] {Stream.of(B).collect(Collectors.toList()), Stream.of(B,A).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", A)).collect(Collectors.toList())});
-    
-    params.add(new Object[] {Stream.of(A).collect(Collectors.toList()), Stream.of(A,B,C).collect(Collectors.toList()), Stream.of(new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", B),new ExpectedPatchOperation("ADD", "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", C)).collect(Collectors.toList())});
+    params.add(new Object[] {List.of(A), List.of(A,B,C), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A,B,C)))});
     
     return params.toArray();
   }
   
   @Test
-  @Disabled
-  public void offsetTest1() throws Exception {
+  public void testMultiplePrimitivesInArray() throws Exception {
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
     
     ExampleObjectExtension ext1 = new ExampleObjectExtension();
-    ext1.setList(Stream.of("D","M","Y","Z","Z","Z","Z","Z").collect(Collectors.toList()));
+    ext1.setList(List.of("D","M","Y","Z","Z","Z","Z","Z"));
     user1.addExtension(ext1);
     
     ExampleObjectExtension ext2 = new ExampleObjectExtension();
-    //ext2.setList(Stream.of("A","A","B","B","D","F","N","Q","Z").collect(Collectors.toList()));
-    ext2.setList(Stream.of("A","Z").collect(Collectors.toList()));
+    ext2.setList(List.of("A","Z"));
     user2.addExtension(ext2);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
 
-    // TODO this is likely a flaky test, below, "A" replaces one of the "Z" values, but per order of the lists it should be "D"
-    assertThat(operations).hasSize(7);
-    assertThat(operations).filteredOn(op(Type.REPLACE, ExampleObjectExtension.URN + ":list[value EQ \"Z\"]", "A")).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"Z\"]")).hasSize(3);
-    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"D\"]")).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"M\"]")).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.REMOVE, ExampleObjectExtension.URN + ":list[value EQ \"Y\"]")).hasSize(1);
+    scimAssertThat(operations).contains(
+        patchOpMatching(Type.REPLACE, ExampleObjectExtension.URN + ":list", List.of("A","Z")));
   }
   
   @Test
@@ -707,9 +698,9 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
-    assertThat(operations).hasSize(2);
-    assertThat(operations).filteredOn(op(Type.REPLACE, "name.formatted", "")).hasSize(1);
-    assertThat(operations).filteredOn(op(Type.ADD, "nickName", nickname)).hasSize(1);
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REPLACE, "name.formatted", ""),
+      patchOpMatching(Type.ADD, "nickName", nickname));
   }
   
   /**
@@ -719,56 +710,122 @@ public class PatchGeneratorTest {
    * remove the primary flag, and remove the work number 
    */
   @Test
-  @Disabled
-  public void testShowBugWhereDeleteIsTreatedAsMultipleReplace() throws Exception {
-    final int expectedNumberOfOperationsWithoutBug = 1;
-    final int expectedNumberOfOperationsWithBug = 4;
+  public void testRemoveAndAddTypedElements() throws Exception {
 
     ScimUser user1 = createUser();
     ScimUser user2 = createUser();
-    user2.getPhoneNumbers().removeIf(p -> p.getType().equals("home"));
+    // remove home number REMOVE
+    user2.getPhoneNumbers().remove(0);
 
-    PhoneNumber workNumber = user2.getPhoneNumbers().stream().filter(p -> p.getType().equals("work")).findFirst().orElse(null);
+    // change work number REMOVE old and ADD new
+    PhoneNumber workNumber = user2.getPhoneNumbers().get(0);
     assertNotNull(workNumber);
     workNumber.setType(null);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
+    scimAssertThat(operations).contains(
+      patchOpMatching(Type.REMOVE, "phoneNumbers[type EQ \"home\"]"),
+      patchOpMatching(Type.REMOVE, "phoneNumbers[type EQ \"work\"]"),
+      patchOpMatching(Type.ADD, "phoneNumbers", workNumber)
+    );
+  }
+
+  @Test
+  public void testGroupUpdate() throws FilterParseException {
+    ScimGroup group1 = new ScimGroup();
+    group1.setDisplayName("Test Group");
+    group1.setMembers(new ArrayList<>());
+
+    ScimGroup group2 = new ScimGroup();
+    group2.setDisplayName("Test Group - updated");
+    group2.setMembers(new ArrayList<>());
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
+    scimAssertThat(operations).single()
+      .matches(Type.REPLACE, "displayName", "Test Group - updated");
+  }
+
+  @Test
+  public void testAddGroupMember() throws FilterParseException {
+    ScimGroup group1 = new ScimGroup();
+    group1.setDisplayName("Test Group");
+    group1.setMembers(new ArrayList<>());
+    group1.getMembers().add(new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user1"));
+
+    ScimGroup group2 = new ScimGroup();
+    group2.setDisplayName("Test Group");
+    group2.setMembers(new ArrayList<>());
+    group2.getMembers().add(new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user1"));
+
+    ResourceReference user2Ref = new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user2");
+    group2.getMembers().add(user2Ref);
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
     assertNotNull(operations);
+    assertEquals(1, operations.size());
+    PatchOperation operation = operations.get(0);
 
-    System.out.println("Number of operations: "+operations.size());
-    operations.stream().forEach(op -> System.out.println(op));
-
-    assertEquals(expectedNumberOfOperationsWithBug, operations.size());
-    assertNotEquals(expectedNumberOfOperationsWithoutBug, operations.size());
+    scimAssertThat(operation).matches(Type.ADD, "members", user2Ref);
   }
 
-  private PatchOperation assertSingleResult(List<PatchOperation> result) {
-    assertThat(result)
-              .isNotNull();
-    assertThat(result)
-              .hasSize(1);
-    PatchOperation actual = result.get(0);
-    return actual;
+  @Test
+  public void testRemoveGroupMember() throws FilterParseException {
+    ScimGroup group1 = new ScimGroup();
+    group1.setDisplayName("Test Group");
+    group1.setMembers(new ArrayList<>());
+    group1.getMembers().add(new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user1"));
+
+    ResourceReference user2Ref = new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user2");
+    group1.getMembers().add(user2Ref);
+
+    ScimGroup group2 = new ScimGroup();
+    group2.setDisplayName("Test Group");
+    group2.setMembers(new ArrayList<>());
+    group2.getMembers().add(new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user1"));
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
+    scimAssertThat(operations).contains(patchOpMatching(Type.REMOVE, "members[value EQ \"user2\"]"));
   }
 
-  private void checkAssertions(PatchOperation actual, Type op, String path, Object value) throws FilterParseException {
-    assertThat(actual.getOperation())
-              .isEqualTo(op);
-    assertThat(actual.getPath()
-                                .toString())
-              .isEqualTo(path);
-    assertThat(actual.getValue())
-              .isEqualTo(value);
-  }
-  
-  @Data
-  @AllArgsConstructor
-  private static class ExpectedPatchOperation {
-    private String op;
-    private String path;
-    private String value;
-    
-    
+
+  @Test
+  public void testGroupReplace() throws FilterParseException {
+
+    ScimGroup group1 = new ScimGroup();
+    group1.setDisplayName("Test Group");
+    group1.setMembers(new ArrayList<>());
+
+    group1.getMembers().add(new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user1"));
+
+    ScimGroup group2 = new ScimGroup();
+    group2.setDisplayName("Test Group");
+    group2.setMembers(new ArrayList<>());
+
+    ResourceReference user2Ref = new ResourceReference()
+      .setType(ResourceReference.ReferenceType.USER)
+      .setValue("user2");
+    group2.getMembers().add(user2Ref);
+
+    List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
+
+    scimAssertThat(operations).containsOnly(
+      patchOpMatching(Type.REMOVE, "members[value EQ \"user1\"]", null),
+      patchOpMatching(Type.ADD, "members", user2Ref)
+    );
   }
   
   public static final Address createHomeAddress() {
@@ -814,8 +871,7 @@ public class PatchGeneratorTest {
     workAddress.setCountry("USA");
     workAddress.setPostalCode("16802");
 
-    List<Address> address = Stream.of(workAddress, homeAddress)
-                                  .collect(Collectors.toList());
+    List<Address> address = Stream.of(workAddress, homeAddress).collect(Collectors.toList());
     user.setAddresses(address);
 
     Email workEmail = new Email();
@@ -836,13 +892,11 @@ public class PatchGeneratorTest {
     otherEmail.setValue("outside@version.net");
     otherEmail.setDisplay("outside@version.net");
 
-    List<Email> emails = Stream.of(homeEmail, workEmail)
-                               .collect(Collectors.toList());
+    List<Email> emails = Stream.of(homeEmail, workEmail).collect(Collectors.toList());
     user.setEmails(emails);
 
     //"+1(814)867-5309"
     PhoneNumber homePhone = new GlobalPhoneNumberBuilder().globalNumber("+1(814)867-5309").build();
-    
     homePhone.setType("home");
     homePhone.setPrimary(true);
 
@@ -851,8 +905,7 @@ public class PatchGeneratorTest {
     workPhone.setType("work");
     workPhone.setPrimary(false);
 
-    List<PhoneNumber> phones = Stream.of(homePhone, workPhone)
-                                     .collect(Collectors.toList());
+    List<PhoneNumber> phones = Stream.of(homePhone, workPhone).collect(Collectors.toList());
     user.setPhoneNumbers(phones);
 
     EnterpriseExtension enterpriseExtension = new EnterpriseExtension();
@@ -874,75 +927,5 @@ public class PatchGeneratorTest {
     removePhoneNumberOp.setPath(PatchOperationPath.fromString("phoneNumbers[type eq \"home\"]"));
     patchOperations.add(removePhoneNumberOp);
     return patchOperations;
-  }
-
-  static class PatchOperationAssert extends AbstractAssert<PatchOperationAssert, PatchOperation> {
-
-    public PatchOperationAssert(PatchOperation actual) {
-      super(actual, PatchOperationAssert.class);
-    }
-
-    public PatchOperationAssert hashPath(String path) {
-      isNotNull();
-      PatchOperationPath actualPath = actual.getPath();
-      if (actualPath == null || !actualPath.toString().equals(path)) {
-        failWithMessage("Expecting path in:\n  <%s>\nto be:    <%s>\nbut was: <%s>", actual, actualPath, path);
-      }
-      return this;
-    }
-
-    public PatchOperationAssert hasType(Type opType) {
-      isNotNull();
-      Type actualType = actual.getOperation();
-      if (!Objects.equals(actualType, opType)) {
-        failWithMessage("Expecting operation type in:\n  <%s>\nto be:   <%s>\nbut was: <%s>", actual, actualType, opType);
-      }
-      return this;
-    }
-
-    public PatchOperationAssert hasValue(Object value) {
-      isNotNull();
-      Object actualValue = actual.getValue();
-      if (!Objects.equals(actualValue, value)) {
-        failWithMessage("Expecting value in:\n  <%s>\nto be:    <%s>\nbut was: <%s>", actual, actualValue, value);
-      }
-      return this;
-    }
-
-    public PatchOperationAssert nullValue() {
-      return hasValue(null);
-    }
-
-    public static PatchOperationAssert assertThat(PatchOperation actual) {
-      return new PatchOperationAssert(actual);
-    }
-  }
-
-  static class PatchOperationCondition extends Condition<PatchOperation> {
-
-    private final Type type;
-    private final String path;
-    private final Object value;
-
-    public PatchOperationCondition(Type type, String path, Object value) {
-      this.type = type;
-      this.path = path;
-      this.value = value;
-    }
-
-    @Override
-    public boolean matches(PatchOperation patchOperation){
-      return Objects.equals(type, patchOperation.getOperation()) &&
-        Objects.equals(path, Objects.toString(patchOperation.getPath().toString())) &&
-        Objects.equals(value, patchOperation.getValue());
-    }
-
-    static PatchOperationCondition op(Type type, String path, Object value) {
-      return new PatchOperationCondition(type, path, value);
-    }
-
-    static PatchOperationCondition op(Type type, String path) {
-      return op(type, path, null);
-    }
   }
 }

@@ -52,11 +52,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.flipkart.zjsonpatch</groupId>
-      <artifactId>zjsonpatch</artifactId>
-      <version>0.4.14</version>
-    </dependency>
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>

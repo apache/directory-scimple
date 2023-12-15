@@ -37,13 +37,38 @@
       <artifactId>scim-spec-schema</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.foodev</groupId>
-      <artifactId>jsondiff</artifactId>
-      <version>2.0.0</version>
+      <groupId>org.apache.directory.scimple</groupId>
+      <artifactId>scim-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.directory.scimple</groupId>
+      <artifactId>scim-test</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
