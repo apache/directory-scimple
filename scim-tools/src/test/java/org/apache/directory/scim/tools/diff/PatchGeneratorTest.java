@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.directory.scim.spec.resources.GroupMembership;
 import org.apache.directory.scim.test.stub.ExampleObjectExtension;
 import org.apache.directory.scim.test.stub.Subobject;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
@@ -33,7 +34,6 @@ import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.patch.PatchOperation;
-import org.apache.directory.scim.spec.patch.PatchOperation.Type;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.Address;
@@ -44,7 +44,6 @@ import org.apache.directory.scim.spec.resources.PhoneNumber.GlobalPhoneNumberBui
 import org.apache.directory.scim.spec.resources.Photo;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.spec.schema.Schemas;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,7 +90,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-        .matches(Type.ADD, "nickName", "Jon");
+        .matches(PatchOperation.Type.ADD, "nickName", "Jon");
   }
   
   @Test
@@ -104,7 +103,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.ADD, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", ext);
+      .matches(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", ext);
   }
 
   @Test
@@ -117,7 +116,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.ADD, "name.honorificPrefix", "Dr.");
+      .matches(PatchOperation.Type.ADD, "name.honorificPrefix", "Dr.");
   }
 
   @Test
@@ -132,7 +131,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.ADD, "phoneNumbers", mobilePhone);
+      .matches(PatchOperation.Type.ADD, "phoneNumbers", mobilePhone);
   }
   
   /**
@@ -159,7 +158,7 @@ public class PatchGeneratorTest {
     assertThat(operations).hasSize(1);
     PatchOperation operation = operations.get(0);
     assertNotNull(operation.getValue());
-    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(PatchOperation.Type.ADD, operation.getOperation());
     assertEquals(PhoneNumber.class, operation.getValue().getClass());
   }
   
@@ -188,12 +187,12 @@ public class PatchGeneratorTest {
     
     PatchOperation operation = operations.get(0);
     assertNotNull(operation.getValue());
-    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(PatchOperation.Type.ADD, operation.getOperation());
     assertEquals(PhoneNumber.class, operation.getValue().getClass());
     
     operation = operations.get(1);
     assertNotNull(operation.getValue());
-    assertEquals(Type.ADD, operation.getOperation());
+    assertEquals(PatchOperation.Type.ADD, operation.getOperation());
     assertEquals(PhoneNumber.class, operation.getValue().getClass());
   }
 
@@ -206,7 +205,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REPLACE, "active", false);
+      .matches(PatchOperation.Type.REPLACE, "active", false);
   }
   
   @Test
@@ -218,7 +217,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "Dept XYZ.");
+      .matches(PatchOperation.Type.REPLACE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "Dept XYZ.");
   }
 
   @Test
@@ -231,7 +230,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REPLACE, "name.familyName", "Nobody");
+      .matches(PatchOperation.Type.REPLACE, "name.familyName", "Nobody");
   }
 
   @Test
@@ -246,8 +245,8 @@ public class PatchGeneratorTest {
 
     // Changing contents of a collection, should REMOVE the old and ADD a new
     scimAssertThat(result).containsOnly(
-        patchOpMatching(Type.REMOVE, "emails[type EQ \"work\"]"),
-        patchOpMatching(Type.ADD, "emails", workEmail));
+        patchOpMatching(PatchOperation.Type.REMOVE, "emails[type EQ \"work\"]"),
+        patchOpMatching(PatchOperation.Type.ADD, "emails", workEmail));
   }
 
   @Test
@@ -259,7 +258,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REMOVE, "userName", null);
+      .matches(PatchOperation.Type.REMOVE, "userName", null);
   }
   
   @Test
@@ -271,7 +270,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", null);
+      .matches(PatchOperation.Type.REMOVE, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", null);
   }
 
   @Test
@@ -284,7 +283,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REMOVE, "name.middleName", null);
+      .matches(PatchOperation.Type.REMOVE, "name.middleName", null);
   }
 
   @Test
@@ -296,7 +295,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REMOVE, "name", null);
+      .matches(PatchOperation.Type.REMOVE, "name", null);
   }
 
   @Test
@@ -313,7 +312,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REMOVE, "emails[type EQ \"home\"]", null);
+      .matches(PatchOperation.Type.REMOVE, "emails[type EQ \"home\"]", null);
   }
   
   @Test
@@ -333,7 +332,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(result).single()
-      .matches(Type.REMOVE, "addresses[type EQ \"local\"]", null);
+      .matches(PatchOperation.Type.REMOVE, "addresses[type EQ \"local\"]", null);
   }
   
   @Test
@@ -357,9 +356,9 @@ public class PatchGeneratorTest {
 
     scimAssertThat(result)
       .containsOnly(
-          patchOpMatching(Type.REMOVE, "addresses[type EQ \"work\"]"),
-          patchOpMatching(Type.ADD, "addresses", newWorkAddress),
-          patchOpMatching(Type.ADD, "addresses", localAddress));
+          patchOpMatching(PatchOperation.Type.REMOVE, "addresses[type EQ \"work\"]"),
+          patchOpMatching(PatchOperation.Type.ADD, "addresses", newWorkAddress),
+          patchOpMatching(PatchOperation.Type.ADD, "addresses", localAddress));
   }
   
   @Test
@@ -434,7 +433,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.ADD, "photos", photo)
+      patchOpMatching(PatchOperation.Type.ADD, "photos", photo)
     );
   }
 
@@ -454,7 +453,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.ADD, ExampleObjectExtension.URN + ":list", List.of(FIRST,SECOND))
+      patchOpMatching(PatchOperation.Type.ADD, ExampleObjectExtension.URN + ":list", List.of(FIRST,SECOND))
     );
   }
   
@@ -471,7 +470,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REMOVE, "photos")
+      patchOpMatching(PatchOperation.Type.REMOVE, "photos")
     );
   }
 
@@ -490,7 +489,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REMOVE, ExampleObjectExtension.URN + ":list")
+      patchOpMatching(PatchOperation.Type.REMOVE, ExampleObjectExtension.URN + ":list")
     );
   }
   
@@ -511,7 +510,7 @@ public class PatchGeneratorTest {
 
     // Changing content of list should REMOVE old, and ADD new
     scimAssertThat(operations).containsOnly(
-        patchOpMatching(Type.REPLACE, ExampleObjectExtension.URN + ":list", List.of(FIRST,SECOND,FOURTH)));
+        patchOpMatching(PatchOperation.Type.REPLACE, ExampleObjectExtension.URN + ":list", List.of(FIRST,SECOND,FOURTH)));
   }
   
   @Test
@@ -527,8 +526,8 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.ADD, "name.formatted", nickname),
-      patchOpMatching(Type.REMOVE, "nickName", null)
+      patchOpMatching(PatchOperation.Type.ADD, "name.formatted", nickname),
+      patchOpMatching(PatchOperation.Type.REMOVE, "nickName", null)
     );
   }
   
@@ -547,8 +546,8 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REPLACE, "name.formatted", nickname),
-      patchOpMatching(Type.REPLACE, "nickName", ""));
+      patchOpMatching(PatchOperation.Type.REPLACE, "name.formatted", nickname),
+      patchOpMatching(PatchOperation.Type.REPLACE, "nickName", ""));
   }
   
   @Test
@@ -566,8 +565,8 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REPLACE, "name.formatted", nickname),
-      patchOpMatching(Type.REMOVE, "nickName"));
+      patchOpMatching(PatchOperation.Type.REPLACE, "name.formatted", nickname),
+      patchOpMatching(PatchOperation.Type.REMOVE, "nickName"));
   }
   
   @Test
@@ -586,8 +585,8 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.ADD, "name.formatted", nickname),
-      patchOpMatching(Type.REPLACE, "nickName", ""));
+      patchOpMatching(PatchOperation.Type.ADD, "name.formatted", nickname),
+      patchOpMatching(PatchOperation.Type.REPLACE, "nickName", ""));
   }
   
   @Test
@@ -605,8 +604,8 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REMOVE, "name.formatted"),
-      patchOpMatching(Type.REPLACE, "nickName", nickname));
+      patchOpMatching(PatchOperation.Type.REMOVE, "name.formatted"),
+      patchOpMatching(PatchOperation.Type.REPLACE, "nickName", nickname));
   }
   
   @ParameterizedTest
@@ -640,26 +639,26 @@ public class PatchGeneratorTest {
     //  3c Value
     
     List<Condition<PatchOperation>> multipleOps = new ArrayList<>();
-    multipleOps.add(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A"));
-    multipleOps.add(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "B"));
-    multipleOps.add(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "C"));
+    multipleOps.add(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "A"));
+    multipleOps.add(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "B"));
+    multipleOps.add(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", "C"));
 
-    params.add(new Object[] {List.of(A), emptyList(), List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
-    params.add(new Object[] {List.of(A), null, List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
-    params.add(new Object[] {null, List.of(A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A)))});
-    params.add(new Object[] {null, List.of(C,B,A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(C,B,A)))});
-    params.add(new Object[] {List.of(A,B,C), emptyList(), List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
-    params.add(new Object[] {List.of(C,B,A), emptyList(), List.of(patchOpMatching(Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
-    params.add(new Object[] {emptyList(), List.of(A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A)))});
-    params.add(new Object[] {emptyList(), List.of(C,B,A), List.of(patchOpMatching(Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(C,B,A)))});
+    params.add(new Object[] {List.of(A), emptyList(), List.of(patchOpMatching(PatchOperation.Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {List.of(A), null, List.of(patchOpMatching(PatchOperation.Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {null, List.of(A), List.of(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A)))});
+    params.add(new Object[] {null, List.of(C,B,A), List.of(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(C,B,A)))});
+    params.add(new Object[] {List.of(A,B,C), emptyList(), List.of(patchOpMatching(PatchOperation.Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {List.of(C,B,A), emptyList(), List.of(patchOpMatching(PatchOperation.Type.REMOVE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list"))});
+    params.add(new Object[] {emptyList(), List.of(A), List.of(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A)))});
+    params.add(new Object[] {emptyList(), List.of(C,B,A), List.of(patchOpMatching(PatchOperation.Type.ADD, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(C,B,A)))});
 
-    params.add(new Object[] {List.of(A, B), List.of(B), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B)))});
-    params.add(new Object[] {List.of(B, A), List.of(B), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B)))});
+    params.add(new Object[] {List.of(A, B), List.of(B), List.of(patchOpMatching(PatchOperation.Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B)))});
+    params.add(new Object[] {List.of(B, A), List.of(B), List.of(patchOpMatching(PatchOperation.Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B)))});
     
-    params.add(new Object[] {List.of(B), List.of(A,B), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A,B)))});
-    params.add(new Object[] {List.of(B), List.of(B,A), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B,A)))});
+    params.add(new Object[] {List.of(B), List.of(A,B), List.of(patchOpMatching(PatchOperation.Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A,B)))});
+    params.add(new Object[] {List.of(B), List.of(B,A), List.of(patchOpMatching(PatchOperation.Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(B,A)))});
     
-    params.add(new Object[] {List.of(A), List.of(A,B,C), List.of(patchOpMatching(Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A,B,C)))});
+    params.add(new Object[] {List.of(A), List.of(A,B,C), List.of(patchOpMatching(PatchOperation.Type.REPLACE, "urn:ietf:params:scim:schemas:extension:example:2.0:Object:list", List.of(A,B,C)))});
     
     return params.toArray();
   }
@@ -680,7 +679,7 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).contains(
-        patchOpMatching(Type.REPLACE, ExampleObjectExtension.URN + ":list", List.of("A","Z")));
+        patchOpMatching(PatchOperation.Type.REPLACE, ExampleObjectExtension.URN + ":list", List.of("A","Z")));
   }
   
   @Test
@@ -699,8 +698,8 @@ public class PatchGeneratorTest {
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REPLACE, "name.formatted", ""),
-      patchOpMatching(Type.ADD, "nickName", nickname));
+      patchOpMatching(PatchOperation.Type.REPLACE, "name.formatted", ""),
+      patchOpMatching(PatchOperation.Type.ADD, "nickName", nickname));
   }
   
   /**
@@ -724,9 +723,9 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
     scimAssertThat(operations).contains(
-      patchOpMatching(Type.REMOVE, "phoneNumbers[type EQ \"home\"]"),
-      patchOpMatching(Type.REMOVE, "phoneNumbers[type EQ \"work\"]"),
-      patchOpMatching(Type.ADD, "phoneNumbers", workNumber)
+      patchOpMatching(PatchOperation.Type.REMOVE, "phoneNumbers[type EQ \"home\"]"),
+      patchOpMatching(PatchOperation.Type.REMOVE, "phoneNumbers[type EQ \"work\"]"),
+      patchOpMatching(PatchOperation.Type.ADD, "phoneNumbers", workNumber)
     );
   }
 
@@ -742,7 +741,7 @@ public class PatchGeneratorTest {
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
     scimAssertThat(operations).single()
-      .matches(Type.REPLACE, "displayName", "Test Group - updated");
+      .matches(PatchOperation.Type.REPLACE, "displayName", "Test Group - updated");
   }
 
   @Test
@@ -750,19 +749,19 @@ public class PatchGeneratorTest {
     ScimGroup group1 = new ScimGroup();
     group1.setDisplayName("Test Group");
     group1.setMembers(new ArrayList<>());
-    group1.getMembers().add(new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    group1.getMembers().add(new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user1"));
 
     ScimGroup group2 = new ScimGroup();
     group2.setDisplayName("Test Group");
     group2.setMembers(new ArrayList<>());
-    group2.getMembers().add(new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    group2.getMembers().add(new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user1"));
 
-    ResourceReference user2Ref = new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    GroupMembership user2Ref = new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user2");
     group2.getMembers().add(user2Ref);
 
@@ -771,7 +770,7 @@ public class PatchGeneratorTest {
     assertEquals(1, operations.size());
     PatchOperation operation = operations.get(0);
 
-    scimAssertThat(operation).matches(Type.ADD, "members", user2Ref);
+    scimAssertThat(operation).matches(PatchOperation.Type.ADD, "members", user2Ref);
   }
 
   @Test
@@ -779,24 +778,24 @@ public class PatchGeneratorTest {
     ScimGroup group1 = new ScimGroup();
     group1.setDisplayName("Test Group");
     group1.setMembers(new ArrayList<>());
-    group1.getMembers().add(new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    group1.getMembers().add(new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user1"));
 
-    ResourceReference user2Ref = new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    GroupMembership user2Ref = new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user2");
     group1.getMembers().add(user2Ref);
 
     ScimGroup group2 = new ScimGroup();
     group2.setDisplayName("Test Group");
     group2.setMembers(new ArrayList<>());
-    group2.getMembers().add(new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    group2.getMembers().add(new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user1"));
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
-    scimAssertThat(operations).contains(patchOpMatching(Type.REMOVE, "members[value EQ \"user2\"]"));
+    scimAssertThat(operations).contains(patchOpMatching(PatchOperation.Type.REMOVE, "members[value EQ \"user2\"]"));
   }
 
 
@@ -807,24 +806,24 @@ public class PatchGeneratorTest {
     group1.setDisplayName("Test Group");
     group1.setMembers(new ArrayList<>());
 
-    group1.getMembers().add(new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    group1.getMembers().add(new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user1"));
 
     ScimGroup group2 = new ScimGroup();
     group2.setDisplayName("Test Group");
     group2.setMembers(new ArrayList<>());
 
-    ResourceReference user2Ref = new ResourceReference()
-      .setType(ResourceReference.ReferenceType.USER)
+    GroupMembership user2Ref = new GroupMembership()
+      .setType(GroupMembership.Type.USER)
       .setValue("user2");
     group2.getMembers().add(user2Ref);
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(group1, group2);
 
     scimAssertThat(operations).containsOnly(
-      patchOpMatching(Type.REMOVE, "members[value EQ \"user1\"]", null),
-      patchOpMatching(Type.ADD, "members", user2Ref)
+      patchOpMatching(PatchOperation.Type.REMOVE, "members[value EQ \"user1\"]", null),
+      patchOpMatching(PatchOperation.Type.ADD, "members", user2Ref)
     );
   }
   
@@ -923,7 +922,7 @@ public class PatchGeneratorTest {
   private List<PatchOperation> createUser1PatchOps() throws FilterParseException {
     List<PatchOperation> patchOperations = new ArrayList<>();
     PatchOperation removePhoneNumberOp = new PatchOperation();
-    removePhoneNumberOp.setOperation(Type.REMOVE);
+    removePhoneNumberOp.setOperation(PatchOperation.Type.REMOVE);
     removePhoneNumberOp.setPath(PatchOperationPath.fromString("phoneNumbers[type eq \"home\"]"));
     patchOperations.add(removePhoneNumberOp);
     return patchOperations;

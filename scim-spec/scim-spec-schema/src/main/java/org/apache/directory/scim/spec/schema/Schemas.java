@@ -58,7 +58,6 @@ public final class Schemas {
     put(Date.class, Schema.Attribute.Type.DATE_TIME);
     put(Instant.class, Schema.Attribute.Type.DATE_TIME);
     put(byte[].class, Schema.Attribute.Type.BINARY);
-    put(ResourceReference.ReferenceType.class, Schema.Attribute.Type.REFERENCE);
   }};
 
   private Schemas() {}
@@ -224,6 +223,7 @@ public final class Schemas {
       if (refType.isEmpty() || (refType.size() == 1 && refType.get(0).isEmpty())) {
         attribute.setReferenceTypes(null);
       } else {
+        attribute.setType(Schema.Attribute.Type.REFERENCE);
         attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
       }
 

@@ -35,7 +35,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.schema.Meta;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -56,13 +55,13 @@ public class ScimGroup extends ScimResource implements Serializable {
   
   @XmlElement
   @ScimAttribute(description = "A list of members of the Group.")
-  List<ResourceReference> members;
+  List<GroupMembership> members;
 
-  public ScimGroup addMember(ResourceReference resourceReference) {
+  public ScimGroup addMember(GroupMembership groupMembership) {
     if (members == null) {
       members = new ArrayList<>();
     }
-    members.add(resourceReference);
+    members.add(groupMembership);
 
     return this;
   }

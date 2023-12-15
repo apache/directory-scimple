@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.test.assertj;
 
+import org.apache.directory.scim.spec.resources.GroupMembership;
 import org.apache.directory.scim.spec.resources.ScimGroup;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.assertj.core.api.AbstractAssert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +38,7 @@ public class ScimGroupAssert extends AbstractAssert<ScimGroupAssert, ScimGroup> 
     return this;
   }
 
-  public ScimGroupAssert containsMember(ResourceReference... expected) {
+  public ScimGroupAssert containsMember(GroupMembership... expected) {
     isNotNull();
     assertMembersNotNull();
     assertThat(actual.getMembers()).contains(expected);

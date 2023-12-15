@@ -17,9 +17,7 @@
 * under the License.
 */
 
-package org.apache.directory.scim.spec.schema;
-
-import java.io.Serializable;
+package org.apache.directory.scim.spec.resources;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -27,40 +25,46 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 import jakarta.xml.bind.annotation.XmlType;
-
+import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
-import lombok.Data;
+import org.apache.directory.scim.spec.schema.Schema;
+
+import java.io.Serializable;
 
 @Data
 @XmlType(propOrder = {"value","ref","display","type"})
 @XmlAccessorType(XmlAccessType.NONE)
-public class ResourceReference implements Serializable {
+public class UserGroup implements Serializable {
 
   private static final long serialVersionUID = 9126588075353486789L;
 
   @XmlEnum
-  public enum ReferenceType {
+  public enum Type {
     @XmlEnumValue("direct") DIRECT,
-    @XmlEnumValue("indirect") INDIRECT,
-    @XmlEnumValue("User") USER,
-    @XmlEnumValue("Group") GROUP;
+    @XmlEnumValue("indirect") INDIRECT;
   }
   
-  @ScimAttribute(description="Reference Element Identifier")
+  @ScimAttribute(description="The identifier of the User's group.",
+    mutability = Schema.Attribute.Mutability.READ_ONLY)
   @ScimResourceIdReference
   @XmlElement
   String value;
 
-  @ScimAttribute(name = "$ref", description="The URI of the corresponding resource ", referenceTypes={"User", "Group"})
+  @ScimAttribute(name = "$ref", description="The URI of the corresponding 'Group' resource to which the user belongs.",
+    referenceTypes={"User", "Group"},
+    mutability = Schema.Attribute.Mutability.READ_ONLY)
   @XmlElement(name = "$ref")
   String ref;
 
-  @ScimAttribute(description="A human readable name, primarily used for display purposes. READ-ONLY.")
+  @ScimAttribute(description="A human-readable name, primarily used for display purposes.",
+    mutability = Schema.Attribute.Mutability.READ_ONLY)
   @XmlElement
   String display;
 
-  @ScimAttribute(description="A label indicating the attribute's function; e.g., 'direct' or 'indirect'.", canonicalValueList={"direct", "indirect"})
+  @ScimAttribute(description="A label indicating the attribute's function, e.g., 'direct' or 'indirect'.",
+    canonicalValueList={"direct", "indirect"},
+    mutability = Schema.Attribute.Mutability.READ_ONLY)
   @XmlElement
-  ReferenceType type;
+  Type type;
 }

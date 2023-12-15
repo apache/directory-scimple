@@ -22,6 +22,8 @@ package org.apache.directory.scim.spec.schema;
 import org.apache.directory.scim.spec.AllSchemaTypesExtension;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 public class SchemasTest {
 
   private Schema schema = Schemas.schemaForExtension(AllSchemaTypesExtension.class);
@@ -414,7 +416,24 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(List.of("one", "two"));
+  }
+
+  @Test
+  public void ref2Attribute() {
+    assertThat(schema.getAttribute("$ref"))
+      .hasName("$ref")
+      .hasMutability(Schema.Attribute.Mutability.READ_WRITE)
+      .hasReturned(Schema.Attribute.Returned.DEFAULT)
+      .hasType(Schema.Attribute.Type.REFERENCE)
+      .hasUniqueness(Schema.Attribute.Uniqueness.NONE)
+      .isMultiValued(false)
+      .hasDescription("")
+      .isRequired(false)
+      .isCaseExact(false)
+      .hasSubAttributes(null)
+      .hasCanonicalValues(null)
+      .hasReferenceTypes(List.of("three", "four"));
   }
 
   @Test
@@ -431,7 +450,7 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(List.of("one", "two", "three"));
   }
 
 

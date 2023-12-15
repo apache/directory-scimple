@@ -35,7 +35,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.schema.Meta;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Uniqueness;
 
@@ -77,7 +76,7 @@ public class ScimUser extends ScimResource implements Serializable {
 
   @XmlElement
   @ScimAttribute(description="A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
-  List<ResourceReference> groups;
+  List<UserGroup> groups;
 
   @XmlElement
   @ScimAttribute(description="Instant messaging address for the User.")

@@ -27,7 +27,6 @@ import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
 import java.time.Instant;
@@ -137,13 +136,17 @@ public class AllSchemaTypesExtension implements ScimExtension {
   @XmlElement
   private List<byte[]> binaryList1;
 
-  @ScimAttribute
+  @ScimAttribute(referenceTypes = {"one", "two"})
   @XmlElement
-  private ResourceReference.ReferenceType ref1;
+  private String ref1;
 
-  @ScimAttribute
+  @ScimAttribute(name = "$ref", referenceTypes = {"three", "four"})
   @XmlElement
-  private List<ResourceReference.ReferenceType> refList1;
+  private String ref2;
+
+  @ScimAttribute(referenceTypes = {"one", "two", "three"})
+  @XmlElement
+  private List<String> refList1;
 
   @Override
   public String getUrn() {
