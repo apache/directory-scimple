@@ -28,8 +28,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.directory.scim.core.repository.utility.ExampleObjectExtension;
-import org.apache.directory.scim.core.repository.utility.Subobject;
+import org.apache.directory.scim.test.stub.ExampleObjectExtension;
+import org.apache.directory.scim.test.stub.Subobject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;

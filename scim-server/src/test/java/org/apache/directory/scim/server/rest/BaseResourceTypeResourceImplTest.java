@@ -40,8 +40,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 
 import org.apache.directory.scim.core.repository.Repository;
-import org.apache.directory.scim.server.utility.ExampleObjectExtension;
-import org.apache.directory.scim.server.utility.ExampleObjectExtension.ComplexObject;
+import org.apache.directory.scim.test.stub.ExampleObjectExtension;
+import org.apache.directory.scim.test.stub.ExampleObjectExtension.ComplexObject;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
