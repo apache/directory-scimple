@@ -28,7 +28,7 @@
   <artifactId>scim-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SCIMple - Parent</name>
+  <name>SCIMple</name>
   <description>Apache Directory SCIMple - Jakarta EE implementation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
   <url>https://github.com/apache/directory-scimple</url>
 
@@ -417,6 +417,11 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>4.0.0-M12</version>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -655,6 +660,22 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <profiles>
     <profile>
