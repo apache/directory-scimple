@@ -33,29 +33,32 @@ import org.apache.directory.scim.spec.resources.ScimResource;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Slf4j
 public final class Schemas {
-
-  private static final String STRING_TYPE_IDENTIFIER = "class java.lang.String";
-  private static final String STRING_TYPE = "java.lang.String"; // TODO this is ugly
-  private static final String CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [C";
-  private static final String BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER = "class [Ljava.lang.Character;";
-  private static final String INT_TYPE_IDENTIFIER = "int";
-  private static final String INTEGER_TYPE_IDENTIFIER = "class java.lang.Integer";
-  private static final String FLOAT_TYPE_IDENTIFIER = "float";
-  private static final String BIG_F_FLOAT_TYPE_IDENTIFIER = "class java.lang.Float";
-  private static final String DOUBLE_TYPE_IDENTIFIER = "double";
-  private static final String BIG_D_DOUBLE_TYPE_IDENTIFIER = "class java.lang.Double";
-  private static final String BOOLEAN_TYPE_IDENTIFIER = "boolean";
-  private static final String BIG_B_BOOLEAN_TYPE_IDENTIFIER = "class java.lang.Boolean";
-  private static final String LOCAL_TIME_TYPE_IDENTIFER = "class java.time.LocalTime";
-  private static final String LOCAL_DATE_TYPE_IDENTIFER = "class java.time.LocalDate";
-  private static final String LOCAL_DATE_TIME_TYPE_IDENTIFIER = "class java.time.LocalDateTime";
-  private static final String DATE_TYPE_IDENTIFIER = "class java.util.Date";
-  private static final String BYTE_ARRAY_TYPE_IDENTIFIER = "class [B";
-  private static final String RESOURCE_REFERENCE_TYPE_IDENTIFIER = "class org.apache.directory.scim.spec.schema.ResourceReference$ReferenceType";
+  private final static Map<Class<?>, Schema.Attribute.Type> CLASS_TO_TYPE = new HashMap<>() {{
+    put(String.class, Schema.Attribute.Type.STRING);
+    put(Character.class, Schema.Attribute.Type.STRING);
+    put(Integer.class, Schema.Attribute.Type.INTEGER);
+    put(int.class, Schema.Attribute.Type.INTEGER);
+    put(Double.class, Schema.Attribute.Type.DECIMAL);
+    put(double.class, Schema.Attribute.Type.DECIMAL);
+    put(Float.class, Schema.Attribute.Type.DECIMAL);
+    put(float.class, Schema.Attribute.Type.DECIMAL);
+    put(Boolean.class, Schema.Attribute.Type.BOOLEAN);
+    put(boolean.class, Schema.Attribute.Type.BOOLEAN);
+    put(LocalTime.class, Schema.Attribute.Type.DATE_TIME);
+    put(LocalDate.class, Schema.Attribute.Type.DATE_TIME);
+    put(LocalDateTime.class, Schema.Attribute.Type.DATE_TIME);
+    put(Date.class, Schema.Attribute.Type.DATE_TIME);
+    put(Instant.class, Schema.Attribute.Type.DATE_TIME);
+    put(byte[].class, Schema.Attribute.Type.BINARY);
+  }};
 
   private Schemas() {}
 
@@ -120,7 +123,7 @@ public final class Schemas {
 
       log.debug("++++++++++++++++++++ Processing field " + f.getName());
       if (sa == null) {
-        log.debug("Attribute " + f.getName() + " did not have a ScimAttribute annotation");
+        log.debug("Attribute {} did not have a ScimAttribute annotation", f.getName());
         continue;
       }
 
@@ -146,7 +149,7 @@ public final class Schemas {
 
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
-      log.debug("Gathered fields of off the enum, there are " + enumFields.length + " " + sa.canonicalValueEnum().getName());
+      log.debug("Gathered fields of off the enum, there are {} {}", enumFields.length, sa.canonicalValueEnum().getName());
 
       if (enumFields.length != 0) {
 
@@ -174,79 +177,39 @@ public final class Schemas {
       if (canonicalTypes.isEmpty() || (canonicalTypes.size() == 1 && canonicalTypes.get(0).isEmpty())) {
         attribute.setCanonicalValues(null);
       } else {
-        attribute.setCanonicalValues(new HashSet<String>(canonicalTypes));
+        attribute.setCanonicalValues(new HashSet<>(canonicalTypes));
       }
 
       attribute.setCaseExact(sa.caseExact());
       attribute.setDescription(sa.description());
 
-      String typeName = null;
+      Class<?> typeClass;
       if (Collection.class.isAssignableFrom(f.getType())) {
-        log.debug("We have a collection");
+        log.debug("Attribute: '{}' is a collection", attributeName);
         ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
-        Class<?> attributeContainedClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-        typeName = attributeContainedClass.getTypeName();
+        typeClass = (Class<?>) stringListType.getActualTypeArguments()[0];
         attribute.setMultiValued(true);
       } else if (f.getType().isArray()) {
-        log.debug("We have an array");
-        Class<?> componentType = f.getType().getComponentType();
-        typeName = componentType.getTypeName();
-        attribute.setMultiValued(true);
+        log.debug("Attribute: '{}' is an array", attributeName);
+        typeClass = f.getType().getComponentType();
+
+        // special case for byte[]
+        if (typeClass == byte.class) {
+          typeClass = byte[].class;
+        } else {
+          attribute.setMultiValued(true);
+        }
       } else {
-        typeName = f.getType().toString();
+        typeClass = f.getType();
         attribute.setMultiValued(false);
       }
 
-      // attribute.setType(sa.type());
-      boolean attributeIsAString = false;
-      log.debug("Attempting to set the attribute type, raw value = " + typeName);
-      switch (typeName) {
-        case STRING_TYPE_IDENTIFIER:
-        case STRING_TYPE:
-        case CHARACTER_ARRAY_TYPE_IDENTIFIER:
-        case BIG_C_CHARACTER_ARRAY_TYPE_IDENTIFIER:
-          log.debug("Setting type to String");
-          attribute.setType(Schema.Attribute.Type.STRING);
-          attributeIsAString = true;
-          break;
-        case INT_TYPE_IDENTIFIER:
-        case INTEGER_TYPE_IDENTIFIER:
-          log.debug("Setting type to integer");
-          attribute.setType(Schema.Attribute.Type.INTEGER);
-          break;
-        case FLOAT_TYPE_IDENTIFIER:
-        case BIG_F_FLOAT_TYPE_IDENTIFIER:
-        case DOUBLE_TYPE_IDENTIFIER:
-        case BIG_D_DOUBLE_TYPE_IDENTIFIER:
-          log.debug("Setting type to decimal");
-          attribute.setType(Schema.Attribute.Type.DECIMAL);
-          break;
-        case BOOLEAN_TYPE_IDENTIFIER:
-        case BIG_B_BOOLEAN_TYPE_IDENTIFIER:
-          log.debug("Setting type to boolean");
-          attribute.setType(Schema.Attribute.Type.BOOLEAN);
-          break;
-        case BYTE_ARRAY_TYPE_IDENTIFIER:
-          log.debug("Setting type to binary");
-          attribute.setType(Schema.Attribute.Type.BINARY);
-          break;
-        case DATE_TYPE_IDENTIFIER:
-        case LOCAL_DATE_TIME_TYPE_IDENTIFIER:
-        case LOCAL_TIME_TYPE_IDENTIFER:
-        case LOCAL_DATE_TYPE_IDENTIFER:
-          log.debug("Setting type to date time");
-          attribute.setType(Schema.Attribute.Type.DATE_TIME);
-          break;
-        case RESOURCE_REFERENCE_TYPE_IDENTIFIER:
-          log.debug("Setting type to reference");
-          attribute.setType(Schema.Attribute.Type.REFERENCE);
-          break;
-        default:
-          log.debug("Setting type to complex");
-          attribute.setType(Schema.Attribute.Type.COMPLEX);
-      }
+      log.debug("Attempting to set the attribute type, raw value = {}", typeClass);
+      Schema.Attribute.Type type = CLASS_TO_TYPE.getOrDefault(typeClass, Schema.Attribute.Type.COMPLEX);
+      attribute.setType(type);
+
       if (f.getAnnotation(ScimResourceIdReference.class) != null) {
-        if (attributeIsAString) {
+        if (type == Schema.Attribute.Type.STRING) {
           attribute.setScimResourceIdReference(true);
         } else {
           log.warn("Field annotated with @ScimResourceIdReference must be a string: {}", f);
@@ -260,6 +223,7 @@ public final class Schemas {
       if (refType.isEmpty() || (refType.size() == 1 && refType.get(0).isEmpty())) {
         attribute.setReferenceTypes(null);
       } else {
+        attribute.setType(Schema.Attribute.Type.REFERENCE);
         attribute.setReferenceTypes(Arrays.asList(sa.referenceTypes()));
       }
 
@@ -267,7 +231,6 @@ public final class Schemas {
       attribute.setReturned(sa.returned());
       attribute.setUniqueness(sa.uniqueness());
 
-      //if (sa.type().equals(Type.COMPLEX))
       ScimType st = f.getType().getAnnotation(ScimType.class);
 
       if (attribute.getType() == Schema.Attribute.Type.COMPLEX || st != null) {
@@ -291,7 +254,7 @@ public final class Schemas {
     }
 
     attributeList.sort(Comparator.comparing(o -> o.name));
-    log.debug("Returning " + attributeList.size() + " attributes");
+    log.debug("Returning {} attributes", attributeList.size());
     return attributeList;
   }
 

@@ -30,10 +30,10 @@ import org.apache.directory.scim.protocol.data.BulkOperation;
 import org.apache.directory.scim.protocol.data.BulkRequest;
 import org.apache.directory.scim.protocol.data.BulkResponse;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
+import org.apache.directory.scim.spec.resources.GroupMembership;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -60,8 +60,8 @@ public class BulkResourceImplTest {
 
     ScimGroup tourGuides = new ScimGroup()
       .setDisplayName("Tour Guides")
-      .setMembers(List.of(new ResourceReference()
-        .setType(ResourceReference.ReferenceType.USER)
+      .setMembers(List.of(new GroupMembership()
+        .setType(GroupMembership.Type.USER)
         .setValue("bulkId:qwerty")));
 
     BulkRequest bulkRequest = new BulkRequest()

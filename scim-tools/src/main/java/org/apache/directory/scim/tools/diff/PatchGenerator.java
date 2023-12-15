@@ -28,7 +28,6 @@ import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
 import java.util.ArrayList;
@@ -36,6 +35,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -258,14 +258,24 @@ public class PatchGenerator {
 
     Schema.Attribute typeAttribute = attribute.getAttribute(TYPE);
     Schema.Attribute valueAttribute = attribute.getAttribute(VALUE);
+    Optional<Schema.Attribute> refAttribute = attribute.getSubAttributes().stream()
+      .filter(attr -> attr.getType() == Schema.Attribute.Type.REFERENCE)
+      .findFirst();
 
-    // Special handling for some types
+    // Special handling if there is this object has reference attribute and a `value`  attribute
     // if right is a ref, the expression will be: `<attribute>[value EQ <right.value>]`
-    if (value instanceof ResourceReference) {
-      Object right = ((ResourceReference) value).getValue();
-      AttributeReference attributeReference = new AttributeReference(attributePath(prefixSchema, parentAttributes, attribute));
-      AttributeReference expressionAttributeRef = new AttributeReference(attributePath(prefixSchema, parentAttributes, valueAttribute));
-      return new ValuePathExpression(attributeReference, new AttributeComparisonExpression(expressionAttributeRef, CompareOperator.EQ, right));
+    if (refAttribute.isPresent() && valueAttribute != null) {
+      Object right = valueAttribute.getAccessor().get(value);
+
+      if (right != null) {
+        if (!(right instanceof String)) {
+          throw new IllegalArgumentException("PatchGenerator does not support 'value' attributes that are not a String.");
+        }
+
+        AttributeReference attributeReference = new AttributeReference(attributePath(prefixSchema, parentAttributes, attribute));
+        AttributeReference expressionAttributeRef = new AttributeReference(attributePath(prefixSchema, parentAttributes, valueAttribute));
+        return new ValuePathExpression(attributeReference, new AttributeComparisonExpression(expressionAttributeRef, CompareOperator.EQ, right));
+      }
     }
 
     // Next check for objects that have a `type` attribute: `<attribute>[type EQ <right.type>]`
