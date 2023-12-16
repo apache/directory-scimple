@@ -27,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ScimGroupAssert extends AbstractAssert<ScimGroupAssert, ScimGroup> {
 
-  protected ScimGroupAssert(ScimGroup scimGroup, Class<?> selfType) {
-    super(scimGroup, selfType);
+  protected ScimGroupAssert(ScimGroup scimGroup) {
+    super(scimGroup, ScimGroupAssert.class);
   }
 
   public ScimGroupAssert membersHasSize(int expected) {
@@ -38,10 +38,19 @@ public class ScimGroupAssert extends AbstractAssert<ScimGroupAssert, ScimGroup> 
     return this;
   }
 
-  public ScimGroupAssert containsMember(GroupMembership... expected) {
+  public ScimGroupAssert containsMembers(GroupMembership... expected) {
     isNotNull();
     assertMembersNotNull();
     assertThat(actual.getMembers()).contains(expected);
+    return this;
+  }
+
+  @SafeVarargs
+  public final ScimGroupAssert containsOnlyMembers(GroupMembership... groupMemberships) {
+    isNotNull();
+    assertThat(actual.getMembers())
+      .as("ScimGroup.members")
+      .containsOnly(groupMemberships);
     return this;
   }
 
