@@ -29,6 +29,7 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.exception.MutabilityException;
 import org.apache.directory.scim.spec.exception.UnsupportedFilterException;
 import org.apache.directory.scim.spec.filter.AttributeComparisonExpression;
+import org.apache.directory.scim.spec.filter.CompareOperator;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.filter.ValuePathExpression;
@@ -60,6 +61,8 @@ import static java.util.stream.Collectors.toList;
 public class DefaultPatchHandler implements PatchHandler {
 
   public static final String PRIMARY = "primary";
+
+  private static final String VALUE_ATTRIBUTE_NAME = "value";
 
   private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {};
 
@@ -378,6 +381,24 @@ public class DefaultPatchHandler implements PatchHandler {
 
   private static class RemoveOperationHandler implements PatchOperationHandler {
 
+    public <T extends ScimResource> void applyValue(final T source, Map<String, Object> sourceAsMap, Schema schema, Attribute attribute, ValuePathExpression valuePathExpression, Object value) {
+      // detect Azure off-spec request
+      if (isAzureRemoveQuirk(attribute, valuePathExpression, value)) {
+        Collection<?> valuesToRemove = (Collection<?>) value;
+        AttributeReference valueAttributeRef = new AttributeReference(attribute.getUrn(), attribute.getName(), VALUE_ATTRIBUTE_NAME);
+
+        // map the Azure formatted examples in to a _normal_ scim filter expression
+        azureQuirkValuesToRemove(valuesToRemove, attribute).forEach(itemToRemove -> {
+          ValuePathExpression adjustedValuePathExpression = new ValuePathExpression(valuePathExpression.getAttributePath(), new AttributeComparisonExpression(valueAttributeRef, CompareOperator.EQ, itemToRemove));
+          applyMultiValue(source, sourceAsMap, schema, attribute, adjustedValuePathExpression, itemToRemove);
+        });
+
+      } else {
+        // call super (default method of interface)
+        PatchOperationHandler.super.applyValue(source, sourceAsMap, schema, attribute, valuePathExpression, value);
+      }
+    }
+
     @Override
     public void applySingleValue(Map<String, Object> sourceAsMap, Attribute attribute, AttributeReference attributeReference, Object value) {
       if (attributeReference.hasSubAttribute()) {
@@ -425,6 +446,49 @@ public class DefaultPatchHandler implements PatchHandler {
           }
         }
       }
+    }
+
+    /**
+     *  Detects Azure Quirk mode.
+     *  Azure uses an out of spec patch operation that does not use an express,
+     *  but instead uses a remove with a value.  Detect this and convert it to an expression
+     *  <pre><code>
+     *   {
+     *     "op":"remove",
+     *     "path":"members",
+     *     "value":[{
+     *         "value":"<id>"
+     *     }]
+     *   }
+     *   </code></pre>
+     * @param valuePathExpression The valuePathExpression to check if it has a null attribute
+     * @return true, if Azure patch REMOVE detected.
+     */
+    private static boolean isAzureRemoveQuirk(Attribute attribute, ValuePathExpression valuePathExpression, Object value) {
+      return attribute.isMultiValued()
+        && attribute.getAttribute(VALUE_ATTRIBUTE_NAME) != null
+        && valuePathExpression.getAttributeExpression() == null
+        && value instanceof Collection;
+    }
+
+    private static List<String> azureQuirkValuesToRemove(Collection<?> listOfMaps, Attribute attribute) {
+      return listOfMaps.stream()
+        .map(item -> {
+          if (!(item instanceof Map)) {
+            throw new IllegalArgumentException("Azure Remove Patch request quirk detected, but 'value' is not a list of maps");
+          }
+          return (Map<?,?>) item;
+        })
+        .map(item -> {
+          Attribute valueAttribute = attribute.getAttribute(VALUE_ATTRIBUTE_NAME);
+          Object itemValue = item.get(valueAttribute.getName());
+          if (!(itemValue instanceof String)) {
+            throw new IllegalArgumentException("Azure Remove Patch request quirk detected, but item 'value' is not a string");
+          }
+
+          return (String) itemValue;
+        })
+        .collect(toList());
     }
   }
 }
