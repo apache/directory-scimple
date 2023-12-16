@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.apache.directory.scim.spec.patch.PatchOperation.Type.*;
 import static java.util.Map.entry;
+import static org.apache.directory.scim.test.assertj.ScimpleAssertions.scimAssertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -480,8 +481,15 @@ public class PatchHandlerTest {
         "type", "User")
     ));
 
+    GroupMembership member1 = userRef("1234");
+    GroupMembership member2 = userRef("5678");
+    GroupMembership member3 = new GroupMembership()
+      .setValue("9876")
+      .setDisplay("testUser2")
+      .setType(GroupMembership.Type.USER);
+
     ScimGroup updatedGroup = patchHandler.apply(group(), List.of(op));
-    assertThat(updatedGroup.getMembers().size()).isEqualTo(3);
+    scimAssertThat(updatedGroup).containsOnlyMembers(member1, member2, member3);
   }
 
   /**
