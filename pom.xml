@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.directory.project</groupId>
     <artifactId>project</artifactId>
-    <version>47</version>
+    <version>48</version>
   </parent>
 
   <groupId>org.apache.directory.scimple</groupId>
