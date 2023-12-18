@@ -86,7 +86,7 @@ public class ServerConfiguration {
   public BulkConfiguration getBulkConfiguration() {
     BulkConfiguration bulkConfiguration = new BulkConfiguration();
 
-    bulkConfiguration.setSupported(supportsBulk);
+    bulkConfiguration.setSupported(isSupportsBulk());
     bulkConfiguration.setMaxOperations(bulkMaxOperations);
     bulkConfiguration.setMaxPayloadSize(bulkMaxPayloadSize);
 
@@ -94,7 +94,7 @@ public class ServerConfiguration {
   }
 
   public SupportedConfiguration getEtagConfiguration() {
-    return createSupportedConfiguration(supportsETag);
+    return createSupportedConfiguration(isSupportsETag());
 
   }
 
@@ -110,7 +110,7 @@ public class ServerConfiguration {
   }
 
   public SupportedConfiguration getSortConfiguration() {
-    return createSupportedConfiguration(supportsSort);
+    return createSupportedConfiguration(isSupportsSort());
   }
   
   private SupportedConfiguration createSupportedConfiguration(boolean supported) {
