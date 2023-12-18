@@ -80,15 +80,15 @@ public class ServerConfiguration {
   }
 
   public SupportedConfiguration getChangePasswordConfiguration() {
-    return createSupportedConfiguration(supportsChangePassword);
+    return createSupportedConfiguration(isSupportsChangePassword());
   }
 
   public BulkConfiguration getBulkConfiguration() {
     BulkConfiguration bulkConfiguration = new BulkConfiguration();
 
     bulkConfiguration.setSupported(isSupportsBulk());
-    bulkConfiguration.setMaxOperations(bulkMaxOperations);
-    bulkConfiguration.setMaxPayloadSize(bulkMaxPayloadSize);
+    bulkConfiguration.setMaxOperations(getBulkMaxOperations());
+    bulkConfiguration.setMaxPayloadSize(getBulkMaxPayloadSize());
 
     return bulkConfiguration;
   }
@@ -100,13 +100,13 @@ public class ServerConfiguration {
 
   public FilterConfiguration getFilterConfiguration() {
     FilterConfiguration filterConfiguration = new FilterConfiguration();
-    filterConfiguration.setSupported(supportsFilter);
-    filterConfiguration.setMaxResults(filterMaxResults);
+    filterConfiguration.setSupported(isSupportsFilter());
+    filterConfiguration.setMaxResults(getFilterMaxResults());
     return filterConfiguration;
   }
 
   public SupportedConfiguration getPatchConfiguration() {
-    return createSupportedConfiguration(supportsPatch);
+    return createSupportedConfiguration(isSupportsPatch());
   }
 
   public SupportedConfiguration getSortConfiguration() {
