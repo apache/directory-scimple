@@ -20,6 +20,7 @@
 package org.apache.directory.scim.test.assertj;
 
 import org.apache.directory.scim.spec.patch.PatchOperation;
+import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.assertj.core.api.Condition;
 
 public final class ScimpleAssertions {
@@ -30,6 +31,10 @@ public final class ScimpleAssertions {
 
   public static PatchOperationAssert scimAssertThat(PatchOperation actual) {
     return new PatchOperationAssert(actual);
+  }
+
+  public static ScimGroupAssert scimAssertThat(ScimGroup actual) {
+    return new ScimGroupAssert(actual);
   }
 
   public static Condition<PatchOperation> patchOpMatching(PatchOperation.Type type, String path) {
