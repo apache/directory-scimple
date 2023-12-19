@@ -80,37 +80,37 @@ public class ServerConfiguration {
   }
 
   public SupportedConfiguration getChangePasswordConfiguration() {
-    return createSupportedConfiguration(supportsChangePassword);
+    return createSupportedConfiguration(isSupportsChangePassword());
   }
 
   public BulkConfiguration getBulkConfiguration() {
     BulkConfiguration bulkConfiguration = new BulkConfiguration();
 
-    bulkConfiguration.setSupported(supportsBulk);
-    bulkConfiguration.setMaxOperations(bulkMaxOperations);
-    bulkConfiguration.setMaxPayloadSize(bulkMaxPayloadSize);
+    bulkConfiguration.setSupported(isSupportsBulk());
+    bulkConfiguration.setMaxOperations(getBulkMaxOperations());
+    bulkConfiguration.setMaxPayloadSize(getBulkMaxPayloadSize());
 
     return bulkConfiguration;
   }
 
   public SupportedConfiguration getEtagConfiguration() {
-    return createSupportedConfiguration(supportsETag);
+    return createSupportedConfiguration(isSupportsETag());
 
   }
 
   public FilterConfiguration getFilterConfiguration() {
     FilterConfiguration filterConfiguration = new FilterConfiguration();
-    filterConfiguration.setSupported(supportsFilter);
-    filterConfiguration.setMaxResults(filterMaxResults);
+    filterConfiguration.setSupported(isSupportsFilter());
+    filterConfiguration.setMaxResults(getFilterMaxResults());
     return filterConfiguration;
   }
 
   public SupportedConfiguration getPatchConfiguration() {
-    return createSupportedConfiguration(supportsPatch);
+    return createSupportedConfiguration(isSupportsPatch());
   }
 
   public SupportedConfiguration getSortConfiguration() {
-    return createSupportedConfiguration(supportsSort);
+    return createSupportedConfiguration(isSupportsSort());
   }
   
   private SupportedConfiguration createSupportedConfiguration(boolean supported) {
