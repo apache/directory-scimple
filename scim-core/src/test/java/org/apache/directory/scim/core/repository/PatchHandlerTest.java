@@ -29,11 +29,11 @@ import org.apache.directory.scim.spec.patch.PatchOperationPath;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
+import org.apache.directory.scim.spec.resources.GroupMembership;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import org.apache.directory.scim.spec.schema.ResourceReference;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.directory.scim.spec.patch.PatchOperation.Type.*;
@@ -51,6 +51,7 @@ public class PatchHandlerTest {
   public PatchHandlerTest() {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
     schemaRegistry.addSchema(ScimUser.class, List.of(EnterpriseExtension.class));
+    schemaRegistry.addSchema(ScimGroup.class, null);
     this.patchHandler = new DefaultPatchHandler(schemaRegistry);
   }
 
@@ -666,8 +667,8 @@ public class PatchHandlerTest {
   }
 
   private static ScimGroup group() {
-    ResourceReference member1 = userRef("1234");
-    ResourceReference member2 = userRef("5678");
+    GroupMembership member1 = userRef("1234");
+    GroupMembership member2 = userRef("5678");
 
     return new ScimGroup()
       .setDisplayName("Test Group")
@@ -675,9 +676,9 @@ public class PatchHandlerTest {
       .setMembers(List.of(member1, member2));
   }
 
-  private static ResourceReference userRef(String id) {
-    ResourceReference member = new ResourceReference();
-    member.setType(ResourceReference.ReferenceType.USER);
+  private static GroupMembership userRef(String id) {
+    GroupMembership member = new GroupMembership();
+    member.setType(GroupMembership.Type.USER);
     member.setValue(id);
     member.setRef("https://example.com/Users/" + id);
     member.setDisplay("Test User" + id);
