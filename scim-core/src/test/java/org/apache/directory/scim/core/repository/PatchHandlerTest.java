@@ -29,13 +29,16 @@ import org.apache.directory.scim.spec.patch.PatchOperationPath;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.resources.Address;
 import org.apache.directory.scim.spec.resources.Email;
+import org.apache.directory.scim.spec.resources.GroupMembership;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.PhoneNumber;
+import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.directory.scim.spec.patch.PatchOperation.Type.*;
 import static java.util.Map.entry;
+import static org.apache.directory.scim.test.assertj.ScimpleAssertions.scimAssertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -49,6 +52,7 @@ public class PatchHandlerTest {
   public PatchHandlerTest() {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
     schemaRegistry.addSchema(ScimUser.class, List.of(EnterpriseExtension.class));
+    schemaRegistry.addSchema(ScimGroup.class, null);
     this.patchHandler = new DefaultPatchHandler(schemaRegistry);
   }
 
@@ -466,6 +470,46 @@ public class PatchHandlerTest {
   }
 
   @Test
+  public void addItemToCollection() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(ADD);
+    op.setPath(PatchOperationPath.fromString("members"));
+    op.setValue(List.of(
+      Map.of(
+        "value", "9876",
+        "display", "testUser2",
+        "type", "User")
+    ));
+
+    GroupMembership member1 = userRef("1234");
+    GroupMembership member2 = userRef("5678");
+    GroupMembership member3 = new GroupMembership()
+      .setValue("9876")
+      .setDisplay("testUser2")
+      .setType(GroupMembership.Type.USER);
+
+    ScimGroup updatedGroup = patchHandler.apply(group(), List.of(op));
+    scimAssertThat(updatedGroup).containsOnlyMembers(member1, member2, member3);
+  }
+
+  /**
+   * This test covers Azure-style remove member operations, where a value is
+   * specified in the operation body, rather than in the path.
+   * For example: { "op": "remove", "path": "members", "value": [ { "value": "1234" } ] }
+   */
+  @Test
+  public void removeItemFromCollection() throws FilterParseException {
+    PatchOperation op = new PatchOperation();
+    op.setOperation(REMOVE);
+    op.setPath(PatchOperationPath.fromString("members"));
+    op.setValue(List.of(Map.of("value", "1234")));
+
+    ScimGroup updatedGroup = patchHandler.apply(group(), List.of(op));
+    assertThat(updatedGroup.getMembers()).isNotNull();
+    assertThat(updatedGroup.getMembers().size()).isEqualTo(1);
+  }
+
+  @Test
   public void addAttribute() throws FilterParseException {
     PatchOperation op = new PatchOperation();
     op.setOperation(ADD);
@@ -628,5 +672,25 @@ public class PatchHandlerTest {
     } catch (PhoneNumberParseException e) {
       throw new IllegalStateException("Invalid phone number", e);
     }
+  }
+
+  private static ScimGroup group() {
+    GroupMembership member1 = userRef("1234");
+    GroupMembership member2 = userRef("5678");
+
+    return new ScimGroup()
+      .setDisplayName("Test Group")
+      .setExternalId("test-group-external-id")
+      .setMembers(List.of(member1, member2));
+  }
+
+  private static GroupMembership userRef(String id) {
+    GroupMembership member = new GroupMembership();
+    member.setType(GroupMembership.Type.USER);
+    member.setValue(id);
+    member.setRef("https://example.com/Users/" + id);
+    member.setDisplay("Test User" + id);
+
+    return member;
   }
 }
