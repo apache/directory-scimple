@@ -36,11 +36,21 @@ Make sure to have created the .pgpkey in your p.a.o/~ directory and to have adde
 > **NOTE:** You can also store a [GPG key on a Yubikey](https://developer.okta.com/blog/2021/07/07/developers-guide-to-gpg).
 
 ## Release Process
+
 Since we are using Nexus for the release process is as follows (see also [Publishing maven artifacts](https://www.apache.org/dev/publishing-maven-artifacts.html#staging-maven)).
 
 ### Test the Project
+
+You can run a build equivalent to the release process by running:
+
 ```shell
-$ mvn release:prepare -DdryRun=true
+$ ./mvnw clean install -Papache-release --threads=1
+```
+
+Or by using the Release Plugin with the `dryRun` flag:
+
+```shell
+$ ./mvnw release:prepare -DdryRun=true
 ```
 
 Be aware that this phase will ask you about the next version, and most important, for the next SCM tag :
