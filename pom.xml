@@ -33,6 +33,7 @@
   <url>https://github.com/apache/directory-scimple</url>
 
   <properties>
+    <project.build.outputTimestamp>2023-12-19T00:00:00Z</project.build.outputTimestamp>
     <jdk.version>11</jdk.version>
     <max.jdk.version>${jdk.version}</max.jdk.version>
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
@@ -330,6 +331,7 @@
         </executions>
         <configuration>
           <shortRevisionLength>7</shortRevisionLength>
+          <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
           <doCheck>false</doCheck>
           <doUpdate>false</doUpdate>
         </configuration>
@@ -606,7 +608,9 @@
               <signTag>true</signTag>
               <autoVersionSubmodules>true</autoVersionSubmodules>
               <preparationGoals>verify</preparationGoals>
-              <arguments>--threads=1</arguments> <!-- the javadoc aggregation is not thread safe -->
+              <!-- the javadoc aggregation is not thread safe -->
+              <!-- generate SHA-512 checksums -->
+              <arguments>--threads=1 -Daether.checksums.algorithms=SHA-512,SHA-1,MD5</arguments>
             </configuration>
           </plugin>
           <plugin>
