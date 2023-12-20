@@ -342,9 +342,8 @@
         <version>1.6.13</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>rao</serverId>
+          <serverId>apache.releases.https</serverId>
           <nexusUrl>https://repository.apache.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
       <plugin>
