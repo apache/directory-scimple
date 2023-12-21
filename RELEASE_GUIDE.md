@@ -67,8 +67,8 @@ What is SCM release tag or label for "Apache Directory SCIMple"? (org.apache.dir
 ### Prepare the Release
 
 ```shell
-$ mvn release:clean
-$ mvn release:prepare
+$ ./mvnw release:clean
+$ ./mvnw release:prepare
 ```
 
 This creates a [git tag](https://github.com/apache/directory-scimple).
@@ -76,7 +76,7 @@ This creates a [git tag](https://github.com/apache/directory-scimple).
 ### Stage the Release
 
 ```shell
-$ mvn release:perform
+$ ./mvnw release:perform
 ```
 
 This deploys the release to a staging repository.

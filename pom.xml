@@ -602,8 +602,6 @@
             <artifactId>maven-release-plugin</artifactId>
             <version>3.0.1</version>
             <configuration>
-              <!-- do not update upstream, with a pending release. -->
-              <pushChanges>false</pushChanges>
               <signTag>true</signTag>
               <autoVersionSubmodules>true</autoVersionSubmodules>
               <preparationGoals>verify</preparationGoals>
