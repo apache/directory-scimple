@@ -71,8 +71,8 @@
   </modules>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com:apache/directory-scimple.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:apache/directory-scimple.git</developerConnection>
+    <connection>scm:git:https://github.com/apache/directory-scimple.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/apache/directory-scimple.git</developerConnection>
     <url>https://github.com/apache/directory-scimple</url>
   </scm>
 
