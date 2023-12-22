@@ -606,6 +606,7 @@
               <signTag>true</signTag>
               <autoVersionSubmodules>true</autoVersionSubmodules>
               <preparationGoals>verify</preparationGoals>
+              <goals>install deploy</goals>
               <!-- the javadoc aggregation is not thread safe -->
               <!-- generate SHA-512 checksums -->
               <arguments>--threads=1 -Daether.checksums.algorithms=SHA-512,SHA-1,MD5</arguments>
