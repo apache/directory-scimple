@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.directory.scimple</groupId>
     <artifactId>scimple</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-M1</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -32,7 +32,7 @@
     <version.quarkus>3.6.3</version.quarkus>
     <max.jdk.version>17</max.jdk.version>
     <!-- disable discovery of tests in other jars, tests are wrapped directly in this project to run with Quarkus -->
-    <dependenciesToScan></dependenciesToScan>
+    <dependenciesToScan />
   </properties>
 
   <dependencyManagement>
