@@ -20,6 +20,8 @@
 package org.apache.directory.scim.spec.schema;
 
 import org.apache.directory.scim.spec.AllSchemaTypesExtension;
+import org.apache.directory.scim.spec.ComplexTypeExtension;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -453,6 +455,26 @@ public class SchemasTest {
       .hasReferenceTypes(List.of("one", "two", "three"));
   }
 
+  @Test
+  public void complexTypeSubAttributesNotDuplicated() {
+    Schema schema = Schemas.schemaForExtension(ComplexTypeExtension.class);
+    Schema.Attribute complexType = schema.getAttribute("complexType");
+
+    Assertions.assertThat((complexType.subAttributes.size())).isEqualTo(1);
+
+    Schema.Attribute firstAttribute = new Schema.Attribute();
+    firstAttribute.setName("firstAttribute");
+    firstAttribute.setUrn(ComplexTypeExtension.SCHEMA_URN);
+    firstAttribute.setType(Schema.Attribute.Type.STRING);
+    firstAttribute.setDescription("First attribute");
+    firstAttribute.setMutability(Schema.Attribute.Mutability.READ_WRITE);
+    firstAttribute.setReturned(Schema.Attribute.Returned.DEFAULT);
+    firstAttribute.setUniqueness(Schema.Attribute.Uniqueness.NONE);
+
+    assertThat(schema.getAttribute("complexType"))
+      .hasName("complexType")
+      .hasSubAttributes(List.of(firstAttribute));
+  }
 
   private AttributeAssert assertThat(Schema.Attribute attribute) {
     return new AttributeAssert(attribute);
