@@ -237,7 +237,6 @@ public final class Schemas {
         Class<?> componentType;
         if (!attribute.isMultiValued()) {
           componentType = f.getType();
-          attribute.setSubAttributes(createAttributes(urn, Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()), Schema.Attribute.AddAction.APPEND);
         } else if (f.getType().isArray()) {
           componentType = f.getType().getComponentType();
         } else {
