@@ -27,6 +27,7 @@ import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidExtensionException;
 import org.apache.directory.scim.spec.schema.Meta;
+import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
 
   @XmlElement
   @Size(min = 1)
-  @ScimAttribute(required = true, returned = Returned.ALWAYS, description = "A unique identifier for a SCIM resource as defined by the service provider.")
+  @ScimAttribute(required = true, returned = Returned.ALWAYS, mutability = Schema.Attribute.Mutability.READ_ONLY, uniqueness = Schema.Attribute.Uniqueness.SERVER, description = "A unique identifier for a SCIM resource as defined by the service provider.")
   String id;
 
   @XmlElement
