@@ -32,6 +32,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.directory.scim.spec.adapter.LocalDateTimeAdapter;
 import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Mutability;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 
 /**
  * Defines the structure of the meta attribute for all SCIM resources as defined
@@ -50,25 +52,25 @@ public class Meta implements Serializable {
 
   @XmlElement
   @Size(min = 1)
-  @ScimAttribute(description = "The name of the resource type of the resource.")
+  @ScimAttribute(returned = Returned.DEFAULT, mutability = Mutability.READ_ONLY, caseExact = true, description = "The name of the resource type of the resource.")
   String resourceType;
   
   @XmlElement
   @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
-  @ScimAttribute(description = "The DateTime that the resource was added to the service provider.")
+  @ScimAttribute(returned = Returned.DEFAULT, mutability = Mutability.READ_ONLY, description = "The DateTime that the resource was added to the service provider.")
   LocalDateTime created;
   
   @XmlElement
   @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
-  @ScimAttribute(description = "The most recent DateTime that the details of this resource were updated at the service provider.")
+  @ScimAttribute(returned = Returned.DEFAULT, mutability = Mutability.READ_ONLY, description = "The most recent DateTime that the details of this resource were updated at the service provider.")
   LocalDateTime lastModified;
   
   @XmlElement
-  @ScimAttribute(description = "The URI of the resource being returned.")
+  @ScimAttribute(returned = Returned.DEFAULT, mutability = Mutability.READ_ONLY, description = "The URI of the resource being returned.")
   String location;
   
   @XmlElement
-  @ScimAttribute(description = "The version of the resource being returned.  This value must be the same as the entity-tag (ETag) HTTP response header")
+  @ScimAttribute(returned = Returned.DEFAULT, mutability = Mutability.READ_ONLY, description = "The version of the resource being returned.  This value must be the same as the entity-tag (ETag) HTTP response header")
   String version;
 
 }
