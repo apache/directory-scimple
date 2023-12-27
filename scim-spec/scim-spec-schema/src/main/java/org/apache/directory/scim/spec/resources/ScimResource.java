@@ -67,7 +67,7 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
   String id;
 
   @XmlElement
-  @ScimAttribute
+  @ScimAttribute(returned = Returned.DEFAULT, caseExact = true, mutability = Schema.Attribute.Mutability.READ_WRITE)
   String externalId;
 
   // TODO - Figure out JAXB equivalent of JsonAnyGetter and JsonAnySetter
