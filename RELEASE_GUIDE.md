@@ -95,13 +95,13 @@ That will checkout the project distributions.
 Now, create a sub-directory for the version you have generated (here, for version 1.0.0-RC1) :
 
 ```shell
-$ mkdir ~/apacheds/dist/dev/directory/scimple/1.0.0-M1
+$ mkdir <directory-scimple-dist-dir>/1.0.0-M1
 ```
 
 Copy the packages and signature to this area:
 
 ```shell
-$ cd distributions/target
+$ cd <scimple-source-dir>/target/checkout/target/
 $ cp scimple-<version>-* <directory-scimple-dist-dir>/1.0.0-M1
 ```
 
@@ -114,6 +114,39 @@ $ svn ci <directory-scimple-dist-dir>/1.0.0-M1 -m "Apache SCIMple 1.0.0-M1"
 
 ## Vote
 Start a 72h vote at the dev mailing list.
+
+Template:
+
+Subject:
+
+```text
+[VOTE] Release Apache Directory SCIMple ${VERSION}
+TO: dev@directory.apache.org, scimple@directory.apache.org
+
+This is a call to vote in favor of releasing Apache Directory SCIMple
+version ${VERSION}.
+
+<Description of release>
+
+Maven Staging Repo:
+https://repository.apache.org/content/repositories/orgapachedirectory-${STAGING_REPO_ID}
+https://repository.apache.org/service/local/repositories/orgapachedirectory-${STAGING_REPO_ID}/content/org/apache/directory/scimple/scimple/${VERSION}/scimple-${VERSION}-source-release.zip
+
+Dist Staging Repository:
+https://dist.apache.org/repos/dist/dev/directory/scimple/<TBD>/
+
+Project website updates:
+<If any>
+
+Guide to testing staged releases:
+http://maven.apache.org/guides/development/guide-testing-releases.html
+
+Vote open for 72 hours.
+
+[ ] +1
+[ ] +0
+[ ] -1 (please include reasoning)
+```
 
 ## Release
 If the vote succeeds the project can be released.
