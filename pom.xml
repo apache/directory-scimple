@@ -822,7 +822,6 @@
                 <id>aggregate</id>
                 <goals>
                   <goal>aggregate</goal>
-                  <goal>aggregate-jar</goal>
                 </goals>
                 <configuration>
                   <excludePackageNames>org.apache.directory.scim.example.*,org.apache.directory.scim.test.*</excludePackageNames>
