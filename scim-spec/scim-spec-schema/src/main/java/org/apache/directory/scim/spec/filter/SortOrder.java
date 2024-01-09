@@ -21,10 +21,25 @@ package org.apache.directory.scim.spec.filter;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
+import java.util.Arrays;
+
 public enum SortOrder {
   @XmlEnumValue("ascending")
-  ASCENDING,
+  ASCENDING("ascending"),
   @XmlEnumValue("descending")
-  DESCENDING
+  DESCENDING("descending");
+
+  private final String value;
+
+  SortOrder(String value) {
+    this.value = value;
+  }
+
+  public static SortOrder fromString(String value) {
+    return Arrays.stream(SortOrder.values())
+      .filter(order -> order.value.equals(value))
+      .findFirst()
+      .orElseThrow(() -> new IllegalArgumentException("Argument is not a valid SortOrder: " + value));
+  }
 }
 
