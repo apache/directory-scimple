@@ -40,7 +40,6 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
@@ -328,7 +327,7 @@ class AttributeUtil {
       attributes.add(attribute);
     }
     if (attribute.getType() == Type.COMPLEX && includeAttributeChain) {
-      List<Attribute> remaininAttributes = attribute.getAttributes();
+      Set<Attribute> remaininAttributes = attribute.getAttributes();
       attributes.addAll(remaininAttributes);
     }
     return attributes;
