@@ -118,7 +118,7 @@ public class Schema implements AttributeContainer {
     Type type;
     
     @XmlElement
-    List<Attribute> subAttributes;
+    Set<Attribute> subAttributes;
     
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -156,11 +156,11 @@ public class Schema implements AttributeContainer {
     private boolean scimResourceIdReference;
 
     @Override
-    public List<Attribute> getAttributes() {
-      return Collections.unmodifiableList(subAttributes);
+    public Set<Attribute> getAttributes() {
+      return Collections.unmodifiableSet(subAttributes);
     }
     
-    public void setSubAttributes(List<Attribute> attributes, AddAction action) {
+    public void setSubAttributes(Set<Attribute> attributes, AddAction action) {
       
       if (action.equals(AddAction.REPLACE)) {
         subAttributeNamesMap.clear();
@@ -179,7 +179,7 @@ public class Schema implements AttributeContainer {
         this.subAttributes = attributes;
       } else {
         if (subAttributes == null) {
-          subAttributes = new ArrayList<>();
+          subAttributes = new TreeSet<>(Comparator.comparing(o -> o.name));
         }
         this.subAttributes.addAll(attributes);
       }
@@ -209,7 +209,7 @@ public class Schema implements AttributeContainer {
   @Size(min = 1, max = 65535)
   @XmlElement
   @XmlElementWrapper(name = "attributes")
-  List<Attribute> attributes;
+  Set<Attribute> attributes;
   
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -218,11 +218,11 @@ public class Schema implements AttributeContainer {
   @XmlElement
   Meta meta;
   
-  public List<Attribute> getAttributes() {
-    return Collections.unmodifiableList(attributes);
+  public Set<Attribute> getAttributes() {
+    return Collections.unmodifiableSet(attributes);
   }
   
-  public void setAttributes(List<Attribute> attributes) {
+  public void setAttributes(Set<Attribute> attributes) {
     attributeNamesMap.clear();
     
     for (Attribute attribute : attributes) {

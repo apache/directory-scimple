@@ -85,7 +85,7 @@ public final class Schemas {
     log.debug("calling set attributes with " + fieldList.size() + " fields");
     String urn = set != null ? set.id() : srt.schema();
     Set<String> invalidAttributes = new HashSet<>();
-    List<Schema.Attribute> createAttributes = createAttributes(urn, fieldList, invalidAttributes, clazz.getSimpleName());
+    Set<Schema.Attribute> createAttributes = createAttributes(urn, fieldList, invalidAttributes, clazz.getSimpleName());
     schema.setAttributes(createAttributes);
 
     if (!invalidAttributes.isEmpty()) {
@@ -115,8 +115,8 @@ public final class Schemas {
   }
 
 
-  private static List<Schema.Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
-    List<Schema.Attribute> attributeList = new ArrayList<>();
+  private static Set<Schema.Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
+    Set<Schema.Attribute> attributes = new TreeSet<>(Comparator.comparing(o -> o.name));
 
     for (Field f : fieldList) {
       ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
@@ -245,16 +245,15 @@ public final class Schemas {
         }
 
         List<Field> fl = getFieldsUpTo(componentType, Object.class);
-        List<Schema.Attribute> la = createAttributes(urn, fl, invalidAttributes, nameBase + "." + f.getName());
+        Set<Schema.Attribute> la = createAttributes(urn, fl, invalidAttributes, nameBase + "." + f.getName());
 
         attribute.setSubAttributes(la, Schema.Attribute.AddAction.APPEND);
       }
-      attributeList.add(attribute);
+      attributes.add(attribute);
     }
 
-    attributeList.sort(Comparator.comparing(o -> o.name));
-    log.debug("Returning {} attributes", attributeList.size());
-    return attributeList;
+    log.debug("Returning {} attributes", attributes.size());
+    return attributes;
   }
 
   static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
