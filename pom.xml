@@ -567,7 +567,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.2.3</version>
+            <version>3.2.5</version>
             <configuration>
               <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
               <argLine>@{jacoco.argline}</argLine>
