@@ -37,14 +37,14 @@
       <artifactId>scim-spec-schema</artifactId>
     </dependency>
 
-    <!-- These dependencies are normally test scoped, but for this module they are compile
+    <!-- These dependencies are normally test scoped, but for this module they are provide/compile
          projects that consume this module will use the test scope, so none of these dependencies
          will be transitive
     -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
