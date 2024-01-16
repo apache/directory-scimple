@@ -6,7 +6,7 @@
 * to you under the Apache License, Version 2.0 (the
 * "License"); you may not use this file except in compliance
 * with the License.  You may obtain a copy of the License at
- 
+
 * http://www.apache.org/licenses/LICENSE-2.0
 
 * Unless required by applicable law or agreed to in writing,
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.enterprise.inject.spi.CDI;
@@ -141,7 +142,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     resource = attributesForDisplayThrowOnError(resource, attributeReferences, excludedAttributeReferences);
     return Response.ok()
                    .entity(resource)
-                   .location(buildLocationTag(resource))
+                   .location(uriInfo.getAbsolutePath())
                    .tag(etag)
                    .build();
   }
@@ -158,7 +159,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     else {
       searchRequest.setFilter(null);
     }
-    
+
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
     searchRequest.setStartIndex(startIndex);
@@ -188,11 +189,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         log.debug("Exception thrown while processing attributes", e);
     }
 
+    Objects.requireNonNull(created.getId(), "Repository must supply an id for a resource");
+    URI location = uriInfo.getAbsolutePathBuilder()
+      .path(created.getId())
+      .build();
+
     return Response.status(Status.CREATED)
-                   .location(buildLocationTag(created))
-                   .tag(etag)
-                   .entity(created)
-                   .build();
+      .location(location)
+      .tag(etag)
+      .entity(created)
+      .build();
   }
 
   @Override
@@ -267,7 +273,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   private Response update(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, UpdateFunction<T> updateFunction) throws ScimException, ResourceException {
-
     Repository<T> repository = getRepositoryInternal();
 
     Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
@@ -283,7 +288,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     EntityTag etag = fromVersion(updated);
     return Response.ok(updated)
-      .location(buildLocationTag(updated))
+      .location(uriInfo.getAbsolutePath())
       .tag(etag)
       .build();
   }
@@ -311,17 +316,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     return resource;
-  }
-
-  private URI buildLocationTag(T resource) {
-    String id = resource.getId();
-    if (id == null) {
-      LOG.warn("Repository must supply an id for a resource");
-      id = "unknown";
-    }
-    return uriInfo.getAbsolutePathBuilder()
-                  .path(id)
-                  .build();
   }
 
   private <T extends ScimResource> T attributesForDisplay(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws AttributeException {
