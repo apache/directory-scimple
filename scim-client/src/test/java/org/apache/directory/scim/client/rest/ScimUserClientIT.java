@@ -39,7 +39,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ScimUserClientTest extends ClientTestSupport {
+public class ScimUserClientIT extends ClientTestSupport {
 
   @Test
   public void notFound(MockWebServer server, ScimUserClient client) throws Exception {

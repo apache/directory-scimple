@@ -571,6 +571,12 @@
             <configuration>
               <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
               <argLine>@{jacoco.argline}</argLine>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled = true
+                  junit.jupiter.execution.parallel.mode.default = concurrent
+                </configurationParameters>
+              </properties>
               <includes>
                 <include>**/Test*.java</include>
                 <include>**/*Test.java</include>
@@ -585,6 +591,11 @@
             <version>3.2.5</version>
             <configuration>
               <argLine>@{jacoco.it.argline}</argLine>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled = true
+                </configurationParameters>
+              </properties>
               <includes>
                 <include>**/*IT.java</include>
               </includes>
