@@ -60,12 +60,12 @@ public class SchemaTest {
    */
   @ParameterizedTest
   @ValueSource( strings = {
-      "schemas/urn_ietf_params_scim_schemas_core_2.0_User.json",
-      "schemas/urn_ietf_params_scim_schemas_core_2.0_Group.json",
-      "schemas/urn_ietf_params_scim_schemas_core_2.0_ResourceType.json",
-      "schemas/urn_ietf_params_scim_schemas_core_2.0_Schema.json",
-      "schemas/urn_ietf_params_scim_schemas_core_2.0_ServiceProviderConfig.json",
-      "schemas/urn_ietf_params_scim_schemas_extension_enterprise_2.0_User.json"
+    "schemas/User.json",
+    "schemas/Group.json",
+    "schemas/ResourceType.json",
+    "schemas/Schema.json",
+    "schemas/ServiceProviderConfig.json",
+    "schemas/EnterpriseUser.json"
   })
 
   public void testUnmarshallingProvidedSchemas(String schemaFileName) {
