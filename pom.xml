@@ -551,7 +551,7 @@
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.16</version>
+          <version>0.16.1</version>
           <configuration>
             <excludes>
               <exclude>**/*.md</exclude>
