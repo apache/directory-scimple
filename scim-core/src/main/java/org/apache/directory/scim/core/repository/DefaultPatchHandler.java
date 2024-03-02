@@ -385,7 +385,7 @@ public class DefaultPatchHandler implements PatchHandler {
       // detect Azure off-spec request
       if (isAzureRemoveQuirk(attribute, valuePathExpression, value)) {
         Collection<?> valuesToRemove = (Collection<?>) value;
-        AttributeReference valueAttributeRef = new AttributeReference(attribute.getUrn(), attribute.getName(), VALUE_ATTRIBUTE_NAME);
+        AttributeReference valueAttributeRef = new AttributeReference(attribute.getSchemaUrn(), attribute.getName(), VALUE_ATTRIBUTE_NAME);
 
         // map the Azure formatted examples in to a _normal_ scim filter expression
         azureQuirkValuesToRemove(valuesToRemove, attribute).forEach(itemToRemove -> {

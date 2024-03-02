@@ -126,4 +126,20 @@ class AttributeAssert extends AbstractAssert<AttributeAssert, Schema.Attribute> 
         .isEqualTo(referenceTypes);
       return this;
     }
+
+  AttributeAssert hasPath(String path) {
+    isNotNull();
+    assertThat(actual.getPath())
+      .as("Incorrect Attribute.path")
+      .isEqualTo(path);
+    return this;
+  }
+
+  AttributeAssert hasUrn(String urn) {
+    isNotNull();
+    assertThat(actual.getUrn())
+      .as("Incorrect Attribute.urn")
+      .isEqualTo(urn);
+    return this;
+  }
   }
