@@ -21,6 +21,7 @@ package org.apache.directory.scim.spec.schema;
 
 import org.apache.directory.scim.spec.AllSchemaTypesExtension;
 import org.apache.directory.scim.spec.ComplexTypeExtension;
+import org.apache.directory.scim.spec.resources.ScimUser;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,7 @@ import java.util.List;
 public class SchemasTest {
 
   private Schema schema = Schemas.schemaForExtension(AllSchemaTypesExtension.class);
+  private Schema userSchema = Schemas.schemaFor(ScimUser.class);
 
   @Test
   public void string1Attribute() {
@@ -44,7 +46,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("string1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":string1");
   }
 
   @Test
@@ -61,7 +65,9 @@ public class SchemasTest {
       .isCaseExact(true)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("string2")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":string2");
   }
 
   @Test
@@ -78,7 +84,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("stringList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":stringList1");
   }
 
   @Test
@@ -95,7 +103,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("boolean1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":boolean1");
   }
 
   @Test
@@ -112,7 +122,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("booleanList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":booleanList1");
   }
 
   @Test
@@ -129,7 +141,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("boolean2")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":boolean2");
   }
 
   @Test
@@ -146,7 +160,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("booleanArray1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":booleanArray1");
   }
 
   @Test
@@ -163,7 +179,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("decimal1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":decimal1");
   }
 
   @Test
@@ -180,7 +198,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("decimal2")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":decimal2");
   }
 
   @Test
@@ -197,7 +217,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("decimalList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":decimalList1");
   }
 
   @Test
@@ -214,7 +236,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("decimalArray1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":decimalArray1");
   }
 
   @Test
@@ -231,7 +255,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("integer1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":integer1");
   }
 
   @Test
@@ -248,7 +274,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("integer2")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":integer2");
   }
 
   @Test
@@ -265,7 +293,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("integerList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":integerList1");
   }
 
   @Test
@@ -282,7 +312,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("integerArray1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":integerArray1");
   }
 
   @Test
@@ -299,7 +331,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("date1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":date1");
   }
 
   @Test
@@ -316,7 +350,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("dateList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":dateList1");
   }
 
   @Test
@@ -333,7 +369,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("dateArray1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":dateArray1");
   }
 
   @Test
@@ -350,7 +388,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("instant1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":instant1");
   }
 
   @Test
@@ -367,7 +407,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("instantList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":instantList1");
   }
 
   @Test
@@ -384,7 +426,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("instantArray1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":instantArray1");
   }
 
   @Test
@@ -401,7 +445,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(null);
+      .hasReferenceTypes(null)
+      .hasPath("binary1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":binary1");
   }
 
   @Test
@@ -418,7 +464,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(List.of("one", "two"));
+      .hasReferenceTypes(List.of("one", "two"))
+      .hasPath("ref1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":ref1");
   }
 
   @Test
@@ -435,7 +483,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(List.of("three", "four"));
+      .hasReferenceTypes(List.of("three", "four"))
+      .hasPath("$ref")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":$ref");
   }
 
   @Test
@@ -452,7 +502,9 @@ public class SchemasTest {
       .isCaseExact(false)
       .hasSubAttributes(null)
       .hasCanonicalValues(null)
-      .hasReferenceTypes(List.of("one", "two", "three"));
+      .hasReferenceTypes(List.of("one", "two", "three"))
+      .hasPath("refList1")
+      .hasUrn(AllSchemaTypesExtension.SCHEMA_URN + ":refList1");
   }
 
   @Test
@@ -464,7 +516,7 @@ public class SchemasTest {
 
     Schema.Attribute firstAttribute = new Schema.Attribute();
     firstAttribute.setName("firstAttribute");
-    firstAttribute.setUrn(ComplexTypeExtension.SCHEMA_URN);
+//    firstAttribute.setUrn(ComplexTypeExtension.SCHEMA_URN);
     firstAttribute.setType(Schema.Attribute.Type.STRING);
     firstAttribute.setDescription("First attribute");
     firstAttribute.setMutability(Schema.Attribute.Mutability.READ_WRITE);
@@ -473,7 +525,31 @@ public class SchemasTest {
 
     assertThat(schema.getAttribute("complexType"))
       .hasName("complexType")
-      .hasSubAttributes(List.of(firstAttribute));
+      .hasSubAttributes(List.of(firstAttribute))
+      .hasPath("complexType")
+      .hasUrn(ComplexTypeExtension.SCHEMA_URN + ":complexType");
+  }
+
+  @Test
+  public void nestedAttributeUrn() {
+    Schema.Attribute nameAttribute = userSchema.getAttribute("name");
+    Schema.Attribute familyNameAttribute = nameAttribute.getAttribute("familyName");
+
+    assertThat(familyNameAttribute)
+      .hasName("familyName")
+      .hasMutability(Schema.Attribute.Mutability.READ_WRITE)
+      .hasReturned(Schema.Attribute.Returned.DEFAULT)
+      .hasType(Schema.Attribute.Type.STRING)
+      .hasUniqueness(Schema.Attribute.Uniqueness.NONE)
+      .isMultiValued(false)
+      .hasDescription("The family name of the User, or Last Name in most Western languages (e.g. Jensen given the full name Ms. Barbara J Jensen, III.).")
+      .isRequired(false)
+      .isCaseExact(false)
+      .hasSubAttributes(null)
+      .hasCanonicalValues(null)
+      .hasReferenceTypes(null)
+      .hasPath("name.familyName")
+      .hasUrn(ScimUser.SCHEMA_URI + ":name.familyName");
   }
 
   private AttributeAssert assertThat(Schema.Attribute attribute) {

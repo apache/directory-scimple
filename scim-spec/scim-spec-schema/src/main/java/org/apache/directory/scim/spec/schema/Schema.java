@@ -106,8 +106,6 @@ public class Schema implements AttributeContainer {
       APPEND
     }
 
-    String urn;
-
     // The attribute name must match the ABNF pattern defined in section 2.1 of
     // the SCIM Schema specification.
     @XmlElement
@@ -116,7 +114,13 @@ public class Schema implements AttributeContainer {
     
     @XmlElement
     Type type;
-    
+
+    String schemaUrn;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    String path;
+
     @XmlElement
     Set<Attribute> subAttributes;
     
@@ -154,6 +158,10 @@ public class Schema implements AttributeContainer {
     transient AttributeAccessor accessor;
 
     private boolean scimResourceIdReference;
+
+    public String getUrn() {
+      return schemaUrn + ":" + path;
+    }
 
     @Override
     public Set<Attribute> getAttributes() {
@@ -217,7 +225,12 @@ public class Schema implements AttributeContainer {
   
   @XmlElement
   Meta meta;
-  
+
+  @Override
+  public String getUrn() {
+    return id;
+  }
+
   public Set<Attribute> getAttributes() {
     return Collections.unmodifiableSet(attributes);
   }

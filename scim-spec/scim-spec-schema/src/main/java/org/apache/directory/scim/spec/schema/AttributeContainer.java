@@ -25,6 +25,9 @@ import java.util.Set;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 
 public interface AttributeContainer extends Serializable {
+
+  String getUrn();
+
   Set<Attribute> getAttributes();
 
   Attribute getAttribute(String attributeName);

@@ -109,7 +109,7 @@ class AttributeUtil {
         boolean removeExtension = true;
 
         for (Attribute attributeToKeep : attributesToKeep) {
-          if (extensionUrn.equalsIgnoreCase(attributeToKeep.getUrn())) {
+          if (extensionUrn.equalsIgnoreCase(attributeToKeep.getSchemaUrn())) {
             removeExtension = false;
 
             break;

@@ -114,8 +114,11 @@ public final class Schemas {
     return schema;
   }
 
-
   private static Set<Schema.Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
+    return createAttributes(urn, Optional.empty(), fieldList, invalidAttributes, nameBase);
+  }
+
+  private static Set<Schema.Attribute> createAttributes(String urn, Optional<String> path, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
     Set<Schema.Attribute> attributes = new TreeSet<>(Comparator.comparing(o -> o.name));
 
     for (Field f : fieldList) {
@@ -145,7 +148,8 @@ public final class Schemas {
       Schema.Attribute attribute = new Schema.Attribute();
       attribute.setAccessor(Schema.AttributeAccessor.forField(f));
       attribute.setName(attributeName);
-      attribute.setUrn(urn);
+      attribute.setSchemaUrn(urn);
+      path.ifPresentOrElse(p -> attribute.setPath(p + "." + attributeName), () -> attribute.setPath(attributeName));
 
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
@@ -245,7 +249,7 @@ public final class Schemas {
         }
 
         List<Field> fl = getFieldsUpTo(componentType, Object.class);
-        Set<Schema.Attribute> la = createAttributes(urn, fl, invalidAttributes, nameBase + "." + f.getName());
+        Set<Schema.Attribute> la = createAttributes(urn, Optional.of(attributeName), fl, invalidAttributes, nameBase + "." + f.getName());
 
         attribute.setSubAttributes(la, Schema.Attribute.AddAction.APPEND);
       }
