@@ -21,5 +21,12 @@ github:
     wiki: false
     issues: true
     projects: false
+  labels:
+    - SCIM
+    - Java
   dependabot_alerts:  true
   dependabot_updates: true
+  del_branch_on_merge: true
+  autolink_jira:
+    - SCIMPLE
+    - DIR
