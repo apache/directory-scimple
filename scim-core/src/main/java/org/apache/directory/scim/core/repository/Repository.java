@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.core.repository;
 
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -69,14 +70,14 @@ public interface Repository<T extends ScimResource> {
    *
    *
    * @param id the identifier of the ScimResource to update and persist.
-   * @param version an optional version (usually used as an ETag) that can be used to optimize update requests, may be compared against, the current {@code ScimResource.meta.version}.
+   * @param etags optional ETag(s) in 'If-Match' header. If not null, to avoid dirty writing, {@code ScimResource.meta.version} must match one of this set (the set should contain only one element, and it must be not weak)
    * @param resource an updated resource to persist
    * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
    * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
    * @return The newly updated ScimResource.
    * @throws ResourceException When the ScimResource cannot be updated.
    */
-  T update(String id, String version, T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+  T update(String id, @Nullable Set<ETag> etags, T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
 
   /**
    * Allows the SCIM server's REST implementation to update and existing
@@ -86,14 +87,14 @@ public interface Repository<T extends ScimResource> {
    * it can be used as a mechanism for caching and to ensure clients do not inadvertently overwrite other changes.
    *
    * @param id the identifier of the ScimResource to update and persist.
-   * @param version an optional version (usually used as an ETag) that can be used to optimize update requests, may be compared against, the current {@code ScimResource.meta.version}.
+   * @param etags optional ETag(s) in 'If-Match' header. If not null, to avoid dirty writing, {@code ScimResource.meta.version} must match one of this set (the set should contain only one element, and it must be not weak)
    * @param patchOperations a list of patch operations to apply to an existing resource.
    * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
    * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
    * @return The newly updated ScimResource.
    * @throws ResourceException When the ScimResource cannot be updated.
    */
-  T patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+  T patch(String id, Set<ETag> etags, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
 
   /**
    * Retrieves the ScimResource associated with the provided identifier.

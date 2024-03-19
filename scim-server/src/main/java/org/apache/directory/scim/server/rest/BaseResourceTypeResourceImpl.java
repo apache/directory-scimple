@@ -33,6 +33,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
+import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.server.exception.*;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
@@ -70,7 +71,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private final RepositoryRegistry repositoryRegistry;
 
-  private final  AttributeUtil attributeUtil;
+  private final AttributeUtil attributeUtil;
 
   private final Class<T> resourceClass;
 
@@ -254,14 +255,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(attributes, excludedAttributes, (etag, includeAttributes, excludeAttributes, repository)
-      -> repository.update(id, etag,resource, includeAttributes, excludeAttributes));
+    return update(attributes, excludedAttributes, (etags, includeAttributes, excludeAttributes, repository)
+      -> repository.update(id, etags, resource, includeAttributes, excludeAttributes));
   }
 
   @Override
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(attributes, excludedAttributes, (etag, includeAttributes, excludeAttributes, repository)
-      -> repository.patch(id, etag, patchRequest.getPatchOperationList(), includeAttributes, excludeAttributes));
+    return update(attributes, excludedAttributes, (etags, includeAttributes, excludeAttributes, repository)
+      -> repository.patch(id, etags, patchRequest.getPatchOperationList(), includeAttributes, excludeAttributes));
   }
 
   @Override
@@ -279,8 +280,10 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
-    String requestEtag = headers.getHeaderString("ETag");
-    T updated = updateFunction.update(requestEtag, attributeReferences, excludedAttributeReferences, repository);
+    String requestEtag = headers.getHeaderString("If-Match");
+    Set<ETag> etags = EtagParser.parseETag(requestEtag);
+
+    T updated = updateFunction.update(etags, attributeReferences, excludedAttributeReferences, repository);
 
     // Process Attributes
     updated = processFilterAttributeExtensions(repository, updated, attributeReferences, excludedAttributeReferences);
@@ -371,6 +374,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @FunctionalInterface
   private interface UpdateFunction<T extends ScimResource> {
-    T update(String etag, Set<AttributeReference> includeAttributes, Set<AttributeReference> excludeAttributes, Repository<T> repository) throws ResourceException;
+    T update(Set<ETag> etags, Set<AttributeReference> includeAttributes, Set<AttributeReference> excludeAttributes, Repository<T> repository) throws ResourceException;
   }
 }
