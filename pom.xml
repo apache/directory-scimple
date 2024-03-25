@@ -45,7 +45,7 @@
     <version.restfuse>1.2.0</version.restfuse>
     <version.slf4j>2.0.7</version.slf4j>
     <version.antlr4>4.13.1</version.antlr4>
-    <version.resteasy>6.2.7.Final</version.resteasy>
+    <version.resteasy>6.2.8.Final</version.resteasy>
     <version.spring-boot>3.2.3</version.spring-boot>
 
     <!-- default surefire/failsafe arg lines to empty-->
