@@ -29,7 +29,7 @@
 
   <properties>
     <module.name>org.apache.directory.scim.example.quarkus</module.name>
-    <version.quarkus>3.10.0</version.quarkus>
+    <version.quarkus>3.11.2</version.quarkus>
     <max.jdk.version>17</max.jdk.version>
     <!-- disable discovery of tests in other jars, tests are wrapped directly in this project to run with Quarkus -->
     <dependenciesToScan />
