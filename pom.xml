@@ -434,33 +434,6 @@
         <artifactId>maven-site-plugin</artifactId>
         <version>4.0.0-M16</version>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>scan</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>scan</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -722,6 +695,40 @@
   </reporting>
 
   <profiles>
+    <profile>
+      <id>ci</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>scan</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>scan</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>acceptance-tests</id>
       <build>
