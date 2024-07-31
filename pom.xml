@@ -581,6 +581,12 @@
                 <include>**/*Tests.java</include>
                 <include>**/*TestCase.java</include>
               </includes>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled = true
+                  junit.jupiter.execution.parallel.mode.default = concurrent
+                </configurationParameters>
+              </properties>
             </configuration>
           </plugin>
           <plugin>
@@ -596,6 +602,12 @@
               <dependenciesToScan>
                 <dependency>org.apache.directory.scimple:scim-compliance-tests</dependency>
               </dependenciesToScan>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled = true
+                  junit.jupiter.execution.parallel.mode.default = concurrent
+                </configurationParameters>
+              </properties>
             </configuration>
           </plugin>
           <plugin>
