@@ -34,8 +34,7 @@
   </buildScan>
   <buildCache>
     <local>
-      <!-- Disable local cache, it will be enabled in a future step -->
-      <enabled>false</enabled>
+      <enabled>#{isFalse(env['CI'])}</enabled>
     </local>
     <remote>
       <enabled>false</enabled>
