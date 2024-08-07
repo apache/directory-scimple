@@ -55,6 +55,8 @@ jobs:
 
       - name: Setup Build Scan PR Comment and Summary
         uses: gradle/develocity-actions/maven-setup@v1.1
+        with:
+          job-name: ${{ inputs.name }}
 
       - name: Running Maven
         id: mvnBuild
