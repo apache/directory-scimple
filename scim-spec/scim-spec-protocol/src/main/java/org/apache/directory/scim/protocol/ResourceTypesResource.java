@@ -40,7 +40,7 @@ import org.apache.directory.scim.spec.schema.ResourceType;
  * 
  * @see <a href="https://tools.ietf.org/html/rfc7644#section-4">Scim spec
  *      section 4</a>
- * 
+ * <p>
  *      /ResourceTypes An HTTP GET to this endpoint is used to discover the
  *      types of resources available on a SCIM service provider (e.g., Users and
  *      Groups). Each resource type defines the endpoints, the core schema URI
@@ -48,7 +48,7 @@ import org.apache.directory.scim.spec.schema.ResourceType;
  *      attributes defining a resource type can be found in Section 6 of
  *      [RFC7643], and an example representation can be found in Section 8.6 of
  *      [RFC7643].
- * 
+ * <p>
  *      In cases where a request is for a specific "ResourceType" or "Schema",
  *      the single JSON object is returned in the same way that a single User or
  *      Group is retrieved, as per Section 3.4.1. When returning multiple

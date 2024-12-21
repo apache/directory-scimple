@@ -37,10 +37,10 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute.Mutability;
 /**
  * Defines the structure of the meta attribute for all SCIM resources as defined
  * by section 3.1 of the SCIM schema specification. See
- * https://tools.ietf.org/html/draft-ietf-scim-core-schema-17#section-3.1 for more
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7643#section-3.1">RFC 7643 section 3.1</a> for more
  * details.
- * 
- * @author Steve Moyer <smoyer@psu.edu>
+ *
+ * @author Steve Moyer {@literal <smoyer@psu.edu>}
  */
 @XmlType(name = "meta")
 @XmlAccessorType(XmlAccessType.NONE)

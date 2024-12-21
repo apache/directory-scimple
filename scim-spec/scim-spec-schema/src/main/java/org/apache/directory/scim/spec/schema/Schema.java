@@ -35,10 +35,10 @@ import java.util.*;
 /**
  * Defines the structure of the SCIM schemas as defined by section 7 of the SCIM
  * schema specification. See
- * https://tools.ietf.org/html/draft-ietf-scim-core-schema-17#section-7 for more
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7643#section-7">RFC 7643 section 7</a> for more
  * details.
- * 
- * @author Steve Moyer <smoyer@psu.edu>
+ *
+ * @author Steve Moyer {@literal <smoyer@psu.edu>}
  */
 @XmlRootElement(name = "schema")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -55,10 +55,10 @@ public class Schema implements AttributeContainer {
   /**
    * Defines the structure of attributes included in SCIM schemas as defined by
    * section 7 of the SCIM schema specification. See
-   * https://tools.ietf.org/html/draft-ietf-scim-core-schema-17#section-7 for more
+   * <a href="https://datatracker.ietf.org/doc/html/rfc7643#section-7">RFC 7643 section 7</a> for more
    * details.
-   * 
-   * @author Steve Moyer <smoyer@psu.edu>
+   *
+   * @author Steve Moyer {@literal <smoyer@psu.edu>}
    */
   @XmlType(name = "attribute")
   @XmlAccessorType(XmlAccessType.NONE)

@@ -17,9 +17,6 @@
 * under the License.
 */
 
-/**
- * 
- */
 package org.apache.directory.scim.spec.phonenumber;
 
 /**

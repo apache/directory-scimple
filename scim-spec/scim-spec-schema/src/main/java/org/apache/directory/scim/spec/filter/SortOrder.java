@@ -36,7 +36,7 @@ public enum SortOrder {
   }
 
   public static SortOrder fromString(String value) {
-    return Arrays.stream(SortOrder.values())
+    return Arrays.stream(values())
       .filter(order -> order.value.equals(value))
       .findFirst()
       .orElseThrow(() -> new IllegalArgumentException("Argument is not a valid SortOrder: " + value));

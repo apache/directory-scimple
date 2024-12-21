@@ -28,7 +28,12 @@ import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.spec.exception.ResourceException;
-import org.apache.directory.scim.spec.filter.*;
+import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
+import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.filter.FilterExpressions;
+import org.apache.directory.scim.spec.filter.FilterResponse;
+import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -36,17 +41,17 @@ import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
 public class InMemoryGroupService implements Repository<ScimGroup> {
 
-  private final Map<String, ScimGroup> groups = new HashMap<>();
+  private final Map<String, ScimGroup> groups = new ConcurrentHashMap<>();
 
   private final SchemaRegistry schemaRegistry;
 
@@ -95,12 +100,18 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public ScimGroup update(String id, Set<ETag> etags, ScimGroup resource, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+    if (!groups.containsKey(id)) {
+      throw new ResourceNotFoundException(id);
+    }
     groups.put(id, resource);
     return resource;
   }
 
   @Override
   public ScimGroup patch(String id, Set<ETag> etags, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+    if (!groups.containsKey(id)) {
+      throw new ResourceNotFoundException(id);
+    }
     ScimGroup resource = patchHandler.apply(get(id), patchOperations);
     groups.put(id, resource);
     return resource;
@@ -112,8 +123,10 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   }
 
   @Override
-  public void delete(String id) {
-    groups.remove(id);
+  public void delete(String id) throws ResourceException {
+    if (groups.remove(id) == null) {
+      throw new ResourceNotFoundException(id);
+    }
   }
 
   @Override

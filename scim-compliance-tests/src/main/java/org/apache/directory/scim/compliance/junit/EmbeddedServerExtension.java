@@ -20,10 +20,9 @@
 package org.apache.directory.scim.compliance.junit;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestInstantiationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,22 +38,41 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public class EmbeddedServerExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback {
+public class EmbeddedServerExtension implements BeforeEachCallback {
 
   private static final Logger logger = LoggerFactory.getLogger(EmbeddedServerExtension.class);
 
-  private ScimTestServer server;
-  private URI uri;
+  private static ScimTestServer server;
+  private static URI uri;
 
-  @Override
-  public void beforeAll(ExtensionContext context) throws Exception {
+  static {
+    // Start a single instance of the ScimTestServer
+    // this instance is shared for all tests using this extension
+    setupServer();
+  }
+
+  private static void setupServer() {
     ServiceLoader<ScimTestServer> serviceLoader = ServiceLoader.load(ScimTestServer.class);
-    if (serviceLoader.findFirst().isPresent()) {
-      server = serviceLoader.findFirst().get();
-      uri = server.start(randomPort());
-    } else {
-      logger.info("Could not find implementation of ScimTestServer via ServiceLoader, assuming server is started using different technique");
-    }
+    serviceLoader.findFirst()
+      .ifPresentOrElse(testServer -> {
+        try {
+          server = testServer;
+          uri = server.start(randomPort());
+
+          Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (server != null) {
+              try {
+                server.shutdown();
+              } catch (Exception e) {
+                logger.warn("Failed to shutdown test server", e);
+              }
+            }
+          }));
+
+        } catch (Exception e) {
+          throw new TestInstantiationException("Failed to start test server: "+ testServer, e);
+        }
+      }, () -> logger.info("Could not find implementation of ScimTestServer via ServiceLoader, assuming server is started using different technique"));
   }
 
   @Override
@@ -73,13 +91,6 @@ public class EmbeddedServerExtension implements BeforeAllCallback, BeforeEachCal
           });
         }
       );
-    }
-  }
-
-  @Override
-  public void afterAll(ExtensionContext context) throws Exception {
-    if (server != null) {
-      server.shutdown();
     }
   }
 

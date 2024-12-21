@@ -248,4 +248,37 @@ public class UsersIT extends ScimpleITSupport {
         "active", is(false)
       );
   }
+
+  @Test
+  @DisplayName("Update Invalid User")
+  void updateInvalidUser() {
+    String id = randomName("user-invalidGroup-id");
+
+    String updatedBody = "{" +
+      "\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"]," +
+      "\"active\":true" +
+      "}";
+
+    put("/Users/" + id, updatedBody)
+      .statusCode(404)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:api:messages:2.0:Error"),
+        "status", is("404"),
+        "detail", is("Resource " + id + " not found.")
+      );
+  }
+
+  @Test
+  @DisplayName("Delete Invalid Users")
+  void deleteInvalidUser() {
+    String id = randomName("user-invalidGroup-id");
+
+    delete("/Users/" + id)
+      .statusCode(404)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:api:messages:2.0:Error"),
+        "status", is("404"),
+        "detail", is("Resource " + id + " not found.")
+      );
+  }
 }

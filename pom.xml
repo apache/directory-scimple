@@ -15,13 +15,16 @@
  specific language governing permissions and limitations
  under the License. -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         child.project.url.inherit.append.path="false">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.directory.project</groupId>
     <artifactId>project</artifactId>
-    <version>48</version>
+    <version>49</version>
   </parent>
 
   <groupId>org.apache.directory.scimple</groupId>
@@ -39,14 +42,15 @@
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
     <maven.compiler.target>${jdk.version}</maven.compiler.target>
     <maven.compiler.release>${jdk.version}</maven.compiler.release>
-    <version.jackson>2.17.1</version.jackson>
-    <version.lombok>1.18.32</version.lombok>
+    <version.jackson>2.17.2</version.jackson>
+    <version.logback>1.5.14</version.logback>
+    <version.lombok>1.18.34</version.lombok>
     <version.lombok.plugin>1.18.20.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
     <version.slf4j>2.0.7</version.slf4j>
-    <version.antlr4>4.13.1</version.antlr4>
-    <version.resteasy>6.2.9.Final</version.resteasy>
-    <version.spring-boot>3.2.5</version.spring-boot>
+    <version.antlr4>4.13.2</version.antlr4>
+    <version.resteasy>6.2.11.Final</version.resteasy>
+    <version.spring-boot>3.4.0</version.spring-boot>
 
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline />
@@ -70,8 +74,10 @@
     <module>scim-coverage</module>
   </modules>
 
-  <scm>
-    <connection>scm:git:https://github.com/apache/directory-scimple.git</connection>
+  <scm child.scm.connection.inherit.append.path="false"
+       child.scm.developerConnection.inherit.append.path="false"
+       child.scm.url.inherit.append.path="false">
+  <connection>scm:git:https://github.com/apache/directory-scimple.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/apache/directory-scimple.git</developerConnection>
     <url>https://github.com/apache/directory-scimple</url>
     <tag>HEAD</tag>
@@ -83,6 +89,41 @@
       <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+
+  <ciManagement>
+    <system>GitHub Actions</system>
+    <url>https://github.com/apache/directory-scimple/actions</url>
+  </ciManagement>
+
+  <mailingLists combine.self="override">
+    <mailingList>
+      <name>The Directory SCIMple List</name>
+      <subscribe>scimple-subscribe@directory.apache.org</subscribe>
+      <unsubscribe>scimple-unsubscribe@directory.apache.org</unsubscribe>
+      <post>scimple@directory.apache.org</post>
+      <archive>https://lists.apache.org/list.html?scimple@directory.apache.org</archive>
+    </mailingList>
+    <mailingList>
+      <name>The Directory Developers List</name>
+      <subscribe>dev-subscribe@directory.apache.org</subscribe>
+      <unsubscribe>dev-unsubscribe@directory.apache.org</unsubscribe>
+      <post>dev@directory.apache.org</post>
+      <archive>https://lists.apache.org/list.html?dev@directory.apache.org</archive>
+    </mailingList>
+    <mailingList>
+      <name>The Directory Notifications List</name>
+      <subscribe>notifications-subscribe@directory.apache.org</subscribe>
+      <unsubscribe>notifications-unsubscribe@directory.apache.org</unsubscribe>
+      <post>notifications@directory.apache.org</post>
+      <archive>https://lists.apache.org/list.html?notifications@directory.apache.org</archive>
+    </mailingList>
+    <mailingList>
+      <name>The Directory Commits (SVN and Git) List</name>
+      <subscribe>commits-subscribe@directory.apache.org</subscribe>
+      <unsubscribe>commits-unsubscribe@directory.apache.org</unsubscribe>
+      <archive>https://lists.apache.org/list.html?commits@directory.apache.org</archive>
+    </mailingList>
+  </mailingLists>
 
   <developers>
     <developer>
@@ -174,7 +215,7 @@
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
         <artifactId>weld-se-core</artifactId>
-        <version>5.1.2.Final</version>
+        <version>5.1.3.Final</version>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
@@ -192,7 +233,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.10.2</version>
+        <version>5.11.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -207,13 +248,13 @@
         <groupId>io.rest-assured</groupId>
         <artifactId>rest-assured-bom</artifactId>
         <type>pom</type>
-        <version>5.4.0</version>
+        <version>5.5.0</version>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.glassfish.jersey</groupId>
         <artifactId>jersey-bom</artifactId>
-        <version>3.1.6</version>
+        <version>3.1.8</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -244,12 +285,17 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.2.0-android</version>
+        <version>33.3.0-android</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>${version.logback}</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.4.12</version>
+        <version>${version.logback}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -275,25 +321,25 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>5.12.0</version>
+        <version>5.14.2</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-junit-jupiter</artifactId>
-        <version>5.12.0</version>
+        <version>5.14.2</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.25.3</version>
+        <version>3.26.3</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest</artifactId>
-        <version>2.2</version>
+        <version>3.0</version>
       </dependency>
       <dependency>
         <groupId>eu.codearte.catch-exception</groupId>
@@ -311,7 +357,7 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.17.0</version>
+        <version>1.17.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -321,7 +367,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <phase>validate</phase>
@@ -340,7 +386,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.13</version>
+        <version>1.7.0</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>apache.releases.https</serverId>
@@ -393,7 +439,7 @@
           <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>extra-enforcer-rules</artifactId>
-            <version>1.8.0</version>
+            <version>1.9.0</version>
           </dependency>
         </dependencies>
         <executions>
@@ -419,6 +465,9 @@
               <rules>
                 <enforceBytecodeVersion>
                   <maxJdkVersion>${max.jdk.version}</maxJdkVersion>
+                  <excludes>
+                    <exclude>org.apache.tomcat.embed:tomcat-embed-core</exclude>
+                  </excludes>
                 </enforceBytecodeVersion>
               </rules>
               <fail>true</fail>
@@ -429,7 +478,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>4.0.0-M15</version>
+        <version>4.0.0-M16</version>
       </plugin>
     </plugins>
 
@@ -438,9 +487,9 @@
         <plugin>
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
-          <version>8.4.3</version>
+          <version>11.1.1</version>
           <configuration>
-            <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+            <failBuildOnCVSS>0</failBuildOnCVSS>
             <suppressionFile>${session.executionRootDirectory}/src/owasp/suppression.xml</suppressionFile>
           </configuration>
         </plugin>
@@ -521,13 +570,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.7.0</version>
+          <version>3.10.0</version>
           <executions>
             <execution>
               <id>attach-javadocs</id>
               <goals>
                 <goal>jar</goal>
-                <goal>test-jar</goal>
               </goals>
             </execution>
           </executions>
@@ -567,30 +615,44 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.2.5</version>
+            <version>3.5.2</version>
             <configuration>
               <!-- parent pom overrides the default, so we MUST set the jacoco argline directly -->
               <argLine>@{jacoco.argline}</argLine>
+              <enablePropertiesElement>false</enablePropertiesElement>
               <includes>
                 <include>**/Test*.java</include>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
                 <include>**/*TestCase.java</include>
               </includes>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled = true
+                  junit.jupiter.execution.parallel.mode.default = concurrent
+                </configurationParameters>
+              </properties>
             </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.2.5</version>
+            <version>3.5.0</version>
             <configuration>
               <argLine>@{jacoco.it.argline}</argLine>
+              <enablePropertiesElement>false</enablePropertiesElement>
               <includes>
                 <include>**/*IT.java</include>
               </includes>
               <dependenciesToScan>
                 <dependency>org.apache.directory.scimple:scim-compliance-tests</dependency>
               </dependenciesToScan>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled = true
+                  junit.jupiter.execution.parallel.mode.default = concurrent
+                </configurationParameters>
+              </properties>
             </configuration>
           </plugin>
           <plugin>
@@ -601,7 +663,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.1</version>
             <configuration>
               <signTag>true</signTag>
               <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -626,7 +688,7 @@
           <plugin>
             <groupId>io.smallrye</groupId>
             <artifactId>jandex-maven-plugin</artifactId>
-            <version>3.1.8</version>
+            <version>3.2.2</version>
             <executions>
               <execution>
                 <id>make-index</id>
@@ -651,7 +713,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.8.5.0</version>
+          <version>4.8.6.6</version>
           <configuration>
             <plugins>
               <plugin>
@@ -735,7 +797,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.44.0</version>
+            <version>0.45.0</version>
             <configuration>
               <skip>true</skip>
             </configuration>
@@ -768,7 +830,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.44.0</version>
+            <version>0.45.0</version>
             <configuration>
               <skip>true</skip>
             </configuration>
@@ -796,7 +858,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.4</version>
+            <version>3.2.7</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -826,6 +888,19 @@
                 <configuration>
                   <excludePackageNames>org.apache.directory.scim.example.*,org.apache.directory.scim.test.*</excludePackageNames>
                 </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.cyclonedx</groupId>
+            <artifactId>cyclonedx-maven-plugin</artifactId>
+            <version>2.8.1</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>makeAggregateBom</goal>
+                </goals>
+                <phase>package</phase>
               </execution>
             </executions>
           </plugin>

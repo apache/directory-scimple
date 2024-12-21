@@ -17,27 +17,19 @@
  * under the License.
  */
 
-package org.apache.directory.scim.example.quarkus;
+package org.apache.directory.scim.spec.exception;
 
-import io.quarkus.test.common.http.TestHTTPResource;
-import io.quarkus.test.junit.QuarkusIntegrationTest;
-import org.apache.directory.scim.compliance.tests.GroupsIT;
-import org.junit.jupiter.api.parallel.Isolated;
+public class ResourceNotFoundException extends ResourceException {
 
-import java.net.URI;
+  public ResourceNotFoundException(String resourceId) {
+    super(404, message(resourceId));
+  }
 
-/**
- * Wraps GroupsIT in a Quarkus friendly runner.
- */
-@QuarkusIntegrationTest
-@Isolated
-public class QuarkusGroupsIT extends GroupsIT {
+  public ResourceNotFoundException(String resourceId, Throwable cause) {
+    super(404, message(resourceId), cause);
+  }
 
-  @TestHTTPResource("/v2")
-  URI uri;
-
-  @Override
-  protected URI uri() {
-    return uri;
+  private static String message(String resourceId) {
+    return "Resource " +resourceId + " not found.";
   }
 }

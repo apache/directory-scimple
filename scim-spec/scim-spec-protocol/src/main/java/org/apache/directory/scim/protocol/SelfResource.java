@@ -54,7 +54,7 @@ import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
  * From SCIM Protocol Specification, section 3, page 9
  * 
  * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.2">Scim spec section 3.2</a>
- * 
+ * <p>
  * Resource Endpoint         Operations             Description
    -------- ---------------- ---------------------- --------------------
    Self     /Me              GET, POST, PUT, PATCH, Alias for operations
@@ -79,7 +79,7 @@ public interface SelfResource {
    * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.4.1">Scim spec,
    *      retrieving known resources</a>
    * @return
-   * @throws UnableToRetrieveResourceException 
+   * @throws ResourceException
    */
   @GET
   @Produces({SCIM_CONTENT_TYPE, APPLICATION_JSON})

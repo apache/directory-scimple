@@ -35,7 +35,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * 
- * @author Steve Moyer <smoyer@psu.edu>
+ * @author Steve Moyer {@literal <smoyer@psu.edu>}
  */
 @Data
 @Slf4j

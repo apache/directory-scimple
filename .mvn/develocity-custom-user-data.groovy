@@ -37,6 +37,10 @@ if (isGitHubActions()) {
   envVariable("GITHUB_HEAD_REF").ifPresent(value ->
     buildScan.value("Git branch", value))
 
+  // Add workflow name as tag
+  envVariable("GITHUB_WORKFLOW").ifPresent(value ->
+    buildScan.tag(value))
+
   // Add Build Scan info to step outputs
   envVariable("GITHUB_OUTPUT").ifPresent(value -> {
     buildScan.buildScanPublished({

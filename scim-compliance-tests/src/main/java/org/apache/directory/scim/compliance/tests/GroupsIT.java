@@ -213,6 +213,41 @@ public class GroupsIT extends ScimpleITSupport {
       );
   }
 
+  @Test
+  @DisplayName("Update Invalid Group")
+  void updateInvalidGroup() {
+
+    String id = randomName("group-invalidGroup-id");
+    String groupName = randomName("group-invalidGroup");
+
+    String updatedBody = "{" +
+      "\"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"]," +
+      "\"displayName\": \"" + groupName + "\"," +
+      "\"members\": []}";
+
+    put("/Groups/" + id, updatedBody)
+      .statusCode(404)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:api:messages:2.0:Error"),
+        "status", is("404"),
+        "detail", is("Resource " + id + " not found.")
+      );
+  }
+
+  @Test
+  @DisplayName("Delete Invalid Group")
+  void deleteInvalidGroup() {
+    String id = randomName("group-invalidGroup-id");
+
+    delete("/Groups/" + id)
+      .statusCode(404)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:api:messages:2.0:Error"),
+        "status", is("404"),
+        "detail", is("Resource " + id + " not found.")
+      );
+  }
+
   String createUser(String name, String email) {
     String body = "{" +
       "\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"]," +

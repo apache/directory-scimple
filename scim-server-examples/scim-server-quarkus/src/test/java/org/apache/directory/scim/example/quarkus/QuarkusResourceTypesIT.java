@@ -22,6 +22,7 @@ package org.apache.directory.scim.example.quarkus;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 import org.apache.directory.scim.compliance.tests.ResourceTypesIT;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import java.net.URI;
 
@@ -29,6 +30,7 @@ import java.net.URI;
  * Wraps ResourceTypesIT in a Quarkus friendly runner.
  */
 @QuarkusIntegrationTest
+@Isolated
 public class QuarkusResourceTypesIT extends ResourceTypesIT {
 
   @TestHTTPResource("/v2")

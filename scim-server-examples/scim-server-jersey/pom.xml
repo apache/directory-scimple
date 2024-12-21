@@ -110,7 +110,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.5.0</version>
         <configuration>
           <mainClass>org.apache.directory.scim.example.jersey.JerseyApplication</mainClass>
         </configuration>

@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: CI
+name: Build & Test
 
 on:
   push:
@@ -30,41 +30,11 @@ jobs:
       matrix:
         java: [17, 21]
 
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-          cache: maven
-
-      - name: Build with Maven
-        id: mvnBuild
-        run: ./mvnw verify -Pci -V -B --no-transfer-progress
-        env:
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
-
-      - name: Check License Headers
-        if: matrix.java == '17'
-        run: ./mvnw apache-rat:check -V -B --no-transfer-progress
-
-      - name: Add PR Comment
-        if: github.event.pull_request.number != ''
-        run: |
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          #
-          # Use GitHub API to get this Job URL
-          JOBINFO="$(curl --get -Ss -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=30")"
-          echo "${JOBINFO}" | grep "Resource not accessible by integration" &&  exit 1
-          eval "$(echo ${JOBINFO} | jq -r --arg job_name '${{ github.job }} (${{ matrix.java }})' '.jobs | map(select(.name == $job_name)) | .[0] | @sh "job_id=\(.id) html_url=\(.html_url)"')"
-          #
-          # Use GitHub API to create a comment on the PR
-          COMMENT="View details about the Java ${{ matrix.java }} build [${{ github.run_number }}](${html_url}) in the [Build Scan](${{ steps.mvnBuild.outputs.buildscan_uri }}) 📊"
-          COMMENT_URL="${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-          echo "${{ steps.mvnBuild.outputs.buildscan_uri }}"
-          curl -s -H "Authorization: token ${GITHUB_TOKEN}" -X POST ${COMMENT_URL} -d "{\"body\":\"${COMMENT}\"}"
+    uses: ./.github/workflows/maven.yml
+    with:
+      mvn: verify -Pci
+      name: "Maven Verify (with Java ${{ matrix.java }}-zulu)"
+      jobs_path: "build (${{ matrix.java }}) / maven"
+      java-version: ${{ matrix.java }}
+      java-distribution: 'zulu'
+    secrets: inherit
