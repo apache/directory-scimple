@@ -25,8 +25,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import lombok.Value;
 
@@ -88,14 +86,7 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
     if (this.compareValue == null) {
       compareValueString = "null";
     } else if (this.compareValue instanceof String) {
-      // TODO change this to escapeJson() when dependencies get upgraded
-      String escaped = StringEscapeUtils.escapeEcmaScript((String) this.compareValue)
-          // StringEscapeUtils follows the outdated JSON spec requiring "/" to be escaped, this could subtly break things
-          .replaceAll("\\\\/", "/")
-          // We don't want single-quotes escaped, this will be unnecessary with escapeJson()
-          .replaceAll("\\\\'", "'");
-
-      compareValueString = QUOTE + escaped + QUOTE;
+      compareValueString = QUOTE + this.compareValue + QUOTE;
     } else if (this.compareValue instanceof Date) {
       compareValueString = QUOTE + toDateTimeString((Date) this.compareValue) + QUOTE;
     } else if (this.compareValue instanceof LocalDate) {
