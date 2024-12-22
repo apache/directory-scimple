@@ -38,6 +38,16 @@ public class FilterBuilderTest {
       .build();
     assertThat(filter).isEqualTo(new Filter("name.givenName EQ \"Bilbo\" AND name.familyName EQ \"Baggins\""));
   }
+
+  @Test
+  public void testExtendedCharsAnd() throws FilterParseException {
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bílbo")
+      .and(r -> r.equalTo("name.familyName", "Bággins"))
+      .build();
+    Filter expected = new Filter("name.givenName EQ \"Bílbo\" AND name.familyName EQ \"Bággins\"");
+    assertThat(filter).isEqualTo(expected);
+  }
   
   @Test
   public void testSimpleOr() throws FilterParseException {
