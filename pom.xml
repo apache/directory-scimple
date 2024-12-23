@@ -50,7 +50,7 @@
     <version.slf4j>2.0.7</version.slf4j>
     <version.antlr4>4.13.2</version.antlr4>
     <version.resteasy>6.2.11.Final</version.resteasy>
-    <version.spring-boot>3.4.0</version.spring-boot>
+    <version.spring-boot>3.4.1</version.spring-boot>
 
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline />
