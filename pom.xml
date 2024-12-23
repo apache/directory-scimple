@@ -701,6 +701,7 @@
           <artifactId>maven-pmd-plugin</artifactId>
           <configuration>
             <format>net.sourceforge.pmd.renderers.SarifRenderer</format>
+            <linkXRef>false</linkXRef>
             <rulesets>
               <ruleset>${session.executionRootDirectory}/src/pmd/ruleset.xml</ruleset>
             </rulesets>
