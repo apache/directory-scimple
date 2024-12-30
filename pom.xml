@@ -215,7 +215,7 @@
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
         <artifactId>weld-se-core</artifactId>
-        <version>5.1.3.Final</version>
+        <version>5.1.4.Final</version>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
