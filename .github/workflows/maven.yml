@@ -57,7 +57,7 @@ jobs:
         id: mvnBuild
         run: ./mvnw ${{ inputs.mvn }}
         env:
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Add PR Comment
         if: github.event.pull_request.number != ''
