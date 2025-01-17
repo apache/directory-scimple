@@ -73,7 +73,7 @@ public class PatchHandlerTest {
     ScimUser updatedUser = patchHandler.apply(user, List.of(op));
     assertThat(updatedUser.getName().getFamilyName()).isEqualTo("New Family Name");
     // assert that PATCH did not update fields not provided in PatchOperation
-    assertThat(updatedUser.getName().getGivenName()).isNotNull();
+    assertThat(updatedUser.getName().getGivenName()).isEqualTo("Given Name");
   }
 
   @Test
