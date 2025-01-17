@@ -57,6 +57,26 @@ public class PatchHandlerTest {
   }
 
   @Test
+  public void applyReplaceComplexAttribute() {
+    // setup existing user
+    Name existingName = new Name();
+    existingName.setFamilyName("Family Name");
+    existingName.setGivenName("Given Name");
+    ScimUser user = user();
+    user.setName(existingName);
+
+    // setup patch ops
+    Map<String, String> newName = Map.of("familyName", "New Family Name");
+    PatchOperation op = patchOperation(REPLACE, "name", newName);
+
+    //execute
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    assertThat(updatedUser.getName().getFamilyName()).isEqualTo("New Family Name");
+    // assert that PATCH did not update fields not provided in PatchOperation
+    assertThat(updatedUser.getName().getGivenName()).isNotNull();
+  }
+
+  @Test
   public void applyReplaceUserName()  {
     String newUserName = "testUser_updated@test.com";
     PatchOperation op = patchOperation(REPLACE, "userName", newUserName);

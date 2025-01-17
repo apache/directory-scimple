@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
 
 import static java.util.stream.Collectors.toList;
 
@@ -337,8 +338,16 @@ public class DefaultPatchHandler implements PatchHandler {
         checkMutability(attribute.getAttribute(subAttributeName), parentValue.get(subAttributeName));
         parentValue.put(subAttributeName, value);
       } else {
-        checkMutability(attribute, sourceAsMap.get(attribute.getName()));
-        sourceAsMap.put(attribute.getName(), value);
+        Object currentValue = sourceAsMap.get(attribute.getName());
+        checkMutability(attribute, currentValue);
+        // PATCH on complex attributes should only replace the values given, leaving any not provided in the request untouched
+        if (attribute.getType() == Type.COMPLEX) {
+          Map<String, Object> newValue = ((Map<String, Object>) currentValue);
+          newValue.putAll((Map<String, Object>) value);
+          sourceAsMap.put(attribute.getName(), newValue);
+        } else {
+          sourceAsMap.put(attribute.getName(), value);
+        }
       }
     }
 
