@@ -673,6 +673,14 @@
               <mavenExecutorId>forked-path</mavenExecutorId>
             </configuration>
           </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-artifact-plugin</artifactId>
+          <version>3.6.0</version>
+          <configuration>
+            <fail>true</fail>
+          </configuration>
+        </plugin>
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
