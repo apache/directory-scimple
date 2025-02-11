@@ -37,6 +37,8 @@
 
   <properties>
     <project.build.outputTimestamp>2024-01-09T22:20:58Z</project.build.outputTimestamp>
+    <version.previous>1.0.0-M1</version.previous>
+    <previous.tag>${version.previous}</previous.tag>
     <jdk.version>11</jdk.version>
     <max.jdk.version>${jdk.version}</max.jdk.version>
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
@@ -479,6 +481,77 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>4.0.0-M16</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jreleaser</groupId>
+        <artifactId>jreleaser-maven-plugin</artifactId>
+        <version>1.16.0</version>
+        <inherited>false</inherited>
+        <configuration>
+          <dryrun>true</dryrun>
+          <jreleaser>
+            <release>
+              <github>
+                <previousTagName>${previous.tag}</previousTagName>
+                <changelog>
+                  <links>true</links>
+                  <skipMergeCommits>true</skipMergeCommits>
+                  <formatted>ALWAYS</formatted>
+                  <content>
+                    ## Changelog
+
+                    {{changelogChanges}}
+                  </content>
+                  <format>- {{commitShortHash}} {{commitTitle}}</format>
+                  <labelers>
+                    <labeler>
+                      <label>dependencies</label>
+                      <title>from apache/dependabot</title>
+                      <order>10</order>
+                    </labeler>
+                    <labeler>
+                      <label>dependencies</label>
+                      <contributor>dependabot[bot]</contributor>
+                      <order>11</order>
+                    </labeler>
+                    <labeler>
+                      <label>automated</label>
+                      <title>regex:.*\[maven-release-plugin\].*</title>
+                      <order>20</order>
+                    </labeler>
+                  </labelers>
+                  <categories>
+                    <category>
+                      <title>Dependencies</title>
+                      <key>dependencies</key>
+                      <labels>
+                        <label>dependencies</label>
+                      </labels>
+                      <order>10</order>
+                    </category>
+                    <category>
+                      <title>Automated</title>
+                      <key>automated</key>
+                      <labels>
+                        <label>automated</label>
+                      </labels>
+                      <order>20</order>
+                    </category>
+                  </categories>
+                  <hide>
+                    <categories>
+                      <category>dependencies</category>
+                      <category>automated</category>
+                    </categories>
+                    <contributors>
+                      <contributor>dependabot[bot]</contributor>
+                    </contributors>
+                  </hide>
+                </changelog>
+              </github>
+            </release>
+          </jreleaser>
+        </configuration>
       </plugin>
     </plugins>
 
