@@ -483,6 +483,27 @@
         <version>4.0.0-M16</version>
       </plugin>
       <plugin>
+        <groupId>com.github.siom79.japicmp</groupId>
+        <artifactId>japicmp-maven-plugin</artifactId>
+        <version>0.23.1</version>
+        <configuration>
+          <oldVersion>
+            <dependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <version>${version.previous}</version>
+              <type>${project.packaging}</type>
+            </dependency>
+          </oldVersion>
+          <parameter>
+            <onlyModified>true</onlyModified>
+            <breakBuildOnSourceIncompatibleModifications>false</breakBuildOnSourceIncompatibleModifications>
+            <breakBuildOnBinaryIncompatibleModifications>false</breakBuildOnBinaryIncompatibleModifications>
+            <breakBuildBasedOnSemanticVersioning>false</breakBuildBasedOnSemanticVersioning>
+          </parameter>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.jreleaser</groupId>
         <artifactId>jreleaser-maven-plugin</artifactId>
         <version>1.16.0</version>
