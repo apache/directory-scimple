@@ -367,25 +367,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>3.2.1</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>create</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <shortRevisionLength>7</shortRevisionLength>
-          <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-          <doCheck>false</doCheck>
-          <doUpdate>false</doUpdate>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
         <version>1.7.0</version>
@@ -613,11 +594,6 @@
                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               </manifest>
-              <manifestEntries>
-                <Build-Number>${buildNumber}</Build-Number>
-                <SCM-Revision>${buildNumber}</SCM-Revision>
-                <SCM-Branch>${scmBranch}</SCM-Branch>
-              </manifestEntries>
             </archive>
           </configuration>
         </plugin>
@@ -632,9 +608,6 @@
               </manifest>
               <manifestEntries>
                 <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
-                <Build-Number>${buildNumber}</Build-Number>
-                <SCM-Revision>${buildNumber}</SCM-Revision>
-                <SCM-Branch>${scmBranch}</SCM-Branch>
               </manifestEntries>
             </archive>
           </configuration>
