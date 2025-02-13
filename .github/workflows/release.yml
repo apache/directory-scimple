@@ -1,0 +1,185 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+name: Release Build
+
+on:
+  push:
+    tags:
+      - v*.**
+env:
+  JAVA_VERSION: 21
+  PROJECT_NAME: SCIMple
+  PROJECT_NAME_LOWER: scimple
+  MAVEN_ARGS: --batch-mode --no-transfer-progress
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      project-version: ${{ steps.version.outputs.project-version }}
+      nexus-url: ${{ steps.nexus.outputs.nexus-url }}
+      svn-dist-url: ${{ steps.svn.outputs.svn-dist-url }}
+      changelog-md: ${{ steps.mvn.outputs.changelog-md }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}-zulu
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: zulu
+          cache: '' # disabled
+          server-id: apache.releases.https
+          server-username: NEXUS_USERNAME
+          server-password: NEXUS_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+
+      - name: Resolve the `project-version` from the pom
+        id: version
+        shell: bash
+        run: |
+            export PROJECT_VERSION=$(./mvnw --non-recursive --quiet --batch-mode \
+              -DforceStdout=true \
+              -Dexpression=project.version \
+              help:evaluate \
+              | tail -n 1)
+            echo "project-version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+      - name: Maven Release Build
+        id: mvn
+        run: |
+          ./mvnw -V deploy \
+            -Papache-release -Pci \
+            --threads=1 \
+            -Daether.checksums.algorithms=SHA-512,SHA-1,MD5 \
+            -Ddevelocity.cache.local.enabled=false \
+            -Ddevelocity.cache.remote.enabled=false
+          echo "changelog-md=./target/jreleaser/release/CHANGELOG.md" >> $GITHUB_OUTPUT
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PW }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+      - name: Capture Nexus Staging URL
+        id: nexus
+        run: |
+          export NEXUS_URL=$(awk '/^(stagingRepository.url)/ { gsub(/(^.+=|\\)/, ""); print $1 }' target/nexus-staging/staging/*.properties)
+          echo "nexus-url=$NEXUS_URL" >> $GITHUB_OUTPUT
+
+      - name: Upload to Dist to Subversion
+        id: svn
+        shell: bash
+        env:
+          PROJECT_ID: ${{ env.PROJECT_NAME_LOWER }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          PROJECT_VERSION: ${{ steps.version.outputs.project-version }}
+        run: |
+          # Install Subversion
+          sudo apt install --assume-yes --no-install-recommends subversion
+          
+          export DIST_FILE_NAME=${PROJECT_ID}-${PROJECT_VERSION}-source-release.zip
+          export DIST_FILE_PATH=$(pwd)/target/${DIST_FILE_NAME}
+          export SVN_BASE_URL=https://dist.apache.org/repos/dist/dev/directory/$PROJECT_ID
+          export SVN_DIR="/tmp/svn-repo"
+          
+          # Checkout the SVN repository
+          svn co \
+            "${SVN_BASE_URL}" \
+            "$SVN_DIR"
+          cd "$SVN_DIR"
+          
+          # Switch to the distribution folder
+          [ -d "$PROJECT_VERSION" ] || {
+            mkdir "$PROJECT_VERSION"
+            svn add "$PROJECT_VERSION"
+          }
+          cd "$PROJECT_VERSION"
+          
+          # Copy the distribution
+          cp ${DIST_FILE_PATH} .
+          
+          # Add & commit changes
+          svn add "$DIST_FILENAME_PREFIX"
+          svn commit \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            -m "Added \`${DIST_FILE_NAME}\` artifacts for release \`${PROJECT_VERSION}\`"
+  
+          echo "svn-dist-url=${SVN_BASE_URL}/$PROJECT_VERSION/DIST_FILE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Failure Summary
+        if: failure()
+        shell: bash
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          Release of tag ${{ github.ref_name }} with POM version ${{ steps.version.outputs.project-version }} failed ❌
+          You may need to cleanup:
+          - The Nexus staging repository: https://repository.apache.org/#stagingRepositories
+          - The staged Source bundle: ${{ steps.svn.outputs.svn-dist-url }}
+          
+          To re-run the release, you will need to delete the tag and re-push it.
+          EOF
+
+      - name: Success Summary
+        shell: bash
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          The release of tag ${{ github.ref_name }} with POM version ${{ steps.version.outputs.project-version }} has been staged ✅
+          
+          The next step is to check if the release is reproducible by running a Maven build locally
+          using against the source dist zip and the tag, for each run the command:
+          
+          ```bash
+          ./mvn clean verify artifact:compare \
+            -Dreference.repo=${{ steps.nexus.outputs.nexus-url }}
+          ```
+          
+          If that was successful, start the vote email thread, suggested email template:
+          
+          ```txt
+          Subject: [VOTE] Release Apache Directory ${{ env.PROJECT_NAME }} ${{ steps.version.outputs.project-version }}
+            
+          This is a call to vote in favor of releasing Apache Directory ${{ env.PROJECT_NAME }} version ${{ steps.version.outputs.project-version }}.
+          
+          We solved # issues:
+            <insert release notes or link to release notes> (see below for suggestion)
+          
+          Maven Staging repo: 
+            ${{ steps.nexus.outputs.nexus-url }}
+          
+          Dist Staging Repository:
+            ${{ steps.svn.outputs.svn-dist-url }}
+          
+          Guide to testing staged releases:
+            https://maven.apache.org/guides/development/guide-testing-releases.html
+            
+          Vote open for 72 hours.
+          
+          [ ] +1
+          [ ] +0
+          [ ] -1 (please include reasoning)
+          ```
+          
+          Changelog:
+      
+          EOF
+          cat ${{ steps.mvn.outputs.changelog-md }} >> $GITHUB_STEP_SUMMARY
