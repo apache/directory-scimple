@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Release Build
+name: Snapshot Build
 
 on:
   push:
@@ -75,12 +75,13 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USER }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PW }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Success Summary
         shell: bash
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
-          The SNAPSHOT build from ${{ github.ref_name }} with POM version ${{ steps.version.outputs.project-version }} has been deployed ✅
+          The SNAPSHOT build from \`${{ github.ref_name }}\` with POM version \`${{ steps.version.outputs.project-version }}\` has been deployed ✅
           
           Changes in this build since the last release:
       

@@ -1041,6 +1041,7 @@
                 <goals>
                   <goal>changelog</goal>
                 </goals>
+                <phase>package</phase>
               </execution>
             </executions>
           </plugin>
