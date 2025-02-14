@@ -28,7 +28,7 @@ env:
   MAVEN_ARGS: --batch-mode --no-transfer-progress
 
 jobs:
-  release:
+  snapshot:
     runs-on: ubuntu-latest
     outputs:
       project-version: ${{ steps.version.outputs.project-version }}
@@ -72,7 +72,7 @@ jobs:
             -Ddevelocity.cache.remote.enabled=false
           echo "changelog-md=./target/jreleaser/release/CHANGELOG.md" >> $GITHUB_OUTPUT
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USER }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PW }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
