@@ -61,7 +61,7 @@ jobs:
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
-      - name: Maven Release Build
+      - name: Maven Snapshot Build
         id: mvn
         run: |
           ./mvnw -V deploy \
