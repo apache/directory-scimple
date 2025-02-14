@@ -52,6 +52,7 @@ if (isGitHubActions()) {
         << "buildscan_id=${id}"
         << '\n'
         << "buildscan_uri=${uri}"
+        << '\n'
     })
   })
 
