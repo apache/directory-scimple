@@ -38,6 +38,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need history to generate the changelog
 
       - name: Set up Java ${{ env.JAVA_VERSION }}-zulu
         uses: actions/setup-java@v4

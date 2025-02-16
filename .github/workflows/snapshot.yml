@@ -36,6 +36,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need history to generate the changelog
 
       - name: Set up Java ${{ env.JAVA_VERSION }}-zulu
         uses: actions/setup-java@v4
@@ -81,7 +83,7 @@ jobs:
         shell: bash
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
-          The SNAPSHOT build from \`${{ github.ref_name }}\` with POM version \`${{ steps.version.outputs.project-version }}\` has been deployed ✅
+          The SNAPSHOT build from \`${{ github.ref_name }}\` with POM version \[\`${{ steps.version.outputs.project-version }}\`\]\(https://repository.apache.org/#nexus-search;gav~org.apache.directory.scimple~~${{ steps.version.outputs.project-version }}~~\) has been deployed ✅
           
           Changes in this build since the last release:
       
