@@ -1021,5 +1021,25 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>ci-templating</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/ci-templates</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>

@@ -59,6 +59,7 @@ jobs:
               -Dexpression=project.version \
               help:evaluate \
               | tail -n 1)
+            echo "project-version=$PROJECT_VERSION"
             echo "project-version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
@@ -82,10 +83,7 @@ jobs:
       - name: Success Summary
         shell: bash
         run: |
-          cat << EOF >> $GITHUB_STEP_SUMMARY
-          The SNAPSHOT build from \`${{ github.ref_name }}\` with POM version \[\`${{ steps.version.outputs.project-version }}\`\]\(https://repository.apache.org/#nexus-search;gav~org.apache.directory.scimple~~${{ steps.version.outputs.project-version }}~~\) has been deployed ✅
-          
-          Changes in this build since the last release:
-      
-          EOF
+          ./mvnw -N -Pci-templating resources:copy-resources \
+            -DgitRef=${{ github.ref_name }}
+          cat ./target/snapshot-success-summary.md >> $GITHUB_STEP_SUMMARY
           cat ${{ steps.mvn.outputs.changelog-md }} >> $GITHUB_STEP_SUMMARY
