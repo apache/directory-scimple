@@ -69,6 +69,15 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
+      <exclusions>
+        <exclusion>
+          <!-- brings in unused native dependency
+               It's not used in this example, and it causes issues
+               with Reproducible Builds and the maven-remote-resources-plugin -->
+          <groupId>com.aayushatharva.brotli4j</groupId>
+          <artifactId>brotli4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
