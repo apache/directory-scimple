@@ -118,16 +118,15 @@ jobs:
           cd "$PROJECT_VERSION"
           
           # Copy the distribution
-          cp ${DIST_FILE_PATH} .
+          cp ${DIST_FILE_PATH}* .
           
           # Add & commit changes
-          svn add "$DIST_FILENAME_PREFIX"
+          svn add "${DIST_FILE_NAME}"
           svn commit \
             --username "$SVN_USERNAME" \
             --password "$SVN_PASSWORD" \
             -m "Added \`${DIST_FILE_NAME}\` artifacts for release \`${PROJECT_VERSION}\`"
-  
-          echo "svn-dist-url=${SVN_BASE_URL}/$PROJECT_VERSION/DIST_FILE_NAME" >> $GITHUB_OUTPUT
+          echo "svn-dist-url=${SVN_BASE_URL}/${PROJECT_VERSION}/${DIST_FILE_NAME}" >> $GITHUB_OUTPUT
 
       - name: Failure Summary
         if: failure()
