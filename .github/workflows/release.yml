@@ -99,9 +99,9 @@ jobs:
           # Install Subversion
           sudo apt install --assume-yes --no-install-recommends subversion
           
-          export DIST_FILE_NAME=${PROJECT_ID}-${PROJECT_VERSION}-source-release.zip
-          export DIST_FILE_PATH=$(pwd)/target/${DIST_FILE_NAME}
-          export SVN_BASE_URL=https://dist.apache.org/repos/dist/dev/directory/$PROJECT_ID
+          export DIST_FILE_NAME="${PROJECT_ID}-${PROJECT_VERSION}-source-release.zip"
+          export DIST_FILE_PATH="$(pwd)/target/${DIST_FILE_NAME}"
+          export SVN_BASE_URL="https://dist.apache.org/repos/dist/dev/directory/${PROJECT_ID}"
           export SVN_DIR="/tmp/svn-repo"
           
           # Checkout the SVN repository
@@ -117,11 +117,15 @@ jobs:
           }
           cd "$PROJECT_VERSION"
           
-          # Copy the distribution
-          cp ${DIST_FILE_PATH}* .
+          # Copy the distribution, signature, and checksum
+          cp ${DIST_FILE_PATH} .
+          cp ${DIST_FILE_PATH}.asc .
+          cp ${DIST_FILE_PATH}.sha512 .
           
           # Add & commit changes
           svn add "${DIST_FILE_NAME}"
+          svn add "${DIST_FILE_NAME}.asc"
+          svn add "${DIST_FILE_NAME}.sha512"
           svn commit \
             --username "$SVN_USERNAME" \
             --password "$SVN_PASSWORD" \
