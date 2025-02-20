@@ -143,7 +143,7 @@ jobs:
           ./mvnw -N -Pci-templating resources:copy-resources \
             -DgitRef=${{ github.ref_name }} \
             -DnexusStagingUrl=${{ steps.nexus.outputs.nexus-url }} \
-            -DsvnDistUrl=${{ steps.svn.outputs.svn-dist-url }} \
+            -DsvnDistUrl=${{ steps.svn.outputs.svn-dist-url }}
           cat ./target/release-failure-summary.md >> $GITHUB_STEP_SUMMARY
 
       - name: Success Summary
@@ -152,6 +152,6 @@ jobs:
           ./mvnw -N -Pci-templating resources:copy-resources \
             -DgitRef=${{ github.ref_name }} \
             -DnexusStagingUrl=${{ steps.nexus.outputs.nexus-url }} \
-            -DsvnDistUrl=${{ steps.svn.outputs.svn-dist-url }} \
+            -DsvnDistUrl=${{ steps.svn.outputs.svn-dist-url }}
           cat ./target/release-success-summary.md >> $GITHUB_STEP_SUMMARY
           cat ${{ steps.mvn.outputs.changelog-md }} >> $GITHUB_STEP_SUMMARY
