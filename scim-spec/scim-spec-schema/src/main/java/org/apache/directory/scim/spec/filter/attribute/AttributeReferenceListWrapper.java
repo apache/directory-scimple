@@ -26,15 +26,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @Data
-@Slf4j
 public class AttributeReferenceListWrapper {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(AttributeReferenceListWrapper.class);
 
   @Setter(AccessLevel.NONE)
   private Set<AttributeReference> attributeReferences = new HashSet<>();

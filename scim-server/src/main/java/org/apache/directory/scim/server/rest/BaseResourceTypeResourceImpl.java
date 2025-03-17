@@ -62,10 +62,10 @@ import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortOrder;
 import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 

@@ -20,7 +20,7 @@
 package org.apache.directory.scim.spec.schema;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
@@ -30,6 +30,8 @@ import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -39,9 +41,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-@Slf4j
 public final class Schemas {
-  private final static Map<Class<?>, Schema.Attribute.Type> CLASS_TO_TYPE = new HashMap<>() {{
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(Schemas.class);
+
+    private final static Map<Class<?>, Schema.Attribute.Type> CLASS_TO_TYPE = new HashMap<>() {{
     put(String.class, Schema.Attribute.Type.STRING);
     put(Character.class, Schema.Attribute.Type.STRING);
     put(Integer.class, Schema.Attribute.Type.INTEGER);

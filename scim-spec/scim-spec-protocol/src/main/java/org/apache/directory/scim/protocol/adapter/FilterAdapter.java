@@ -22,10 +22,12 @@ package org.apache.directory.scim.protocol.adapter;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.apache.directory.scim.spec.filter.Filter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class FilterAdapter extends XmlAdapter<String, Filter> {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(FilterAdapter.class);
 
   @Override
   public Filter unmarshal(String string) throws Exception {

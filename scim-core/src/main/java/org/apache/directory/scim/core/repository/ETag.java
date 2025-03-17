@@ -19,10 +19,6 @@
 
 package org.apache.directory.scim.core.repository;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-
 /**
  * Bean representing an ETag, as defined by RFC 7232 section 2.3.
  * <p>
@@ -52,10 +48,78 @@ import lombok.RequiredArgsConstructor;
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7232#section-2.3">Conditional Requests - RFC 7232</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.14">SCIM Protocol -  RFC 7644</a>
  */
-@Data
-@EqualsAndHashCode
-@RequiredArgsConstructor
 public class ETag {
-  private final String value;
-  private final boolean weak;
+    private String value;
+    private boolean weak;
+    
+    public ETag( String value, boolean weak )
+    {
+        this.value = value;
+        this.weak = weak;
+    }
+
+    /**
+     * @return the value
+     */
+    public String getValue()
+    {
+        return value;
+    }
+
+
+    /**
+     * @return the weak
+     */
+    public boolean isWeak()
+    {
+        return weak;
+    }
+    
+    
+    /**
+     * Gets the hashcode of this object.
+     *
+     * @see java.lang.Object#hashCode()
+     * @return The instance hash code
+     */
+    @Override
+    public int hashCode()
+    {
+        int h = 37;
+        
+        h = h * 17 + ( value != null ? value.hashCode() : 0 );
+        h = h * 17 + ( weak ? 1 : 0 );
+        
+        return h;
+    }
+    
+    
+    /**
+     * @see Object#equals(Object)
+     */
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+
+        if ( !( obj instanceof ETag ) )
+        {
+            return false;
+        }
+        
+        ETag that = (ETag)obj;
+        
+        
+        if ( value == null )
+        {
+            return weak = that.weak && that.value == null;
+        }
+        else
+        {
+            return weak == that.weak && value.equals( that.value );
+        }
+    }
 }

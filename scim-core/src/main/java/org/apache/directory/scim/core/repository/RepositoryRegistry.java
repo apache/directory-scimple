@@ -20,10 +20,11 @@
 package org.apache.directory.scim.core.repository;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 import java.util.HashMap;
@@ -31,9 +32,10 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@Slf4j
 public class RepositoryRegistry {
-
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(RepositoryRegistry.class);
+    
   private SchemaRegistry schemaRegistry;
 
   private Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap = new HashMap<>();

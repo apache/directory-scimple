@@ -46,14 +46,18 @@ import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
-@Slf4j
 @ApplicationScoped
 public class BulkResourceImpl implements BulkResource {
-//  private static final StatusWrapper OKAY_STATUS = new StatusWrapper();
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(BulkResourceImpl.class);
+
+    //  private static final StatusWrapper OKAY_STATUS = new StatusWrapper();
 //  private static final StatusWrapper CREATED_STATUS = new StatusWrapper();
 //  private static final StatusWrapper NO_CONTENT_STATUS = new StatusWrapper();
 //  private static final StatusWrapper METHOD_NOT_ALLOWED_STATUS = new StatusWrapper();

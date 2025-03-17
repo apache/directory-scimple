@@ -20,7 +20,6 @@
 package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.server.exception.AttributeDoesNotExistException;
@@ -35,6 +34,8 @@ import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 import java.util.Collection;
@@ -44,8 +45,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 
-@Slf4j
 class AttributeUtil {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(AttributeUtil.class);
 
   SchemaRegistry schemaRegistry;
 

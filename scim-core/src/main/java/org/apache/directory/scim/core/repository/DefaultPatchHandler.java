@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.exception.MutabilityException;
@@ -49,6 +48,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
@@ -57,9 +58,10 @@ import static java.util.stream.Collectors.toList;
  * of ScimResource.
  */
 @SuppressWarnings("unchecked")
-@Slf4j
 @ApplicationScoped
 public class DefaultPatchHandler implements PatchHandler {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(DefaultPatchHandler.class);
 
   public static final String PRIMARY = "primary";
 

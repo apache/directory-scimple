@@ -36,11 +36,13 @@ import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWra
 import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.spec.resources.ScimUser;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @ApplicationScoped
 public class SelfResourceImpl implements SelfResource {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(SelfResourceImpl.class);
 
   private final UserResource userResource;
 

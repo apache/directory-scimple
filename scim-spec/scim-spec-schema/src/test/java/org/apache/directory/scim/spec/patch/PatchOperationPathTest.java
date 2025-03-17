@@ -22,11 +22,12 @@ package org.apache.directory.scim.spec.patch;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class PatchOperationPathTest {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(PatchOperationPathTest.class);
 
   public static String[] pathValues() {
     return new String[] { "members",

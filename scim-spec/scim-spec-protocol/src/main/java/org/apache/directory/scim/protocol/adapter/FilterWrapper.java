@@ -26,14 +26,16 @@ import jakarta.ws.rs.core.Response.Status;
 import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.filter.FilterParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.directory.scim.spec.filter.Filter;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Data
 final public class FilterWrapper {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(FilterWrapper.class);
 
   final public Filter filter;
   

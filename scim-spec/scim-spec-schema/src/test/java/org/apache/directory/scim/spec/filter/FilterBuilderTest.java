@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -27,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Slf4j
 public class FilterBuilderTest {
 
   @Test

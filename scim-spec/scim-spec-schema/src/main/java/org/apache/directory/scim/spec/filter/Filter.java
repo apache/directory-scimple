@@ -22,10 +22,11 @@ package org.apache.directory.scim.spec.filter;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.net.URLDecoder;
@@ -38,8 +39,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Steve Moyer {@literal <smoyer@psu.edu>}
  */
 @Data
-@Slf4j
 public class Filter implements Serializable {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(Filter.class);
 
   private static final long serialVersionUID = -363511683199922297L;
 
