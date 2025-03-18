@@ -21,13 +21,6 @@ package org.apache.directory.scim.spec.filter;
 
 import java.util.Collection;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
-@Data
-@EqualsAndHashCode
-@ToString
 public class FilterResponse<T> {
   
   private Collection<T> resources;
@@ -42,4 +35,65 @@ public class FilterResponse<T> {
     this.totalResults = totalResults;
   }
 
+  public Collection<T> getResources() {
+    return this.resources;
+  }
+
+  public FilterResponse<T> setResources(Collection<T> resources) {
+    this.resources = resources;
+    return this;
+  }
+
+  public PageRequest getPageRequest() {
+    return this.pageRequest;
+  }
+
+  public FilterResponse<T> setPageRequest(PageRequest pageRequest) {
+    this.pageRequest = pageRequest;
+    return this;
+  }
+
+  public int getTotalResults() {
+    return this.totalResults;
+  }
+
+  public FilterResponse<T> setTotalResults(int totalResults) {
+    this.totalResults = totalResults;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof FilterResponse)) return false;
+    final FilterResponse<?> other = (FilterResponse<?>) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$resources = this.getResources();
+    final Object other$resources = other.getResources();
+    if (this$resources == null ? other$resources != null : !this$resources.equals(other$resources)) return false;
+    final Object this$pageRequest = this.getPageRequest();
+    final Object other$pageRequest = other.getPageRequest();
+    if (this$pageRequest == null ? other$pageRequest != null : !this$pageRequest.equals(other$pageRequest))
+      return false;
+    if (this.getTotalResults() != other.getTotalResults()) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof FilterResponse;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $resources = this.getResources();
+    result = result * PRIME + ($resources == null ? 43 : $resources.hashCode());
+    final Object $pageRequest = this.getPageRequest();
+    result = result * PRIME + ($pageRequest == null ? 43 : $pageRequest.hashCode());
+    result = result * PRIME + this.getTotalResults();
+    return result;
+  }
+
+  public String toString() {
+    return "FilterResponse(resources=" + this.getResources() + ", pageRequest=" + this.getPageRequest() + ", totalResults=" + this.getTotalResults() + ")";
+  }
 }

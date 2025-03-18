@@ -38,13 +38,7 @@ import org.apache.directory.scim.spec.schema.Meta;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Uniqueness;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
-@Data
-@ToString(callSuper = true, exclude = {"password"})
-@EqualsAndHashCode(callSuper = true, exclude = {"password"})
 @ScimResourceType(id = ScimUser.RESOURCE_NAME, name = ScimUser.RESOURCE_NAME, schema = ScimUser.SCHEMA_URI, description = "Top level ScimUser", endpoint = "/Users")
 @XmlRootElement(name = ScimUser.RESOURCE_NAME)
 @XmlAccessorType(XmlAccessType.NONE)
@@ -205,5 +199,322 @@ public class ScimUser extends ScimResource implements Serializable {
   @Override
   public ScimUser addExtension(ScimExtension extension) {
     return (ScimUser) super.addExtension(extension);
+  }
+
+  public Boolean getActive() {
+    return this.active;
+  }
+
+  public ScimUser setActive(Boolean active) {
+    this.active = active;
+    return this;
+  }
+
+  public List<Address> getAddresses() {
+    return this.addresses;
+  }
+
+  public ScimUser setAddresses(List<Address> addresses) {
+    this.addresses = addresses;
+    return this;
+  }
+
+  public String getDisplayName() {
+    return this.displayName;
+  }
+
+  public List<Email> getEmails() {
+    return this.emails;
+  }
+
+  public ScimUser setEmails(List<Email> emails) {
+    this.emails = emails;
+    return this;
+  }
+
+  public List<Entitlement> getEntitlements() {
+    return this.entitlements;
+  }
+
+  public List<UserGroup> getGroups() {
+    return this.groups;
+  }
+
+  public List<Im> getIms() {
+    return this.ims;
+  }
+
+  public String getLocale() {
+    return this.locale;
+  }
+
+  public Name getName() {
+    return this.name;
+  }
+
+  public String getNickName() {
+    return this.nickName;
+  }
+
+  public ScimUser setNickName(String nickName) {
+    this.nickName = nickName;
+    return this;
+  }
+
+  public String getPassword() {
+    return this.password;
+  }
+
+  public ScimUser setPassword(String password) {
+    this.password = password;
+    return this;
+  }
+
+  public List<PhoneNumber> getPhoneNumbers() {
+    return this.phoneNumbers;
+  }
+
+  public ScimUser setPhoneNumbers(List<PhoneNumber> phoneNumbers) {
+    this.phoneNumbers = phoneNumbers;
+    return this;
+  }
+
+  public List<Photo> getPhotos() {
+    return this.photos;
+  }
+
+  public ScimUser setPhotos(List<Photo> photos) {
+    this.photos = photos;
+    return this;
+  }
+
+  public String getProfileUrl() {
+    return this.profileUrl;
+  }
+
+  public ScimUser setProfileUrl(String profileUrl) {
+    this.profileUrl = profileUrl;
+    return this;
+  }
+
+  public String getPreferredLanguage() {
+    return this.preferredLanguage;
+  }
+
+  public ScimUser setPreferredLanguage(String preferredLanguage) {
+    this.preferredLanguage = preferredLanguage;
+    return this;
+  }
+
+  public List<Role> getRoles() {
+    return this.roles;
+  }
+
+  public ScimUser setRoles(List<Role> roles) {
+    this.roles = roles;
+    return this;
+  }
+
+  public String getTimezone() {
+    return this.timezone;
+  }
+
+  public ScimUser setTimezone(String timezone) {
+    this.timezone = timezone;
+    return this;
+  }
+
+  public String getTitle() {
+    return this.title;
+  }
+
+  public ScimUser setTitle(String title) {
+    this.title = title;
+    return this;
+  }
+
+  public String getUserName() {
+    return this.userName;
+  }
+
+  public ScimUser setUserName(String userName) {
+    this.userName = userName;
+    return this;
+  }
+
+  public String getUserType() {
+    return this.userType;
+  }
+
+  public ScimUser setUserType(String userType) {
+    this.userType = userType;
+    return this;
+  }
+
+  public List<X509Certificate> getX509Certificates() {
+    return this.x509Certificates;
+  }
+
+  public ScimUser setX509Certificates(List<X509Certificate> x509Certificates) {
+    this.x509Certificates = x509Certificates;
+    return this;
+  }
+
+  public ScimUser setDisplayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  public ScimUser setEntitlements(List<Entitlement> entitlements) {
+    this.entitlements = entitlements;
+    return this;
+  }
+
+  public ScimUser setGroups(List<UserGroup> groups) {
+    this.groups = groups;
+    return this;
+  }
+
+  public ScimUser setIms(List<Im> ims) {
+    this.ims = ims;
+    return this;
+  }
+
+  public ScimUser setLocale(String locale) {
+    this.locale = locale;
+    return this;
+  }
+
+  public ScimUser setName(Name name) {
+    this.name = name;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ScimUser)) return false;
+    final ScimUser other = (ScimUser) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$active = this.getActive();
+    final Object other$active = other.getActive();
+    if (this$active == null ? other$active != null : !this$active.equals(other$active)) return false;
+    final Object this$addresses = this.getAddresses();
+    final Object other$addresses = other.getAddresses();
+    if (this$addresses == null ? other$addresses != null : !this$addresses.equals(other$addresses)) return false;
+    final Object this$displayName = this.getDisplayName();
+    final Object other$displayName = other.getDisplayName();
+    if (this$displayName == null ? other$displayName != null : !this$displayName.equals(other$displayName))
+      return false;
+    final Object this$emails = this.getEmails();
+    final Object other$emails = other.getEmails();
+    if (this$emails == null ? other$emails != null : !this$emails.equals(other$emails)) return false;
+    final Object this$entitlements = this.getEntitlements();
+    final Object other$entitlements = other.getEntitlements();
+    if (this$entitlements == null ? other$entitlements != null : !this$entitlements.equals(other$entitlements))
+      return false;
+    final Object this$groups = this.getGroups();
+    final Object other$groups = other.getGroups();
+    if (this$groups == null ? other$groups != null : !this$groups.equals(other$groups)) return false;
+    final Object this$ims = this.getIms();
+    final Object other$ims = other.getIms();
+    if (this$ims == null ? other$ims != null : !this$ims.equals(other$ims)) return false;
+    final Object this$locale = this.getLocale();
+    final Object other$locale = other.getLocale();
+    if (this$locale == null ? other$locale != null : !this$locale.equals(other$locale)) return false;
+    final Object this$name = this.getName();
+    final Object other$name = other.getName();
+    if (this$name == null ? other$name != null : !this$name.equals(other$name)) return false;
+    final Object this$nickName = this.getNickName();
+    final Object other$nickName = other.getNickName();
+    if (this$nickName == null ? other$nickName != null : !this$nickName.equals(other$nickName)) return false;
+    final Object this$phoneNumbers = this.getPhoneNumbers();
+    final Object other$phoneNumbers = other.getPhoneNumbers();
+    if (this$phoneNumbers == null ? other$phoneNumbers != null : !this$phoneNumbers.equals(other$phoneNumbers))
+      return false;
+    final Object this$photos = this.getPhotos();
+    final Object other$photos = other.getPhotos();
+    if (this$photos == null ? other$photos != null : !this$photos.equals(other$photos)) return false;
+    final Object this$profileUrl = this.getProfileUrl();
+    final Object other$profileUrl = other.getProfileUrl();
+    if (this$profileUrl == null ? other$profileUrl != null : !this$profileUrl.equals(other$profileUrl)) return false;
+    final Object this$preferredLanguage = this.getPreferredLanguage();
+    final Object other$preferredLanguage = other.getPreferredLanguage();
+    if (this$preferredLanguage == null ? other$preferredLanguage != null : !this$preferredLanguage.equals(other$preferredLanguage))
+      return false;
+    final Object this$roles = this.getRoles();
+    final Object other$roles = other.getRoles();
+    if (this$roles == null ? other$roles != null : !this$roles.equals(other$roles)) return false;
+    final Object this$timezone = this.getTimezone();
+    final Object other$timezone = other.getTimezone();
+    if (this$timezone == null ? other$timezone != null : !this$timezone.equals(other$timezone)) return false;
+    final Object this$title = this.getTitle();
+    final Object other$title = other.getTitle();
+    if (this$title == null ? other$title != null : !this$title.equals(other$title)) return false;
+    final Object this$userName = this.getUserName();
+    final Object other$userName = other.getUserName();
+    if (this$userName == null ? other$userName != null : !this$userName.equals(other$userName)) return false;
+    final Object this$userType = this.getUserType();
+    final Object other$userType = other.getUserType();
+    if (this$userType == null ? other$userType != null : !this$userType.equals(other$userType)) return false;
+    final Object this$x509Certificates = this.getX509Certificates();
+    final Object other$x509Certificates = other.getX509Certificates();
+    if (this$x509Certificates == null ? other$x509Certificates != null : !this$x509Certificates.equals(other$x509Certificates))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ScimUser;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $active = this.getActive();
+    result = result * PRIME + ($active == null ? 43 : $active.hashCode());
+    final Object $addresses = this.getAddresses();
+    result = result * PRIME + ($addresses == null ? 43 : $addresses.hashCode());
+    final Object $displayName = this.getDisplayName();
+    result = result * PRIME + ($displayName == null ? 43 : $displayName.hashCode());
+    final Object $emails = this.getEmails();
+    result = result * PRIME + ($emails == null ? 43 : $emails.hashCode());
+    final Object $entitlements = this.getEntitlements();
+    result = result * PRIME + ($entitlements == null ? 43 : $entitlements.hashCode());
+    final Object $groups = this.getGroups();
+    result = result * PRIME + ($groups == null ? 43 : $groups.hashCode());
+    final Object $ims = this.getIms();
+    result = result * PRIME + ($ims == null ? 43 : $ims.hashCode());
+    final Object $locale = this.getLocale();
+    result = result * PRIME + ($locale == null ? 43 : $locale.hashCode());
+    final Object $name = this.getName();
+    result = result * PRIME + ($name == null ? 43 : $name.hashCode());
+    final Object $nickName = this.getNickName();
+    result = result * PRIME + ($nickName == null ? 43 : $nickName.hashCode());
+    final Object $phoneNumbers = this.getPhoneNumbers();
+    result = result * PRIME + ($phoneNumbers == null ? 43 : $phoneNumbers.hashCode());
+    final Object $photos = this.getPhotos();
+    result = result * PRIME + ($photos == null ? 43 : $photos.hashCode());
+    final Object $profileUrl = this.getProfileUrl();
+    result = result * PRIME + ($profileUrl == null ? 43 : $profileUrl.hashCode());
+    final Object $preferredLanguage = this.getPreferredLanguage();
+    result = result * PRIME + ($preferredLanguage == null ? 43 : $preferredLanguage.hashCode());
+    final Object $roles = this.getRoles();
+    result = result * PRIME + ($roles == null ? 43 : $roles.hashCode());
+    final Object $timezone = this.getTimezone();
+    result = result * PRIME + ($timezone == null ? 43 : $timezone.hashCode());
+    final Object $title = this.getTitle();
+    result = result * PRIME + ($title == null ? 43 : $title.hashCode());
+    final Object $userName = this.getUserName();
+    result = result * PRIME + ($userName == null ? 43 : $userName.hashCode());
+    final Object $userType = this.getUserType();
+    result = result * PRIME + ($userType == null ? 43 : $userType.hashCode());
+    final Object $x509Certificates = this.getX509Certificates();
+    result = result * PRIME + ($x509Certificates == null ? 43 : $x509Certificates.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "ScimUser(super=" + super.toString() + ", active=" + this.getActive() + ", addresses=" + this.getAddresses() + ", displayName=" + this.getDisplayName() + ", emails=" + this.getEmails() + ", entitlements=" + this.getEntitlements() + ", groups=" + this.getGroups() + ", ims=" + this.getIms() + ", locale=" + this.getLocale() + ", name=" + this.getName() + ", nickName=" + this.getNickName() + ", phoneNumbers=" + this.getPhoneNumbers() + ", photos=" + this.getPhotos() + ", profileUrl=" + this.getProfileUrl() + ", preferredLanguage=" + this.getPreferredLanguage() + ", roles=" + this.getRoles() + ", timezone=" + this.getTimezone() + ", title=" + this.getTitle() + ", userName=" + this.getUserName() + ", userType=" + this.getUserType() + ", x509Certificates=" + this.getX509Certificates() + ")";
   }
 }

@@ -22,11 +22,7 @@ package org.apache.directory.scim.protocol;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
-@XmlEnum(String.class)
-@Getter(AccessLevel.PUBLIC)
+@XmlEnum
 public enum ErrorMessageType {
   
   //HTTP 400 Error messages (SCIM Protocol Specification, section 3.12, page 69)
@@ -77,5 +73,13 @@ public enum ErrorMessageType {
   ErrorMessageType(String scimType, String detail) {
     this.scimType = scimType;
     this.detail = detail;
+  }
+
+  public String getScimType() {
+    return this.scimType;
+  }
+
+  public String getDetail() {
+    return this.detail;
   }
 }

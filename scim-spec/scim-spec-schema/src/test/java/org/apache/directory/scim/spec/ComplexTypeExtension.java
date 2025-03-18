@@ -23,7 +23,6 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
-import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -32,7 +31,6 @@ import static org.apache.directory.scim.spec.ComplexTypeExtension.SCHEMA_URN;
 
 @XmlRootElement(name = "ComplexTypeExtension", namespace = "https://directory.apache.org/scimple/test/extensions")
 @XmlAccessorType(XmlAccessType.NONE)
-@Data
 @ScimExtensionType(id = SCHEMA_URN, description = "Schema with complex type field", name = "ComplexTypeExtension", required = true)
 public class ComplexTypeExtension implements ScimExtension {
 
@@ -45,5 +43,42 @@ public class ComplexTypeExtension implements ScimExtension {
   @Override
   public String getUrn() {
     return SCHEMA_URN;
+  }
+
+  public ComplexType getComplexType() {
+    return this.complexType;
+  }
+
+  public ComplexTypeExtension setComplexType(ComplexType complexType) {
+    this.complexType = complexType;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ComplexTypeExtension)) return false;
+    final ComplexTypeExtension other = (ComplexTypeExtension) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$complexType = this.getComplexType();
+    final Object other$complexType = other.getComplexType();
+    if (this$complexType == null ? other$complexType != null : !this$complexType.equals(other$complexType))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ComplexTypeExtension;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $complexType = this.getComplexType();
+    result = result * PRIME + ($complexType == null ? 43 : $complexType.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "ComplexTypeExtension(complexType=" + this.getComplexType() + ")";
   }
 }

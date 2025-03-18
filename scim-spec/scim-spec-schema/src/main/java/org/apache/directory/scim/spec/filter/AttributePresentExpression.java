@@ -19,13 +19,15 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.Value;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 
-@Value
-public class AttributePresentExpression implements FilterExpression, ValueFilterExpression {
+public final class AttributePresentExpression implements FilterExpression, ValueFilterExpression {
   private static final long serialVersionUID = -4491412651236977273L;
-  AttributeReference attributePath;
+  private final AttributeReference attributePath;
+
+  public AttributePresentExpression(AttributeReference attributePath) {
+    this.attributePath = attributePath;
+  }
 
   @Override
   public String toFilter() {
@@ -46,5 +48,32 @@ public class AttributePresentExpression implements FilterExpression, ValueFilter
     String subAttributeName = this.attributePath.getAttributeName();
     this.attributePath.setAttributeName(parentAttributeName);
     this.attributePath.setSubAttributeName(subAttributeName);
+  }
+
+  public AttributeReference getAttributePath() {
+    return this.attributePath;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof AttributePresentExpression)) return false;
+    final AttributePresentExpression other = (AttributePresentExpression) o;
+    final Object this$attributePath = this.getAttributePath();
+    final Object other$attributePath = other.getAttributePath();
+    if (this$attributePath == null ? other$attributePath != null : !this$attributePath.equals(other$attributePath))
+      return false;
+    return true;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $attributePath = this.getAttributePath();
+    result = result * PRIME + ($attributePath == null ? 43 : $attributePath.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "AttributePresentExpression(attributePath=" + this.getAttributePath() + ")";
   }
 }

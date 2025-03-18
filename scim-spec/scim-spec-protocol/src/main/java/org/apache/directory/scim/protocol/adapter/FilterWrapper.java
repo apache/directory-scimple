@@ -30,9 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.directory.scim.spec.filter.Filter;
 
-import lombok.Data;
 
-@Data
 final public class FilterWrapper {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(FilterWrapper.class);
@@ -54,5 +52,31 @@ final public class FilterWrapper {
 
   public FilterWrapper(Filter filter) {
     this.filter = filter;
+  }
+
+  public Filter getFilter() {
+    return this.filter;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof FilterWrapper)) return false;
+    final FilterWrapper other = (FilterWrapper) o;
+    final Object this$filter = this.getFilter();
+    final Object other$filter = other.getFilter();
+    if (this$filter == null ? other$filter != null : !this$filter.equals(other$filter)) return false;
+    return true;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $filter = this.getFilter();
+    result = result * PRIME + ($filter == null ? 43 : $filter.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "FilterWrapper(filter=" + this.getFilter() + ")";
   }
 }

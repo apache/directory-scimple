@@ -58,7 +58,7 @@
     <Bug pattern="UNENCRYPTED_SERVER_SOCKET"/>
   </Match>
 
-  <!-- doesn't seem to play well with lombok -->
+  <!-- doesn't seem to play well with previously generated lombok code -->
   <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
 
   <Match>

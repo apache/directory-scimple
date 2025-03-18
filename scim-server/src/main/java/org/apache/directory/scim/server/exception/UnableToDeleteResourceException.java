@@ -20,13 +20,8 @@
 package org.apache.directory.scim.server.exception;
 
 import jakarta.ws.rs.core.Response.Status;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.exception.ResourceException;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
 public class UnableToDeleteResourceException extends ResourceException {
 
   private static final long serialVersionUID = -3872700870424005641L;
@@ -37,5 +32,27 @@ public class UnableToDeleteResourceException extends ResourceException {
 
   public UnableToDeleteResourceException(Status status, String message, Throwable cause) {
     super(status.getStatusCode(), message, cause);
+  }
+
+  public String toString() {
+    return "UnableToDeleteResourceException(status=" + this.getStatus() + ", " + getMessage() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof UnableToDeleteResourceException)) return false;
+    final UnableToDeleteResourceException other = (UnableToDeleteResourceException) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof UnableToDeleteResourceException;
+  }
+
+  public int hashCode() {
+    int result = super.hashCode();
+    return result;
   }
 }

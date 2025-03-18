@@ -27,11 +27,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.directory.scim.spec.resources.BaseResource;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 public class BulkRequest extends BaseResource<BulkRequest> {
@@ -48,5 +44,57 @@ public class BulkRequest extends BaseResource<BulkRequest> {
   
   public BulkRequest() {
     super(SCHEMA_URI);
+  }
+
+  public Integer getFailOnErrors() {
+    return this.failOnErrors;
+  }
+
+  public BulkRequest setFailOnErrors(Integer failOnErrors) {
+    this.failOnErrors = failOnErrors;
+    return this;
+  }
+
+  public List<BulkOperation> getOperations() {
+    return this.operations;
+  }
+
+  public BulkRequest setOperations(List<BulkOperation> operations) {
+    this.operations = operations;
+    return this;
+  }
+
+  public String toString() {
+    return "BulkRequest(failOnErrors=" + this.getFailOnErrors() + ", operations=" + this.getOperations() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof BulkRequest)) return false;
+    final BulkRequest other = (BulkRequest) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$failOnErrors = this.getFailOnErrors();
+    final Object other$failOnErrors = other.getFailOnErrors();
+    if (this$failOnErrors == null ? other$failOnErrors != null : !this$failOnErrors.equals(other$failOnErrors))
+      return false;
+    final Object this$operations = this.getOperations();
+    final Object other$operations = other.getOperations();
+    if (this$operations == null ? other$operations != null : !this$operations.equals(other$operations)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof BulkRequest;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $failOnErrors = this.getFailOnErrors();
+    result = result * PRIME + ($failOnErrors == null ? 43 : $failOnErrors.hashCode());
+    final Object $operations = this.getOperations();
+    result = result * PRIME + ($operations == null ? 43 : $operations.hashCode());
+    return result;
   }
 }

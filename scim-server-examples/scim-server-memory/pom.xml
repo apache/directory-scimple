@@ -49,11 +49,6 @@
       <groupId>org.apache.directory.scimple</groupId>
       <artifactId>scim-server</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 
   <build>

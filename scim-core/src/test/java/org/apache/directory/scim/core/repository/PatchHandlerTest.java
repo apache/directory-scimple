@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.core.repository;
 
-import lombok.SneakyThrows;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.filter.FilterParseException;
@@ -676,12 +675,15 @@ public class PatchHandlerTest {
     ));
   }
 
-  @SneakyThrows
   private PatchOperation patchOperation(Type operationType, String path, Object value) {
     PatchOperation op = new PatchOperation();
     op.setOperation(operationType);
     if (path != null) {
-      op.setPath(PatchOperationPath.fromString(path));
+      try {
+        op.setPath(PatchOperationPath.fromString(path));
+      } catch (FilterParseException e) {
+        throw new RuntimeException("Failed to parse Operation path in test", e);
+      }
     }
     if (value != null) {
       op.setValue(value);

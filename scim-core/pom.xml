@@ -52,12 +52,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.directory.scimple</groupId>
       <artifactId>scim-test</artifactId>
       <scope>test</scope>

@@ -23,17 +23,12 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 /**
  * This class overrides the required id element in ScimResource for use as a
  * base class for some of the odd SCIM resources.
  * 
  * @author crh5255
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResourceWithOptionalId extends ScimResource {
   
@@ -45,5 +40,41 @@ public abstract class ScimResourceWithOptionalId extends ScimResource {
   public ScimResourceWithOptionalId(String urn, String resourceType) {
     super(urn, resourceType);
   }
-  
+
+  public String getId() {
+    return this.id;
+  }
+
+  public ScimResourceWithOptionalId setId(String id) {
+    this.id = id;
+    return this;
+  }
+
+  public String toString() {
+    return "ScimResourceWithOptionalId(id=" + this.getId() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ScimResourceWithOptionalId)) return false;
+    final ScimResourceWithOptionalId other = (ScimResourceWithOptionalId) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$id = this.getId();
+    final Object other$id = other.getId();
+    if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ScimResourceWithOptionalId;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $id = this.getId();
+    result = result * PRIME + ($id == null ? 43 : $id.hashCode());
+    return result;
+  }
 }

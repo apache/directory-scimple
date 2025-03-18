@@ -19,8 +19,6 @@
 
 package org.apache.directory.scim.spec.patch;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,12 +34,10 @@ import org.apache.directory.scim.spec.filter.ValuePathExpression;
 
 import java.io.Serializable;
 
-@EqualsAndHashCode
 public class PatchOperationPath implements Serializable {
 
   private static final long serialVersionUID = 449365558879593512L;
 
-  @Getter
   private final ValuePathExpression valuePathExpression;
 
   public PatchOperationPath(ValuePathExpression valuePathExpression) {
@@ -80,4 +76,31 @@ public class PatchOperationPath implements Serializable {
     return new PatchOperationPath(parsePatchPath(patchPath));
   }
 
+  public ValuePathExpression getValuePathExpression() {
+    return this.valuePathExpression;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof PatchOperationPath)) return false;
+    final PatchOperationPath other = (PatchOperationPath) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$valuePathExpression = this.getValuePathExpression();
+    final Object other$valuePathExpression = other.getValuePathExpression();
+    if (this$valuePathExpression == null ? other$valuePathExpression != null : !this$valuePathExpression.equals(other$valuePathExpression))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof PatchOperationPath;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $valuePathExpression = this.getValuePathExpression();
+    result = result * PRIME + ($valuePathExpression == null ? 43 : $valuePathExpression.hashCode());
+    return result;
+  }
 }

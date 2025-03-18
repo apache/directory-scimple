@@ -23,7 +23,6 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
-import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -37,7 +36,6 @@ import org.apache.directory.scim.spec.schema.Schema;
  */
 @XmlRootElement( name = "LuckyNumberExtension", namespace = "http://www.psu.edu/schemas/psu-scim" )
 @XmlAccessorType(XmlAccessType.NONE)
-@Data
 @ScimExtensionType(id = LuckyNumberExtension.SCHEMA_URN, description="Lucky Numbers", name="LuckyNumbers", required=true)
 public class LuckyNumberExtension implements ScimExtension {
   
@@ -58,4 +56,37 @@ public class LuckyNumberExtension implements ScimExtension {
     return SCHEMA_URN;
   }
 
+  public long getLuckyNumber() {
+    return this.luckyNumber;
+  }
+
+  public LuckyNumberExtension setLuckyNumber(long luckyNumber) {
+    this.luckyNumber = luckyNumber;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof LuckyNumberExtension)) return false;
+    final LuckyNumberExtension other = (LuckyNumberExtension) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (this.getLuckyNumber() != other.getLuckyNumber()) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof LuckyNumberExtension;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final long $luckyNumber = this.getLuckyNumber();
+    result = result * PRIME + (int) ($luckyNumber >>> 32 ^ $luckyNumber);
+    return result;
+  }
+
+  public String toString() {
+    return "LuckyNumberExtension(luckyNumber=" + this.getLuckyNumber() + ")";
+  }
 }

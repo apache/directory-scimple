@@ -21,12 +21,8 @@ package org.apache.directory.scim.server.exception;
 
 
 import jakarta.ws.rs.core.Response.Status;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.exception.ResourceException;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
 public class UnableToResolveIdResourceException extends ResourceException {
 
   private static final long serialVersionUID = -7401709416973728017L;
@@ -37,5 +33,27 @@ public class UnableToResolveIdResourceException extends ResourceException {
 
   public UnableToResolveIdResourceException(Status status, String message, Throwable cause) {
     super(status.getStatusCode(), message, cause);
+  }
+
+  public String toString() {
+    return "UnableToResolveIdResourceException(status=" + this.getStatus() + ", " + getMessage() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof UnableToResolveIdResourceException)) return false;
+    final UnableToResolveIdResourceException other = (UnableToResolveIdResourceException) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof UnableToResolveIdResourceException;
+  }
+
+  public int hashCode() {
+    int result = super.hashCode();
+    return result;
   }
 }

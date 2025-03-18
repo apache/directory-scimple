@@ -20,13 +20,7 @@
 package org.apache.directory.scim.spec.filter;
 
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ValuePathExpression implements FilterExpression {
 
   private static final long serialVersionUID = 2615135752981305135L;
@@ -35,8 +29,15 @@ public class ValuePathExpression implements FilterExpression {
   AttributeReference attributePath;
   FilterExpression attributeExpression;
 
+  public ValuePathExpression() {}
+
   public ValuePathExpression(AttributeReference attributePath) {
     this.attributePath = attributePath;
+  }
+
+  public ValuePathExpression(AttributeReference attributePath, FilterExpression attributeExpression) {
+    this.attributePath = attributePath;
+    this.attributeExpression = attributeExpression;
   }
 
   public static ValuePathExpression fromFilterExpression(AttributeReference attrRef, FilterExpression attributeExpression) {
@@ -48,7 +49,7 @@ public class ValuePathExpression implements FilterExpression {
   public static ValuePathExpression fromFilterExpression(String attribute, FilterExpression expression) {
     AttributeReference attributeReference = new AttributeReference(attribute);
 
-    return fromFilterExpression(attributeReference,  expression);
+    return fromFilterExpression(attributeReference, expression);
   }
 
   @Override
@@ -100,5 +101,57 @@ public class ValuePathExpression implements FilterExpression {
       filter = this.attributePath.getAttributeName() + (subAttributeName != null ? "." + subAttributeName : "");
     }
     return filter;
+  }
+
+  public AttributeReference getAttributePath() {
+    return this.attributePath;
+  }
+
+  public ValuePathExpression setAttributePath(AttributeReference attributePath) {
+    this.attributePath = attributePath;
+    return this;
+  }
+
+  public FilterExpression getAttributeExpression() {
+    return this.attributeExpression;
+  }
+
+  public ValuePathExpression setAttributeExpression(FilterExpression attributeExpression) {
+    this.attributeExpression = attributeExpression;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ValuePathExpression)) return false;
+    final ValuePathExpression other = (ValuePathExpression) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$attributePath = this.getAttributePath();
+    final Object other$attributePath = other.getAttributePath();
+    if (this$attributePath == null ? other$attributePath != null : !this$attributePath.equals(other$attributePath))
+      return false;
+    final Object this$attributeExpression = this.getAttributeExpression();
+    final Object other$attributeExpression = other.getAttributeExpression();
+    if (this$attributeExpression == null ? other$attributeExpression != null : !this$attributeExpression.equals(other$attributeExpression))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ValuePathExpression;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $attributePath = this.getAttributePath();
+    result = result * PRIME + ($attributePath == null ? 43 : $attributePath.hashCode());
+    final Object $attributeExpression = this.getAttributeExpression();
+    result = result * PRIME + ($attributeExpression == null ? 43 : $attributeExpression.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "ValuePathExpression(attributePath=" + this.getAttributePath() + ", attributeExpression=" + this.getAttributeExpression() + ")";
   }
 }

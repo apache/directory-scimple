@@ -19,13 +19,8 @@
 
 package org.apache.directory.scim.core.repository.extensions;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Data
-@EqualsAndHashCode(callSuper=true)
 public class ClientFilterException extends Exception {
-  
+
   private static final long serialVersionUID = 3308947684934769952L;
 
   private final int status;
@@ -35,4 +30,32 @@ public class ClientFilterException extends Exception {
     this.status = statusCode;
   }
 
+  public int getStatus() {
+    return this.status;
+  }
+
+  public String toString() {
+    return "ClientFilterException(status=" + this.getStatus() + ", " + getMessage() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ClientFilterException)) return false;
+    final ClientFilterException other = (ClientFilterException) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    if (this.getStatus() != other.getStatus()) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ClientFilterException;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    result = result * PRIME + this.getStatus();
+    return result;
+  }
 }

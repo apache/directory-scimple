@@ -25,9 +25,7 @@ import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.filter.ExpressionBuildingListener;
 import org.apache.directory.scim.spec.filter.FilterExpression;
 import org.apache.directory.scim.spec.filter.ValuePathExpression;
-import lombok.Getter;
 
-@Getter
 public class PatchPathListener extends ExpressionBuildingListener {
 
   private ValuePathExpression valuePathExpression;
@@ -60,5 +58,9 @@ public class PatchPathListener extends ExpressionBuildingListener {
     AttributeReference attributePath = new AttributeReference(attributePathText);
 
     this.valuePathExpression = new ValuePathExpression(attributePath);
+  }
+
+  public ValuePathExpression getValuePathExpression() {
+    return this.valuePathExpression;
   }
 }

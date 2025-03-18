@@ -19,19 +19,20 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class LogicalExpression implements FilterExpression, ValueFilterExpression {
 
   FilterExpression left;
   LogicalOperator operator;
   FilterExpression right;
-  
+
+  public LogicalExpression() {}
+
+  public LogicalExpression(FilterExpression left, LogicalOperator operator, FilterExpression right) {
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+  }
+
   @Override
   public String toFilter() {
     boolean leftParens = left instanceof LogicalExpression;
@@ -58,5 +59,69 @@ public class LogicalExpression implements FilterExpression, ValueFilterExpressio
     String rightString = (rightParens ? "(" : "") + right.toUnqualifiedFilter() + (rightParens ? ")" : "");
 
     return leftString + " " + operator + " " + rightString;
+  }
+
+  public FilterExpression getLeft() {
+    return this.left;
+  }
+
+  public LogicalExpression setLeft(FilterExpression left) {
+    this.left = left;
+    return this;
+  }
+
+  public LogicalOperator getOperator() {
+    return this.operator;
+  }
+
+  public LogicalExpression setOperator(LogicalOperator operator) {
+    this.operator = operator;
+    return this;
+  }
+
+  public FilterExpression getRight() {
+    return this.right;
+  }
+
+  public LogicalExpression setRight(FilterExpression right) {
+    this.right = right;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof LogicalExpression)) return false;
+    final LogicalExpression other = (LogicalExpression) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$left = this.getLeft();
+    final Object other$left = other.getLeft();
+    if (this$left == null ? other$left != null : !this$left.equals(other$left)) return false;
+    final Object this$operator = this.getOperator();
+    final Object other$operator = other.getOperator();
+    if (this$operator == null ? other$operator != null : !this$operator.equals(other$operator)) return false;
+    final Object this$right = this.getRight();
+    final Object other$right = other.getRight();
+    if (this$right == null ? other$right != null : !this$right.equals(other$right)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof LogicalExpression;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $left = this.getLeft();
+    result = result * PRIME + ($left == null ? 43 : $left.hashCode());
+    final Object $operator = this.getOperator();
+    result = result * PRIME + ($operator == null ? 43 : $operator.hashCode());
+    final Object $right = this.getRight();
+    result = result * PRIME + ($right == null ? 43 : $right.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "LogicalExpression(left=" + this.getLeft() + ", operator=" + this.getOperator() + ", right=" + this.getRight() + ")";
   }
 }

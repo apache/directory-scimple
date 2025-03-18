@@ -19,11 +19,6 @@
 
 package org.apache.directory.scim.spec.exception;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Data
-@EqualsAndHashCode(callSuper=true)
 public class ResourceException extends Exception {
 
   private final int status;
@@ -36,5 +31,34 @@ public class ResourceException extends Exception {
   public ResourceException(int statusCode, String message, Throwable cause) {
     super(message, cause);
     this.status = statusCode;
+  }
+
+  public int getStatus() {
+    return this.status;
+  }
+
+  public String toString() {
+    return "ResourceException(status=" + this.getStatus() + ", message=" + this.getMessage() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ResourceException)) return false;
+    final ResourceException other = (ResourceException) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    if (this.getStatus() != other.getStatus()) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ResourceException;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    result = result * PRIME + this.getStatus();
+    return result;
   }
 }

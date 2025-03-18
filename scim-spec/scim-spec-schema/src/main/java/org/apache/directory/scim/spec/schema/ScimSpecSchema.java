@@ -21,13 +21,12 @@ package org.apache.directory.scim.spec.schema;
 
 import java.util.Set;
 
-import lombok.Data;
-import lombok.Getter;
-
-@Data
+@Deprecated
+/**
+ * @deprecated will be removed in the near future, use {@link org.apache.directory.scim.core.schema.SchemaRegistry SchemaRegistry} instead.
+ */
 public class ScimSpecSchema {
-  
-  @Getter
+
   final static Set<String> schemaNames = Set.of(
     "urn:ietf:params:scim:schemas:core:2.0:Group",
     "urn:ietf:params:scim:schemas:core:2.0:ResourceType",
@@ -35,4 +34,8 @@ public class ScimSpecSchema {
     "urn:ietf:params:scim:schemas:core:2.0:User",
     "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
   );
+
+  public static Set<String> getSchemaNames() {
+    return schemaNames;
+  }
 }
