@@ -1,5 +1,7 @@
 [<img src="https://directory.apache.org/fortress/gen-docs/1.0.1/apidocs/org/apache/directory/fortress/core/doc-files/apacheds-logo.jpeg" align="right" />](https://directory.apache.org/scimple/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Maven Central Version](https://img.shields.io/maven-central/v/org.apache.directory.scimple/scim-core)](https://central.sonatype.com/search?q=org.apache.directory.scimple&namespace=org.apache.directory.scimple)
+
 
 Apache Directory SCIMple
 ========================
