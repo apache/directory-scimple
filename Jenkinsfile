@@ -1,4 +1,4 @@
-@Library('sym-pipeline@PRD') _
+@Library('sym-pipeline') _
 
 node("build-directory-jenkins-agent") {
 
