@@ -17,26 +17,25 @@
 * under the License.
 */
 
-/**
- * 
- */
 package org.apache.directory.scim.server.rest;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 /**
  * @author shawn
  *
  */
-@Slf4j
 @ApplicationScoped
 public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> implements UserResource {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(UserResourceImpl.class);
 
   @Inject
   public UserResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {

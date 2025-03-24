@@ -46,8 +46,7 @@ public abstract class BaseResource<SELF extends BaseResource<SELF>> implements S
 
   @XmlElement(name="schemas")
   @Size(min = 1)
-  @Urn
-  Set<String> schemas;
+  Set<@Urn String> schemas;
 
   public BaseResource(@Urn String urn) {
     addSchema(urn);

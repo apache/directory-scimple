@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.exception.MutabilityException;
@@ -48,6 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
@@ -56,9 +58,10 @@ import static java.util.stream.Collectors.toList;
  * of ScimResource.
  */
 @SuppressWarnings("unchecked")
-@Slf4j
 @ApplicationScoped
 public class DefaultPatchHandler implements PatchHandler {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(DefaultPatchHandler.class);
 
   public static final String PRIMARY = "primary";
 
@@ -337,8 +340,16 @@ public class DefaultPatchHandler implements PatchHandler {
         checkMutability(attribute.getAttribute(subAttributeName), parentValue.get(subAttributeName));
         parentValue.put(subAttributeName, value);
       } else {
-        checkMutability(attribute, sourceAsMap.get(attribute.getName()));
-        sourceAsMap.put(attribute.getName(), value);
+        Object currentValue = sourceAsMap.get(attribute.getName());
+        checkMutability(attribute, currentValue);
+        // PATCH on complex attributes should only replace the values given, leaving any not provided in the request untouched
+        if (attribute.getType() == Type.COMPLEX) {
+          Map<String, Object> newValue = ((Map<String, Object>) currentValue);
+          newValue.putAll((Map<String, Object>) value);
+          sourceAsMap.put(attribute.getName(), newValue);
+        } else {
+          sourceAsMap.put(attribute.getName(), value);
+        }
       }
     }
 
@@ -385,7 +396,7 @@ public class DefaultPatchHandler implements PatchHandler {
       // detect Azure off-spec request
       if (isAzureRemoveQuirk(attribute, valuePathExpression, value)) {
         Collection<?> valuesToRemove = (Collection<?>) value;
-        AttributeReference valueAttributeRef = new AttributeReference(attribute.getUrn(), attribute.getName(), VALUE_ATTRIBUTE_NAME);
+        AttributeReference valueAttributeRef = new AttributeReference(attribute.getSchemaUrn(), attribute.getName(), VALUE_ATTRIBUTE_NAME);
 
         // map the Azure formatted examples in to a _normal_ scim filter expression
         azureQuirkValuesToRemove(valuesToRemove, attribute).forEach(itemToRemove -> {

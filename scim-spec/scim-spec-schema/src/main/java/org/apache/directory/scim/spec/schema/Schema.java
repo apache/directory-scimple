@@ -35,10 +35,10 @@ import java.util.*;
 /**
  * Defines the structure of the SCIM schemas as defined by section 7 of the SCIM
  * schema specification. See
- * https://tools.ietf.org/html/draft-ietf-scim-core-schema-17#section-7 for more
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7643#section-7">RFC 7643 section 7</a> for more
  * details.
- * 
- * @author Steve Moyer <smoyer@psu.edu>
+ *
+ * @author Steve Moyer {@literal <smoyer@psu.edu>}
  */
 @XmlRootElement(name = "schema")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -55,10 +55,10 @@ public class Schema implements AttributeContainer {
   /**
    * Defines the structure of attributes included in SCIM schemas as defined by
    * section 7 of the SCIM schema specification. See
-   * https://tools.ietf.org/html/draft-ietf-scim-core-schema-17#section-7 for more
+   * <a href="https://datatracker.ietf.org/doc/html/rfc7643#section-7">RFC 7643 section 7</a> for more
    * details.
-   * 
-   * @author Steve Moyer <smoyer@psu.edu>
+   *
+   * @author Steve Moyer {@literal <smoyer@psu.edu>}
    */
   @XmlType(name = "attribute")
   @XmlAccessorType(XmlAccessType.NONE)
@@ -106,8 +106,6 @@ public class Schema implements AttributeContainer {
       APPEND
     }
 
-    String urn;
-
     // The attribute name must match the ABNF pattern defined in section 2.1 of
     // the SCIM Schema specification.
     @XmlElement
@@ -116,9 +114,15 @@ public class Schema implements AttributeContainer {
     
     @XmlElement
     Type type;
-    
+
+    String schemaUrn;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    String path;
+
     @XmlElement
-    List<Attribute> subAttributes;
+    Set<Attribute> subAttributes;
     
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -155,12 +159,16 @@ public class Schema implements AttributeContainer {
 
     private boolean scimResourceIdReference;
 
+    public String getUrn() {
+      return schemaUrn + ":" + path;
+    }
+
     @Override
-    public List<Attribute> getAttributes() {
-      return Collections.unmodifiableList(subAttributes);
+    public Set<Attribute> getAttributes() {
+      return Collections.unmodifiableSet(subAttributes);
     }
     
-    public void setSubAttributes(List<Attribute> attributes, AddAction action) {
+    public void setSubAttributes(Set<Attribute> attributes, AddAction action) {
       
       if (action.equals(AddAction.REPLACE)) {
         subAttributeNamesMap.clear();
@@ -179,7 +187,7 @@ public class Schema implements AttributeContainer {
         this.subAttributes = attributes;
       } else {
         if (subAttributes == null) {
-          subAttributes = new ArrayList<>();
+          subAttributes = new TreeSet<>(Comparator.comparing(o -> o.name));
         }
         this.subAttributes.addAll(attributes);
       }
@@ -209,7 +217,7 @@ public class Schema implements AttributeContainer {
   @Size(min = 1, max = 65535)
   @XmlElement
   @XmlElementWrapper(name = "attributes")
-  List<Attribute> attributes;
+  Set<Attribute> attributes;
   
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -217,12 +225,17 @@ public class Schema implements AttributeContainer {
   
   @XmlElement
   Meta meta;
-  
-  public List<Attribute> getAttributes() {
-    return Collections.unmodifiableList(attributes);
+
+  @Override
+  public String getUrn() {
+    return id;
+  }
+
+  public Set<Attribute> getAttributes() {
+    return Collections.unmodifiableSet(attributes);
   }
   
-  public void setAttributes(List<Attribute> attributes) {
+  public void setAttributes(Set<Attribute> attributes) {
     attributeNamesMap.clear();
     
     for (Attribute attribute : attributes) {

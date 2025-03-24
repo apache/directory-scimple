@@ -6,7 +6,7 @@
 * to you under the Apache License, Version 2.0 (the
 * "License"); you may not use this file except in compliance
 * with the License.  You may obtain a copy of the License at
- 
+
 * http://www.apache.org/licenses/LICENSE-2.0
 
 * Unless required by applicable law or agreed to in writing,
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.enterprise.inject.spi.CDI;
@@ -32,6 +33,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
+import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.protocol.exception.ScimException;
 import org.apache.directory.scim.server.exception.*;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
@@ -60,16 +62,14 @@ import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortOrder;
 import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
-
-  private static final Logger LOG = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
+  /** A logger for this class */
+  private static final Logger log = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
   private final RepositoryRegistry repositoryRegistry;
 
-  private final  AttributeUtil attributeUtil;
+  private final AttributeUtil attributeUtil;
 
   private final Class<T> resourceClass;
 
@@ -141,7 +141,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     resource = attributesForDisplayThrowOnError(resource, attributeReferences, excludedAttributeReferences);
     return Response.ok()
                    .entity(resource)
-                   .location(buildLocationTag(resource))
+                   .location(uriInfo.getAbsolutePath())
                    .tag(etag)
                    .build();
   }
@@ -158,7 +158,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     else {
       searchRequest.setFilter(null);
     }
-    
+
     searchRequest.setSortBy(sortBy);
     searchRequest.setSortOrder(sortOrder);
     searchRequest.setStartIndex(startIndex);
@@ -188,11 +188,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         log.debug("Exception thrown while processing attributes", e);
     }
 
+    Objects.requireNonNull(created.getId(), "Repository must supply an id for a resource");
+    URI location = uriInfo.getAbsolutePathBuilder()
+      .path(created.getId())
+      .build();
+
     return Response.status(Status.CREATED)
-                   .location(buildLocationTag(created))
-                   .tag(etag)
-                   .entity(created)
-                   .build();
+      .location(location)
+      .tag(etag)
+      .entity(created)
+      .build();
   }
 
   @Override
@@ -248,14 +253,14 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(attributes, excludedAttributes, (etag, includeAttributes, excludeAttributes, repository)
-      -> repository.update(id, etag,resource, includeAttributes, excludeAttributes));
+    return update(attributes, excludedAttributes, (etags, includeAttributes, excludeAttributes, repository)
+      -> repository.update(id, etags, resource, includeAttributes, excludeAttributes));
   }
 
   @Override
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(attributes, excludedAttributes, (etag, includeAttributes, excludeAttributes, repository)
-      -> repository.patch(id, etag, patchRequest.getPatchOperationList(), includeAttributes, excludeAttributes));
+    return update(attributes, excludedAttributes, (etags, includeAttributes, excludeAttributes, repository)
+      -> repository.patch(id, etags, patchRequest.getPatchOperationList(), includeAttributes, excludeAttributes));
   }
 
   @Override
@@ -267,15 +272,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   }
 
   private Response update(AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes, UpdateFunction<T> updateFunction) throws ScimException, ResourceException {
-
     Repository<T> repository = getRepositoryInternal();
 
     Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
-    String requestEtag = headers.getHeaderString("ETag");
-    T updated = updateFunction.update(requestEtag, attributeReferences, excludedAttributeReferences, repository);
+    String requestEtag = headers.getHeaderString("If-Match");
+    Set<ETag> etags = EtagParser.parseETag(requestEtag);
+
+    T updated = updateFunction.update(etags, attributeReferences, excludedAttributeReferences, repository);
 
     // Process Attributes
     updated = processFilterAttributeExtensions(repository, updated, attributeReferences, excludedAttributeReferences);
@@ -283,7 +289,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     EntityTag etag = fromVersion(updated);
     return Response.ok(updated)
-      .location(buildLocationTag(updated))
+      .location(uriInfo.getAbsolutePath())
       .tag(etag)
       .build();
   }
@@ -311,17 +317,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     }
 
     return resource;
-  }
-
-  private URI buildLocationTag(T resource) {
-    String id = resource.getId();
-    if (id == null) {
-      LOG.warn("Repository must supply an id for a resource");
-      id = "unknown";
-    }
-    return uriInfo.getAbsolutePathBuilder()
-                  .path(id)
-                  .build();
   }
 
   private <T extends ScimResource> T attributesForDisplay(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws AttributeException {
@@ -377,6 +372,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @FunctionalInterface
   private interface UpdateFunction<T extends ScimResource> {
-    T update(String etag, Set<AttributeReference> includeAttributes, Set<AttributeReference> excludeAttributes, Repository<T> repository) throws ResourceException;
+    T update(Set<ETag> etags, Set<AttributeReference> includeAttributes, Set<AttributeReference> excludeAttributes, Repository<T> repository) throws ResourceException;
   }
 }

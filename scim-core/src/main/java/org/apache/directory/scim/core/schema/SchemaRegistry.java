@@ -30,11 +30,13 @@ import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.ResourceType;
 import org.apache.directory.scim.spec.schema.Schema;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.spec.schema.Schemas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class SchemaRegistry implements Serializable {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(SchemaRegistry.class);
 
   private static final long serialVersionUID = 2644269305703474835L;
   private final Map<String, Schema> schemaMap = new HashMap<>();

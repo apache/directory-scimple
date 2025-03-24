@@ -20,7 +20,7 @@
 package org.apache.directory.scim.spec.schema;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
@@ -30,6 +30,8 @@ import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -39,9 +41,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-@Slf4j
 public final class Schemas {
-  private final static Map<Class<?>, Schema.Attribute.Type> CLASS_TO_TYPE = new HashMap<>() {{
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(Schemas.class);
+
+    private final static Map<Class<?>, Schema.Attribute.Type> CLASS_TO_TYPE = new HashMap<>() {{
     put(String.class, Schema.Attribute.Type.STRING);
     put(Character.class, Schema.Attribute.Type.STRING);
     put(Integer.class, Schema.Attribute.Type.INTEGER);
@@ -85,7 +89,7 @@ public final class Schemas {
     log.debug("calling set attributes with " + fieldList.size() + " fields");
     String urn = set != null ? set.id() : srt.schema();
     Set<String> invalidAttributes = new HashSet<>();
-    List<Schema.Attribute> createAttributes = createAttributes(urn, fieldList, invalidAttributes, clazz.getSimpleName());
+    Set<Schema.Attribute> createAttributes = createAttributes(urn, fieldList, invalidAttributes, clazz.getSimpleName());
     schema.setAttributes(createAttributes);
 
     if (!invalidAttributes.isEmpty()) {
@@ -114,9 +118,12 @@ public final class Schemas {
     return schema;
   }
 
+  private static Set<Schema.Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
+    return createAttributes(urn, Optional.empty(), fieldList, invalidAttributes, nameBase);
+  }
 
-  private static List<Schema.Attribute> createAttributes(String urn, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
-    List<Schema.Attribute> attributeList = new ArrayList<>();
+  private static Set<Schema.Attribute> createAttributes(String urn, Optional<String> path, List<Field> fieldList, Set<String> invalidAttributes, String nameBase) throws ScimResourceInvalidException {
+    Set<Schema.Attribute> attributes = new TreeSet<>(Comparator.comparing(o -> o.name));
 
     for (Field f : fieldList) {
       ScimAttribute sa = f.getAnnotation(ScimAttribute.class);
@@ -145,7 +152,8 @@ public final class Schemas {
       Schema.Attribute attribute = new Schema.Attribute();
       attribute.setAccessor(Schema.AttributeAccessor.forField(f));
       attribute.setName(attributeName);
-      attribute.setUrn(urn);
+      attribute.setSchemaUrn(urn);
+      path.ifPresentOrElse(p -> attribute.setPath(p + "." + attributeName), () -> attribute.setPath(attributeName));
 
       List<String> canonicalTypes = null;
       Field [] enumFields = sa.canonicalValueEnum().getFields();
@@ -237,7 +245,6 @@ public final class Schemas {
         Class<?> componentType;
         if (!attribute.isMultiValued()) {
           componentType = f.getType();
-          attribute.setSubAttributes(createAttributes(urn, Arrays.asList(f.getType().getDeclaredFields()), invalidAttributes, nameBase + "." + f.getName()), Schema.Attribute.AddAction.APPEND);
         } else if (f.getType().isArray()) {
           componentType = f.getType().getComponentType();
         } else {
@@ -246,16 +253,15 @@ public final class Schemas {
         }
 
         List<Field> fl = getFieldsUpTo(componentType, Object.class);
-        List<Schema.Attribute> la = createAttributes(urn, fl, invalidAttributes, nameBase + "." + f.getName());
+        Set<Schema.Attribute> la = createAttributes(urn, Optional.of(attributeName), fl, invalidAttributes, nameBase + "." + f.getName());
 
         attribute.setSubAttributes(la, Schema.Attribute.AddAction.APPEND);
       }
-      attributeList.add(attribute);
+      attributes.add(attribute);
     }
 
-    attributeList.sort(Comparator.comparing(o -> o.name));
-    log.debug("Returning {} attributes", attributeList.size());
-    return attributeList;
+    log.debug("Returning {} attributes", attributes.size());
+    return attributes;
   }
 
   static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {

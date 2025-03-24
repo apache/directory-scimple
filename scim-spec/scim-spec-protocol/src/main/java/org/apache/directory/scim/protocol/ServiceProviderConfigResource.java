@@ -41,7 +41,7 @@ import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 * From SCIM Protocol Specification, section 4, page 73
 * 
 * @see <a href="https://tools.ietf.org/html/rfc7644#section-4">Scim spec section 4</a>
-* 
+* <p>
 * /ServiceProviderConfig
 *      An HTTP GET to this endpoint will return a JSON structure that
 *      describes the SCIM specification features available on a service

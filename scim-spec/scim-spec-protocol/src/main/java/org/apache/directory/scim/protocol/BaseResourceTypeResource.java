@@ -61,7 +61,7 @@ public interface BaseResourceTypeResource<T> {
    *      retrieving known resources</a>
    * @return
    * @throws ScimException
-   * @throws UnableToRetrieveResourceException
+   * @throws ResourceException
    */
   @GET
   @Path("{id}")

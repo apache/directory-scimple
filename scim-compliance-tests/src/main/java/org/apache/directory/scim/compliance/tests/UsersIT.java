@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.compliance.tests;
 
+import io.restassured.response.ValidatableResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.directory.scim.compliance.junit.EmbeddedServerExtension;
 import org.junit.jupiter.api.DisplayName;
@@ -103,7 +104,7 @@ public class UsersIT extends ScimpleITSupport {
         "\"active\":true" +
         "}";
 
-    String id = post("/Users", body)
+    ValidatableResponse response = post("/Users", body)
       .statusCode(201)
       .body(
         "schemas", contains("urn:ietf:params:scim:schemas:core:2.0:User"),
@@ -112,12 +113,15 @@ public class UsersIT extends ScimpleITSupport {
         "name.givenName", is(givenName),
         "name.familyName", is(familyName),
         "userName", equalToIgnoringCase(email)
-      )
-      .extract().jsonPath().get("id");
+      );
+
+    String id = response.extract().jsonPath().get("id");
+    response.header("Location", matchesRegex(".*/Users/" + id));
 
     // retrieve the user by id
     get("/Users/" + id)
       .statusCode(200)
+      .header("Location", matchesRegex(".*/Users/" + id))
       .body(
         "schemas", contains("urn:ietf:params:scim:schemas:core:2.0:User"),
         "active", is(true),
@@ -168,6 +172,7 @@ public class UsersIT extends ScimpleITSupport {
 
     put("/Users/" + id, updatedBody)
       .statusCode(200)
+      .header("Location", matchesRegex(".*/Users/" + id))
       .body(
         "schemas", contains("urn:ietf:params:scim:schemas:core:2.0:User"),
         "active", is(true),
@@ -238,8 +243,42 @@ public class UsersIT extends ScimpleITSupport {
 
     patch("/Users/" + id, patchBody)
       .statusCode(200)
+      .header("Location", matchesRegex(".*/Users/" + id))
       .body(
         "active", is(false)
+      );
+  }
+
+  @Test
+  @DisplayName("Update Invalid User")
+  void updateInvalidUser() {
+    String id = randomName("user-invalidGroup-id");
+
+    String updatedBody = "{" +
+      "\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"]," +
+      "\"active\":true" +
+      "}";
+
+    put("/Users/" + id, updatedBody)
+      .statusCode(404)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:api:messages:2.0:Error"),
+        "status", is("404"),
+        "detail", is("Resource " + id + " not found.")
+      );
+  }
+
+  @Test
+  @DisplayName("Delete Invalid Users")
+  void deleteInvalidUser() {
+    String id = randomName("user-invalidGroup-id");
+
+    delete("/Users/" + id)
+      .statusCode(404)
+      .body(
+        "schemas", contains("urn:ietf:params:scim:api:messages:2.0:Error"),
+        "status", is("404"),
+        "detail", is("Resource " + id + " not found.")
       );
   }
 }

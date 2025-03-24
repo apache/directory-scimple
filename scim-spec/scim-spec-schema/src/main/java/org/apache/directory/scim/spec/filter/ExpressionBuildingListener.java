@@ -23,10 +23,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Locale;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.directory.scim.spec.filter.FilterParser.AttributeCompareExpressionContext;
 import org.apache.directory.scim.spec.filter.FilterParser.AttributeGroupExpressionContext;
 import org.apache.directory.scim.spec.filter.FilterParser.AttributeLogicExpressionContext;
@@ -40,8 +36,6 @@ import org.apache.directory.scim.spec.filter.FilterParser.FilterValuePathExpress
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 
 public class ExpressionBuildingListener extends FilterBaseListener {
-
-  private static final Logger LOG = LoggerFactory.getLogger(ExpressionBuildingListener.class);
 
   protected Deque<FilterExpression> expressionStack = new ArrayDeque<>();
 
@@ -160,14 +154,8 @@ public class ExpressionBuildingListener extends FilterBaseListener {
 
   private static Object parseJsonType(String jsonValue) {
     if (jsonValue.startsWith("\"")) {
-      String doubleEscaped = jsonValue.substring(1, jsonValue.length() - 1)
-          // StringEscapeUtils follows the outdated JSON spec requiring "/" to be escaped, this could subtly break things
-          .replaceAll("\\\\/", "\\\\\\\\/")
-          // Just in case someone needs a single-quote with a backslash in front of it, this will be unnecessary with escapeJson()
-          .replaceAll("\\\\'", "\\\\\\\\'");
-
-      // TODO change this to escapeJson() when dependencies get upgraded
-      return StringEscapeUtils.unescapeEcmaScript(doubleEscaped);
+      // remove leading and trailing slash
+      return jsonValue.substring(1, jsonValue.length() - 1);
     } else if ("null".equals(jsonValue)) {
       return null;
     } else if ("true".equals(jsonValue)) {
@@ -182,11 +170,9 @@ public class ExpressionBuildingListener extends FilterBaseListener {
           return Integer.parseInt(jsonValue);
         }
       } catch (NumberFormatException e) {
-        LOG.warn("Unable to parse a json number: " + jsonValue);
+        throw new IllegalStateException("Unable to parse JSON number: " + jsonValue, e);
       }
     }
-
-    throw new IllegalStateException("Unable to parse JSON Value");
   }
 
 }

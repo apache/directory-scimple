@@ -46,14 +46,18 @@ import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
-@Slf4j
 @ApplicationScoped
 public class BulkResourceImpl implements BulkResource {
-//  private static final StatusWrapper OKAY_STATUS = new StatusWrapper();
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(BulkResourceImpl.class);
+
+    //  private static final StatusWrapper OKAY_STATUS = new StatusWrapper();
 //  private static final StatusWrapper CREATED_STATUS = new StatusWrapper();
 //  private static final StatusWrapper NO_CONTENT_STATUS = new StatusWrapper();
 //  private static final StatusWrapper METHOD_NOT_ALLOWED_STATUS = new StatusWrapper();
@@ -590,7 +594,7 @@ public class BulkResourceImpl implements BulkResource {
     if (attributeValue == null) {
       return unresolveds;
     }
-    List<Schema.Attribute> attributes = attribute.getAttributes();
+    Set<Schema.Attribute> attributes = attribute.getAttributes();
 
     for (Schema.Attribute subAttribute : attributes) {
       Schema.AttributeAccessor accessor = subAttribute.getAccessor();
@@ -763,7 +767,7 @@ public class BulkResourceImpl implements BulkResource {
     return transitiveDependenciesGraph;
   }
 
-  private static void generateReverseDependenciesGraph(Map<String, Set<String>> reverseDependenciesGraph, String dependentBulkId, Object scimObject, List<Schema.Attribute> scimObjectAttributes) {
+  private static void generateReverseDependenciesGraph(Map<String, Set<String>> reverseDependenciesGraph, String dependentBulkId, Object scimObject, Set<Schema.Attribute> scimObjectAttributes) {
     for (Schema.Attribute scimObjectAttribute : scimObjectAttributes)
       if (scimObjectAttribute.isScimResourceIdReference()) {
         String reference = scimObjectAttribute.getAccessor().get(scimObject);
@@ -782,7 +786,7 @@ public class BulkResourceImpl implements BulkResource {
           Class<?> attributeObjectClass = attributeObject.getClass();
           boolean isCollection = Collection.class.isAssignableFrom(attributeObjectClass);
           Collection<?> attributeValues = isCollection ? (Collection<?>) attributeObject : List.of(attributeObject);
-          List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
+          Set<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
 
           for (Object attributeValue : attributeValues) {
             generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
@@ -790,7 +794,7 @@ public class BulkResourceImpl implements BulkResource {
         }
       } else if (scimObjectAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
         Object attributeValue = scimObjectAttribute.getAccessor().get(scimObject);
-        List<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
+        Set<Schema.Attribute> subAttributes = scimObjectAttribute.getAttributes();
 
         generateReverseDependenciesGraph(reverseDependenciesGraph, dependentBulkId, attributeValue, subAttributes);
       }
@@ -812,7 +816,7 @@ public class BulkResourceImpl implements BulkResource {
         ScimResource scimResource = bulkOperation.getData();
         String scimResourceBaseUrn = scimResource.getBaseUrn();
         Schema schema = this.schemaRegistry.getSchema(scimResourceBaseUrn);
-        List<Schema.Attribute> attributes = schema.getAttributes();
+        Set<Schema.Attribute> attributes = schema.getAttributes();
 
         generateReverseDependenciesGraph(reverseDependenciesGraph, bulkId, scimResource, attributes);
       }

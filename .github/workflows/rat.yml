@@ -15,33 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Nightly Full Build
+name: Apache Rat
 
 on:
-  schedule:
-    - cron: "0 0 * * *" # nightly
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
-  build:
-
-    strategy:
-      matrix:
-        java: [17]
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-          cache: maven
-
-      - name: Build with Maven
-        run: ./mvnw verify dependency-check:check -Pci -V -B --no-transfer-progress
-        env:
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+  rat:
+    uses: ./.github/workflows/maven.yml
+    with:
+      name: "Apache Rat - Check"
+      jobs_path: "rat / maven"
+      mvn: apache-rat:check
+      java-version: 17
+      java-distribution: 'zulu'
+    secrets: inherit

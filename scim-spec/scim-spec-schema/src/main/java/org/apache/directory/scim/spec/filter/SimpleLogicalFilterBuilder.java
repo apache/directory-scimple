@@ -19,10 +19,12 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 abstract class SimpleLogicalFilterBuilder implements FilterBuilder {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(SimpleLogicalFilterBuilder.class);
 
   protected FilterExpression filterExpression;
 

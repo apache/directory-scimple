@@ -29,7 +29,7 @@ import org.apache.directory.scim.spec.resources.ScimGroup;
 * From SCIM Protocol Specification, section 3, page 9
 * 
 * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.2">Scim spec section 3.2</a>
-* 
+* <p>
 * Resource Endpoint         Operations             Description
  -------- ---------------- ---------------------- --------------------
  Group    /Groups          GET (Section 3.4.1),   Retrieve, add,

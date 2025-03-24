@@ -17,9 +17,6 @@
 * under the License.
 */
 
-/**
- * 
- */
 package org.apache.directory.scim.spec.resources;
 
 import java.io.Serializable;
@@ -58,7 +55,7 @@ import lombok.Setter;
 
 /**
  * Scim core schema, <a
- * href="https://tools.ietf.org/html/rfc7643#section-4.1.2>section 4.1.2</a>
+ * href="https://tools.ietf.org/html/rfc7643#section-4.1.2">section 4.1.2</a>
  *
  */
 

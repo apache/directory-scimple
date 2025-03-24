@@ -29,7 +29,7 @@ public interface FilterBuilder {
   FilterBuilder and(FilterExpression fe1);
 
   default FilterBuilder and(UnaryOperator<FilterBuilder> filter) {
-    return and(filter.apply(FilterBuilder.create()).build());
+    return and(filter.apply(create()).build());
   }
 
   default FilterBuilder and(Filter filter) {
@@ -43,7 +43,7 @@ public interface FilterBuilder {
   }
 
   default FilterBuilder and(UnaryOperator<FilterBuilder> left, UnaryOperator<FilterBuilder> right) {
-    return and(left.apply(FilterBuilder.create()).build(), right.apply(FilterBuilder.create()).build());
+    return and(left.apply(create()).build(), right.apply(create()).build());
   }
 
   FilterBuilder or(FilterExpression fe1);
@@ -53,7 +53,7 @@ public interface FilterBuilder {
   }
 
   default FilterBuilder or(UnaryOperator<FilterBuilder> filter) {
-    return or(filter.apply(FilterBuilder.create()).build());
+    return or(filter.apply(create()).build());
   }
 
   FilterBuilder or(FilterExpression left, FilterExpression right);
@@ -62,7 +62,7 @@ public interface FilterBuilder {
     return or(left.getExpression(), right.getExpression());
   }
   default FilterBuilder or(UnaryOperator<FilterBuilder> left, UnaryOperator<FilterBuilder> right) {
-    return or(left.apply(FilterBuilder.create()).build(), right.apply(FilterBuilder.create()).build());
+    return or(left.apply(create()).build(), right.apply(create()).build());
   }
 
   FilterBuilder equalTo(String key, String value);
@@ -140,13 +140,13 @@ public interface FilterBuilder {
   }
 
   default FilterBuilder not(UnaryOperator<FilterBuilder> filter) {
-    return not(filter.apply(FilterBuilder.create()).build());
+    return not(filter.apply(create()).build());
   }
 
   FilterBuilder attributeHas(String attribute, FilterExpression filter);
 
   default FilterBuilder attributeHas(String attribute, UnaryOperator<FilterBuilder> filter) {
-    return attributeHas(attribute, filter.apply(FilterBuilder.create()).build());
+    return attributeHas(attribute, filter.apply(create()).build());
   }
 
   default FilterBuilder attributeHas(String attribute, Filter filter) {

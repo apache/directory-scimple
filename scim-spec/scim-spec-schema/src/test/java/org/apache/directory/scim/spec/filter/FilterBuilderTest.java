@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -27,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Slf4j
 public class FilterBuilderTest {
 
   @Test
@@ -37,6 +35,16 @@ public class FilterBuilderTest {
       .and(r -> r.equalTo("name.familyName", "Baggins"))
       .build();
     assertThat(filter).isEqualTo(new Filter("name.givenName EQ \"Bilbo\" AND name.familyName EQ \"Baggins\""));
+  }
+
+  @Test
+  public void testExtendedCharsAnd() throws FilterParseException {
+    Filter filter = FilterBuilder.create()
+      .equalTo("name.givenName", "Bílbo")
+      .and(r -> r.equalTo("name.familyName", "Bággins"))
+      .build();
+    Filter expected = new Filter("name.givenName EQ \"Bílbo\" AND name.familyName EQ \"Bággins\"");
+    assertThat(filter).isEqualTo(expected);
   }
   
   @Test

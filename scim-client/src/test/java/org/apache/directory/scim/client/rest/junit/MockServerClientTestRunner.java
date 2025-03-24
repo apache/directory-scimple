@@ -34,6 +34,13 @@ public class MockServerClientTestRunner implements ParameterResolver, BeforeEach
 
   private final List<Class<?>> supportedClasses = List.of(MockWebServer.class, ScimUserClient.class, Client.class);
 
+  private final static Weld WELD = new Weld();
+  static {
+    // Use single instance of Weld for all tests using this runner
+    WELD.initialize();
+    Runtime.getRuntime().addShutdownHook(new Thread(WELD::shutdown));
+  }
+
   @Override
   public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
     return supportedClasses.contains(parameterContext.getParameter().getType());
@@ -59,9 +66,6 @@ public class MockServerClientTestRunner implements ParameterResolver, BeforeEach
   @Override
   public void beforeEach(ExtensionContext context) throws Exception {
 
-    Weld weld = new Weld();
-    getStore(context).put(Weld.class, weld);
-
     MockWebServer server = new MockWebServer();
     getStore(context).put(MockWebServer.class, server);
 
@@ -79,11 +83,6 @@ public class MockServerClientTestRunner implements ParameterResolver, BeforeEach
     if (server != null) {
       server.start();
     }
-
-    Weld weld = fromStore(Weld.class, context);
-    if (weld != null) {
-      weld.initialize();
-    }
   }
 
   @Override
@@ -91,11 +90,6 @@ public class MockServerClientTestRunner implements ParameterResolver, BeforeEach
     MockWebServer server = fromStore(MockWebServer.class, context);
     if (server != null) {
       server.shutdown();
-    }
-
-    Weld weld = fromStore(Weld.class, context);
-    if (weld != null) {
-      weld.shutdown();
     }
 
     Client client = fromStore(Client.class, context);

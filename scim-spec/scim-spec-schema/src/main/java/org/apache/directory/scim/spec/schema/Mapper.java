@@ -17,9 +17,6 @@
 * under the License.
 */
 
-/**
- * 
- */
 package org.apache.directory.scim.spec.schema;
 
 import java.time.Instant;
@@ -50,10 +47,6 @@ public class Mapper {
   DateTimeFormatter iso8601DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
 
   public Mapper() {
-  }
-
-  public String convertDateTime(Instant instant) {
-    return iso8601DateTimeFormatter.format(instant);
   }
 
   /**

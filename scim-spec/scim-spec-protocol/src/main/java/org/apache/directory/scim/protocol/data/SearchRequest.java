@@ -40,8 +40,8 @@ import org.apache.directory.scim.spec.resources.BaseResource;
 
 /**
  * See Section 3.4.3 Querying Resources Using HTTP POST
- * (https://tools.ietf.org/html/rfc7644#section-3.4.3)
- * 
+ * (<a href="https://tools.ietf.org/html/rfc7644#section-3.4.3">RFC 7644 section 3.4.3</a>)
+ *
  * @author crh5255
  *
  */

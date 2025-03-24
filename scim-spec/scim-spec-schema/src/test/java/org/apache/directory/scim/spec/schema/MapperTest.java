@@ -19,8 +19,6 @@
 
 package org.apache.directory.scim.spec.schema;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -56,22 +54,5 @@ public class MapperTest {
     assertEquals(1, calendar.get(Calendar.HOUR_OF_DAY));
     assertEquals(37, calendar.get(Calendar.MINUTE));
     assertEquals(17, calendar.get(Calendar.SECOND));
-  }
-  
-  @Test
-  @Disabled
-  public void convertDateTimeFromDate() {
-    Mapper mapper = new Mapper();
-    TimeZone timeZone = new SimpleTimeZone(0, "GMT");
-    GregorianCalendar calendar = new GregorianCalendar(timeZone);
-    calendar.set(Calendar.YEAR, 2015);
-    calendar.set(Calendar.MONTH, 03);
-    calendar.set(Calendar.DATE, 26);
-    calendar.set(Calendar.HOUR_OF_DAY, 1);
-    calendar.set(Calendar.MINUTE, 37);
-    calendar.set(Calendar.SECOND, 17);
-    Instant instant = calendar.toInstant();
-    String actualDateTime = mapper.convertDateTime(instant);
-    assertEquals(ISO_DATETIME_EXAMPLES[0], actualDateTime);
   }
 }

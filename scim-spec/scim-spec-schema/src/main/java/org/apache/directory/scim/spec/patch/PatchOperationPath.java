@@ -33,11 +33,9 @@ import org.apache.directory.scim.spec.filter.FilterLexer;
 import org.apache.directory.scim.spec.filter.FilterParser;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.filter.ValuePathExpression;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
-@Slf4j
 @EqualsAndHashCode
 public class PatchOperationPath implements Serializable {
 

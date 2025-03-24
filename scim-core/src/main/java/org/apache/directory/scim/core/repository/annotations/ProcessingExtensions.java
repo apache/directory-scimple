@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 public @interface ProcessingExtensions {
 
   /**
-   * An array of one or more {@link ExtendWith @ExtendWith} declarations.
+   * An array of one or more {@link ScimProcessingExtension @ScimProcessingExtension} declarations.
    */
   ScimProcessingExtension[] value();
 

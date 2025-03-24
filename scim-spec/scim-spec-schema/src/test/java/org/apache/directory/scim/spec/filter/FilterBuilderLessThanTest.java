@@ -19,10 +19,11 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -32,9 +33,7 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 public class FilterBuilderLessThanTest {
-
   static final Integer[] INT_EXAMPLES = { 1, 12, 123, 1234, 12345, 123456 };
   static final Long[] LONG_EXAMPLES = { 3L, 33L, 333L, 3333L, 33333L, 333333L };
   static final Float [] FLOAT_EXAMPLES = {.14f, 3.14f, 2.1415f, 3.14E+10f, 333.14f};

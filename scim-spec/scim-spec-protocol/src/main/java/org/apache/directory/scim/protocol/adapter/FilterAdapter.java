@@ -22,9 +22,7 @@ package org.apache.directory.scim.protocol.adapter;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.apache.directory.scim.spec.filter.Filter;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class FilterAdapter extends XmlAdapter<String, Filter> {
 
   @Override

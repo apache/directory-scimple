@@ -24,24 +24,30 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
+import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.spec.exception.ResourceException;
+import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
+import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
-import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
-import org.apache.directory.scim.spec.resources.*;
-import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.spec.resources.Email;
+import org.apache.directory.scim.spec.resources.Name;
+import org.apache.directory.scim.spec.resources.ScimExtension;
+import org.apache.directory.scim.spec.resources.ScimResource;
+import org.apache.directory.scim.spec.resources.ScimUser;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +67,7 @@ public class InMemoryUserService implements Repository<ScimUser> {
   static final String DEFAULT_USER_EMAIL_TYPE = "work";
   static final int DEFAULT_USER_LUCKY_NUMBER = 7;
 
-  private final Map<String, ScimUser> users = new HashMap<>();
+  private final Map<String, ScimUser> users = new ConcurrentHashMap<>();
 
   private SchemaRegistry schemaRegistry;
 
@@ -130,13 +136,19 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   @Override
-  public ScimUser update(String id, String version, ScimUser resource, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+  public ScimUser update(String id, Set<ETag> etags, ScimUser resource, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+    if (!users.containsKey(id)) {
+      throw new ResourceNotFoundException(id);
+    }
     users.put(id, resource);
     return resource;
   }
 
   @Override
-  public ScimUser patch(String id, String version, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+  public ScimUser patch(String id, Set<ETag> etags, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+    if (!users.containsKey(id)) {
+      throw new ResourceNotFoundException(id);
+    }
     ScimUser resource = patchHandler.apply(get(id), patchOperations);
     users.put(id, resource);
     return resource;
@@ -154,8 +166,10 @@ public class InMemoryUserService implements Repository<ScimUser> {
    * @see Repository#delete(String)
    */
   @Override
-  public void delete(String id) {
-    users.remove(id);
+  public void delete(String id) throws ResourceException {
+    if (users.remove(id) == null) {
+      throw new ResourceNotFoundException(id);
+    }
   }
 
   /**

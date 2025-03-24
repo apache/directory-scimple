@@ -152,10 +152,19 @@ Clone the code and build it!
 ```bash
 git clone https://github.com/apache/directory-scimple.git
 cd directory-scimple
+./mvnw clean install
+# or on windows
+# mvnw.bat clean install
+```
+
+In order to build the wars, run the following command:
+
+````bash
 ./mvnw package
 # or on windows
 # mvnw.bat package
 ```
+
 
 ### Project modules
 

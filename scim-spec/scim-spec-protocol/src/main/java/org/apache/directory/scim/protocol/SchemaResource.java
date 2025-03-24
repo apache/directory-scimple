@@ -40,20 +40,20 @@ import jakarta.ws.rs.core.UriInfo;
  * From SCIM Protocol Specification, section 4, page 74
  * 
  * @see <a href="https://tools.ietf.org/html/rfc7644#section-4">Scim spec section 4</a>
- * 
+ * <p>
  *      /Schemas An HTTP GET to this endpoint is used to retrieve information
  *      about resource schemas supported by a SCIM service provider. An HTTP GET
  *      to the endpoint "/Schemas" SHALL return all supported schemas in
  *      ListResponse format (see Figure 3). Individual schema definitions can be
  *      returned by appending the schema URI to the /Schemas endpoint. For
  *      example:
- * 
+ * <p>
  *      /Schemas/urn:ietf:params:scim:schemas:core:2.0:User
- * 
+ * <p>
  *      The contents of each schema returned are described in Section 7 of
  *      [RFC7643]. An example representation of SCIM schemas may be found in
  *      Section 8.7 of [RFC7643].
- * 
+ * <p>
  *      In cases where a request is for a specific "ResourceType" or "Schema",
  *      the single JSON object is returned in the same way that a single User or
  *      Group is retrieved, as per Section 3.4.1. When returning multiple

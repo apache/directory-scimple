@@ -22,12 +22,14 @@ package org.apache.directory.scim.server.exception;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.scim.protocol.Constants;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 abstract class BaseScimExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
+    /** A logger for this class */
+    private static final Logger log = LoggerFactory.getLogger(BaseScimExceptionMapper.class);
 
   protected abstract ErrorResponse errorResponse(E throwable);
 

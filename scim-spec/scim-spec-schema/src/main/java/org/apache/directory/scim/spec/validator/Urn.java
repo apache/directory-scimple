@@ -26,14 +26,15 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE_USE;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Constraint(validatedBy = UrnValidator.class)
-@Target( { METHOD, FIELD, PARAMETER })
+@Target( { TYPE_USE, METHOD, FIELD, PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface  Urn 
+public @interface Urn
 {
   String message() default "The urn is malformed";
 	 

@@ -44,7 +44,7 @@ import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 * From SCIM Protocol Specification, section 3, page 9
 * 
 * @see <a href="https://tools.ietf.org/html/rfc7644#section-3.2">Scim spec section 3.2</a>
-* 
+* <p>
 * Resource Endpoint         Operations             Description
  -------- ---------------- ---------------------- --------------------
    Search   [prefix]/.search POST (Section 3.4.3)   Search from system
