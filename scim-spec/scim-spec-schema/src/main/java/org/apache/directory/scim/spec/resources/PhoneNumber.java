@@ -35,6 +35,7 @@ import lombok.ToString;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -148,6 +149,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
       PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
       p.setBuildParseTree(true);
+      p.removeErrorListener(ConsoleErrorListener.INSTANCE);
       p.addErrorListener(new PhoneNumberErrorListener());
   
       PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
