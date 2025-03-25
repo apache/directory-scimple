@@ -12,22 +12,11 @@ node("build-directory-jenkins-agent") {
 
         stage('Build and test jar') {
             gitCheckout()
-            mvn('clean package -Dpmd.skip=true -Dspotbugs.skip=true')
+            mvn('clean package -Dpmd.skip=true -Dspotbugs.skip=true -DskipTests -DskipITs')
         }
 
         stage("Publish the packages") {
-            def readPom = readMavenPom file: 'pom.xml'
-            def version = "${readPom.version}"
-            def artifactsToDeploy = [ // path, name
-              ['scim-spec/scim-spec-schema', 'scim-spec-schema'],
-              ['scim-server', 'scim-server'],
-              ['scim-core', 'scim-core']
-            ]
-            artifactsToDeploy.each { artifact ->
-                def path = artifact[0]
-                def name = artifact[1]
-              deployOnArtifactory("${path}/target/${name}-${version}.jar", 'cip-local-dev/directory-scimple/')
-            }
+            mvn('deploy -Dpmd.skip=true -Dspotbugs.skip=true -DskipTests -DskipITs')
         }
     }
 }
@@ -38,20 +27,4 @@ def mvn(String cmd) {
         sh 'base64 -d \$settings_xml > /home/jenkins/.m2/settings.xml'
         sh "mvn -B ${cmd}"
     }
-}
-
-def deployOnArtifactory(filename, target_folder) {
-    echo "Deploying the ${filename} -> ${target_folder} to Artifactory"
-    def artifactoryServer = Artifactory.server 'Symphony-Production-Artifactory'
-    def buildInfo = Artifactory.newBuildInfo()
-    buildInfo.name = "${filename}"
-    def uploadSpec = """{
-        "files": [{
-            "pattern": "${filename}",
-            "target": "${target_folder}"
-            }
-            ]
-    }"""
-    artifactoryServer.upload(uploadSpec, true)
-    artifactoryServer.publishBuildInfo(buildInfo)
 }

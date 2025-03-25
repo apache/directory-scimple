@@ -29,7 +29,7 @@
 
   <groupId>org.apache.directory.scimple</groupId>
   <artifactId>scimple</artifactId>
-  <version>1.0.0-SYM2-SNAPSHOT</version>
+  <version>1.0.0-SYM1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SCIMple</name>
   <description>Apache Directory SCIMple - Jakarta EE implementation of the SCIM version 2.0 specification (RFC7642, RFC7643 and RFC7644)</description>
@@ -58,6 +58,9 @@
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline />
     <jacoco.it.argline />
+    <artifactory.url>https://repo.symphony.com/artifactory</artifactory.url>
+    <deploy-plugin.version>2.7</deploy-plugin.version>
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <modules>
@@ -170,49 +173,49 @@
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-spec-protocol</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-spec-schema</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-core</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-tools</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-server</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-client</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-compliance-tests</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-test</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.scimple</groupId>
         <artifactId>scim-spring-boot-starter</artifactId>
-        <version>1.0.0-SYM2-SNAPSHOT</version>
+        <version>1.0.0-SYM1-SNAPSHOT</version>
       </dependency>
 
       <dependency>
@@ -368,16 +371,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.7.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>apache.releases.https</serverId>
-          <nexusUrl>https://repository.apache.org/</nexusUrl>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <executions>
@@ -401,6 +394,11 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -831,6 +829,19 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <distributionManagement>
+    <repository>
+      <id>symphony</id>
+      <name>Symphony Releases</name>
+      <url>${artifactory.url}/libs-release-local</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <name>Symphony Snapshots</name>
+      <url>${artifactory.url}/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <reporting>
     <plugins>
