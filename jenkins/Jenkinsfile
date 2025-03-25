@@ -18,16 +18,15 @@ node("build-directory-jenkins-agent") {
         stage("Publish the packages") {
             def readPom = readMavenPom file: 'pom.xml'
             def version = "${readPom.version}"
-            mvn('deploy -DskipTests -Dpmd.skip=true -Dspotbugs.skip=true -DskipRemoteStaging -DskipNexusStagingDeployMojo')
-            def artifactsToDeploy = [
-              'scim-spec-schema',
-              'scim-server',
-              'scim-core'
+            def artifactsToDeploy = [ // path, name
+              ['scim-spec/scim-spec-schema', 'scim-spec-schema'],
+              ['scim-server', 'scim-server'],
+              ['scim-core', 'scim-core']
             ]
-            dir('target/nexus-staging/deferred/org/apache/directory/scimple') {
-              artifactsToDeploy.each { artifactName ->
-                deployOnArtifactory("${artifactName}/${version}/${artifactName}-${version}.jar", 'cip-local-dev/directory-scimple/')
-              }
+            artifactsToDeploy.each { artifact ->
+                def path = artifact[0]
+                def name = artifact[1]
+              deployOnArtifactory("${path}/target/${name}-${version}.jar", 'cip-local-dev/directory-scimple/')
             }
         }
     }
@@ -42,7 +41,7 @@ def mvn(String cmd) {
 }
 
 def deployOnArtifactory(filename, target_folder) {
-    echo "Deploying the Directory-scimple to Artifactory"
+    echo "Deploying the ${filename} -> ${target_folder} to Artifactory"
     def artifactoryServer = Artifactory.server 'Symphony-Production-Artifactory'
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "${filename}"
