@@ -20,12 +20,17 @@
   <parent>
     <groupId>org.apache.directory.scimple</groupId>
     <artifactId>scimple</artifactId>
-    <version>1.0.0-SYM1-SNAPSHOT</version>
+    <version>1.0.0-SYM2-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
   <artifactId>scim-server-memory</artifactId>
   <name>SCIMple - Server - Examples - Memory</name>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
   <packaging>war</packaging>
 
   <dependencies>
