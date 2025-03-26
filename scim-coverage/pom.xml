@@ -31,6 +31,7 @@
   <properties>
     <!-- The spring modules require 17 -->
     <max.jdk.version>17</max.jdk.version>
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <dependencies>

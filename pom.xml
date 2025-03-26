@@ -60,7 +60,6 @@
     <jacoco.it.argline />
     <artifactory.url>https://repo.symphony.com/artifactory</artifactory.url>
     <deploy-plugin.version>2.7</deploy-plugin.version>
-    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <modules>
@@ -399,6 +398,18 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>${deploy-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

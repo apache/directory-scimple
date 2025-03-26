@@ -35,6 +35,7 @@
     <legacyMode>true</legacyMode>
     <!-- disable discovery of tests in other jars, tests are wrapped directly in this project to run with Quarkus -->
     <dependenciesToScan />
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <dependencyManagement>

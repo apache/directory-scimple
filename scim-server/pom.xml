@@ -30,7 +30,6 @@
 
   <properties>
     <module.name>org.apache.directory.scim.server</module.name>
-    <maven.deploy.skip>false</maven.deploy.skip>
   </properties>
 
   <dependencies>

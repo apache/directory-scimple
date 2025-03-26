@@ -29,7 +29,6 @@
 
   <properties>
     <module.name>org.apache.directory.scim.core</module.name>
-    <maven.deploy.skip>false</maven.deploy.skip>
   </properties>
 
   <dependencies>

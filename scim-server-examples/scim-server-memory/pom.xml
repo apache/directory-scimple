@@ -26,6 +26,11 @@
 
   <artifactId>scim-server-memory</artifactId>
   <name>SCIMple - Server - Examples - Memory</name>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
   <packaging>war</packaging>
 
   <dependencies>
