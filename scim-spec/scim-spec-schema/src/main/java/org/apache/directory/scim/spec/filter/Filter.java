@@ -19,9 +19,6 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -38,14 +35,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * 
  * @author Steve Moyer {@literal <smoyer@psu.edu>}
  */
-@Data
 public class Filter implements Serializable {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(Filter.class);
 
   private static final long serialVersionUID = -363511683199922297L;
 
-  @Setter(AccessLevel.NONE)
   private FilterExpression expression;
   private String filter;
   
@@ -117,5 +112,34 @@ public class Filter implements Serializable {
 
   public String getFilter() {
     return this.filter;
+  }
+
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof Filter)) return false;
+    final Filter other = (Filter) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$expression = this.getExpression();
+    final Object other$expression = other.getExpression();
+    if (this$expression == null ? other$expression != null : !this$expression.equals(other$expression)) return false;
+    final Object this$filter = this.getFilter();
+    final Object other$filter = other.getFilter();
+    if (this$filter == null ? other$filter != null : !this$filter.equals(other$filter)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof Filter;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $expression = this.getExpression();
+    result = result * PRIME + ($expression == null ? 43 : $expression.hashCode());
+    final Object $filter = this.getFilter();
+    result = result * PRIME + ($filter == null ? 43 : $filter.hashCode());
+    return result;
   }
 }

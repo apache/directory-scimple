@@ -21,14 +21,65 @@ package org.apache.directory.scim.spec.filter.attribute;
 
 import java.util.Set;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@Data
-@AllArgsConstructor
 public class ScimRequestContext {
 
   private Set<AttributeReference> attributeReferences;
   private Set<AttributeReference> excludedAttributeReferences;
-  
+
+  public ScimRequestContext(Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) {
+    this.attributeReferences = attributeReferences;
+    this.excludedAttributeReferences = excludedAttributeReferences;
+  }
+
+  public Set<AttributeReference> getAttributeReferences() {
+    return this.attributeReferences;
+  }
+
+  public ScimRequestContext setAttributeReferences(Set<AttributeReference> attributeReferences) {
+    this.attributeReferences = attributeReferences;
+    return this;
+  }
+
+  public Set<AttributeReference> getExcludedAttributeReferences() {
+    return this.excludedAttributeReferences;
+  }
+
+  public ScimRequestContext setExcludedAttributeReferences(Set<AttributeReference> excludedAttributeReferences) {
+    this.excludedAttributeReferences = excludedAttributeReferences;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ScimRequestContext)) return false;
+    final ScimRequestContext other = (ScimRequestContext) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$attributeReferences = this.getAttributeReferences();
+    final Object other$attributeReferences = other.getAttributeReferences();
+    if (this$attributeReferences == null ? other$attributeReferences != null : !this$attributeReferences.equals(other$attributeReferences))
+      return false;
+    final Object this$excludedAttributeReferences = this.getExcludedAttributeReferences();
+    final Object other$excludedAttributeReferences = other.getExcludedAttributeReferences();
+    if (this$excludedAttributeReferences == null ? other$excludedAttributeReferences != null : !this$excludedAttributeReferences.equals(other$excludedAttributeReferences))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ScimRequestContext;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $attributeReferences = this.getAttributeReferences();
+    result = result * PRIME + ($attributeReferences == null ? 43 : $attributeReferences.hashCode());
+    final Object $excludedAttributeReferences = this.getExcludedAttributeReferences();
+    result = result * PRIME + ($excludedAttributeReferences == null ? 43 : $excludedAttributeReferences.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "ScimRequestContext(attributeReferences=" + this.getAttributeReferences() + ", excludedAttributeReferences=" + this.getExcludedAttributeReferences() + ")";
+  }
 }

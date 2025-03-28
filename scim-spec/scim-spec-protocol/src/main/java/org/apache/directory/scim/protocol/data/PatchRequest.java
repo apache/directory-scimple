@@ -26,14 +26,9 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.BaseResource;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class PatchRequest extends BaseResource<PatchRequest> {
@@ -52,5 +47,43 @@ public class PatchRequest extends BaseResource<PatchRequest> {
     }
     patchOperationList.add(operation);
     return this;
+  }
+
+  public List<PatchOperation> getPatchOperationList() {
+    return this.patchOperationList;
+  }
+
+  public PatchRequest setPatchOperationList(List<PatchOperation> patchOperationList) {
+    this.patchOperationList = patchOperationList;
+    return this;
+  }
+
+  public String toString() {
+    return "PatchRequest(patchOperationList=" + this.getPatchOperationList() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof PatchRequest)) return false;
+    final PatchRequest other = (PatchRequest) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$patchOperationList = this.getPatchOperationList();
+    final Object other$patchOperationList = other.getPatchOperationList();
+    if (this$patchOperationList == null ? other$patchOperationList != null : !this$patchOperationList.equals(other$patchOperationList))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof PatchRequest;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $patchOperationList = this.getPatchOperationList();
+    result = result * PRIME + ($patchOperationList == null ? 43 : $patchOperationList.hashCode());
+    return result;
   }
 }

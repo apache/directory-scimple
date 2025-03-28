@@ -47,8 +47,6 @@
     <gpg.bestPractices>true</gpg.bestPractices>
     <version.jackson>2.18.3</version.jackson>
     <version.logback>1.5.17</version.logback>
-    <version.lombok>1.18.36</version.lombok>
-    <version.lombok.plugin>1.18.20.0</version.lombok.plugin>
     <version.restfuse>1.2.0</version.restfuse>
     <version.slf4j>2.0.16</version.slf4j>
     <version.antlr4>4.13.2</version.antlr4>
@@ -219,11 +217,6 @@
         <groupId>org.jboss.weld.se</groupId>
         <artifactId>weld-se-core</artifactId>
         <version>5.1.5.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>${version.lombok}</version>
       </dependency>
 
       <dependency>
@@ -577,13 +570,6 @@
             <!-- parent pom currently defines v1.7 -->
             <source>${maven.compiler.source}</source>
             <target>${maven.compiler.target}</target>
-            <annotationProcessorPaths>
-              <path>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${version.lombok}</version>
-              </path>
-            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>
@@ -648,19 +634,6 @@
           <configuration>
             <doclint>none</doclint>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok-maven-plugin</artifactId>
-          <version>${version.lombok.plugin}</version>
-          <executions>
-            <execution>
-              <phase>generate-sources</phase>
-              <goals>
-                <goal>delombok</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.rat</groupId>

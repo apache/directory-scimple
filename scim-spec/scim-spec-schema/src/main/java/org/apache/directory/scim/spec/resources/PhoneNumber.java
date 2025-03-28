@@ -30,8 +30,6 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
-
-import lombok.ToString;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -48,10 +46,6 @@ import org.apache.directory.scim.spec.phonenumber.PhoneNumberLexer;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseException;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParseTreeListener;
 import org.apache.directory.scim.spec.phonenumber.PhoneNumberParser;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Scim core schema, <a
@@ -61,7 +55,6 @@ import lombok.Setter;
 
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
-@ToString
 public class PhoneNumber implements Serializable, TypedAttribute {
 
   private static final long serialVersionUID = 607319505715224096L;
@@ -75,48 +68,28 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
   @XmlElement
   @ScimAttribute(description = "A human readable name, primarily used for display purposes. READ-ONLY.")
-  @Getter
-  @Setter
   String display;
 
   @XmlElement
   @ScimAttribute(canonicalValueList = { "work", "home", "mobile", "fax", "pager", "other" }, description = "A label indicating the attribute's function; e.g., 'work' or 'home' or 'mobile' etc.")
-  @Getter
-  @Setter
   String type;
 
   @XmlElement
   @ScimAttribute(description = "A Boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred phone number or primary phone number. The primary attribute value 'true' MUST appear no more than once.")
-  @Getter
-  @Setter
   Boolean primary = false;
 
-  @Setter(AccessLevel.NONE)
-  @Getter
   boolean isGlobalNumber = false;
 
-  @Getter
-  @Setter(AccessLevel.NONE)
   String number;
 
-  @Setter(AccessLevel.NONE)
-  @Getter
   String extension;
 
-  @Setter(AccessLevel.NONE)
-  @Getter
   String subAddress;
 
-  @Setter(AccessLevel.NONE)
-  @Getter
   String phoneContext;
 
-  @Setter(AccessLevel.NONE)
-  @Getter
   boolean isDomainPhoneContext = false;
 
-  @Getter
-  @Setter(AccessLevel.NONE)
   Map<String, String> params;
 
   public void addParam(String name, String value) {
@@ -174,6 +147,61 @@ public class PhoneNumber implements Serializable, TypedAttribute {
         this.value = value;
       }
       return this;
+  }
+
+  public String getDisplay() {
+    return this.display;
+  }
+
+  public PhoneNumber setDisplay(String display) {
+    this.display = display;
+    return this;
+  }
+
+  public String getType() {
+    return this.type;
+  }
+
+  public PhoneNumber setType(String type) {
+    this.type = type;
+    return this;
+  }
+
+  public Boolean getPrimary() {
+    return this.primary;
+  }
+
+  public PhoneNumber setPrimary(Boolean primary) {
+    this.primary = primary;
+    return this;
+  }
+
+  public String getNumber() {
+    return this.number;
+  }
+
+  public String getExtension() {
+    return this.extension;
+  }
+
+  public String getSubAddress() {
+    return this.subAddress;
+  }
+
+  public String getPhoneContext() {
+    return this.phoneContext;
+  }
+
+  public boolean isDomainPhoneContext() {
+    return this.isDomainPhoneContext;
+  }
+
+  public Map<String, String> getParams() {
+    return this.params;
+  }
+
+  public boolean isGlobalNumber() {
+    return this.isGlobalNumber;
   }
 
   /*
@@ -306,6 +334,10 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     return true;
   }
 
+  public String toString() {
+    return "PhoneNumber(value=" + this.getValue() + ", display=" + this.getDisplay() + ", type=" + this.getType() + ", primary=" + this.getPrimary() + ", isGlobalNumber=" + this.isGlobalNumber() + ", number=" + this.getNumber() + ", extension=" + this.getExtension() + ", subAddress=" + this.getSubAddress() + ", phoneContext=" + this.getPhoneContext() + ", isDomainPhoneContext=" + this.isDomainPhoneContext() + ", params=" + this.getParams() + ")";
+  }
+
   private static class PhoneNumberErrorListener extends BaseErrorListener {
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
@@ -313,7 +345,6 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     }
   }
 
-  @Data
   public abstract static class PhoneNumberBuilder {
 
     static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberBuilder.class);
@@ -471,6 +502,130 @@ public class PhoneNumber implements Serializable, TypedAttribute {
         phoneNumber.subAddress = this.subAddress;
       }
       return phoneNumber;
+    }
+
+    public String getNumber() {
+      return this.number;
+    }
+
+    public PhoneNumberBuilder setNumber(String number) {
+      this.number = number;
+      return this;
+    }
+
+    public String getDisplay() {
+      return this.display;
+    }
+
+    public PhoneNumberBuilder setDisplay(String display) {
+      this.display = display;
+      return this;
+    }
+
+    public String getExtension() {
+      return this.extension;
+    }
+
+    public PhoneNumberBuilder setExtension(String extension) {
+      this.extension = extension;
+      return this;
+    }
+
+    public String getSubAddress() {
+      return this.subAddress;
+    }
+
+    public PhoneNumberBuilder setSubAddress(String subAddress) {
+      this.subAddress = subAddress;
+      return this;
+    }
+
+    public String getPhoneContext() {
+      return this.phoneContext;
+    }
+
+    public PhoneNumberBuilder setPhoneContext(String phoneContext) {
+      this.phoneContext = phoneContext;
+      return this;
+    }
+
+    public LinkedHashMap<String, String> getParams() {
+      return this.params;
+    }
+
+    public boolean isGlobalNumber() {
+      return this.isGlobalNumber;
+    }
+
+    public PhoneNumberBuilder setGlobalNumber(boolean isGlobalNumber) {
+      this.isGlobalNumber = isGlobalNumber;
+      return this;
+    }
+
+    public boolean isDomainPhoneContext() {
+      return this.isDomainPhoneContext;
+    }
+
+    public PhoneNumberBuilder setDomainPhoneContext(boolean isDomainPhoneContext) {
+      this.isDomainPhoneContext = isDomainPhoneContext;
+      return this;
+    }
+
+    public boolean equals(final Object o) {
+      if (o == this) return true;
+      if (!(o instanceof PhoneNumberBuilder)) return false;
+      final PhoneNumberBuilder other = (PhoneNumberBuilder) o;
+      if (!other.canEqual((Object) this)) return false;
+      final Object this$number = this.getNumber();
+      final Object other$number = other.getNumber();
+      if (this$number == null ? other$number != null : !this$number.equals(other$number)) return false;
+      final Object this$display = this.getDisplay();
+      final Object other$display = other.getDisplay();
+      if (this$display == null ? other$display != null : !this$display.equals(other$display)) return false;
+      final Object this$extension = this.getExtension();
+      final Object other$extension = other.getExtension();
+      if (this$extension == null ? other$extension != null : !this$extension.equals(other$extension)) return false;
+      final Object this$subAddress = this.getSubAddress();
+      final Object other$subAddress = other.getSubAddress();
+      if (this$subAddress == null ? other$subAddress != null : !this$subAddress.equals(other$subAddress)) return false;
+      final Object this$phoneContext = this.getPhoneContext();
+      final Object other$phoneContext = other.getPhoneContext();
+      if (this$phoneContext == null ? other$phoneContext != null : !this$phoneContext.equals(other$phoneContext))
+        return false;
+      final Object this$params = this.getParams();
+      final Object other$params = other.getParams();
+      if (this$params == null ? other$params != null : !this$params.equals(other$params)) return false;
+      if (this.isGlobalNumber() != other.isGlobalNumber()) return false;
+      if (this.isDomainPhoneContext() != other.isDomainPhoneContext()) return false;
+      return true;
+    }
+
+    protected boolean canEqual(final Object other) {
+      return other instanceof PhoneNumberBuilder;
+    }
+
+    public int hashCode() {
+      final int PRIME = 59;
+      int result = 1;
+      final Object $number = this.getNumber();
+      result = result * PRIME + ($number == null ? 43 : $number.hashCode());
+      final Object $display = this.getDisplay();
+      result = result * PRIME + ($display == null ? 43 : $display.hashCode());
+      final Object $extension = this.getExtension();
+      result = result * PRIME + ($extension == null ? 43 : $extension.hashCode());
+      final Object $subAddress = this.getSubAddress();
+      result = result * PRIME + ($subAddress == null ? 43 : $subAddress.hashCode());
+      final Object $phoneContext = this.getPhoneContext();
+      result = result * PRIME + ($phoneContext == null ? 43 : $phoneContext.hashCode());
+      final Object $params = this.getParams();
+      result = result * PRIME + ($params == null ? 43 : $params.hashCode());
+      result = result * PRIME + (this.isGlobalNumber() ? 79 : 97);
+      result = result * PRIME + (this.isDomainPhoneContext() ? 79 : 97);
+      return result;
+    }
+
+    public String toString() {
+      return "PhoneNumber.PhoneNumberBuilder(number=" + this.getNumber() + ", display=" + this.getDisplay() + ", extension=" + this.getExtension() + ", subAddress=" + this.getSubAddress() + ", phoneContext=" + this.getPhoneContext() + ", params=" + this.getParams() + ", isGlobalNumber=" + this.isGlobalNumber() + ", isDomainPhoneContext=" + this.isDomainPhoneContext() + ")";
     }
   }
 

@@ -23,15 +23,50 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
-import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 
 @XmlType(name = "complexType")
 @XmlAccessorType(XmlAccessType.NONE)
-@Data
 public class ComplexType {
 
   @XmlElement
   @ScimAttribute(description = "First attribute")
   String firstAttribute;
+
+  public String getFirstAttribute() {
+    return this.firstAttribute;
+  }
+
+  public ComplexType setFirstAttribute(String firstAttribute) {
+    this.firstAttribute = firstAttribute;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ComplexType)) return false;
+    final ComplexType other = (ComplexType) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$firstAttribute = this.getFirstAttribute();
+    final Object other$firstAttribute = other.getFirstAttribute();
+    if (this$firstAttribute == null ? other$firstAttribute != null : !this$firstAttribute.equals(other$firstAttribute))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ComplexType;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $firstAttribute = this.getFirstAttribute();
+    result = result * PRIME + ($firstAttribute == null ? 43 : $firstAttribute.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "ComplexType(firstAttribute=" + this.getFirstAttribute() + ")";
+  }
 }

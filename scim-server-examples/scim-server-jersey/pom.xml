@@ -93,12 +93,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.directory.scimple</groupId>
       <artifactId>scim-compliance-tests</artifactId>
       <scope>test</scope>

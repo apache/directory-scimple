@@ -29,11 +29,7 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.directory.scim.spec.resources.BaseResource;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 public class BulkResponse extends BaseResource<BulkResponse> {
@@ -52,5 +48,71 @@ public class BulkResponse extends BaseResource<BulkResponse> {
   
   public BulkResponse() {
     super(SCHEMA_URI);
+  }
+
+  public List<BulkOperation> getOperations() {
+    return this.operations;
+  }
+
+  public BulkResponse setOperations(List<BulkOperation> operations) {
+    this.operations = operations;
+    return this;
+  }
+
+  public Status getStatus() {
+    return this.status;
+  }
+
+  public BulkResponse setStatus(Status status) {
+    this.status = status;
+    return this;
+  }
+
+  public ErrorResponse getErrorResponse() {
+    return this.errorResponse;
+  }
+
+  public BulkResponse setErrorResponse(ErrorResponse errorResponse) {
+    this.errorResponse = errorResponse;
+    return this;
+  }
+
+  public String toString() {
+    return "BulkResponse(operations=" + this.getOperations() + ", status=" + this.getStatus() + ", errorResponse=" + this.getErrorResponse() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof BulkResponse)) return false;
+    final BulkResponse other = (BulkResponse) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$operations = this.getOperations();
+    final Object other$operations = other.getOperations();
+    if (this$operations == null ? other$operations != null : !this$operations.equals(other$operations)) return false;
+    final Object this$status = this.getStatus();
+    final Object other$status = other.getStatus();
+    if (this$status == null ? other$status != null : !this$status.equals(other$status)) return false;
+    final Object this$errorResponse = this.getErrorResponse();
+    final Object other$errorResponse = other.getErrorResponse();
+    if (this$errorResponse == null ? other$errorResponse != null : !this$errorResponse.equals(other$errorResponse))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof BulkResponse;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $operations = this.getOperations();
+    result = result * PRIME + ($operations == null ? 43 : $operations.hashCode());
+    final Object $status = this.getStatus();
+    result = result * PRIME + ($status == null ? 43 : $status.hashCode());
+    final Object $errorResponse = this.getErrorResponse();
+    result = result * PRIME + ($errorResponse == null ? 43 : $errorResponse.hashCode());
+    return result;
   }
 }

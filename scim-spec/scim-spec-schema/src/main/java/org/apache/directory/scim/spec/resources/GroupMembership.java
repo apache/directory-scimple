@@ -25,19 +25,95 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 import jakarta.xml.bind.annotation.XmlType;
-import lombok.Data;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
 import java.io.Serializable;
 
-@Data
 @XmlType(propOrder = {"value","ref","display","type"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class GroupMembership implements Serializable {
 
   private static final long serialVersionUID = 9126588075353486789L;
+
+  public String getValue() {
+    return this.value;
+  }
+
+  public GroupMembership setValue(String value) {
+    this.value = value;
+    return this;
+  }
+
+  public String getRef() {
+    return this.ref;
+  }
+
+  public GroupMembership setRef(String ref) {
+    this.ref = ref;
+    return this;
+  }
+
+  public String getDisplay() {
+    return this.display;
+  }
+
+  public GroupMembership setDisplay(String display) {
+    this.display = display;
+    return this;
+  }
+
+  public Type getType() {
+    return this.type;
+  }
+
+  public GroupMembership setType(Type type) {
+    this.type = type;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof GroupMembership)) return false;
+    final GroupMembership other = (GroupMembership) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$value = this.getValue();
+    final Object other$value = other.getValue();
+    if (this$value == null ? other$value != null : !this$value.equals(other$value)) return false;
+    final Object this$ref = this.getRef();
+    final Object other$ref = other.getRef();
+    if (this$ref == null ? other$ref != null : !this$ref.equals(other$ref)) return false;
+    final Object this$display = this.getDisplay();
+    final Object other$display = other.getDisplay();
+    if (this$display == null ? other$display != null : !this$display.equals(other$display)) return false;
+    final Object this$type = this.getType();
+    final Object other$type = other.getType();
+    if (this$type == null ? other$type != null : !this$type.equals(other$type)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof GroupMembership;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $value = this.getValue();
+    result = result * PRIME + ($value == null ? 43 : $value.hashCode());
+    final Object $ref = this.getRef();
+    result = result * PRIME + ($ref == null ? 43 : $ref.hashCode());
+    final Object $display = this.getDisplay();
+    result = result * PRIME + ($display == null ? 43 : $display.hashCode());
+    final Object $type = this.getType();
+    result = result * PRIME + ($type == null ? 43 : $type.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "GroupMembership(value=" + this.getValue() + ", ref=" + this.getRef() + ", display=" + this.getDisplay() + ", type=" + this.getType() + ")";
+  }
 
   @XmlEnum
   public enum Type {

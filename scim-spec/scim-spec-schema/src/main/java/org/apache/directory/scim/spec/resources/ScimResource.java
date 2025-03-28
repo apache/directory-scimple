@@ -20,8 +20,6 @@
 package org.apache.directory.scim.spec.resources;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
@@ -47,8 +45,6 @@ import java.util.Map;
  * 
  * @author smoyer1
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResource extends BaseResource<ScimResource> implements Serializable {
 
@@ -144,6 +140,11 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
     return extensions;
   }
 
+  public ScimResource setExtensions(Map<String, ScimExtension> extensions) {
+    this.extensions = extensions;
+    return this;
+  }
+
   public ScimExtension removeExtension(String urn) {
     return extensions.remove(urn);
   }
@@ -153,5 +154,90 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
     ScimExtensionType se = lookupScimExtensionType(extensionClass);
     
     return (T) extensions.remove(se.id());
+  }
+
+  public @NotNull Meta getMeta() {
+    return this.meta;
+  }
+
+  public ScimResource setMeta(@NotNull Meta meta) {
+    this.meta = meta;
+    return this;
+  }
+
+  public @Size(min = 1) String getId() {
+    return this.id;
+  }
+
+  public ScimResource setId(@Size(min = 1) String id) {
+    this.id = id;
+    return this;
+  }
+
+  public String getExternalId() {
+    return this.externalId;
+  }
+
+  public ScimResource setExternalId(String externalId) {
+    this.externalId = externalId;
+    return this;
+  }
+
+  public String getResourceType() {
+    return this.resourceType;
+  }
+
+  public String toString() {
+    return "ScimResource(meta=" + this.getMeta() + ", id=" + this.getId() + ", externalId=" + this.getExternalId() + ", extensions=" + this.getExtensions() + ", baseUrn=" + this.getBaseUrn() + ", resourceType=" + this.getResourceType() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ScimResource)) return false;
+    final ScimResource other = (ScimResource) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$meta = this.getMeta();
+    final Object other$meta = other.getMeta();
+    if (this$meta == null ? other$meta != null : !this$meta.equals(other$meta)) return false;
+    final Object this$id = this.getId();
+    final Object other$id = other.getId();
+    if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
+    final Object this$externalId = this.getExternalId();
+    final Object other$externalId = other.getExternalId();
+    if (this$externalId == null ? other$externalId != null : !this$externalId.equals(other$externalId)) return false;
+    final Object this$extensions = this.getExtensions();
+    final Object other$extensions = other.getExtensions();
+    if (this$extensions == null ? other$extensions != null : !this$extensions.equals(other$extensions)) return false;
+    final Object this$baseUrn = this.getBaseUrn();
+    final Object other$baseUrn = other.getBaseUrn();
+    if (this$baseUrn == null ? other$baseUrn != null : !this$baseUrn.equals(other$baseUrn)) return false;
+    final Object this$resourceType = this.getResourceType();
+    final Object other$resourceType = other.getResourceType();
+    if (this$resourceType == null ? other$resourceType != null : !this$resourceType.equals(other$resourceType))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ScimResource;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $meta = this.getMeta();
+    result = result * PRIME + ($meta == null ? 43 : $meta.hashCode());
+    final Object $id = this.getId();
+    result = result * PRIME + ($id == null ? 43 : $id.hashCode());
+    final Object $externalId = this.getExternalId();
+    result = result * PRIME + ($externalId == null ? 43 : $externalId.hashCode());
+    final Object $extensions = this.getExtensions();
+    result = result * PRIME + ($extensions == null ? 43 : $extensions.hashCode());
+    final Object $baseUrn = this.getBaseUrn();
+    result = result * PRIME + ($baseUrn == null ? 43 : $baseUrn.hashCode());
+    final Object $resourceType = this.getResourceType();
+    result = result * PRIME + ($resourceType == null ? 43 : $resourceType.hashCode());
+    return result;
   }
 }

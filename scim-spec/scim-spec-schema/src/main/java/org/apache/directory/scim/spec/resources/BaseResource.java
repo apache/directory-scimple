@@ -29,7 +29,6 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 
 import org.apache.directory.scim.spec.validator.Urn;
-import lombok.Data;
 
 /**
  * All the different variations of SCIM responses require that the object
@@ -38,7 +37,6 @@ import lombok.Data;
  * @author crh5255
  *
  */
-@Data
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class BaseResource<SELF extends BaseResource<SELF>> implements Serializable {
 
@@ -72,5 +70,36 @@ public abstract class BaseResource<SELF extends BaseResource<SELF>> implements S
   @SuppressWarnings("unchecked")
   protected SELF self() {
     return (SELF) this;
+  }
+
+  public @Size(min = 1) Set<@Urn String> getSchemas() {
+    return this.schemas;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof BaseResource)) return false;
+    final BaseResource<?> other = (BaseResource<?>) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$schemas = this.getSchemas();
+    final Object other$schemas = other.getSchemas();
+    if (this$schemas == null ? other$schemas != null : !this$schemas.equals(other$schemas)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof BaseResource;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $schemas = this.getSchemas();
+    result = result * PRIME + ($schemas == null ? 43 : $schemas.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "BaseResource(schemas=" + this.getSchemas() + ")";
   }
 }

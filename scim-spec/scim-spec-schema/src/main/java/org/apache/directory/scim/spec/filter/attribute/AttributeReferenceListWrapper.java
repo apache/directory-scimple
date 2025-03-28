@@ -29,16 +29,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
 
-@Data
 public class AttributeReferenceListWrapper {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(AttributeReferenceListWrapper.class);
 
-  @Setter(AccessLevel.NONE)
   private Set<AttributeReference> attributeReferences = new HashSet<>();
   
   public AttributeReferenceListWrapper(String attributeReferencesString) {
@@ -70,5 +65,33 @@ public class AttributeReferenceListWrapper {
     }
     
     return attributeReferences.stream().map(AttributeReference::toString).collect(Collectors.joining(","));
+  }
+
+  public Set<AttributeReference> getAttributeReferences() {
+    return this.attributeReferences;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof AttributeReferenceListWrapper)) return false;
+    final AttributeReferenceListWrapper other = (AttributeReferenceListWrapper) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$attributeReferences = this.getAttributeReferences();
+    final Object other$attributeReferences = other.getAttributeReferences();
+    if (this$attributeReferences == null ? other$attributeReferences != null : !this$attributeReferences.equals(other$attributeReferences))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof AttributeReferenceListWrapper;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $attributeReferences = this.getAttributeReferences();
+    result = result * PRIME + ($attributeReferences == null ? 43 : $attributeReferences.hashCode());
+    return result;
   }
 }

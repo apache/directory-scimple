@@ -26,18 +26,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
-import lombok.Value;
-
-@Value
-public class AttributeComparisonExpression implements FilterExpression, ValueFilterExpression {
+public final class AttributeComparisonExpression implements FilterExpression, ValueFilterExpression {
   private static final long serialVersionUID = -2865840428089850575L;
-  AttributeReference attributePath;
-  CompareOperator operation;
-  Object compareValue;
-  
+  private final AttributeReference attributePath;
+  private final CompareOperator operation;
+  private final Object compareValue;
+
   private static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd";
   private static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SS";
   private static final String QUOTE = "\"";
+
+  public AttributeComparisonExpression(AttributeReference attributePath, CompareOperator operation, Object compareValue) {
+    this.attributePath = attributePath;
+    this.operation = operation;
+    this.compareValue = compareValue;
+  }
 
   @Override
   public String toFilter() {
@@ -97,5 +100,51 @@ public class AttributeComparisonExpression implements FilterExpression, ValueFil
       compareValueString = this.compareValue.toString();
     }
     return compareValueString;
+  }
+
+  public AttributeReference getAttributePath() {
+    return this.attributePath;
+  }
+
+  public CompareOperator getOperation() {
+    return this.operation;
+  }
+
+  public Object getCompareValue() {
+    return this.compareValue;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof AttributeComparisonExpression)) return false;
+    final AttributeComparisonExpression other = (AttributeComparisonExpression) o;
+    final Object this$attributePath = this.getAttributePath();
+    final Object other$attributePath = other.getAttributePath();
+    if (this$attributePath == null ? other$attributePath != null : !this$attributePath.equals(other$attributePath))
+      return false;
+    final Object this$operation = this.getOperation();
+    final Object other$operation = other.getOperation();
+    if (this$operation == null ? other$operation != null : !this$operation.equals(other$operation)) return false;
+    final Object this$compareValue = this.getCompareValue();
+    final Object other$compareValue = other.getCompareValue();
+    if (this$compareValue == null ? other$compareValue != null : !this$compareValue.equals(other$compareValue))
+      return false;
+    return true;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $attributePath = this.getAttributePath();
+    result = result * PRIME + ($attributePath == null ? 43 : $attributePath.hashCode());
+    final Object $operation = this.getOperation();
+    result = result * PRIME + ($operation == null ? 43 : $operation.hashCode());
+    final Object $compareValue = this.getCompareValue();
+    result = result * PRIME + ($compareValue == null ? 43 : $compareValue.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "AttributeComparisonExpression(attributePath=" + this.getAttributePath() + ", operation=" + this.getOperation() + ", compareValue=" + this.getCompareValue() + ")";
   }
 }

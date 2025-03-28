@@ -22,11 +22,7 @@ package org.apache.directory.scim.protocol.exception;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.data.ErrorResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
 public class ScimException extends Exception {
 
   private static final long serialVersionUID = 3643485564325176463L;
@@ -46,5 +42,46 @@ public class ScimException extends Exception {
   public ScimException(ErrorResponse error, Status status) {
     this.error = error;
     this.status = status;
+  }
+
+  public ErrorResponse getError() {
+    return this.error;
+  }
+
+  public Status getStatus() {
+    return this.status;
+  }
+
+  public String toString() {
+    return "ScimException(error=" + this.getError() + ", status=" + this.getStatus() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ScimException)) return false;
+    final ScimException other = (ScimException) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$error = this.getError();
+    final Object other$error = other.getError();
+    if (this$error == null ? other$error != null : !this$error.equals(other$error)) return false;
+    final Object this$status = this.getStatus();
+    final Object other$status = other.getStatus();
+    if (this$status == null ? other$status != null : !this$status.equals(other$status)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ScimException;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $error = this.getError();
+    result = result * PRIME + ($error == null ? 43 : $error.hashCode());
+    final Object $status = this.getStatus();
+    result = result * PRIME + ($status == null ? 43 : $status.hashCode());
+    return result;
   }
 }

@@ -34,8 +34,6 @@ import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResourceWithOptionalId;
 import org.apache.directory.scim.spec.validator.Urn;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * SCIM ResourceType
@@ -44,8 +42,6 @@ import lombok.EqualsAndHashCode;
  * 
  * @author Steve Moyer &lt;smoyer@psu.edu&gt;
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
 @XmlAccessorType(XmlAccessType.NONE)
 public class ResourceType extends ScimResourceWithOptionalId {
   
@@ -53,7 +49,101 @@ public class ResourceType extends ScimResourceWithOptionalId {
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
   private static final long serialVersionUID = -696969911228870476L;
 
-  @Data
+  public @Size(min = 1) String getName() {
+    return this.name;
+  }
+
+  public ResourceType setName(@Size(min = 1) String name) {
+    this.name = name;
+    return this;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public ResourceType setDescription(String description) {
+    this.description = description;
+    return this;
+  }
+
+  public @Size(min = 1) String getEndpoint() {
+    return this.endpoint;
+  }
+
+  public ResourceType setEndpoint(@Size(min = 1) String endpoint) {
+    this.endpoint = endpoint;
+    return this;
+  }
+
+  public @Urn @Size(min = 1) String getSchemaUrn() {
+    return this.schemaUrn;
+  }
+
+  public ResourceType setSchemaUrn(@Urn @Size(min = 1) String schemaUrn) {
+    this.schemaUrn = schemaUrn;
+    return this;
+  }
+
+  public List<SchemaExtensionConfiguration> getSchemaExtensions() {
+    return this.schemaExtensions;
+  }
+
+  public ResourceType setSchemaExtensions(List<SchemaExtensionConfiguration> schemaExtensions) {
+    this.schemaExtensions = schemaExtensions;
+    return this;
+  }
+
+  public String toString() {
+    return "ResourceType(name=" + this.getName() + ", description=" + this.getDescription() + ", endpoint=" + this.getEndpoint() + ", schemaUrn=" + this.getSchemaUrn() + ", schemaExtensions=" + this.getSchemaExtensions() + ")";
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof ResourceType)) return false;
+    final ResourceType other = (ResourceType) o;
+    if (!other.canEqual((Object) this)) return false;
+    if (!super.equals(o)) return false;
+    final Object this$name = this.getName();
+    final Object other$name = other.getName();
+    if (this$name == null ? other$name != null : !this$name.equals(other$name)) return false;
+    final Object this$description = this.getDescription();
+    final Object other$description = other.getDescription();
+    if (this$description == null ? other$description != null : !this$description.equals(other$description))
+      return false;
+    final Object this$endpoint = this.getEndpoint();
+    final Object other$endpoint = other.getEndpoint();
+    if (this$endpoint == null ? other$endpoint != null : !this$endpoint.equals(other$endpoint)) return false;
+    final Object this$schemaUrn = this.getSchemaUrn();
+    final Object other$schemaUrn = other.getSchemaUrn();
+    if (this$schemaUrn == null ? other$schemaUrn != null : !this$schemaUrn.equals(other$schemaUrn)) return false;
+    final Object this$schemaExtensions = this.getSchemaExtensions();
+    final Object other$schemaExtensions = other.getSchemaExtensions();
+    if (this$schemaExtensions == null ? other$schemaExtensions != null : !this$schemaExtensions.equals(other$schemaExtensions))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof ResourceType;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = super.hashCode();
+    final Object $name = this.getName();
+    result = result * PRIME + ($name == null ? 43 : $name.hashCode());
+    final Object $description = this.getDescription();
+    result = result * PRIME + ($description == null ? 43 : $description.hashCode());
+    final Object $endpoint = this.getEndpoint();
+    result = result * PRIME + ($endpoint == null ? 43 : $endpoint.hashCode());
+    final Object $schemaUrn = this.getSchemaUrn();
+    result = result * PRIME + ($schemaUrn == null ? 43 : $schemaUrn.hashCode());
+    final Object $schemaExtensions = this.getSchemaExtensions();
+    result = result * PRIME + ($schemaExtensions == null ? 43 : $schemaExtensions.hashCode());
+    return result;
+  }
+
   public static class SchemaExtensionConfiguration implements Serializable {
 
     private static final long serialVersionUID = 7351651561572744255L;
@@ -65,6 +155,53 @@ public class ResourceType extends ScimResourceWithOptionalId {
 
     @XmlElement
     boolean required;
+
+    public @Urn @Size(min = 1) String getSchemaUrn() {
+      return this.schemaUrn;
+    }
+
+    public SchemaExtensionConfiguration setSchemaUrn(@Urn @Size(min = 1) String schemaUrn) {
+      this.schemaUrn = schemaUrn;
+      return this;
+    }
+
+    public boolean isRequired() {
+      return this.required;
+    }
+
+    public SchemaExtensionConfiguration setRequired(boolean required) {
+      this.required = required;
+      return this;
+    }
+
+    public boolean equals(final Object o) {
+      if (o == this) return true;
+      if (!(o instanceof SchemaExtensionConfiguration)) return false;
+      final SchemaExtensionConfiguration other = (SchemaExtensionConfiguration) o;
+      if (!other.canEqual((Object) this)) return false;
+      final Object this$schemaUrn = this.getSchemaUrn();
+      final Object other$schemaUrn = other.getSchemaUrn();
+      if (this$schemaUrn == null ? other$schemaUrn != null : !this$schemaUrn.equals(other$schemaUrn)) return false;
+      if (this.isRequired() != other.isRequired()) return false;
+      return true;
+    }
+
+    protected boolean canEqual(final Object other) {
+      return other instanceof SchemaExtensionConfiguration;
+    }
+
+    public int hashCode() {
+      final int PRIME = 59;
+      int result = 1;
+      final Object $schemaUrn = this.getSchemaUrn();
+      result = result * PRIME + ($schemaUrn == null ? 43 : $schemaUrn.hashCode());
+      result = result * PRIME + (this.isRequired() ? 79 : 97);
+      return result;
+    }
+
+    public String toString() {
+      return "ResourceType.SchemaExtensionConfiguration(schemaUrn=" + this.getSchemaUrn() + ", required=" + this.isRequired() + ")";
+    }
   }
 
   @XmlElement

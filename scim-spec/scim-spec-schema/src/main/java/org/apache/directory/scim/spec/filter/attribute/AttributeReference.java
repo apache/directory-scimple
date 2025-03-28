@@ -22,9 +22,7 @@ package org.apache.directory.scim.spec.filter.attribute;
 import java.io.Serializable;
 
 import org.apache.directory.scim.spec.validator.Urn;
-import lombok.Data;
 
-@Data
 public class AttributeReference implements Serializable {
 
   private static final long serialVersionUID = -3559538009692681470L;
@@ -124,5 +122,67 @@ public class AttributeReference implements Serializable {
 
   public String toString() {
     return (this.urn != null ? this.urn + ":" : "") + this.attributeName + (this.subAttributeName != null ? "." + this.subAttributeName : "");
+  }
+
+  public @Urn String getUrn() {
+    return this.urn;
+  }
+
+  public AttributeReference setUrn(@Urn String urn) {
+    this.urn = urn;
+    return this;
+  }
+
+  public String getAttributeName() {
+    return this.attributeName;
+  }
+
+  public AttributeReference setAttributeName(String attributeName) {
+    this.attributeName = attributeName;
+    return this;
+  }
+
+  public String getSubAttributeName() {
+    return this.subAttributeName;
+  }
+
+  public AttributeReference setSubAttributeName(String subAttributeName) {
+    this.subAttributeName = subAttributeName;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof AttributeReference)) return false;
+    final AttributeReference other = (AttributeReference) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$urn = this.getUrn();
+    final Object other$urn = other.getUrn();
+    if (this$urn == null ? other$urn != null : !this$urn.equals(other$urn)) return false;
+    final Object this$attributeName = this.getAttributeName();
+    final Object other$attributeName = other.getAttributeName();
+    if (this$attributeName == null ? other$attributeName != null : !this$attributeName.equals(other$attributeName))
+      return false;
+    final Object this$subAttributeName = this.getSubAttributeName();
+    final Object other$subAttributeName = other.getSubAttributeName();
+    if (this$subAttributeName == null ? other$subAttributeName != null : !this$subAttributeName.equals(other$subAttributeName))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof AttributeReference;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $urn = this.getUrn();
+    result = result * PRIME + ($urn == null ? 43 : $urn.hashCode());
+    final Object $attributeName = this.getAttributeName();
+    result = result * PRIME + ($attributeName == null ? 43 : $attributeName.hashCode());
+    final Object $subAttributeName = this.getSubAttributeName();
+    result = result * PRIME + ($subAttributeName == null ? 43 : $subAttributeName.hashCode());
+    return result;
   }
 }

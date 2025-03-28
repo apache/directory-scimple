@@ -20,10 +20,58 @@
 package org.apache.directory.scim.spec.filter;
 
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
-import lombok.Data;
 
-@Data
 public class SortRequest {
   private AttributeReference sortBy;
   private SortOrder sortOrder;
+
+  public AttributeReference getSortBy() {
+    return this.sortBy;
+  }
+
+  public SortRequest setSortBy(AttributeReference sortBy) {
+    this.sortBy = sortBy;
+    return this;
+  }
+
+  public SortOrder getSortOrder() {
+    return this.sortOrder;
+  }
+
+  public SortRequest setSortOrder(SortOrder sortOrder) {
+    this.sortOrder = sortOrder;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof SortRequest)) return false;
+    final SortRequest other = (SortRequest) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$sortBy = this.getSortBy();
+    final Object other$sortBy = other.getSortBy();
+    if (this$sortBy == null ? other$sortBy != null : !this$sortBy.equals(other$sortBy)) return false;
+    final Object this$sortOrder = this.getSortOrder();
+    final Object other$sortOrder = other.getSortOrder();
+    if (this$sortOrder == null ? other$sortOrder != null : !this$sortOrder.equals(other$sortOrder)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof SortRequest;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $sortBy = this.getSortBy();
+    result = result * PRIME + ($sortBy == null ? 43 : $sortBy.hashCode());
+    final Object $sortOrder = this.getSortOrder();
+    result = result * PRIME + ($sortOrder == null ? 43 : $sortOrder.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "SortRequest(sortBy=" + this.getSortBy() + ", sortOrder=" + this.getSortOrder() + ")";
+  }
 }

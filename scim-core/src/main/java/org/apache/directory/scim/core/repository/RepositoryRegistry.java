@@ -19,7 +19,6 @@
 
 package org.apache.directory.scim.core.repository;
 
-import lombok.Data;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -31,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Data
 public class RepositoryRegistry {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(RepositoryRegistry.class);
@@ -71,5 +69,57 @@ public class RepositoryRegistry {
   @SuppressWarnings("unchecked")
   public <T extends ScimResource> Repository<T> getRepository(Class<T> clazz) {
     return (Repository<T>) repositoryMap.get(clazz);
+  }
+
+  public SchemaRegistry getSchemaRegistry() {
+    return this.schemaRegistry;
+  }
+
+  public RepositoryRegistry setSchemaRegistry(SchemaRegistry schemaRegistry) {
+    this.schemaRegistry = schemaRegistry;
+    return this;
+  }
+
+  public Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> getRepositoryMap() {
+    return this.repositoryMap;
+  }
+
+  public RepositoryRegistry setRepositoryMap(Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap) {
+    this.repositoryMap = repositoryMap;
+    return this;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof RepositoryRegistry)) return false;
+    final RepositoryRegistry other = (RepositoryRegistry) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$schemaRegistry = this.getSchemaRegistry();
+    final Object other$schemaRegistry = other.getSchemaRegistry();
+    if (this$schemaRegistry == null ? other$schemaRegistry != null : !this$schemaRegistry.equals(other$schemaRegistry))
+      return false;
+    final Object this$repositoryMap = this.getRepositoryMap();
+    final Object other$repositoryMap = other.getRepositoryMap();
+    if (this$repositoryMap == null ? other$repositoryMap != null : !this$repositoryMap.equals(other$repositoryMap))
+      return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof RepositoryRegistry;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $schemaRegistry = this.getSchemaRegistry();
+    result = result * PRIME + ($schemaRegistry == null ? 43 : $schemaRegistry.hashCode());
+    final Object $repositoryMap = this.getRepositoryMap();
+    result = result * PRIME + ($repositoryMap == null ? 43 : $repositoryMap.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "RepositoryRegistry(schemaRegistry=" + this.getSchemaRegistry() + ", repositoryMap=" + this.getRepositoryMap() + ")";
   }
 }

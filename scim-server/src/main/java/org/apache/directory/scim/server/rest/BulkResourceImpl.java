@@ -49,7 +49,6 @@ import org.apache.directory.scim.spec.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.AllArgsConstructor;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 @ApplicationScoped
@@ -494,11 +493,16 @@ public class BulkResourceImpl implements BulkResource {
     operationResult.setPath(null);
   }
 
-  @AllArgsConstructor
   private static class IWishJavaHadTuples {
     public final String bulkIdKey;
     public final List<UnresolvedTopLevel> unresolveds;
     public final BulkOperation bulkOperationResult;
+
+    public IWishJavaHadTuples(String bulkIdKey, List<UnresolvedTopLevel> unresolveds, BulkOperation bulkOperationResult) {
+      this.bulkIdKey = bulkIdKey;
+      this.unresolveds = unresolveds;
+      this.bulkOperationResult = bulkOperationResult;
+    }
   }
 
   private static class UnresolvableOperationException extends Exception {
@@ -509,11 +513,16 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
-  @AllArgsConstructor
   private static class UnresolvedComplex {
     private final Object object;
     private final Schema.AttributeAccessor accessor;
     private final String bulkIdKey;
+
+    public UnresolvedComplex(Object object, Schema.AttributeAccessor accessor, String bulkIdKey) {
+      this.object = object;
+      this.accessor = accessor;
+      this.bulkIdKey = bulkIdKey;
+    }
 
     public void resolve(Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException {
       BulkOperation resolvedOperation = bulkIdKeyToOperationResult.get(this.bulkIdKey);
@@ -529,9 +538,12 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
-  @AllArgsConstructor
   private static abstract class UnresolvedTopLevel {
     protected final Schema.AttributeAccessor accessor;
+
+    public UnresolvedTopLevel(Schema.AttributeAccessor accessor) {
+      this.accessor = accessor;
+    }
 
     public abstract void resolve(ScimResource scimResource, Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException;
   }
