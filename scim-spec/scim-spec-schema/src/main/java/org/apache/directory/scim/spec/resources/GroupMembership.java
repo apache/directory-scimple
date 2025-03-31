@@ -30,12 +30,17 @@ import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
 import java.io.Serializable;
+import java.util.Locale;
+import java.util.Objects;
 
 @XmlType(propOrder = {"value","ref","display","type"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class GroupMembership implements Serializable {
 
-  private static final long serialVersionUID = 9126588075353486789L;
+  private static final long serialVersionUID = 6418041921926482112L;
+
+  public static final String TYPE_USER = "User";
+  public static final String TYPE_GROUP = "Group";
 
   public String getValue() {
     return this.value;
@@ -64,50 +69,41 @@ public class GroupMembership implements Serializable {
     return this;
   }
 
-  public Type getType() {
+  public String getType() {
     return this.type;
   }
 
-  public GroupMembership setType(Type type) {
+  public GroupMembership setType(String type) {
     this.type = type;
     return this;
   }
 
-  public boolean equals(final Object o) {
-    if (o == this) return true;
-    if (!(o instanceof GroupMembership)) return false;
-    final GroupMembership other = (GroupMembership) o;
-    if (!other.canEqual((Object) this)) return false;
-    final Object this$value = this.getValue();
-    final Object other$value = other.getValue();
-    if (this$value == null ? other$value != null : !this$value.equals(other$value)) return false;
-    final Object this$ref = this.getRef();
-    final Object other$ref = other.getRef();
-    if (this$ref == null ? other$ref != null : !this$ref.equals(other$ref)) return false;
-    final Object this$display = this.getDisplay();
-    final Object other$display = other.getDisplay();
-    if (this$display == null ? other$display != null : !this$display.equals(other$display)) return false;
-    final Object this$type = this.getType();
-    final Object other$type = other.getType();
-    if (this$type == null ? other$type != null : !this$type.equals(other$type)) return false;
-    return true;
+  /**
+   * @deprecated The list of membership types is not limited to the canonical list, use strings instead.
+   */
+  @Deprecated
+  public GroupMembership setType(Type type) {
+    this.type = type.toString();
+    return this;
   }
 
-  protected boolean canEqual(final Object other) {
-    return other instanceof GroupMembership;
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+
+    GroupMembership that = (GroupMembership) o;
+    return Objects.equals(getValue(), that.getValue())
+      && Objects.equals(getRef(), that.getRef())
+      && Objects.equals(getDisplay(), that.getDisplay())
+      && Objects.equals(getType(), that.getType());
   }
 
+  @Override
   public int hashCode() {
-    final int PRIME = 59;
-    int result = 1;
-    final Object $value = this.getValue();
-    result = result * PRIME + ($value == null ? 43 : $value.hashCode());
-    final Object $ref = this.getRef();
-    result = result * PRIME + ($ref == null ? 43 : $ref.hashCode());
-    final Object $display = this.getDisplay();
-    result = result * PRIME + ($display == null ? 43 : $display.hashCode());
-    final Object $type = this.getType();
-    result = result * PRIME + ($type == null ? 43 : $type.hashCode());
+    int result = Objects.hashCode(getValue());
+    result = 31 * result + Objects.hashCode(getRef());
+    result = 31 * result + Objects.hashCode(getDisplay());
+    result = 31 * result + Objects.hashCode(getType());
     return result;
   }
 
@@ -115,10 +111,30 @@ public class GroupMembership implements Serializable {
     return "GroupMembership(value=" + this.getValue() + ", ref=" + this.getRef() + ", display=" + this.getDisplay() + ", type=" + this.getType() + ")";
   }
 
+  /**
+   * Canonical list of membership types.
+   * @deprecated The list of membership types is not limited to the canonical list, use strings instead.
+   */
+  @Deprecated
   @XmlEnum
   public enum Type {
-    @XmlEnumValue("User") USER,
-    @XmlEnumValue("Group") GROUP;
+    @XmlEnumValue(TYPE_USER) USER(TYPE_USER),
+    @XmlEnumValue(TYPE_GROUP) GROUP(TYPE_GROUP);
+
+    private final String name;
+
+    Type(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+
+    public static Type fromString(String name) {
+      return Type.valueOf(name.toUpperCase(Locale.ROOT));
+    }
   }
   
   @ScimAttribute(description="Identifier of the member of this Group.",
@@ -142,5 +158,5 @@ public class GroupMembership implements Serializable {
     canonicalValueList={"User", "Group"},
     mutability = Schema.Attribute.Mutability.IMMUTABLE)
   @XmlElement
-  Type type;
+  String type;
 }
