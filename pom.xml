@@ -676,7 +676,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.5.2</version>
+            <version>3.5.3</version>
             <configuration>
               <argLine>@{jacoco.it.argline}</argLine>
               <enablePropertiesElement>false</enablePropertiesElement>
