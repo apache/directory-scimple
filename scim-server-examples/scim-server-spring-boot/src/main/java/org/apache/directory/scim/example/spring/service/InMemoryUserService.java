@@ -21,14 +21,12 @@ package org.apache.directory.scim.example.spring.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
-import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.core.repository.PatchHandler;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.example.spring.extensions.LuckyNumberExtension;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.spec.exception.ResourceException;
-import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
@@ -37,11 +35,7 @@ import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
-import org.apache.directory.scim.spec.resources.Email;
-import org.apache.directory.scim.spec.resources.Name;
-import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.resources.ScimUser;
+import org.apache.directory.scim.spec.resources.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -135,26 +129,44 @@ public class InMemoryUserService implements Repository<ScimUser> {
     return resource;
   }
 
+  /**
+   * @param id - the identifier of the ScimResource to update and persist.
+   * @param version - an optional version (usually used as an ETag) that can be used to optimize update requests, may be compared against, the current ScimResource.meta.version.
+   * @param scimUser - a SCIM user to update
+   * @param includedAttributes - a list of included attributes (can be used to select based on performance)
+   * @param excludedAttributes - a list of excluded attributes
+   * @return ScimUser
+   * @throws ResourceException
+   */
   @Override
-  public ScimUser update(String id, Set<ETag> etags, ScimUser resource, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+  public ScimUser update(String id, String version, ScimUser scimUser, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException {
     if (!users.containsKey(id)) {
-      throw new ResourceNotFoundException(id);
+      throw new ResourceException(404, "Group '" + id + "' does not exist.");
     }
+    users.put(id, scimUser);
+    return scimUser;
+  }
 
+  /**
+   * @param id - the identifier of the ScimResource to update and persist.
+   * @param version - an optional version (usually used as an ETag) that can be used to optimize update requests, may be compared against, the current ScimResource.meta.version.
+   * @param patchOps - a list of patch operations
+   * @param includedAttributes - a list of included attributes (can be used to select based on performance)
+   * @param excludedAttributes - a list of excluded attributes
+   * @return ScimUser
+   * @throws ResourceException
+   */
+  @Override
+  public ScimUser patch(String id, String version, List<PatchOperation> patchOps, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException {
+    if (!users.containsKey(id)) {
+      //TODO: figure out right status codes
+      throw new ResourceException(Response.Status.NOT_FOUND.getStatusCode(), "Group '" + id + "' does not exist.");
+    }
+    ScimUser resource = patchHandler.apply(users.get(id), patchOps);
     users.put(id, resource);
     return resource;
   }
 
-  @Override
-  public ScimUser patch(String id, Set<ETag> etags, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
-    if (!users.containsKey(id)) {
-      throw new ResourceNotFoundException(id);
-    }
-
-    ScimUser resource = patchHandler.apply(get(id), patchOperations);
-    users.put(id, resource);
-    return resource;
-  }
 
   /**
    * @see Repository#get(java.lang.String)
@@ -170,7 +182,7 @@ public class InMemoryUserService implements Repository<ScimUser> {
   @Override
   public void delete(String id) throws ResourceException {
     if (users.remove(id) == null) {
-      throw new ResourceNotFoundException(id);
+      throw new ResourceException(Response.Status.NOT_FOUND.getStatusCode(), "User '" + id + "' does not exist.");
     }
   }
 
