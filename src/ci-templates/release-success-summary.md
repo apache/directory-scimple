@@ -18,7 +18,9 @@ cd scimple-${project.version}
 
 # rebuild the source bundle and verify
 ./mvnw clean verify artifact:compare \
+  -Papache-release \
   --threads=1 \
+  -Dgpg.skip \
   -Dreference.repo=${nexusStagingUrl}
 ```
 
@@ -33,7 +35,9 @@ git checkout ${gitRef}
 
 # rebuild the source bundle and verify
 ./mvnw clean verify artifact:compare \
+  -Papache-release \
   --threads=1 \
+  -Dgpg.skip \
   -Dreference.repo=${nexusStagingUrl}
 ```
 

@@ -489,6 +489,7 @@
             <release>
               <github>
                 <previousTagName>${previous.tag}</previousTagName>
+                <token>not_used</token>
                 <changelog>
                   <links>true</links>
                   <skipMergeCommits>true</skipMergeCommits>
