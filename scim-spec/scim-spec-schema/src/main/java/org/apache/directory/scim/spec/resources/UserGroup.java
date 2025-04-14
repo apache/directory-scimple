@@ -30,12 +30,17 @@ import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
 import java.io.Serializable;
+import java.util.Locale;
+import java.util.Objects;
 
 @XmlType(propOrder = {"value","ref","display","type"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class UserGroup implements Serializable {
 
-  private static final long serialVersionUID = 9126588075353486789L;
+  public static final String TYPE_DIRECT = "direct";
+  public static final String TYPE_INDIRECT = "indirect";
+
+  private static final long serialVersionUID = 8698508874413555857L;
 
   public String getValue() {
     return this.value;
@@ -64,50 +69,41 @@ public class UserGroup implements Serializable {
     return this;
   }
 
-  public Type getType() {
+  public String getType() {
     return this.type;
   }
 
-  public UserGroup setType(Type type) {
+  public UserGroup setType(String type) {
     this.type = type;
     return this;
   }
 
-  public boolean equals(final Object o) {
-    if (o == this) return true;
-    if (!(o instanceof UserGroup)) return false;
-    final UserGroup other = (UserGroup) o;
-    if (!other.canEqual((Object) this)) return false;
-    final Object this$value = this.getValue();
-    final Object other$value = other.getValue();
-    if (this$value == null ? other$value != null : !this$value.equals(other$value)) return false;
-    final Object this$ref = this.getRef();
-    final Object other$ref = other.getRef();
-    if (this$ref == null ? other$ref != null : !this$ref.equals(other$ref)) return false;
-    final Object this$display = this.getDisplay();
-    final Object other$display = other.getDisplay();
-    if (this$display == null ? other$display != null : !this$display.equals(other$display)) return false;
-    final Object this$type = this.getType();
-    final Object other$type = other.getType();
-    if (this$type == null ? other$type != null : !this$type.equals(other$type)) return false;
-    return true;
+  /**
+   * @deprecated The list of user group types is not limited to the canonical list, use strings instead.
+   */
+  @Deprecated
+  public UserGroup setType(Type type) {
+    this.type = type.toString();
+    return this;
   }
 
-  protected boolean canEqual(final Object other) {
-    return other instanceof UserGroup;
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+
+    UserGroup userGroup = (UserGroup) o;
+    return Objects.equals(getValue(), userGroup.getValue())
+      && Objects.equals(getRef(), userGroup.getRef())
+      && Objects.equals(getDisplay(), userGroup.getDisplay())
+      && Objects.equals(getType(), userGroup.getType());
   }
 
+  @Override
   public int hashCode() {
-    final int PRIME = 59;
-    int result = 1;
-    final Object $value = this.getValue();
-    result = result * PRIME + ($value == null ? 43 : $value.hashCode());
-    final Object $ref = this.getRef();
-    result = result * PRIME + ($ref == null ? 43 : $ref.hashCode());
-    final Object $display = this.getDisplay();
-    result = result * PRIME + ($display == null ? 43 : $display.hashCode());
-    final Object $type = this.getType();
-    result = result * PRIME + ($type == null ? 43 : $type.hashCode());
+    int result = Objects.hashCode(getValue());
+    result = 31 * result + Objects.hashCode(getRef());
+    result = 31 * result + Objects.hashCode(getDisplay());
+    result = 31 * result + Objects.hashCode(getType());
     return result;
   }
 
@@ -115,10 +111,30 @@ public class UserGroup implements Serializable {
     return "UserGroup(value=" + this.getValue() + ", ref=" + this.getRef() + ", display=" + this.getDisplay() + ", type=" + this.getType() + ")";
   }
 
+  /**
+   * Canonical list of group types.
+   * @deprecated The list of user group types is not limited to the canonical list, use strings instead.
+   */
+  @Deprecated
   @XmlEnum
   public enum Type {
-    @XmlEnumValue("direct") DIRECT,
-    @XmlEnumValue("indirect") INDIRECT;
+    @XmlEnumValue(TYPE_DIRECT) DIRECT(TYPE_DIRECT),
+    @XmlEnumValue(TYPE_INDIRECT) INDIRECT(TYPE_INDIRECT);
+
+    private final String name;
+
+    Type(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+
+    public static UserGroup.Type fromString(String name) {
+      return UserGroup.Type.valueOf(name.toUpperCase(Locale.ROOT));
+    }
   }
   
   @ScimAttribute(description="The identifier of the User's group.",
@@ -142,5 +158,5 @@ public class UserGroup implements Serializable {
     canonicalValueList={"direct", "indirect"},
     mutability = Schema.Attribute.Mutability.READ_ONLY)
   @XmlElement
-  Type type;
+  String type;
 }
