@@ -30,7 +30,7 @@ jobs:
 
     uses: ./.github/workflows/maven.yml
     with:
-      mvn: verify -Pci
+      mvn: clean verify -Pci
       name: "Maven Verify (with Java ${{ matrix.java }}-zulu)"
       jobs_path: "build (${{ matrix.java }}) / maven"
       java-version: ${{ matrix.java }}

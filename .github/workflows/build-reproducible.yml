@@ -50,14 +50,18 @@ jobs:
           cache: '' # disabled
 
       - name: Running Maven
-        run: ./mvnw install
+        run: ./mvnw install  \
+          -Ddevelocity.cache.local.enabled=false \
+          -Ddevelocity.cache.remote.enabled=false
         env:
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DIRECTORY_DEVELOCITY_ACCESS_KEY }}
 
       - name: Running Maven again to check reproducibility
-        run: ./mvnw clean verify artifact:compare
+        run: ./mvnw clean verify artifact:compare  \
+          -Ddevelocity.cache.local.enabled=false \
+          -Ddevelocity.cache.remote.enabled=false
         env:
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DIRECTORY_DEVELOCITY_ACCESS_KEY }}
 
       - name: Upload Build Info
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2

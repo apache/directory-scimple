@@ -62,7 +62,7 @@ jobs:
             echo "project-version=$PROJECT_VERSION"
             echo "project-version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
         env:
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DIRECTORY_DEVELOCITY_ACCESS_KEY }}
 
       - name: Maven Snapshot Build
         id: mvn
@@ -77,7 +77,7 @@ jobs:
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USER }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PW }}
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DIRECTORY_DEVELOCITY_ACCESS_KEY }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Success Summary

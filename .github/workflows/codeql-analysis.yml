@@ -62,7 +62,9 @@ jobs:
           languages: ${{ matrix.language }}
 
       - name: Maven Build
-        run: ./mvnw verify pmd:aggregate-pmd -Pci
+        run: ./mvnw verify pmd:aggregate-pmd -Pci  \
+          -Ddevelocity.cache.local.enabled=false \
+          -Ddevelocity.cache.remote.enabled=false
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@ff0a06e83cb2de871e5a09832bc6a81e7276941f #v3.28.18
