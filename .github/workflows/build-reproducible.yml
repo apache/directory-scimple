@@ -50,9 +50,10 @@ jobs:
           cache: '' # disabled
 
       - name: Running Maven
-        run: ./mvnw install  \
-          -Ddevelocity.cache.local.enabled=false \
-          -Ddevelocity.cache.remote.enabled=false
+        run: |
+          ./mvnw install  \
+            -Ddevelocity.cache.local.enabled=false \
+            -Ddevelocity.cache.remote.enabled=false
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DIRECTORY_DEVELOCITY_ACCESS_KEY }}
 
