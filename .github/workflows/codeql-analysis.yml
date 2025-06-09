@@ -62,7 +62,7 @@ jobs:
           languages: ${{ matrix.language }}
 
       - name: Maven Build
-        run: ./mvnw verify pmd:aggregate-pmd -Pci  \
+        run: ./mvnw verify pmd:aggregate-pmd -Pci \
           -Ddevelocity.cache.local.enabled=false \
           -Ddevelocity.cache.remote.enabled=false
 
