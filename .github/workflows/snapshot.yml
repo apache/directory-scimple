@@ -70,9 +70,7 @@ jobs:
           ./mvnw -V deploy \
             -Papache-release -Pci \
             --threads=1 \
-            -Daether.checksums.algorithms=SHA-512,SHA-1,MD5 \
-            -Ddevelocity.cache.local.enabled=false \
-            -Ddevelocity.cache.remote.enabled=false
+            -Daether.checksums.algorithms=SHA-512,SHA-1,MD5
           echo "changelog-md=./target/jreleaser/release/CHANGELOG.md" >> $GITHUB_OUTPUT
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USER }}
