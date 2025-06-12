@@ -59,6 +59,7 @@ jobs:
             export PROJECT_VERSION=$(./mvnw --non-recursive --quiet --batch-mode \
               -DforceStdout=true \
               -Dexpression=project.version \
+              -Dscan=false \
               help:evaluate \
               | tail -n 1)
             echo "project-version=$PROJECT_VERSION"
