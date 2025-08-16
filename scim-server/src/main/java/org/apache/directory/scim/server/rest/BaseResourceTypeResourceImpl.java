@@ -107,12 +107,16 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     if (uriInfo.getQueryParameters().getFirst("filter") != null) {
       return Response.status(Status.FORBIDDEN).build();
     }
+    
+    Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
+    Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
+    validateAttributes(attributeReferences, excludedAttributeReferences);
 
     Repository<T> repository = getRepositoryInternal();
 
     T resource = null;
     try {
-      resource = repository.get(id);
+      resource = repository.get(id, attributeReferences, excludedAttributeReferences);
     } catch (UnableToRetrieveResourceException e2) {
       Status status = Status.fromStatusCode(e2.getStatus());
       if (status.getFamily().equals(Family.SERVER_ERROR)) {
@@ -131,10 +135,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return Response.status(Status.NOT_MODIFIED).build();
       }
     }
-
-    Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
-    Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
-    validateAttributes(attributeReferences, excludedAttributeReferences);
 
     // Process Attributes
     resource = processFilterAttributeExtensions(repository, resource, attributeReferences, excludedAttributeReferences);
@@ -175,7 +175,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
-    T created = repository.create(resource);
+    T created = repository.create(resource, attributeReferences, excludedAttributeReferences);
 
     EntityTag etag = fromVersion(created);
 
@@ -216,7 +216,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     ListResponse<T> listResponse = new ListResponse<>();
 
-    FilterResponse<T> filterResp = repository.find(filter, pageRequest, sortRequest);
+    FilterResponse<T> filterResp = repository.find(filter, pageRequest, sortRequest, attributeReferences, excludedAttributeReferences);
 
     // If no resources are found, we should still return a ListResponse with
     // the totalResults set to 0;
