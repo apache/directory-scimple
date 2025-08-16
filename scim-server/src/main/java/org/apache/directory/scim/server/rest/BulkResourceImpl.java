@@ -417,7 +417,7 @@ public class BulkResourceImpl implements BulkResource {
 
       log.debug("Creating {}", scimResource);
 
-      ScimResource newScimResource = repository.create(scimResource);
+      ScimResource newScimResource = repository.create(scimResource, Collections.emptySet(), Collections.emptySet());
       String bulkOperationPath = operationResult.getPath();
       String newResourceId = newScimResource.getId();
       String newResourceUri = uriInfo.getBaseUriBuilder()

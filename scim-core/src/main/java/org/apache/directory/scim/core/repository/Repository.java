@@ -55,11 +55,13 @@ public interface Repository<T extends ScimResource> {
    * a POST to a valid end-point.
    * 
    * @param resource The ScimResource to create and persist.
+   * @param includedAttributes optional set of attributes to include from the returned ScimResource, may be used to optimize queries.
+   * @param excludedAttributes optional set of attributes to exclude from the returned ScimResource, may be used to optimize queries.
    * @return The newly created ScimResource.
    * @throws ResourceException When the ScimResource cannot be
    *         created.
    */
-  T create(T resource) throws ResourceException;
+  T create(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
   
   /**
    * Allows the SCIM server's REST implementation to update and existing
@@ -99,11 +101,13 @@ public interface Repository<T extends ScimResource> {
   /**
    * Retrieves the ScimResource associated with the provided identifier.
    * @param id The identifier of the target ScimResource.
+   * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
+   * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
    * @return The requested ScimResource.
    * @throws ResourceException When the ScimResource cannot be
    *         retrieved.
    */
-  T get(String id) throws ResourceException;
+  T get(String id, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
   
   /**
    * Finds and retrieves all ScimResource objects known to the persistence
@@ -119,13 +123,15 @@ public interface Repository<T extends ScimResource> {
    * @param sortRequest Specifies which fields the returned ScimResources
    *        should be sorted by and whether the sort order is ascending or
    *        descending.
+   * @param includedAttributes optional set of attributes to include from returned ScimResources, may be used to optimize queries.
+   * @param excludedAttributes optional set of attributes to exclude from returned ScimResources, may be used to optimize queries.
    * @return A list of the ScimResources that pass the filter criteria,
    *         truncated to match the requested "page" and sorted according
    *         to the provided requirements.
    * @throws ResourceException If one or more ScimResources
    *         cannot be retrieved.
    */
-  FilterResponse<T> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest) throws ResourceException;
+  FilterResponse<T> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
   
   /**
    * Deletes the ScimResource with the provided identifier (if it exists).
