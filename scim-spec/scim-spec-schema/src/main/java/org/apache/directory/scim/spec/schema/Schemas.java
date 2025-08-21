@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.schema;
 
-import jakarta.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlEnumValue;
 
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;

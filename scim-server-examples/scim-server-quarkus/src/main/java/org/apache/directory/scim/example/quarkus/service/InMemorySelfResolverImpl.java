@@ -19,13 +19,13 @@
 
 package org.apache.directory.scim.example.quarkus.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;
 
 import java.security.Principal;
 
-import jakarta.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status;
 
 @ApplicationScoped
 public class InMemorySelfResolverImpl implements SelfIdResolver {

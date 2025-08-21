@@ -21,8 +21,8 @@ package org.apache.directory.scim.core.repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.exception.MutabilityException;

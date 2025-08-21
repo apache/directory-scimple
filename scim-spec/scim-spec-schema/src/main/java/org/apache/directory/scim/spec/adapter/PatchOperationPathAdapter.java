@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.adapter;
 
-import jakarta.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.apache.directory.scim.spec.patch.PatchOperationPath;
 
 public class PatchOperationPathAdapter extends XmlAdapter<String, PatchOperationPath>{

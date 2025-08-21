@@ -19,14 +19,14 @@
 
 package org.apache.directory.scim.example.quarkus;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.ws.rs.ApplicationPath;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.ws.rs.ApplicationPath;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
 import java.util.Set;
 
-import jakarta.ws.rs.core.Application;
+import javax.ws.rs.core.Application;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;

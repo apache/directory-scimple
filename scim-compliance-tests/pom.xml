@@ -39,6 +39,7 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
+      <version>${version.restassured}</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>

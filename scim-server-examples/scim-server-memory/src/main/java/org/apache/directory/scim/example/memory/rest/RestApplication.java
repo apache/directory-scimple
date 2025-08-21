@@ -19,11 +19,11 @@
 
 package org.apache.directory.scim.example.memory.rest;
 
-import jakarta.enterprise.inject.Produces;
+import javax.enterprise.inject.Produces;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
-import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
 import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
 

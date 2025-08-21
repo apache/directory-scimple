@@ -23,10 +23,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.*;
-import jakarta.ws.rs.core.Response.Status;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.ResourceTypesResource;
 import org.apache.directory.scim.protocol.data.ListResponse;

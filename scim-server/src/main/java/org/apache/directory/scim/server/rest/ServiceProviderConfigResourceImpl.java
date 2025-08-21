@@ -22,12 +22,12 @@ package org.apache.directory.scim.server.rest;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.EntityTag;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.core.Response.Status;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.protocol.ServiceProviderConfigResource;

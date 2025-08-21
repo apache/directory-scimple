@@ -16,8 +16,8 @@
  */
 package org.apache.directory.scim.client.rest;
 
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.Response;
 
 /**
  * Corresponds to {@link java.util.function.Function} but specific to REST calls.

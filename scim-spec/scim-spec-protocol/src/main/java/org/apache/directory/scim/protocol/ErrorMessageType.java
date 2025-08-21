@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.protocol;
 
-import jakarta.xml.bind.annotation.XmlEnum;
-import jakarta.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 
 @XmlEnum
 public enum ErrorMessageType {

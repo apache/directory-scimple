@@ -19,35 +19,43 @@
 
 package org.apache.directory.scim.example.jersey;
 
-import jakarta.enterprise.inject.se.SeContainer;
-import jakarta.enterprise.inject.se.SeContainerInitializer;
-import jakarta.ws.rs.SeBootstrap;
-import jakarta.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.directory.scim.compliance.junit.EmbeddedServerExtension;
+import org.glassfish.grizzly.http.server.HttpHandler;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainerProvider;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.jboss.weld.environment.se.Weld;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 public class JerseyTestServer implements EmbeddedServerExtension.ScimTestServer {
 
-  private SeContainer container;
-  private SeBootstrap.Instance server;
+  private HttpServer server;
+
+  private HttpHandler container;
+
+  private Weld weld;
 
   @Override
   public URI start(int port) throws Exception {
-
-    // It doesn't look like Weld finds the beans in src/main/java, so enable implicit scanning
-    // NOTE: this isn't an issue for the scim-server tests, but those beans are located in src/test/java
-    container = SeContainerInitializer.newInstance()
-      .addPackages(true, JerseyApplication.class)
-      .initialize();
-
+    // scan packages
+    weld = new Weld();
+    weld.scanClasspathEntries();
+    weld.initialize();
+    final ResourceConfig config = new ResourceConfig();
     JerseyApplication app = new JerseyApplication();
-    server = SeBootstrap.start(app, SeBootstrap.Configuration.builder().port(port).build())
-      .toCompletableFuture().get(1, TimeUnit.MINUTES);
 
-    // shut down CDI container on stop
-    server.stopOnShutdown(stopResult -> container.close());
+    GrizzlyHttpContainerProvider provider = new GrizzlyHttpContainerProvider();
+    container = provider.createContainer(HttpHandler.class, app);
+
+    // There are multiple JAX-RS implementations on the classpath, Jersey for the server and RestEasy for testing
+    // explicitly use Jersey so the test implementation is not use to start the server
+    server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://localhost:" + port +"/"), config);
+    server.getServerConfiguration().addHttpHandler(container);
+    server.start();
 
     return UriBuilder.fromUri("http://localhost/").port(port).build();
   }
@@ -55,12 +63,11 @@ public class JerseyTestServer implements EmbeddedServerExtension.ScimTestServer 
   @Override
   public void shutdown() throws Exception {
     if (server != null) {
-      server.stop().toCompletableFuture()
-        .get(10, TimeUnit.SECONDS);
+      server.shutdownNow();
     }
-
     if (container != null) {
-      container.close();
+      container.destroy();
     }
+    weld.shutdown();
   }
 }

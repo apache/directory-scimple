@@ -50,16 +50,18 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${version.wsrsapi}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>${version.cdiapi}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
-      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -108,6 +110,31 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>${version.annotationapi}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- support for Optional -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+      <version>${version.jackson}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Falling back to Java Reflection for bean-discovery-mode="annotated" discovery. Add org.jboss:jandex to the classpath to speed-up startup -->
+    <dependency>
+      <groupId>${jandex.groupId}</groupId>
+      <artifactId>jandex</artifactId>
+      <version>${version.jandex}</version>
+    </dependency>
+    <!-- Fixes WARNING: A class javax.activation.DataSource for a default provider MessageBodyWriter<javax.activation.DataSource> was not found -->
+    <dependency>
+      <groupId>jakarta.activation</groupId>
+      <artifactId>jakarta.activation-api</artifactId>
+      <version>${version.activationapi}</version>
+    </dependency>
   </dependencies>
   
 </project>

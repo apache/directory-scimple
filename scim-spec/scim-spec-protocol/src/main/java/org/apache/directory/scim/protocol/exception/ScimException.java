@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.protocol.exception;
 
-import jakarta.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 

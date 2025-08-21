@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import jakarta.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlEnumValue;
 
 import java.util.Arrays;
 

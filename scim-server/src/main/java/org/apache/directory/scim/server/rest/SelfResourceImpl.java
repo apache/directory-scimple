@@ -21,11 +21,11 @@ package org.apache.directory.scim.server.rest;
 
 import java.security.Principal;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.*;
-import jakarta.ws.rs.core.Response.Status;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;

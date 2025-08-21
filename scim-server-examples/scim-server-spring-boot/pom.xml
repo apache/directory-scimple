@@ -53,12 +53,12 @@
       <groupId>com.xwiki.directory.scimple</groupId>
       <artifactId>scim-server</artifactId>
     </dependency>
+    <!-- Causes NoClassDefFoundError: org/slf4j/impl/StaticLoggerBinder
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <scope>runtime</scope>
-    </dependency>
-
+    </dependency>-->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

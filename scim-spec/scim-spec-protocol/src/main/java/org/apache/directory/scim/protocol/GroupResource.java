@@ -20,7 +20,7 @@
 package org.apache.directory.scim.protocol;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.ws.rs.Path;
+import javax.ws.rs.Path;
 
 import org.apache.directory.scim.spec.resources.ScimGroup;
 

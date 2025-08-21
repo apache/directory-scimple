@@ -60,6 +60,14 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
+      <!-- Logging causes NoClassDefFoundError: org/slf4j/impl/StaticLoggerBinder
+           Workaround found at https://stackoverflow.com/a/56754302 -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -78,6 +86,7 @@
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>${version.cdiapi}</version>
     </dependency>
     <dependency>
       <groupId>com.xwiki.directory.scimple</groupId>
@@ -103,6 +112,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <version>${version.grizzly2http}</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>

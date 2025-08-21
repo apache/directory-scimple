@@ -29,7 +29,7 @@
 
   <properties>
     <module.name>com.xwiki.directory.scim.example.quarkus</module.name>
-    <version.quarkus>3.25.3</version.quarkus>
+    <version.quarkus>2.16.12.Final</version.quarkus>
     <max.jdk.version>17</max.jdk.version>
     <!-- smallrye-private-key-pem-parser causes issues with the javadoc plugin due to the generated module name containing 'private' -->
     <legacyMode>true</legacyMode>
@@ -51,6 +51,22 @@
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
         <version>${version.antlr4}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>rest-assured</artifactId>
+        <version>${version.restassured}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jackson2-provider</artifactId>
+        <!-- This version is the last that doesn't depend on a jackson json provider that expects jakarka.ws.rs.ext-->
+        <version>5.0.10.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>${version.wsrsapi}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -87,6 +103,7 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${version.wsrsapi}</version>
     </dependency>
     <dependency>
       <groupId>jakarta.inject</groupId>
@@ -95,10 +112,12 @@
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
+      <version>${version.annotationapi}</version> 
     </dependency>
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>${version.cdiapi}</version>
     </dependency>
     <dependency>
       <groupId>com.xwiki.directory.scimple</groupId>
@@ -113,12 +132,28 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
+      <version>${version.restassured}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.xwiki.directory.scimple</groupId>
       <artifactId>scim-compliance-tests</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <!-- Falling back to Java Reflection for bean-discovery-mode="annotated" discovery. Add org.jboss:jandex to the
+classpath to speed-up startup -->
+    <dependency>
+      <groupId>${jandex.groupId}</groupId>
+      <artifactId>jandex</artifactId>
+      <version>${version.jandex}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <version>${version.grizzly2http}</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 

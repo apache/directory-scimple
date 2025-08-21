@@ -1,12 +1,14 @@
 [<img src="https://directory.apache.org/fortress/gen-docs/1.0.1/apidocs/org/apache/directory/fortress/core/doc-files/apacheds-logo.jpeg" align="right" />](https://directory.apache.org/scimple/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Maven Central Version](https://img.shields.io/maven-central/v/org.apache.directory.scimple/scim-core)](https://central.sonatype.com/search?q=org.apache.directory.scimple&namespace=org.apache.directory.scimple)
 
+**Note:** this is a temporary, javax-based fork of Directory SCIMple intended to be used in XWiki until XWiki is migrated to modern versions of Jakarta.
+The fork is as close to the original version as possible, with dependencies relying on Jakarta modules downgraded.
+If you are not targetting XWiki (or some environment that happens to use the same versions of Javax packages), please use the [original version](https://github.com/apache/directory-scimple).
 
-Apache Directory SCIMple
-========================
+Apache Directory SCIMple - Javax version for XWiki
+==================================================
 
-Jakarta EE implementation of the [Simple Cross-domain Identity Management](http://www.simplecloud.info/) (SCIM) version 2.0 specification as defined by the following RFCs:
+Javax EE implementation of the [Simple Cross-domain Identity Management](http://www.simplecloud.info/) (SCIM) version 2.0 specification as defined by the following RFCs:
 
 * [RFC7643 - SCIM: Core Schema](https://tools.ietf.org/html/rfc7643)
 

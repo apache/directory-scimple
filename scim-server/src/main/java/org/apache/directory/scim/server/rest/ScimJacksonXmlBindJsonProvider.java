@@ -19,17 +19,17 @@
 
 package org.apache.directory.scim.server.rest;
 
-import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.core.MediaType;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.core.MediaType;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.Constants;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.ext.Provider;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.ext.Provider;
 import org.apache.directory.scim.protocol.data.ListResponse;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
@@ -45,7 +45,7 @@ import java.util.Set;
 @Consumes({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
 @Produces({Constants.SCIM_CONTENT_TYPE, MediaType.APPLICATION_JSON})
 @ApplicationScoped
-public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
+public class ScimJacksonXmlBindJsonProvider extends JacksonJaxbJsonProvider {
 
   private static final Set<Package> SUPPORTED_PACKAGES = Set.of(ScimResource.class.getPackage(),
                                                                 ListResponse.class.getPackage(),

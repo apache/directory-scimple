@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.test.stub;
 
-import jakarta.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElement;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 
 import java.io.Serializable;

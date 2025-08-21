@@ -32,6 +32,7 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${version.wsrsapi}</version>
     </dependency>
     <dependency>
       <groupId>jakarta.inject</groupId>
@@ -40,14 +41,22 @@
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
+      <version>${version.annotationapi}</version>
     </dependency>
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>${version.cdiapi}</version>
     </dependency>
     <dependency>
       <groupId>com.xwiki.directory.scimple</groupId>
       <artifactId>scim-server</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <version>${version.grizzly2http}</version>
     </dependency>
   </dependencies>
 

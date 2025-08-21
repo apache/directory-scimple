@@ -19,9 +19,9 @@
 
 package org.apache.directory.scim.server.rest;
 
-import jakarta.ws.rs.core.Feature;
-import jakarta.ws.rs.core.FeatureContext;
-import jakarta.ws.rs.ext.Provider;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.ext.Provider;
 
 import java.util.Collection;
 import java.util.stream.Stream;

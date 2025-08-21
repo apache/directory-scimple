@@ -33,8 +33,8 @@ package org.apache.directory.scim.client.rest;
  * under the License.
  */
 
-import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Response;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 
 public class RestException extends Exception {

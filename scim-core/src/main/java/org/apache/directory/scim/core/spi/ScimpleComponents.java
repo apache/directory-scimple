@@ -19,12 +19,14 @@
 
 package org.apache.directory.scim.core.spi;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.Startup;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.Produces;
+import javax.annotation.ManagedBean;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
+import org.jboss.weld.environment.se.events.ContainerInitialized;
+
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
@@ -34,6 +36,11 @@ import java.util.stream.Collectors;
 
 @Dependent
 public class ScimpleComponents {
+
+  public ScimpleComponents() {
+    // CDI
+    // See https://docs.jboss.org/cdi/spec/1.2/cdi-spec.html#what_classes_are_beans
+  }
 
   @Produces
   @ApplicationScoped
@@ -52,7 +59,7 @@ public class ScimpleComponents {
   /*
    * Eagerly initialize the RepositoryRegistry bean on startup.
    */
-  public void startup(@Observes Startup startup, RepositoryRegistry repositoryRegistry) {
+  public void startup(@Observes ContainerInitialized startup, RepositoryRegistry repositoryRegistry) {
     repositoryRegistry.toString(); // call toString() to resolve real object from proxy
   }
 }

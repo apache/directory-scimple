@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.inject.Alternative;
+
+@Alternative
 public class RepositoryRegistry {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(RepositoryRegistry.class);

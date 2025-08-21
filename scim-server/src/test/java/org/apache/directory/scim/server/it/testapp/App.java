@@ -19,9 +19,10 @@
 
 package org.apache.directory.scim.server.it.testapp;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.ws.rs.core.Application;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.ws.rs.core.Application;
+
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 

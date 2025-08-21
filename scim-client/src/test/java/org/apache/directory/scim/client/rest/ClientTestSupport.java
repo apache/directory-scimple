@@ -22,6 +22,7 @@ package org.apache.directory.scim.client.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import okhttp3.mockwebserver.MockResponse;
 import org.apache.directory.scim.client.rest.junit.MockServerClientTestRunner;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +33,12 @@ import java.util.Map;
 @ExtendWith(MockServerClientTestRunner.class)
 abstract class ClientTestSupport {
 
-  private final ObjectWriter objectWriter = new ObjectMapper().writerWithDefaultPrettyPrinter();
+  private static final ObjectWriter objectWriter;
+  static {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new Jdk8Module());
+    objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
+  }
 
   MockResponse scimResponse() {
     return new MockResponse()

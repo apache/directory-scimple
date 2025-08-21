@@ -19,9 +19,9 @@
 
 package org.apache.directory.scim.server.exception;
 
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 import org.apache.directory.scim.protocol.Constants;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.slf4j.Logger;

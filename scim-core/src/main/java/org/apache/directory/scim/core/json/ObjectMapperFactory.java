@@ -27,8 +27,9 @@ import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -56,7 +57,7 @@ public class ObjectMapperFactory {
     ObjectMapper objectMapper = new ObjectMapper();
 
     AnnotationIntrospector pair = new AnnotationIntrospectorPair(
-      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
+      new JaxbAnnotationIntrospector(objectMapper.getTypeFactory()),
       new JacksonAnnotationIntrospector());
     objectMapper.setAnnotationIntrospector(pair);
 
@@ -72,8 +73,9 @@ public class ObjectMapperFactory {
    */
   public static ObjectMapper createObjectMapper(SchemaRegistry schemaRegistry) {
     ObjectMapper objectMapper = createObjectMapper().copy();
-    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
+    objectMapper.registerModule(new JaxbAnnotationModule());
     objectMapper.registerModule(new ScimResourceModule(schemaRegistry));
+    objectMapper.registerModule(new Jdk8Module());
     return objectMapper;
   }
 

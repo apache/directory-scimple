@@ -19,18 +19,19 @@
 
 package org.apache.directory.scim.example.jersey;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.se.SeContainer;
-import jakarta.enterprise.inject.se.SeContainerInitializer;
-import jakarta.ws.rs.SeBootstrap;
-import jakarta.ws.rs.core.UriBuilder;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import org.glassfish.grizzly.http.server.HttpHandler;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainerProvider;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
 import java.net.URI;
 import java.util.Set;
 
-import jakarta.ws.rs.core.Application;
+import javax.ws.rs.core.Application;
 import org.apache.directory.scim.server.rest.ScimResourceHelper;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -66,14 +67,11 @@ public class JerseyApplication extends Application {
     SLF4JBridgeHandler.install();
 
     try {
-
-      SeContainer container = SeContainerInitializer.newInstance()
-        .addPackages(true, JerseyApplication.class)
-        .initialize();
-
       JerseyApplication app = new JerseyApplication();
-      SeBootstrap.start(app, SeBootstrap.Configuration.builder().port(8080).build())
-        .thenAccept(instance -> instance.stopOnShutdown(stopResult -> container.close()));
+      HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://localhost:8080/")); // shut
+      GrizzlyHttpContainerProvider provider = new GrizzlyHttpContainerProvider();
+      HttpHandler container = provider.createContainer(HttpHandler.class, app);
+      server.getServerConfiguration().addHttpHandler(container);
       URI uri = UriBuilder.fromUri("http://localhost/").port(8080).build();
 
       System.out.printf("Application started: %s%nStop the application using CTRL+C%n", uri.toString());

@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.client.rest;
 
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.core.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;

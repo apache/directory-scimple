@@ -45,13 +45,28 @@
     <maven.compiler.target>${jdk.version}</maven.compiler.target>
     <maven.compiler.release>${jdk.version}</maven.compiler.release>
     <gpg.bestPractices>true</gpg.bestPractices>
-    <version.jackson>2.19.2</version.jackson>
     <version.logback>1.5.18</version.logback>
     <version.restfuse>1.2.0</version.restfuse>
-    <version.slf4j>2.0.16</version.slf4j>
+    <version.slf4j>2.0.17</version.slf4j>
     <version.antlr4>4.13.2</version.antlr4>
     <version.resteasy>6.2.12.Final</version.resteasy>
-    <version.spring-boot>3.5.4</version.spring-boot>
+    <version.spring-boot>2.7.18</version.spring-boot>
+    <jandex.groupId>org.jboss</jandex.groupId>
+    <mavenjandex.groupId>org.jboss.jandex</mavenjandex.groupId>
+    <version.mavenjandex>1.2.3</version.mavenjandex>
+    <version.jandex>3.0.1</version.jandex><!-- higher versions cause WARN: Version of Jandex index is not supported -->
+    <version.restassured>5.5.5</version.restassured>
+    <version.grizzly2http>2.35</version.grizzly2http>
+
+    <!-- Look at xwiki-commons/pom.xml to know which versions to set -->
+    <version.cdiapi>2.0.2</version.cdiapi>
+    <version.wsrsapi>2.1.6</version.wsrsapi>
+    <version.annotationapi>1.3.5</version.annotationapi>
+    <version.bindapi>2.3.3</version.bindapi>
+    <version.validationapi>2.0.1.Final</version.validationapi>
+    <version.activationapi>1.2.2</version.activationapi>
+    <version.jackson>2.19.1</version.jackson>
+    <version.swagger>2.2.17</version.swagger>
 
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline />
@@ -216,7 +231,7 @@
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
         <artifactId>weld-se-core</artifactId>
-        <version>5.1.6.Final</version>
+        <version>3.1.9.Final</version>
       </dependency>
 
       <dependency>
@@ -244,20 +259,20 @@
         <groupId>io.rest-assured</groupId>
         <artifactId>rest-assured-bom</artifactId>
         <type>pom</type>
-        <version>5.5.5</version>
+        <version>${version.restassured}</version>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.glassfish.jersey</groupId>
         <artifactId>jersey-bom</artifactId>
-        <version>3.1.11</version>
+        <version>2.35</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>
         <artifactId>hibernate-validator</artifactId>
-        <version>8.0.2.Final</version>
+        <version>6.2.5.Final</version>
       </dependency>
       <dependency>
         <groupId>org.glassfish</groupId>
@@ -734,9 +749,9 @@
             <version>${version.spring-boot}</version>
           </plugin>
           <plugin>
-            <groupId>io.smallrye</groupId>
+            <groupId>${mavenjandex.groupId}</groupId>
             <artifactId>jandex-maven-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>${version.mavenjandex}</version>
             <executions>
               <execution>
                 <id>make-index</id>

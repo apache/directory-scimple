@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.server.rest;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.protocol.UserResource;
 import org.apache.directory.scim.spec.resources.ScimUser;

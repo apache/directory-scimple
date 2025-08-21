@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.spring.it.app;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.ws.rs.core.Response;
+import javax.annotation.PostConstruct;
+import javax.ws.rs.core.Response;
 import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.core.repository.PatchHandler;
 import org.apache.directory.scim.core.repository.Repository;

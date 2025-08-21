@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.protocol.adapter;
 
-import jakarta.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status;
 import org.apache.directory.scim.protocol.data.StatusAdapter;
 import org.junit.jupiter.api.Test;
 

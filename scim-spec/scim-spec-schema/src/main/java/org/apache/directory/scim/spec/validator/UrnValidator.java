@@ -19,8 +19,8 @@
 
 package org.apache.directory.scim.spec.validator;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 public class UrnValidator implements ConstraintValidator<Urn, String> {
 

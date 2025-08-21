@@ -19,9 +19,9 @@
 
 package org.apache.directory.scim.example.memory.service;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.core.repository.PatchHandler;
@@ -47,8 +47,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 
 @Named

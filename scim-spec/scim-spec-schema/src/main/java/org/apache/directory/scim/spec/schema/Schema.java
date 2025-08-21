@@ -19,10 +19,10 @@
 
 package org.apache.directory.scim.spec.schema;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import jakarta.xml.bind.annotation.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.*;
 import org.apache.directory.scim.spec.exception.ScimResourceInvalidException;
 import org.apache.directory.scim.spec.validator.Urn;
 import org.slf4j.Logger;

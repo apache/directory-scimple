@@ -36,12 +36,13 @@
 		<dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${version.wsrsapi}</version>
       <scope>provided</scope>
     </dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>2.2.36</version>
+			<version>${version.swagger}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.xwiki.directory.scimple</groupId>
@@ -66,7 +67,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>io.smallrye</groupId>
+        <groupId>${mavenjandex.groupId}</groupId>
         <artifactId>jandex-maven-plugin</artifactId>
       </plugin>
     </plugins>

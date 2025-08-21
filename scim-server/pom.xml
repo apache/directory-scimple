@@ -41,12 +41,19 @@
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>${version.cdiapi}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
+      <version>${version.annotationapi}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
     </dependency>
     <dependency>
       <groupId>jakarta.enterprise</groupId>
@@ -56,6 +63,7 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${version.wsrsapi}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -71,8 +79,8 @@
       <artifactId>scim-spec-protocol</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
-      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
     </dependency>
     <dependency>
       <groupId>com.xwiki.directory.scimple</groupId>
@@ -146,17 +154,35 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.glassfish.jersey.ext.cdi</groupId>
+      <artifactId>jersey-cdi1x</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>jakarta.activation</groupId>
+      <artifactId>jakarta.activation-api</artifactId>
+      <version>${version.activationapi}</version>
+    </dependency>
+    <!-- WARNING: JAXBContext implementation could not be found. WADL feature is disabled.
+    https://stackoverflow.com/questions/65444486/warning-jaxbcontext-implementation-could-not-be-found-wadl-feature-is-disabled
+    -->
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>2.3.1</version>
+      <!--version 2.3.2+ introduces a dependency on jakarta.xml.bind:jakarta.xml.bind-api (seems like a major change!)-->
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>io.smallrye</groupId>
+        <groupId>${mavenjandex.groupId}</groupId>
         <artifactId>jandex-maven-plugin</artifactId>
       </plugin>
     </plugins>

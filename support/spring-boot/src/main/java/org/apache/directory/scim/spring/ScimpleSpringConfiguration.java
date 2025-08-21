@@ -19,9 +19,9 @@
 
 package org.apache.directory.scim.spring;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.util.TypeLiteral;
-import jakarta.ws.rs.core.Application;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.util.TypeLiteral;
+import javax.ws.rs.core.Application;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.directory.scim.core.repository.DefaultPatchHandler;
 import org.apache.directory.scim.core.repository.PatchHandler;
@@ -172,6 +172,7 @@ public class ScimpleSpringConfiguration {
       beans.remove(instance);
     }
 
+    /* These methods don't exist in the extended class (yet?)
     @Override
     public Handle<T> getHandle() {
       throw new NotImplementedException("This implementation does not support the `getHandle` method.");
@@ -180,7 +181,7 @@ public class ScimpleSpringConfiguration {
     @Override
     public Iterable<? extends Handle<T>> handles() {
       throw new NotImplementedException("This implementation does not support the `handles` method.");
-    }
+    }*/
 
     @Override
     public T get() {

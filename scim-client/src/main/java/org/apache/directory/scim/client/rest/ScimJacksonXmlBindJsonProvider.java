@@ -19,12 +19,12 @@
 
 package org.apache.directory.scim.client.rest;
 
-import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.ext.Provider;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.ext.Provider;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.Constants;
@@ -36,7 +36,10 @@ import org.apache.directory.scim.protocol.Constants;
 @Consumes(Constants.SCIM_CONTENT_TYPE)
 @Produces(Constants.SCIM_CONTENT_TYPE)
 @ApplicationScoped
-public class ScimJacksonXmlBindJsonProvider extends JacksonXmlBindJsonProvider {
+public class ScimJacksonXmlBindJsonProvider extends JacksonJaxbJsonProvider {
+  public ScimJacksonXmlBindJsonProvider() {
+    // CDI
+  }
 
   @Inject
   public ScimJacksonXmlBindJsonProvider(SchemaRegistry schemaRegistry) {

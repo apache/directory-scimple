@@ -24,7 +24,7 @@ import org.apache.directory.scim.server.exception.UnableToResolveIdResourceExcep
 
 import java.security.Principal;
 
-import jakarta.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Service;
 
 @Service

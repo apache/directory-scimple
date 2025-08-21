@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 
 import java.security.Principal;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.ws.rs.core.Response;
+import javax.enterprise.inject.Instance;
+import javax.ws.rs.core.Response;
 
-import jakarta.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.SecurityContext;
 import org.apache.directory.scim.server.exception.UnableToResolveIdResourceException;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.core.repository.SelfIdResolver;

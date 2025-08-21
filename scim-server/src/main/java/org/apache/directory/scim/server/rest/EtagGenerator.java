@@ -21,13 +21,13 @@ package org.apache.directory.scim.server.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 import org.apache.directory.scim.core.json.ObjectMapperFactory;
 import org.apache.directory.scim.server.exception.EtagGenerationException;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Meta;
 
-import jakarta.ws.rs.core.EntityTag;
+import javax.ws.rs.core.EntityTag;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

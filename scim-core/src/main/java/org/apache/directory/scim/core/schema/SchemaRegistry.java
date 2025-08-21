@@ -22,6 +22,8 @@ package org.apache.directory.scim.core.schema;
 import java.io.Serializable;
 import java.util.*;
 
+import javax.enterprise.inject.Alternative;
+
 import org.apache.directory.scim.spec.annotation.ScimExtensionType;
 import org.apache.directory.scim.spec.annotation.ScimResourceType;
 import org.apache.directory.scim.spec.exception.InvalidExtensionException;
@@ -34,6 +36,7 @@ import org.apache.directory.scim.spec.schema.Schemas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Alternative
 public class SchemaRegistry implements Serializable {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(SchemaRegistry.class);

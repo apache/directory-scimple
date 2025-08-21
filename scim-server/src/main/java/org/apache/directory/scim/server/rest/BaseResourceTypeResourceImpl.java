@@ -27,11 +27,11 @@ import java.util.Optional;
 import java.util.Objects;
 import java.util.Set;
 
-import jakarta.enterprise.inject.spi.CDI;
-import jakarta.ws.rs.core.*;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.Status.Family;
+import javax.enterprise.inject.spi.CDI;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.protocol.exception.ScimException;

@@ -21,11 +21,12 @@ package org.apache.directory.scim.spec;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 public class ObjectMapperFactory {
 
@@ -40,12 +41,13 @@ public class ObjectMapperFactory {
 
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-    objectMapper.registerModule(new JakartaXmlBindAnnotationModule());
+    objectMapper.registerModule(new JaxbAnnotationModule());
 
     AnnotationIntrospector pair = new AnnotationIntrospectorPair(
-      new JakartaXmlBindAnnotationIntrospector(objectMapper.getTypeFactory()),
+      new JaxbAnnotationIntrospector(objectMapper.getTypeFactory()),
       new JacksonAnnotationIntrospector());
     objectMapper.setAnnotationIntrospector(pair);
+    objectMapper.registerModule(new Jdk8Module());
 
     return objectMapper;
   }

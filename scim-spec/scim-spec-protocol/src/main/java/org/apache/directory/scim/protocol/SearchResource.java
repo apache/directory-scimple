@@ -27,16 +27,16 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.directory.scim.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
-import static jakarta.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.MediaType.*;
 import static org.apache.directory.scim.protocol.Constants.SCIM_CONTENT_TYPE;
 
 //@formatter:off

@@ -19,11 +19,11 @@
 
 package org.apache.directory.scim.server.exception;
 
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.ext.Provider;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 import org.apache.directory.scim.protocol.Constants;
 import org.apache.directory.scim.protocol.data.ErrorResponse;

@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.core.repository;
 
-import jakarta.annotation.Nullable;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;

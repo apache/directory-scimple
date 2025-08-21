@@ -28,8 +28,8 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
-import jakarta.validation.Constraint;
-import jakarta.validation.Payload;
+import javax.validation.Constraint;
+import javax.validation.Payload;
 
 @Constraint(validatedBy = UrnValidator.class)
 @Target( { TYPE_USE, METHOD, FIELD, PARAMETER })
