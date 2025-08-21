@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.directory.scimple</groupId>
+    <groupId>com.xwiki.directory.scimple</groupId>
     <artifactId>scimple</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
@@ -28,12 +28,12 @@
   <name>SCIMple - Test</name>
 
   <properties>
-    <module.name>org.apache.directory.scim.test</module.name>
+    <module.name>com.xwiki.directory.scim.test</module.name>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.directory.scimple</groupId>
+      <groupId>com.xwiki.directory.scimple</groupId>
       <artifactId>scim-spec-schema</artifactId>
     </dependency>
 
