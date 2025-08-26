@@ -26,9 +26,7 @@ import org.apache.directory.scim.server.exception.AttributeDoesNotExistException
 import org.apache.directory.scim.server.exception.AttributeException;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimResource;
-import org.apache.directory.scim.spec.resources.ScimUser;
 import org.apache.directory.scim.spec.schema.AttributeContainer;
 import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.schema.Schema.Attribute;
@@ -99,7 +97,7 @@ class AttributeUtil {
       Schema schema = schemaRegistry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and specified attributes, exclude never
-      Set<Attribute> attributesToKeep = resolveAttributeReferences(attributes, true);
+      Set<Attribute> attributesToKeep = resolveAttributeReferences(attributes, true, schema);
       Set<String> extensionsToRemove = new HashSet<>();
       removeAttributesOfType(copy, schema, Returned.DEFAULT, attributesToKeep);
       removeAttributesOfType(copy, schema, Returned.REQUEST, attributesToKeep);
@@ -146,7 +144,7 @@ class AttributeUtil {
       Schema schema = schemaRegistry.getBaseSchemaOfResourceType(resourceType);
 
       // return always and default, exclude never and specified attributes
-      Set<Attribute> attributesToRemove = resolveAttributeReferences(excludedAttributes, false);
+      Set<Attribute> attributesToRemove = resolveAttributeReferences(excludedAttributes, false, schema);
       removeAttributesOfType(copy, schema, Returned.REQUEST);
       removeAttributesOfType(copy, schema, Returned.NEVER);
       removeAttributes(copy, schema, attributesToRemove);
@@ -259,11 +257,11 @@ class AttributeUtil {
     return attributeReferences;
   }
 
-  private Set<Attribute> resolveAttributeReferences(Set<AttributeReference> attributeReferences, boolean includeAttributeChain) throws AttributeDoesNotExistException {
+  private Set<Attribute> resolveAttributeReferences(Set<AttributeReference> attributeReferences, boolean includeAttributeChain, Schema coreSchema) throws AttributeDoesNotExistException {
     Set<Attribute> attributes = new HashSet<>();
 
     for (AttributeReference attributeReference : attributeReferences) {
-      Set<Attribute> findAttributes = findAttribute(attributeReference, includeAttributeChain);
+      Set<Attribute> findAttributes = findAttribute(attributeReference, includeAttributeChain, coreSchema);
       if (!findAttributes.isEmpty()) {
         attributes.addAll(findAttributes);
       }
@@ -272,37 +270,20 @@ class AttributeUtil {
     return attributes;
   }
 
-  private Set<Attribute> findAttribute(AttributeReference attributeReference, boolean includeAttributeChain) throws AttributeDoesNotExistException {
+  private Set<Attribute> findAttribute(AttributeReference attributeReference, boolean includeAttributeChain, Schema coreSchema) throws AttributeDoesNotExistException {
+    Schema schema = coreSchema;
     String schemaUrn = attributeReference.getUrn();
-    Schema schema = null;
-    Set<Attribute> attributes;
-    
     if (!StringUtils.isEmpty(schemaUrn)) {
       schema = schemaRegistry.getSchema(schemaUrn);
-
-      attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
-      if (attributes.isEmpty()) {
-        log.error("Attribute " + attributeReference.getFullyQualifiedAttributeName() + "not found in schema " + schemaUrn);
-        throw new AttributeDoesNotExistException(attributeReference.getFullyQualifiedAttributeName());
-      }
-      return attributes;
     }
 
-    // Handle unqualified attributes, look in the core schemas
-    schema = schemaRegistry.getSchema(ScimUser.SCHEMA_URI);
+    Set<Attribute> attributes;
     attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
-    if (!attributes.isEmpty()) {
-      return attributes;
+    if (attributes.isEmpty()) {
+      log.error("Attribute {} not found in schema {}", attributeReference.getFullyQualifiedAttributeName(), schemaUrn);
+      throw new AttributeDoesNotExistException(attributeReference.getFullyQualifiedAttributeName());
     }
-
-    schema = schemaRegistry.getSchema(ScimGroup.SCHEMA_URI);
-    attributes = findAttributeInSchema(schema, attributeReference, includeAttributeChain);
-    if (!attributes.isEmpty()) {
-      return attributes;
-    }
-
-    log.error("Attribute " + attributeReference.getFullyQualifiedAttributeName() + "not found in any schema.");
-    throw new AttributeDoesNotExistException(attributeReference.getFullyQualifiedAttributeName());
+    return attributes;
   }
 
   private Set<Attribute> findAttributeInSchema(Schema schema, AttributeReference attributeReference, boolean includeAttributeChain) {
