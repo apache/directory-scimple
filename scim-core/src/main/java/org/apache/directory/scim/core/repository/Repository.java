@@ -64,7 +64,7 @@ public interface Repository<T extends ScimResource> {
   T create(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
   
   /**
-   * Allows the SCIM server's REST implementation to update and existing
+   * Allows the SCIM server's REST implementation to update an existing
    * resource via a PUT to a valid end-point.
    * <br>
    * <b>SCIM Implementation NOTE:</b> SCIM supports <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.14">versioning of resources via HTTP ETags</a>, if the (optional) {@code version} parameter is present, (and supported by the server),
@@ -82,7 +82,7 @@ public interface Repository<T extends ScimResource> {
   T update(String id, @Nullable Set<ETag> etags, T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
 
   /**
-   * Allows the SCIM server's REST implementation to update and existing
+   * Allows the SCIM server's REST implementation to update an existing
    * resource via a PATCH to a valid end-point.
    * <br>
    * <b>SCIM Implementation NOTE:</b> SCIM supports <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.14">versioning of resources via HTTP ETags</a>, if the (optional) {@code version} parameter is present, (and supported by the server),
