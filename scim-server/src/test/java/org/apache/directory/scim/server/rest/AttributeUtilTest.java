@@ -6,7 +6,7 @@
 * to you under the Apache License, Version 2.0 (the
 * "License"); you may not use this file except in compliance
 * with the License.  You may obtain a copy of the License at
-
+ 
 * http://www.apache.org/licenses/LICENSE-2.0
 
 * Unless required by applicable law or agreed to in writing,
@@ -75,7 +75,7 @@ public class AttributeUtilTest {
   @Test
   public void testBaseResource() throws Exception {
     ScimUser resource = getScimUser();
-
+    
     debugJson(resource);
 
     resource = attributeUtil.setAttributesForDisplay(resource);
@@ -84,30 +84,30 @@ public class AttributeUtilTest {
 
     Assertions.assertThat(resource.getId()).isNotNull();
     Assertions.assertThat(resource.getPassword()).isNull();
-
+    
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
-
+    
     Assertions.assertThat(extension.getCostCenter()).isNotNull();
-
+    
     ExampleObjectExtension exampleObjectExtension = resource.getExtension(ExampleObjectExtension.class);
-
+    
     Assertions.assertThat(exampleObjectExtension.getValueAlways()).isNotNull();
     Assertions.assertThat(exampleObjectExtension.getValueDefault()).isNotNull();
     Assertions.assertThat(exampleObjectExtension.getValueRequest()).isNull();
     Assertions.assertThat(exampleObjectExtension.getValueNever()).isNull();
   }
-
+  
   @Test
   public void testIncludeAttributes() throws Exception {
     ScimUser resource = getScimUser();
-
+    
     debugJson(resource);
-
+    
     Set<AttributeReference> attributes = new HashSet<>();
     attributes.add(new AttributeReference("userName"));
     attributes.add(new AttributeReference("addresses.streetAddress"));
     resource = attributeUtil.setAttributesForDisplay(resource, attributes);
-
+    
     debugJson(resource);
 
     Assertions.assertThat(resource.getUserName()).isNotNull();
@@ -115,28 +115,28 @@ public class AttributeUtilTest {
 
     Assertions.assertThat(resource.getPassword()).isNull();
     Assertions.assertThat(resource.getActive()).isNull();
-
+    
     Assertions.assertThat(resource.getAddresses().get(0).getCountry()).isNull();
     Assertions.assertThat(resource.getAddresses().get(0).getStreetAddress()).isNotNull();
 
-
+    
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
-
+    
     Assertions.assertThat(extension).as("%s should have been removed from extensions", EnterpriseExtension.URN).isNull();
   }
-
+  
   @Test
   public void testIncludeFullAttributes() throws Exception {
     ScimUser resource = getScimUser();
-
+    
     debugJson(resource);
-
+    
     Set<AttributeReference> attributes = new HashSet<>();
     attributes.add(new AttributeReference("userName"));
     attributes.add(new AttributeReference("name"));
     attributes.add(new AttributeReference("addresses"));
     resource = attributeUtil.setAttributesForDisplay(resource, attributes);
-
+    
     debugJson(resource);
 
     Assertions.assertThat(resource.getUserName()).isNotNull();
@@ -144,29 +144,29 @@ public class AttributeUtilTest {
 
     Assertions.assertThat(resource.getPassword()).isNull();
     Assertions.assertThat(resource.getActive()).isNull();
-
+    
     Assertions.assertThat(resource.getAddresses().get(0).getCountry()).isNotNull();
     Assertions.assertThat(resource.getAddresses().get(0).getStreetAddress()).isNotNull();
     Assertions.assertThat(resource.getAddresses().get(0).getCountry()).isNotNull();
 
-
+    
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
 
     Assertions.assertThat(extension).as("%s should have been removed from extensions", EnterpriseExtension.URN).isNull();
   }
-
+  
   @Test
   public void testIncludeAttributesWithExtension() throws Exception {
     ScimUser resource = getScimUser();
-
+    
     debugJson(resource);
-
+    
     Set<AttributeReference> attributeSet = new HashSet<>();
     attributeSet.add(new AttributeReference("userName"));
     attributeSet.add(new AttributeReference(EnterpriseExtension.URN + ":costCenter"));
-
+    
     resource = attributeUtil.setAttributesForDisplay(resource, attributeSet);
-
+    
     debugJson(resource);
 
     Assertions.assertThat(resource.getUserName()).isNotNull();
@@ -174,27 +174,27 @@ public class AttributeUtilTest {
 
     Assertions.assertThat(resource.getPassword()).isNull();
     Assertions.assertThat(resource.getActive()).isNull();
-
+    
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
-
+    
     Assertions.assertThat(extension.getCostCenter()).isNotNull();
     Assertions.assertThat(extension.getDepartment()).isNull();
 
   }
-
+  
   @Test
   public void testExcludeAttributes() throws Exception {
     ScimUser resource = getScimUser();
-
+    
     debugJson(resource);
 
     Set<AttributeReference> attributeSet = new HashSet<>();
     attributeSet.add(new AttributeReference("userName"));
     attributeSet.add(new AttributeReference("addresses"));
     attributeSet.add(new AttributeReference("name"));
-
+    
     resource = attributeUtil.setExcludedAttributesForDisplay(resource, attributeSet);
-
+    
     debugJson(resource);
 
     Assertions.assertThat(resource.getId()).isNotNull();
@@ -205,27 +205,27 @@ public class AttributeUtilTest {
     Assertions.assertThat(resource.getName()).isNull();
 
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
-
+    
     Assertions.assertThat(extension.getCostCenter()).isNotNull();
   }
-
+  
   @Test
   public void testExcludeAttributesWithExtensions() throws Exception {
     ScimUser resource = getScimUser();
-
+    
     Set<AttributeReference> attributeSet = new HashSet<>();
     attributeSet.add(new AttributeReference("userName"));
     attributeSet.add(new AttributeReference(EnterpriseExtension.URN + ":costCenter"));
-
+    
     resource = attributeUtil.setExcludedAttributesForDisplay(resource, attributeSet);
-
+    
     Assertions.assertThat(resource.getId()).isNotNull();
     Assertions.assertThat(resource.getPassword()).isNull();
     Assertions.assertThat(resource.getUserName()).isNull();
     Assertions.assertThat(resource.getActive()).isNotNull();
 
     EnterpriseExtension extension = resource.getExtension(EnterpriseExtension.class);
-
+    
     Assertions.assertThat(extension.getCostCenter()).isNull();
     Assertions.assertThat(extension.getDepartment()).isNotNull();
   }
@@ -279,7 +279,7 @@ public class AttributeUtilTest {
     objectMapper.writeValue(sw, resource);
     LOG.debug(sw.toString());
   }
-
+  
   private ScimUser getScimUser() throws PhoneNumberParseException {
     ScimUser user = new ScimUser();
 
@@ -333,9 +333,9 @@ public class AttributeUtilTest {
     user.setAddresses(addresses);
 
     List<PhoneNumber> phoneNumbers = new ArrayList<>();
-
+    
     LocalPhoneNumberBuilder lpnb = new LocalPhoneNumberBuilder();
-
+    
     PhoneNumber phoneNumber = lpnb.areaCode("123").countryCode("1").subscriberNumber("456-7890").build();
     phoneNumber.setDisplay("123-456-7890");
     phoneNumber.setPrimary(true);
@@ -362,9 +362,9 @@ public class AttributeUtilTest {
     manager.setValue("0987654321");
     enterpriseEntension.setManager(manager);
     enterpriseEntension.setOrganization("ORG-X");
-
+    
     user.addExtension(enterpriseEntension);
-
+    
     ExampleObjectExtension exampleObjectExtension = new ExampleObjectExtension();
     exampleObjectExtension.setValueAlways("always");
     exampleObjectExtension.setValueDefault("default");
@@ -374,9 +374,9 @@ public class AttributeUtilTest {
     valueComplex.setDisplayName("ValueComplex");
     valueComplex.setValue("Value");
     exampleObjectExtension.setValueComplex(valueComplex);
-
+    
     user.addExtension(exampleObjectExtension);
-
+    
     return user;
   }
 
