@@ -19,16 +19,29 @@
 
 package org.apache.directory.scim.spec.filter.attribute;
 
+import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortRequest;
+
+import java.util.Objects;
 import java.util.Set;
 
 public class ScimRequestContext {
 
   private Set<AttributeReference> attributeReferences;
   private Set<AttributeReference> excludedAttributeReferences;
+  private PageRequest pageRequest;
+  private SortRequest sortRequest;
 
-  public ScimRequestContext(Set<AttributeReference> attributeReferences, Set<AttributeReference> excludedAttributeReferences) {
+  public ScimRequestContext() {}
+
+  public ScimRequestContext(Set<AttributeReference> attributeReferences,
+                            Set<AttributeReference> excludedAttributeReferences,
+                            PageRequest pageRequest,
+                            SortRequest sortRequest) {
     this.attributeReferences = attributeReferences;
     this.excludedAttributeReferences = excludedAttributeReferences;
+    this.pageRequest = pageRequest;
+    this.sortRequest = sortRequest;
   }
 
   public Set<AttributeReference> getAttributeReferences() {
@@ -49,37 +62,48 @@ public class ScimRequestContext {
     return this;
   }
 
-  public boolean equals(final Object o) {
-    if (o == this) return true;
-    if (!(o instanceof ScimRequestContext)) return false;
-    final ScimRequestContext other = (ScimRequestContext) o;
-    if (!other.canEqual((Object) this)) return false;
-    final Object this$attributeReferences = this.getAttributeReferences();
-    final Object other$attributeReferences = other.getAttributeReferences();
-    if (this$attributeReferences == null ? other$attributeReferences != null : !this$attributeReferences.equals(other$attributeReferences))
-      return false;
-    final Object this$excludedAttributeReferences = this.getExcludedAttributeReferences();
-    final Object other$excludedAttributeReferences = other.getExcludedAttributeReferences();
-    if (this$excludedAttributeReferences == null ? other$excludedAttributeReferences != null : !this$excludedAttributeReferences.equals(other$excludedAttributeReferences))
-      return false;
-    return true;
+  public PageRequest getPageRequest() {
+    return pageRequest;
   }
 
-  protected boolean canEqual(final Object other) {
-    return other instanceof ScimRequestContext;
+  public ScimRequestContext setPageRequest(PageRequest pageRequest) {
+    this.pageRequest = pageRequest;
+    return this;
   }
 
+  public SortRequest getSortRequest() {
+    return sortRequest;
+  }
+
+  public ScimRequestContext setSortRequest(SortRequest sortRequest) {
+    this.sortRequest = sortRequest;
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+
+    ScimRequestContext that = (ScimRequestContext) o;
+    return Objects.equals(getAttributeReferences(), that.getAttributeReferences()) && Objects.equals(getExcludedAttributeReferences(), that.getExcludedAttributeReferences()) && Objects.equals(getPageRequest(), that.getPageRequest()) && Objects.equals(getSortRequest(), that.getSortRequest());
+  }
+
+  @Override
   public int hashCode() {
-    final int PRIME = 59;
-    int result = 1;
-    final Object $attributeReferences = this.getAttributeReferences();
-    result = result * PRIME + ($attributeReferences == null ? 43 : $attributeReferences.hashCode());
-    final Object $excludedAttributeReferences = this.getExcludedAttributeReferences();
-    result = result * PRIME + ($excludedAttributeReferences == null ? 43 : $excludedAttributeReferences.hashCode());
+    int result = Objects.hashCode(getAttributeReferences());
+    result = 31 * result + Objects.hashCode(getExcludedAttributeReferences());
+    result = 31 * result + Objects.hashCode(getPageRequest());
+    result = 31 * result + Objects.hashCode(getSortRequest());
     return result;
   }
 
+  @Override
   public String toString() {
-    return "ScimRequestContext(attributeReferences=" + this.getAttributeReferences() + ", excludedAttributeReferences=" + this.getExcludedAttributeReferences() + ")";
+    return "ScimRequestContext{" +
+      "attributeReferences=" + attributeReferences +
+      ", excludedAttributeReferences=" + excludedAttributeReferences +
+      ", pageRequest=" + pageRequest +
+      ", sortRequest=" + sortRequest +
+      '}';
   }
 }

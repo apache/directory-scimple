@@ -175,7 +175,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
-    T created = repository.create(resource, attributeReferences, excludedAttributeReferences);
+    T created = repository.create(resource, new ScimRequestContext(attributeReferences, excludedAttributeReferences, null, null));
 
     EntityTag etag = fromVersion(created);
 
@@ -304,8 +304,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         ProcessingExtension processingExtension = CDI.current().select(class1).get();
         if (processingExtension instanceof AttributeFilterExtension) {
           AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
-          ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
-
+          ScimRequestContext scimRequestContext = new ScimRequestContext()
+              .setAttributeReferences(attributeReferences)
+              .setExcludedAttributeReferences(excludedAttributeReferences);
           try {
             resource = (T) attributeFilterExtension.filterAttributes(resource, scimRequestContext);
             log.debug("Resource now - " + resource.toString());

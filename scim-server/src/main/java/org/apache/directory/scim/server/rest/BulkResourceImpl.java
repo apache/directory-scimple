@@ -43,6 +43,7 @@ import org.apache.directory.scim.protocol.data.BulkOperation.StatusWrapper;
 import org.apache.directory.scim.protocol.data.BulkRequest;
 import org.apache.directory.scim.protocol.data.BulkResponse;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
+import org.apache.directory.scim.spec.filter.attribute.ScimRequestContext;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.schema.Schema;
@@ -417,7 +418,7 @@ public class BulkResourceImpl implements BulkResource {
 
       log.debug("Creating {}", scimResource);
 
-      ScimResource newScimResource = repository.create(scimResource, Collections.emptySet(), Collections.emptySet());
+      ScimResource newScimResource = repository.create(scimResource, new ScimRequestContext());
       String bulkOperationPath = operationResult.getPath();
       String newResourceId = newScimResource.getId();
       String newResourceUri = uriInfo.getBaseUriBuilder()

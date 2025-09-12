@@ -30,6 +30,7 @@ import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortRequest;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.attribute.ScimRequestContext;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -60,9 +61,25 @@ public interface Repository<T extends ScimResource> {
    * @return The newly created ScimResource.
    * @throws ResourceException When the ScimResource cannot be
    *         created.
+   * @deprecated call or implement create(ScimResource, ScimRequestContext)
+   * @see #create(ScimResource, ScimRequestContext)
    */
+  @Deprecated(forRemoval = true)
   T create(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
-  
+
+  /**
+   * Allows the SCIM server's REST implementation to create a resource via
+   * a POST to a valid end-point.
+   *
+   * @param resource The ScimResource to create and persist.
+   * @param requestContext The request context that can be used to optimize the retrieval of data.
+   * @return The newly created ScimResource.
+   * @throws ResourceException When the ScimResource cannot be created.
+   */
+  default T create(T resource, ScimRequestContext requestContext) throws ResourceException {
+    return create(resource, requestContext.getAttributeReferences(), requestContext.getExcludedAttributeReferences());
+  }
+
   /**
    * Allows the SCIM server's REST implementation to update an existing
    * resource via a PUT to a valid end-point.
