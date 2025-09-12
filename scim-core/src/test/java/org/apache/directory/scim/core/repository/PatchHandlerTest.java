@@ -51,7 +51,7 @@ public class PatchHandlerTest {
   public PatchHandlerTest() {
     SchemaRegistry schemaRegistry = new SchemaRegistry();
     schemaRegistry.addSchema(ScimUser.class, List.of(EnterpriseExtension.class));
-    schemaRegistry.addSchema(ScimGroup.class, null);
+    schemaRegistry.addSchema(ScimGroup.class);
     this.patchHandler = new DefaultPatchHandler(schemaRegistry);
   }
 

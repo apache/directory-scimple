@@ -55,9 +55,10 @@ public class SchemaRegistryTest {
     groupType.setSchemaUrn(ScimGroup.SCHEMA_URI);
     groupType.setName(ScimGroup.RESOURCE_NAME);
     groupType.setDescription("Top level ScimGroup");
+    groupType.setSchemaExtensions(List.of());
 
     schemaRegistry.addSchema(ScimUser.class, List.of(ExampleObjectExtension.class));
-    schemaRegistry.addSchema(ScimGroup.class, null);
+    schemaRegistry.addSchema(ScimGroup.class);
 
     assertThat(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).isEqualTo(userSchema);
     assertThat(schemaRegistry.getAllSchemas()).containsOnly(userSchema, groupsSchema, extSchema);
