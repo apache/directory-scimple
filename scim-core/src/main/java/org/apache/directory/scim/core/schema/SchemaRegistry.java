@@ -71,9 +71,13 @@ public class SchemaRegistry implements Serializable {
     return schemaMap.get(schemaUrn);
   }
 
-  private void addSchema(Schema schema) {
+  private void addSchemaToRegistry(Schema schema) {
     log.debug("Adding schema " + schema.getId() + " into the registry");
     schemaMap.put(schema.getId(), schema);
+  }
+
+  public <T extends ScimResource> void addSchema(Class<T> clazz) {
+    this.addSchema(clazz, List.of());
   }
 
   public <T extends ScimResource> void addSchema(Class<T> clazz, List<Class<? extends ScimExtension>> extensionList) {
@@ -88,7 +92,7 @@ public class SchemaRegistry implements Serializable {
     String schemaUrn = scimResourceType.schema();
     String endpoint = scimResourceType.endpoint();
 
-    addSchema(Schemas.schemaFor(clazz));
+    addSchemaToRegistry(Schemas.schemaFor(clazz));
     addScimResourceSchemaUrn(schemaUrn, clazz);
     addScimResourceEndPoint(endpoint, clazz);
     addResourceType(resourceType);
@@ -96,7 +100,7 @@ public class SchemaRegistry implements Serializable {
     if (extensionList != null) {
       for (Class<? extends ScimExtension> scimExtension : extensionList) {
         log.debug("Calling addSchema on an extension: " + scimExtension);
-        addSchema(Schemas.schemaForExtension(scimExtension));
+        addSchemaToRegistry(Schemas.schemaForExtension(scimExtension));
         log.debug("Registering a extension of type: " + scimExtension);
         addExtension(clazz, scimExtension);
       }
