@@ -873,7 +873,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.46.0</version>
+            <version>0.47.0</version>
             <configuration>
               <skip>true</skip>
             </configuration>
@@ -906,7 +906,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.46.0</version>
+            <version>0.47.0</version>
             <configuration>
               <skip>true</skip>
             </configuration>
