@@ -603,7 +603,7 @@
         <plugin>
           <groupId>org.wildfly.plugins</groupId>
           <artifactId>wildfly-maven-plugin</artifactId>
-          <version>5.1.4.Final</version>
+          <version>5.1.5.Final</version>
           <configuration>
             <id>${jbossServerId}</id>
             <hostname>${jbossHostname}</hostname>
