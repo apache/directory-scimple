@@ -59,8 +59,12 @@ public class ScimpleITSupport {
   private final Map<String, String> requestHeaders = Map.of(
     "User-Agent", "Apache SCIMple Compliance Tests",
     "Accept-Charset", "utf-8",
-    "Authorization", "TODO"
+    "Authorization", authorization()
   );
+
+  protected String authorization() {
+    return "TODO";
+  }
 
   protected URI uri() {
     return uri;
@@ -69,7 +73,6 @@ public class ScimpleITSupport {
   protected URI uri(String path) {
     return uri(path, emptyMap());
   }
-
 
   protected URI uri(String path, Map<String, String> query) {
     URI uri = uri();
