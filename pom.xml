@@ -39,7 +39,7 @@
     <project.build.outputTimestamp>2024-01-09T22:20:58Z</project.build.outputTimestamp>
     <version.previous>1.0.0-M1</version.previous>
     <previous.tag>${version.previous}</previous.tag>
-    <jdk.version>11</jdk.version>
+    <jdk.version>17</jdk.version>
     <max.jdk.version>${jdk.version}</max.jdk.version>
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
     <maven.compiler.target>${jdk.version}</maven.compiler.target>
