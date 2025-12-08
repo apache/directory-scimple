@@ -20,7 +20,8 @@
 			},
 			"extensions": [
 				"streetsidesoftware.code-spell-checker",
-				"vscjava.vscode-java-pack"
+				"vscjava.vscode-java-pack",
+				"vmware.vscode-boot-dev-pack"
 			]
 		}
 	},
