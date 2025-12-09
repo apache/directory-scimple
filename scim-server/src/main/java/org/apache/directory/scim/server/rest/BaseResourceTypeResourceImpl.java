@@ -301,7 +301,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         ProcessingExtension processingExtension = CDI.current().select(class1).get();
         if (processingExtension instanceof AttributeFilterExtension) {
           AttributeFilterExtension attributeFilterExtension = (AttributeFilterExtension) processingExtension;
-          ScimRequestContext scimRequestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences);
+          ScimRequestContext scimRequestContext = new ScimRequestContext()
+            .setIncludedAttributes(attributeReferences)
+            .setExcludedAttributes(excludedAttributeReferences);
 
           try {
             resource = (T) attributeFilterExtension.filterAttributes(resource, scimRequestContext);
