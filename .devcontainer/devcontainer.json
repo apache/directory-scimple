@@ -8,7 +8,8 @@
 			"version": "none",
 			"installMaven": "false",
 			"installGradle": "false"
-		}
+		},
+		"ghcr.io/devcontainers/features/git-lfs:1": {}
 	},
 
 	// Configure tool-specific properties.
