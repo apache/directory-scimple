@@ -607,15 +607,6 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.wildfly.plugins</groupId>
-          <artifactId>wildfly-maven-plugin</artifactId>
-          <version>5.1.5.Final</version>
-          <configuration>
-            <id>${jbossServerId}</id>
-            <hostname>${jbossHostname}</hostname>
-          </configuration>
-        </plugin>
-        <plugin>
           <groupId>io.ultreia.java4all.jgitflow</groupId>
           <artifactId>jgitflow-maven-plugin</artifactId>
           <version>1.0.0-rc-1</version>

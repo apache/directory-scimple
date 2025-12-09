@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.scim.core.repository.ScimRequestContext;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
