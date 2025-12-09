@@ -19,17 +19,12 @@
 
 package org.apache.directory.scim.core.repository;
 
-import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.directory.scim.spec.exception.ResourceException;
-import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.Filter;
-import org.apache.directory.scim.spec.filter.PageRequest;
-import org.apache.directory.scim.spec.filter.SortRequest;
-import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -55,14 +50,13 @@ public interface Repository<T extends ScimResource> {
    * a POST to a valid end-point.
    * 
    * @param resource The ScimResource to create and persist.
-   * @param includedAttributes optional set of attributes to include from the returned ScimResource, may be used to optimize queries.
-   * @param excludedAttributes optional set of attributes to exclude from the returned ScimResource, may be used to optimize queries.
+   * @param requestContext the context object holding additional information about the request.
    * @return The newly created ScimResource.
    * @throws ResourceException When the ScimResource cannot be
    *         created.
    */
-  T create(T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
-  
+  T create(T resource, ScimRequestContext requestContext) throws ResourceException;
+
   /**
    * Allows the SCIM server's REST implementation to update an existing
    * resource via a PUT to a valid end-point.
@@ -72,14 +66,12 @@ public interface Repository<T extends ScimResource> {
    *
    *
    * @param id the identifier of the ScimResource to update and persist.
-   * @param etags optional ETag(s) in 'If-Match' header. If not null, to avoid dirty writing, {@code ScimResource.meta.version} must match one of this set (the set should contain only one element).
-   * @param resource an updated resource to persist
-   * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
-   * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
+   * @param resource an updated resource to persist.
+   * @param requestContext the context object holding additional information about the request.
    * @return The newly updated ScimResource.
    * @throws ResourceException When the ScimResource cannot be updated.
    */
-  T update(String id, @Nullable Set<ETag> etags, T resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+  T update(String id, T resource, ScimRequestContext requestContext) throws ResourceException;
 
   /**
    * Allows the SCIM server's REST implementation to update an existing
@@ -89,25 +81,22 @@ public interface Repository<T extends ScimResource> {
    * it can be used as a mechanism for caching and to ensure clients do not inadvertently overwrite other changes.
    *
    * @param id the identifier of the ScimResource to update and persist.
-   * @param etags optional ETag(s) in 'If-Match' header. If not null, to avoid dirty writing, {@code ScimResource.meta.version} must match one of this set (the set should contain only one element).
    * @param patchOperations a list of patch operations to apply to an existing resource.
-   * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
-   * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
+   * @param requestContext the context object holding additional information about the request.
    * @return The newly updated ScimResource.
    * @throws ResourceException When the ScimResource cannot be updated.
    */
-  T patch(String id, @Nullable Set<ETag> etags, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+  T patch(String id, List<PatchOperation> patchOperations, ScimRequestContext requestContext) throws ResourceException;
 
   /**
    * Retrieves the ScimResource associated with the provided identifier.
    * @param id The identifier of the target ScimResource.
-   * @param includedAttributes optional set of attributes to include from ScimResource, may be used to optimize queries.
-   * @param excludedAttributes optional set of attributes to exclude from ScimResource, may be used to optimize queries.
+   * @param requestContext the context object holding additional information about the request.
    * @return The requested ScimResource.
    * @throws ResourceException When the ScimResource cannot be
    *         retrieved.
    */
-  T get(String id, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+  T get(String id, ScimRequestContext requestContext) throws ResourceException;
   
   /**
    * Finds and retrieves all ScimResource objects known to the persistence
@@ -117,21 +106,15 @@ public interface Repository<T extends ScimResource> {
    * SortRequest.
    * 
    * @param filter The filter that determines the ScimResources that will be
-   *        part of the ResultList
-   * @param pageRequest For paged requests, this object specifies the start
-   *        index and number of ScimResources that should be returned.
-   * @param sortRequest Specifies which fields the returned ScimResources
-   *        should be sorted by and whether the sort order is ascending or
-   *        descending.
-   * @param includedAttributes optional set of attributes to include from returned ScimResources, may be used to optimize queries.
-   * @param excludedAttributes optional set of attributes to exclude from returned ScimResources, may be used to optimize queries.
+   *        part of the ResultList.
+   * @param requestContext the context object holding additional information about the request.
    * @return A list of the ScimResources that pass the filter criteria,
    *         truncated to match the requested "page" and sorted according
    *         to the provided requirements.
    * @throws ResourceException If one or more ScimResources
    *         cannot be retrieved.
    */
-  FilterResponse<T> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws ResourceException;
+  FilterResponse<T> find(Filter filter, ScimRequestContext requestContext) throws ResourceException;
   
   /**
    * Deletes the ScimResource with the provided identifier (if it exists).

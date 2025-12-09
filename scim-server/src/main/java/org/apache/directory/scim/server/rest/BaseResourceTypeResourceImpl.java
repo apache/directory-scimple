@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import org.apache.directory.scim.core.repository.annotations.ScimProcessingExtension;
 import org.apache.directory.scim.core.repository.extensions.AttributeFilterExtension;
 import org.apache.directory.scim.core.repository.extensions.ProcessingExtension;
-import org.apache.directory.scim.spec.filter.attribute.ScimRequestContext;
 import org.apache.directory.scim.core.repository.extensions.ClientFilterException;
 import org.apache.directory.scim.protocol.adapter.FilterWrapper;
 import org.apache.directory.scim.protocol.BaseResourceTypeResource;
@@ -58,9 +57,8 @@ import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.Filter;
-import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.SortOrder;
-import org.apache.directory.scim.spec.filter.SortRequest;
+import org.apache.directory.scim.core.repository.ScimRequestContext;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> implements BaseResourceTypeResource<T> {
@@ -116,7 +114,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     T resource = null;
     try {
-      resource = repository.get(id, attributeReferences, excludedAttributeReferences);
+      resource = repository.get(id, new ScimRequestContext(attributeReferences, excludedAttributeReferences));
     } catch (UnableToRetrieveResourceException e2) {
       Status status = Status.fromStatusCode(e2.getStatus());
       if (status.getFamily().equals(Family.SERVER_ERROR)) {
@@ -175,7 +173,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
-    T created = repository.create(resource, attributeReferences, excludedAttributeReferences);
+    T created = repository.create(resource, new ScimRequestContext(attributeReferences, excludedAttributeReferences, null, null, null));
 
     EntityTag etag = fromVersion(created);
 
@@ -211,12 +209,11 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     validateAttributes(attributeReferences, excludedAttributeReferences);
 
     Filter filter = request.getFilter();
-    PageRequest pageRequest = request.getPageRequest();
-    SortRequest sortRequest = request.getSortRequest();
+    ScimRequestContext requestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences, request.getPageRequest(),  request.getSortRequest(), null);
 
     ListResponse<T> listResponse = new ListResponse<>();
 
-    FilterResponse<T> filterResp = repository.find(filter, pageRequest, sortRequest, attributeReferences, excludedAttributeReferences);
+    FilterResponse<T> filterResp = repository.find(filter, requestContext);
 
     // If no resources are found, we should still return a ListResponse with
     // the totalResults set to 0;
@@ -229,7 +226,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
                                             .size());
       listResponse.setItemsPerPage(filterResp.getResources()
                                              .size());
-      int startIndex = Optional.ofNullable(filterResp.getPageRequest().getStartIndex()).orElse(1);
+      int startIndex = Optional.ofNullable(request.getPageRequest().getStartIndex()).orElse(1);
       listResponse.setStartIndex(startIndex);
       listResponse.setTotalResults(filterResp.getTotalResults());
 
@@ -253,14 +250,13 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @Override
   public Response update(T resource, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(attributes, excludedAttributes, (etags, includeAttributes, excludeAttributes, repository)
-      -> repository.update(id, etags, resource, includeAttributes, excludeAttributes));
+    return update(attributes, excludedAttributes, (requestContext, repository) -> repository.update(id, resource, requestContext));
   }
 
   @Override
   public Response patch(PatchRequest patchRequest, String id, AttributeReferenceListWrapper attributes, AttributeReferenceListWrapper excludedAttributes) throws ScimException, ResourceException {
-    return update(attributes, excludedAttributes, (etags, includeAttributes, excludeAttributes, repository)
-      -> repository.patch(id, etags, patchRequest.getPatchOperationList(), includeAttributes, excludeAttributes));
+    return update(attributes, excludedAttributes, (requestContext, repository)
+      -> repository.patch(id, patchRequest.getPatchOperationList(), requestContext));
   }
 
   @Override
@@ -280,8 +276,9 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
     String requestEtag = headers.getHeaderString("If-Match");
     Set<ETag> etags = EtagParser.parseETag(requestEtag);
+    ScimRequestContext requestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences, null, null, etags);
 
-    T updated = updateFunction.update(etags, attributeReferences, excludedAttributeReferences, repository);
+    T updated = updateFunction.update(requestContext, repository);
 
     // Process Attributes
     updated = processFilterAttributeExtensions(repository, updated, attributeReferences, excludedAttributeReferences);
@@ -372,6 +369,6 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   @FunctionalInterface
   private interface UpdateFunction<T extends ScimResource> {
-    T update(Set<ETag> etags, Set<AttributeReference> includeAttributes, Set<AttributeReference> excludeAttributes, Repository<T> repository) throws ResourceException;
+    T update(ScimRequestContext requestContext, Repository<T> repository) throws ResourceException;
   }
 }

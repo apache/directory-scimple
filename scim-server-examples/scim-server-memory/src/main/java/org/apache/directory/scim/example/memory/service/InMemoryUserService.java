@@ -24,12 +24,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
-import org.apache.directory.scim.core.repository.ETag;
 import org.apache.directory.scim.core.repository.PatchHandler;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.example.memory.extensions.LuckyNumberExtension;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
+import org.apache.directory.scim.core.repository.ScimRequestContext;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
 import org.apache.directory.scim.spec.extension.EnterpriseExtension;
@@ -37,8 +37,6 @@ import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.PageRequest;
-import org.apache.directory.scim.spec.filter.SortRequest;
-import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
@@ -48,7 +46,6 @@ import org.apache.directory.scim.spec.resources.ScimUser;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -122,10 +119,10 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   /**
-   * @see Repository#create(ScimResource, java.util.Set, java.util.Set)
+   * @see Repository#create(ScimResource, ScimRequestContext)
    */
   @Override
-  public ScimUser create(ScimUser resource, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) throws UnableToCreateResourceException {
+  public ScimUser create(ScimUser resource, ScimRequestContext requestContext) throws UnableToCreateResourceException {
     String id = UUID.randomUUID().toString();
 
     // check to make sure the user doesn't already exist
@@ -142,7 +139,7 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   @Override
-  public ScimUser update(String id, Set<ETag> etags, ScimUser resource, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+  public ScimUser update(String id, ScimUser resource, ScimRequestContext requestContext) throws ResourceException {
     if (!users.containsKey(id)) {
       throw new ResourceNotFoundException(id);
     }
@@ -151,20 +148,20 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   @Override
-  public ScimUser patch(String id, Set<ETag> etags, List<PatchOperation> patchOperations, Set<AttributeReference> includedAttributeReferences, Set<AttributeReference> excludedAttributeReferences) throws ResourceException {
+  public ScimUser patch(String id, List<PatchOperation> patchOperations, ScimRequestContext requestContext) throws ResourceException {
     if (!users.containsKey(id)) {
       throw new ResourceNotFoundException(id);
     }
-    ScimUser resource = patchHandler.apply(get(id, includedAttributeReferences, excludedAttributeReferences), patchOperations);
+    ScimUser resource = patchHandler.apply(get(id, requestContext), patchOperations);
     users.put(id, resource);
     return resource;
   }
 
   /**
-   * @see Repository#get(java.lang.String, java.util.Set, java.util.Set)
+   * @see Repository#get(java.lang.String, ScimRequestContext)
    */
   @Override
-  public ScimUser get(String id, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) {
+  public ScimUser get(String id, ScimRequestContext requestContext) {
     return users.get(id);
   }
 
@@ -179,15 +176,12 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   /**
-   * @see Repository#find(Filter, PageRequest, SortRequest, java.util.Set, java.util.Set)
+   * @see Repository#find(Filter, ScimRequestContext)
    */
   @Override
-  public FilterResponse<ScimUser> find(Filter filter, PageRequest pageRequest, SortRequest sortRequest, Set<AttributeReference> includedAttributes, Set<AttributeReference> excludedAttributes) {
-
-    long count = pageRequest.getCount() != null ? pageRequest.getCount() : users.size();
-    long startIndex = pageRequest.getStartIndex() != null
-      ? pageRequest.getStartIndex() - 1 // SCIM is 1-based indexed
-      : 0;
+  public FilterResponse<ScimUser> find(Filter filter, ScimRequestContext requestContext) {
+    long count = requestContext.getPageRequest().map(PageRequest::getCount).orElse(users.size());
+    long startIndex = requestContext.getPageRequest().map(PageRequest::getStartIndex).map(it -> it - 1).orElse(0);
 
     List<ScimUser> result = users.values().stream()
       .skip(startIndex)
@@ -195,7 +189,7 @@ public class InMemoryUserService implements Repository<ScimUser> {
       .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimUser.SCHEMA_URI)))
       .collect(Collectors.toList());
 
-    return new FilterResponse<>(result, pageRequest, result.size());
+    return new FilterResponse<>(result, result.size());
   }
 
   /**

@@ -24,14 +24,12 @@ import java.util.Collection;
 public class FilterResponse<T> {
   
   private Collection<T> resources;
-  private PageRequest pageRequest;
   private int totalResults;
   
   public FilterResponse() {}
   
-  public FilterResponse(Collection<T> resources, PageRequest pageRequest, int totalResults) {
+  public FilterResponse(Collection<T> resources, int totalResults) {
     this.resources = resources;
-    this.pageRequest = pageRequest;
     this.totalResults = totalResults;
   }
 
@@ -41,15 +39,6 @@ public class FilterResponse<T> {
 
   public FilterResponse<T> setResources(Collection<T> resources) {
     this.resources = resources;
-    return this;
-  }
-
-  public PageRequest getPageRequest() {
-    return this.pageRequest;
-  }
-
-  public FilterResponse<T> setPageRequest(PageRequest pageRequest) {
-    this.pageRequest = pageRequest;
     return this;
   }
 
@@ -70,10 +59,6 @@ public class FilterResponse<T> {
     final Object this$resources = this.getResources();
     final Object other$resources = other.getResources();
     if (this$resources == null ? other$resources != null : !this$resources.equals(other$resources)) return false;
-    final Object this$pageRequest = this.getPageRequest();
-    final Object other$pageRequest = other.getPageRequest();
-    if (this$pageRequest == null ? other$pageRequest != null : !this$pageRequest.equals(other$pageRequest))
-      return false;
     if (this.getTotalResults() != other.getTotalResults()) return false;
     return true;
   }
@@ -87,13 +72,11 @@ public class FilterResponse<T> {
     int result = 1;
     final Object $resources = this.getResources();
     result = result * PRIME + ($resources == null ? 43 : $resources.hashCode());
-    final Object $pageRequest = this.getPageRequest();
-    result = result * PRIME + ($pageRequest == null ? 43 : $pageRequest.hashCode());
     result = result * PRIME + this.getTotalResults();
     return result;
   }
 
   public String toString() {
-    return "FilterResponse(resources=" + this.getResources() + ", pageRequest=" + this.getPageRequest() + ", totalResults=" + this.getTotalResults() + ")";
+    return "FilterResponse(resources=" + this.getResources() + ", totalResults=" + this.getTotalResults() + ")";
   }
 }

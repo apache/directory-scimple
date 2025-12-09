@@ -24,6 +24,9 @@ import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import org.apache.directory.scim.server.rest.ScimResourceHelper;
+
+import java.util.Set;
 
 import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
 
@@ -35,5 +38,10 @@ public class RestApplication extends Application {
     return new ServerConfiguration()
       .setId("scimple-in-memory-example")
       .addAuthenticationSchema(httpBasic());
+  }
+
+  @Override
+  public Set<Class<?>> getClasses() {
+    return ScimResourceHelper.scimpleFeatureAndResourceClasses();
   }
 }

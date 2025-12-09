@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.scim.core.repository.ScimRequestContext;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.server.exception.UnableToDeleteResourceException;
@@ -290,7 +291,7 @@ public class BulkResourceImpl implements BulkResource {
         Class<ScimResource> scimResourceClass = (Class<ScimResource>) scimResource.getClass();
         Repository<ScimResource> repository = repositoryRegistry.getRepository(scimResourceClass);
 
-        repository.update(scimResourceId, null, scimResource, Collections.emptySet(), Collections.emptySet());
+        repository.update(scimResourceId, scimResource, ScimRequestContext.empty());
       } catch (UnresolvableOperationException unresolvableOperationException) {
         log.error("Could not complete final resolution pass, unresolvable bulkId", unresolvableOperationException);
 
@@ -417,7 +418,7 @@ public class BulkResourceImpl implements BulkResource {
 
       log.debug("Creating {}", scimResource);
 
-      ScimResource newScimResource = repository.create(scimResource, Collections.emptySet(), Collections.emptySet());
+      ScimResource newScimResource = repository.create(scimResource, ScimRequestContext.empty());
       String bulkOperationPath = operationResult.getPath();
       String newResourceId = newScimResource.getId();
       String newResourceUri = uriInfo.getBaseUriBuilder()
@@ -463,7 +464,7 @@ public class BulkResourceImpl implements BulkResource {
                                      + 1);
 
       try {
-        repository.update(id, null, scimResource, Collections.emptySet(), Collections.emptySet());
+        repository.update(id, scimResource, new ScimRequestContext());
         operationResult.setStatus(StatusWrapper.wrap(Status.OK));
       } catch (UnableToRetrieveResourceException e) {
         operationResult.setStatus(StatusWrapper.wrap(Status.NOT_FOUND));
