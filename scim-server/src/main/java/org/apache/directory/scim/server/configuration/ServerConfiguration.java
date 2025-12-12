@@ -71,6 +71,11 @@ public class ServerConfiguration {
     return this;
   }
 
+  public ServerConfiguration removeAuthenticationSchema(AuthenticationSchema authenticationSchema) {
+    authenticationSchemas.remove(authenticationSchema);
+    return this;
+  }
+
   public SupportedConfiguration getChangePasswordConfiguration() {
     return createSupportedConfiguration(isSupportsChangePassword());
   }
