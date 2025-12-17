@@ -24,11 +24,11 @@
     <relativePath>../..</relativePath>
   </parent>
 
-  <artifactId>scim-server-spring-boot</artifactId>
-  <name>SCIMple - Server - Examples - Spring Boot 3</name>
+  <artifactId>scim-server-spring-boot4</artifactId>
+  <name>SCIMple - Server - Examples - Spring Boot 4</name>
 
   <properties>
-    <module.name>org.apache.directory.scim.example.springboot</module.name>
+    <module.name>org.apache.directory.scim.example.springboot4</module.name>
   </properties>
 
   <dependencyManagement>
@@ -36,7 +36,7 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>${version.spring-boot3}</version>
+        <version>${version.spring-boot4}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -80,7 +80,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${version.spring-boot3}</version>
+        <version>${version.spring-boot4}</version>
       </plugin>
     </plugins>
   </build>

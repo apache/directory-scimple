@@ -40,7 +40,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jersey.JerseyAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,7 +53,9 @@ import java.util.Set;
  * Autoconfigures default beans needed for Apache SCIMple.
  */
 @Configuration
-@AutoConfigureBefore(JerseyAutoConfiguration.class)
+@AutoConfigureBefore(name = {
+  "org.springframework.boot.jersey.autoconfigure.JerseyAutoConfiguration", // Spring Boot 4
+  "org.springframework.boot.autoconfigure.jersey.JerseyAutoConfiguration"}) // Spring Boot 3
 public class ScimpleSpringConfiguration {
 
   @Bean
