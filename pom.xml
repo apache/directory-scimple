@@ -51,8 +51,9 @@
     <version.slf4j>2.0.16</version.slf4j>
     <version.antlr4>4.13.2</version.antlr4>
     <version.resteasy>7.0.1.Final</version.resteasy>
-    <version.spring-boot>3.5.7</version.spring-boot>
-
+    <!-- build against Spring Boot 3.x, test against 3 and 4 (until 3 is end of life) -->
+    <version.spring-boot3>3.5.8</version.spring-boot3>
+    <version.spring-boot4>4.0.0</version.spring-boot4>
     <!-- default surefire/failsafe arg lines to empty-->
     <jacoco.argline />
     <jacoco.it.argline />
@@ -68,6 +69,7 @@
     <module>scim-server-examples/scim-server-jersey</module>
     <module>scim-server-examples/scim-server-quarkus</module>
     <module>scim-server-examples/scim-server-spring-boot</module>
+    <module>scim-server-examples/scim-server-spring-boot-4</module>
     <module>support/spring-boot</module>
     <module>scim-tools</module>
     <module>scim-compliance-tests</module>
@@ -727,11 +729,6 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.14</version>
-          </plugin>
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>${version.spring-boot}</version>
           </plugin>
           <plugin>
             <groupId>io.smallrye</groupId>
