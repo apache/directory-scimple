@@ -29,7 +29,7 @@ jobs:
     with:
       name: "Apache Rat - Check"
       jobs_path: "rat / maven"
-      mvn: apache-rat:check
+      mvn: apache-rat:check -T1
       java-version: 17
       java-distribution: 'zulu'
     secrets: inherit
