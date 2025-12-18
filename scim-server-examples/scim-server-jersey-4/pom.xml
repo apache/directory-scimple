@@ -24,12 +24,32 @@
     <relativePath>../..</relativePath>
   </parent>
 
-  <artifactId>scim-server-jersey</artifactId>
-  <name>SCIMple - Server - Examples - Jersey</name>
+  <artifactId>scim-server-jersey-4</artifactId>
+  <name>SCIMple - Server - Examples - Jersey 4 (EE 11) </name>
 
   <properties>
-    <module.name>org.apache.directory.scim.example.jersey</module.name>
+    <module.name>org.apache.directory.scim.example.jersey4</module.name>
+    <max.jdk.version>17</max.jdk.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>jakarta.platform</groupId>
+        <artifactId>jakarta.jakartaee-bom</artifactId>
+        <version>11.0.0</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey</groupId>
+        <artifactId>jersey-bom</artifactId>
+        <version>${version.jersey4}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -50,6 +70,7 @@
     <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
+      <version>6.0.3.Final</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -105,7 +126,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
-          <mainClass>org.apache.directory.scim.example.jersey.JerseyApplication</mainClass>
+          <mainClass>org.apache.directory.scim.example.jersey4.JerseyApplication</mainClass>
         </configuration>
       </plugin>
     </plugins>
