@@ -22,4 +22,4 @@
 # Runs License header checks with Apache Rat
 # ----------------------------------------------------------------------------
 
-./mvnw apache-rat:check
+./mvnw apache-rat:check -T1

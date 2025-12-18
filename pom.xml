@@ -643,6 +643,9 @@
           <artifactId>apache-rat-plugin</artifactId>
           <version>0.17</version>
           <configuration>
+            <inputExcludeStd>ECLIPSE</inputExcludeStd>
+            <inputExcludeStd>IDEA</inputExcludeStd>
+            <inputExcludeStd>MAC</inputExcludeStd>
             <excludes>
               <exclude>**/*.md</exclude>
               <exclude>**/*.json</exclude>
