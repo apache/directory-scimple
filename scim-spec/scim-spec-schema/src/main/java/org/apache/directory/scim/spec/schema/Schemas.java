@@ -67,27 +67,30 @@ public final class Schemas {
   private Schemas() {}
 
   public static Schema schemaFor(Class<? extends ScimResource> clazz) throws ScimResourceInvalidException {
-    return generateSchema(clazz, getFieldsUpTo(clazz, BaseResource.class));
+    ScimResourceType srt = clazz.getAnnotation(ScimResourceType.class);
+    return schemaFor(clazz, srt.schema(), srt.name(), srt.description());
+  }
+
+  public static Schema schemaFor(Class<? extends ScimResource> clazz, String schemaUrn, String name, String description) throws ScimResourceInvalidException {
+    return generateSchema(clazz, schemaUrn, name, description, getFieldsUpTo(clazz, BaseResource.class));
   }
 
   public static Schema schemaForExtension(Class<? extends ScimExtension> clazz) throws ScimResourceInvalidException {
-    return generateSchema(clazz, getFieldsUpTo(clazz, Object.class));
+    ScimExtensionType set = clazz.getAnnotation(ScimExtensionType.class);
+    return generateSchema(clazz, set.id(), set.name(), set.description(), getFieldsUpTo(clazz, Object.class));
   }
 
-  private static Schema generateSchema(Class<?> clazz, List<Field> fieldList) throws ScimResourceInvalidException {
-
-    Schema schema = new Schema();
-
-    ScimResourceType srt = clazz.getAnnotation(ScimResourceType.class);
-    ScimExtensionType set = clazz.getAnnotation(ScimExtensionType.class);
-
-    if (srt == null && set == null) {
-      // TODO - throw?
-      log.error("Neither a ScimResourceType or ScimExtensionType annotation found");
+  private static Schema generateSchema(Class<?> clazz, String urn, String name, String description, List<Field> fieldList) throws ScimResourceInvalidException {
+    if (urn == null) {
+      throw new IllegalArgumentException("Cannot generate schema for null urn.");
     }
 
+    Schema schema = new Schema();
+    schema.setId(urn);
+    schema.setName(name);
+    schema.setDescription(description);
+
     log.debug("calling set attributes with " + fieldList.size() + " fields");
-    String urn = set != null ? set.id() : srt.schema();
     Set<String> invalidAttributes = new HashSet<>();
     Set<Schema.Attribute> createAttributes = createAttributes(urn, fieldList, invalidAttributes, clazz.getSimpleName());
     schema.setAttributes(createAttributes);
@@ -103,16 +106,6 @@ public final class Schemas {
       }
 
       throw new ScimResourceInvalidException(sb.toString());
-    }
-
-    if (srt != null) {
-      schema.setId(srt.schema());
-      schema.setDescription(srt.description());
-      schema.setName(srt.name());
-    } else {
-      schema.setId(set.id());
-      schema.setDescription(set.description());
-      schema.setName(set.name());
     }
 
     return schema;

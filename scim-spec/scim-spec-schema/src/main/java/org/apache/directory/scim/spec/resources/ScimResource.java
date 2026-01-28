@@ -53,7 +53,6 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
   private static final Logger LOG = LoggerFactory.getLogger(ScimResource.class);
 
   @XmlElement
-  @NotNull
   @ScimAttribute(returned = Returned.ALWAYS)
   Meta meta;
 
@@ -156,7 +155,7 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
     return (T) extensions.remove(se.id());
   }
 
-  public @NotNull Meta getMeta() {
+  public Meta getMeta() {
     return this.meta;
   }
 

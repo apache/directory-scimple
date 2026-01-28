@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.core.schema;
 
+import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration;
 import org.apache.directory.scim.test.stub.ExampleObjectExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.apache.directory.scim.spec.resources.ScimUser;
@@ -61,8 +62,8 @@ public class SchemaRegistryTest {
     schemaRegistry.addSchema(ScimGroup.class);
 
     assertThat(schemaRegistry.getSchema(ScimUser.SCHEMA_URI)).isEqualTo(userSchema);
-    assertThat(schemaRegistry.getAllSchemas()).containsOnly(userSchema, groupsSchema, extSchema);
-    assertThat(schemaRegistry.getAllSchemaUrns()).containsOnly(ScimUser.SCHEMA_URI, ScimGroup.SCHEMA_URI, ExampleObjectExtension.URN);
+    assertThat(schemaRegistry.getAllSchemas()).containsOnly(Schema.SCHEMA, ResourceType.SCHEMA, ServiceProviderConfiguration.SCHEMA, userSchema, groupsSchema, extSchema);
+    assertThat(schemaRegistry.getAllSchemaUrns()).containsOnly(Schema.SCHEMA_URI, ResourceType.SCHEMA_URI, ServiceProviderConfiguration.SCHEMA_URI, ScimUser.SCHEMA_URI, ScimGroup.SCHEMA_URI, ExampleObjectExtension.URN);
     assertThat(schemaRegistry.getAllResourceTypes()).containsOnly(userType, groupType);
     assertThat(schemaRegistry.getResourceType(ScimUser.RESOURCE_NAME)).isEqualTo(userType);
     assertThat(schemaRegistry.getScimResourceClassFromEndpoint("/Users")).isEqualTo(ScimUser.class);
