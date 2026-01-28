@@ -41,6 +41,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
   public static final String RESOURCE_NAME = "ServiceProviderConfig";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
+  public static final Schema SCHEMA = Schemas.schemaFor(ServiceProviderConfiguration.class, SCHEMA_URI, "Service Provider Configuration", "Specifies the schema that describes a SCIM schema");
   private static final long serialVersionUID = -6526116522184446474L;
 
   public String getDocumentationUrl() {

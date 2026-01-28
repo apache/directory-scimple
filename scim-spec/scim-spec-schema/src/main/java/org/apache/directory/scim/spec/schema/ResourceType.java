@@ -47,6 +47,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
   
   public static final String RESOURCE_NAME = "ResourceType";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ResourceType";
+  public static final Schema SCHEMA = Schemas.schemaFor(ResourceType.class, SCHEMA_URI, RESOURCE_NAME, "Specifies the schema that describes a SCIM resource type");
   private static final long serialVersionUID = -696969911228870476L;
 
   public @Size(min = 1) String getName() {
