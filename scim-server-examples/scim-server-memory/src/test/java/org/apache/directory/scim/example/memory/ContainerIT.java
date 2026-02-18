@@ -105,7 +105,7 @@ public class ContainerIT {
     static ContainerConfiguration fromConfig(String name, Properties properties) {
       boolean enabled = Boolean.parseBoolean(properties.getProperty(name + ".enabled", "true"));
       String imageName = properties.getProperty(name + ".image");
-      Duration timeout = Duration.parse(properties.getProperty(name + ".timeout", "PT30S"));
+      Duration timeout = Duration.parse(properties.getProperty(name + ".timeout", "PT60S"));
 
       if (imageName == null) {
         throw new TestInstantiationException("Missing image for " + name + ", check the '" + name + ".image' property, in container.properties");
