@@ -1,0 +1,29 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  baseBranchPatterns: ["develop"],
+  labels: ["dependencies"],
+  // Max 10 PRs in total, 10 per hour
+  prConcurrentLimit: 10,
+  prHourlyLimit: 10,
+  customManagers: [
+    {
+      // See renovate docs https://docs.renovatebot.com/modules/manager/regex/
+      customType: 'regex',
+      managerFilePatterns: [
+        '**/container.properties'
+      ],
+      matchStrings: [
+        "(?:# renovate: versioning=(?<versioning>\\S+)\\n)?[\\w-]+\\.image=(?<registryUrl>[^/]+)/(?<depName>[^:]+):(?<currentValue>.+)"
+      ],
+      registryUrlTemplate: "https://{{{registryUrl}}}",
+      datasourceTemplate: 'docker',
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}'
+    }
+  ],
+  // Dependabot handles everything else,
+  // force renovate to only look for images used by test containers and the Maven wrapper
+  enabledManagers: [
+    'maven-wrapper',
+    'custom.regex'
+  ],
+}
