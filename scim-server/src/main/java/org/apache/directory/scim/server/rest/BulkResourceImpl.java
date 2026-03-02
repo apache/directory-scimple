@@ -154,17 +154,15 @@ public class BulkResourceImpl implements BulkResource {
       // bad/missing input for method
       if (method != null && !(operationRequest.getResponse() instanceof ErrorResponse)) {
         switch (method) {
-        case POST:
-        case PUT: {
+        case POST, PUT -> {
           if (operationRequest.getData() == null) {
             errorOccurred = true;
 
             createAndSetErrorResponse(operationRequest, Status.BAD_REQUEST, "data not provided");
           }
         }
-          break;
 
-        case DELETE: {
+        case DELETE -> {
           String path = operationRequest.getPath();
 
           if (path == null) {
@@ -187,18 +185,15 @@ public class BulkResourceImpl implements BulkResource {
             }
           }
         }
-          break;
 
-        case PATCH: {
+        case PATCH -> {
           errorOccurred = true;
 
           createAndSetErrorResponse(operationRequest, Status.NOT_IMPLEMENTED, "Method not implemented: PATCH");
         }
-          break;
 
-        default: {
+        default -> {
         }
-          break;
         }
       } else if (method == null) {
         errorOccurred = true;
@@ -411,7 +406,7 @@ public class BulkResourceImpl implements BulkResource {
     Repository<ScimResource> repository = repositoryRegistry.getRepository(scimResourceClass);
 
     switch (bulkOperationMethod) {
-    case POST: {
+    case POST -> {
       log.debug("POST: {}", scimResource);
 
       this.resolveTopLevel(unresolveds, operationResult, bulkIdKeyToOperationResult);
@@ -439,9 +434,8 @@ public class BulkResourceImpl implements BulkResource {
       operationResult.setPath(null);
       operationResult.setStatus(StatusWrapper.wrap(Status.CREATED));
     }
-      break;
 
-    case DELETE: {
+    case DELETE -> {
       log.debug("DELETE: {}", operationResult.getPath());
 
       String scimResourceId = operationResult.getPath()
@@ -452,9 +446,8 @@ public class BulkResourceImpl implements BulkResource {
       repository.delete(scimResourceId);
       operationResult.setStatus(StatusWrapper.wrap(Status.NO_CONTENT));
     }
-      break;
 
-    case PUT: {
+    case PUT -> {
       log.debug("PUT: {}", scimResource);
 
       this.resolveTopLevel(unresolveds, operationResult, bulkIdKeyToOperationResult);
@@ -470,16 +463,14 @@ public class BulkResourceImpl implements BulkResource {
         operationResult.setStatus(StatusWrapper.wrap(Status.NOT_FOUND));
       }
     }
-      break;
 
-    default: {
+    default -> {
       BulkOperation.Method method = operationResult.getMethod();
       String detail = "Method not allowed: " + method;
 
       log.error("Received unallowed method: {}", method);
       createAndSetErrorResponse(operationResult, Status.METHOD_NOT_ALLOWED, detail);
     }
-      break;
     }
   }
 
