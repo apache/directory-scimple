@@ -72,8 +72,7 @@ public class PatchOperation implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof PatchOperation)) return false;
-    final PatchOperation other = (PatchOperation) o;
+    if (!(o instanceof PatchOperation other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$operation = this.getOperation();
     final Object other$operation = other.getOperation();

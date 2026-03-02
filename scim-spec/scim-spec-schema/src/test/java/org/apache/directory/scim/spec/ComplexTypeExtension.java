@@ -56,8 +56,7 @@ public class ComplexTypeExtension implements ScimExtension {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ComplexTypeExtension)) return false;
-    final ComplexTypeExtension other = (ComplexTypeExtension) o;
+    if (!(o instanceof ComplexTypeExtension other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$complexType = this.getComplexType();
     final Object other$complexType = other.getComplexType();

@@ -66,8 +66,7 @@ public class GroupExpression implements FilterExpression, ValueFilterExpression 
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof GroupExpression)) return false;
-    final GroupExpression other = (GroupExpression) o;
+    if (!(o instanceof GroupExpression other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (this.isNot() != other.isNot()) return false;
     final Object this$filterExpression = this.getFilterExpression();

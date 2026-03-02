@@ -43,8 +43,7 @@ public class UnableToRetrieveExtensionsResourceException extends ResourceExcepti
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof UnableToRetrieveExtensionsResourceException)) return false;
-    final UnableToRetrieveExtensionsResourceException other = (UnableToRetrieveExtensionsResourceException) o;
+    if (!(o instanceof UnableToRetrieveExtensionsResourceException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     return true;

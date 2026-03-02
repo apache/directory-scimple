@@ -394,8 +394,7 @@ public class ScimUser extends ScimResource implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ScimUser)) return false;
-    final ScimUser other = (ScimUser) o;
+    if (!(o instanceof ScimUser other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$active = this.getActive();

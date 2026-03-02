@@ -68,8 +68,7 @@ public class LuckyNumberExtension implements ScimExtension {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof LuckyNumberExtension)) return false;
-    final LuckyNumberExtension other = (LuckyNumberExtension) o;
+    if (!(o instanceof LuckyNumberExtension other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (this.getLuckyNumber() != other.getLuckyNumber()) return false;
     return true;

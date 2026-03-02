@@ -60,8 +60,7 @@ public class ScimException extends Exception {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ScimException)) return false;
-    final ScimException other = (ScimException) o;
+    if (!(o instanceof ScimException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$error = this.getError();

@@ -43,8 +43,7 @@ public class UnableToCreateResourceException extends ResourceException {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof UnableToCreateResourceException)) return false;
-    final UnableToCreateResourceException other = (UnableToCreateResourceException) o;
+    if (!(o instanceof UnableToCreateResourceException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     return true;

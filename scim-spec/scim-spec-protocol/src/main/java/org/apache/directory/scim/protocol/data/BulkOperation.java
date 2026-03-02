@@ -76,8 +76,7 @@ public class BulkOperation implements Serializable {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof StatusWrapper)) return false;
-      final StatusWrapper other = (StatusWrapper) o;
+      if (!(o instanceof StatusWrapper other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$code = this.getCode();
       final Object other$code = other.getCode();
@@ -200,8 +199,7 @@ public class BulkOperation implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof BulkOperation)) return false;
-    final BulkOperation other = (BulkOperation) o;
+    if (!(o instanceof BulkOperation other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$method = this.getMethod();
     final Object other$method = other.getMethod();

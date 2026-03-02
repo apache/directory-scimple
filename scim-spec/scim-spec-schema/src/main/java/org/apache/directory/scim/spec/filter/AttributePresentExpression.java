@@ -59,8 +59,7 @@ public final class AttributePresentExpression implements FilterExpression, Value
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof AttributePresentExpression)) return false;
-    final AttributePresentExpression other = (AttributePresentExpression) o;
+    if (!(o instanceof AttributePresentExpression other)) return false;
     final Object this$attributePath = this.getAttributePath();
     final Object other$attributePath = other.getAttributePath();
     if (this$attributePath == null ? other$attributePath != null : !this$attributePath.equals(other$attributePath))

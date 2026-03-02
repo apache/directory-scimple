@@ -43,8 +43,7 @@ public class ResourceException extends Exception {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ResourceException)) return false;
-    final ResourceException other = (ResourceException) o;
+    if (!(o instanceof ResourceException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     if (this.getStatus() != other.getStatus()) return false;

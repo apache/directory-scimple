@@ -98,8 +98,7 @@ public class Email implements Serializable, TypedAttribute {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Email)) return false;
-    final Email other = (Email) o;
+    if (!(o instanceof Email other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$type = this.getType();
     final Object other$type = other.getType();

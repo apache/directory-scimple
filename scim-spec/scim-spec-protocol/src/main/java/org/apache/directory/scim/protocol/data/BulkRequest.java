@@ -72,8 +72,7 @@ public class BulkRequest extends BaseResource<BulkRequest> {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof BulkRequest)) return false;
-    final BulkRequest other = (BulkRequest) o;
+    if (!(o instanceof BulkRequest other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$failOnErrors = this.getFailOnErrors();

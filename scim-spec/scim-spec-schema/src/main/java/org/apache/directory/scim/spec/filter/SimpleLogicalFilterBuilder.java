@@ -43,11 +43,10 @@ abstract class SimpleLogicalFilterBuilder implements FilterBuilder {
     if (filterExpression == null) {
       filterExpression = expression;
     } else {
-      if (!(filterExpression instanceof LogicalExpression)) {
+      if (!(filterExpression instanceof LogicalExpression le)) {
         throw new IllegalStateException("Invalid filter state");
       }
 
-      LogicalExpression le = (LogicalExpression) filterExpression;
       le.setRight(groupIfNeeded(expression));
     }
   }

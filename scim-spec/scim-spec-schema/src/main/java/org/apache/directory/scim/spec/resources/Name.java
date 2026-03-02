@@ -126,8 +126,7 @@ public class Name implements Serializable  {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Name)) return false;
-    final Name other = (Name) o;
+    if (!(o instanceof Name other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$familyName = this.getFamilyName();
     final Object other$familyName = other.getFamilyName();

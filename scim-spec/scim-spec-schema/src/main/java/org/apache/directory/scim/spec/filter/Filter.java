@@ -119,8 +119,7 @@ public class Filter implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Filter)) return false;
-    final Filter other = (Filter) o;
+    if (!(o instanceof Filter other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$expression = this.getExpression();
     final Object other$expression = other.getExpression();

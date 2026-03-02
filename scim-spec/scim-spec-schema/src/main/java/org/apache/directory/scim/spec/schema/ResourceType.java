@@ -103,8 +103,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ResourceType)) return false;
-    final ResourceType other = (ResourceType) o;
+    if (!(o instanceof ResourceType other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$name = this.getName();
@@ -180,8 +179,7 @@ public class ResourceType extends ScimResourceWithOptionalId {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof SchemaExtensionConfiguration)) return false;
-      final SchemaExtensionConfiguration other = (SchemaExtensionConfiguration) o;
+      if (!(o instanceof SchemaExtensionConfiguration other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$schemaUrn = this.getSchemaUrn();
       final Object other$schemaUrn = other.getSchemaUrn();

@@ -163,8 +163,7 @@ public class Address implements Serializable, TypedAttribute {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Address)) return false;
-    final Address other = (Address) o;
+    if (!(o instanceof Address other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$type = this.getType();
     final Object other$type = other.getType();
