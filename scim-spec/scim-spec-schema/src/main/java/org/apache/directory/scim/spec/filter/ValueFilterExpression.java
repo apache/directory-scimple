@@ -19,7 +19,8 @@
 
 package org.apache.directory.scim.spec.filter;
 
-public interface ValueFilterExpression {
+public sealed interface ValueFilterExpression
+  permits AttributeComparisonExpression, AttributePresentExpression, GroupExpression, LogicalExpression {
 
   String toFilter();
 

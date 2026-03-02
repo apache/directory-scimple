@@ -539,7 +539,7 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
-  private static abstract class UnresolvedTopLevel {
+  private static sealed abstract class UnresolvedTopLevel permits UnresolvedTopLevelBulkId, UnresolvedTopLevelComplex {
     protected final Schema.AttributeAccessor accessor;
 
     public UnresolvedTopLevel(Schema.AttributeAccessor accessor) {
@@ -549,7 +549,7 @@ public class BulkResourceImpl implements BulkResource {
     public abstract void resolve(ScimResource scimResource, Map<String, BulkOperation> bulkIdKeyToOperationResult) throws UnresolvableOperationException;
   }
 
-  private static class UnresolvedTopLevelBulkId extends UnresolvedTopLevel {
+  private static final class UnresolvedTopLevelBulkId extends UnresolvedTopLevel {
     private final String unresolvedBulkIdKey;
 
     public UnresolvedTopLevelBulkId(Schema.AttributeAccessor accessor, String bulkIdKey) {
@@ -573,7 +573,7 @@ public class BulkResourceImpl implements BulkResource {
     }
   }
 
-  private static class UnresolvedTopLevelComplex extends UnresolvedTopLevel {
+  private static final class UnresolvedTopLevelComplex extends UnresolvedTopLevel {
     public final Object complex;
     public final List<UnresolvedComplex> unresolveds;
 
