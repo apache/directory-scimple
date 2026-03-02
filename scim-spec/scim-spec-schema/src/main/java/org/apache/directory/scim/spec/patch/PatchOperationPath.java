@@ -84,8 +84,7 @@ public class PatchOperationPath implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof PatchOperationPath)) return false;
-    final PatchOperationPath other = (PatchOperationPath) o;
+    if (!(o instanceof PatchOperationPath other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$valuePathExpression = this.getValuePathExpression();
     final Object other$valuePathExpression = other.getValuePathExpression();

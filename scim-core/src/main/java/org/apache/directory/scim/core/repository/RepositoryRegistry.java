@@ -91,8 +91,7 @@ public class RepositoryRegistry {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof RepositoryRegistry)) return false;
-    final RepositoryRegistry other = (RepositoryRegistry) o;
+    if (!(o instanceof RepositoryRegistry other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$schemaRegistry = this.getSchemaRegistry();
     final Object other$schemaRegistry = other.getSchemaRegistry();

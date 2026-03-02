@@ -222,8 +222,7 @@ public class ServerConfiguration {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ServerConfiguration)) return false;
-    final ServerConfiguration other = (ServerConfiguration) o;
+    if (!(o instanceof ServerConfiguration other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$id = this.getId();
     final Object other$id = other.getId();

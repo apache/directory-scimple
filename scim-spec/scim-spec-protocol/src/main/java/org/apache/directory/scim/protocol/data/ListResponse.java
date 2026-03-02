@@ -96,8 +96,7 @@ public class ListResponse<T> extends BaseResource<ListResponse<T>> {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ListResponse)) return false;
-    final ListResponse<?> other = (ListResponse<?>) o;
+    if (!(o instanceof ListResponse other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     if (this.getTotalResults() != other.getTotalResults()) return false;

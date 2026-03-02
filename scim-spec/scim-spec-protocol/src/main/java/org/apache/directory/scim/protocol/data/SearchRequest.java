@@ -164,8 +164,7 @@ public class SearchRequest extends BaseResource<SearchRequest> {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof SearchRequest)) return false;
-    final SearchRequest other = (SearchRequest) o;
+    if (!(o instanceof SearchRequest other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$attributes = this.getAttributes();

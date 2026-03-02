@@ -124,8 +124,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ServiceProviderConfiguration)) return false;
-    final ServiceProviderConfiguration other = (ServiceProviderConfiguration) o;
+    if (!(o instanceof ServiceProviderConfiguration other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$documentationUrl = this.getDocumentationUrl();
@@ -238,8 +237,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof AuthenticationSchema)) return false;
-      final AuthenticationSchema other = (AuthenticationSchema) o;
+      if (!(o instanceof AuthenticationSchema other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$type = this.getType();
       final Object other$type = other.getType();
@@ -387,8 +385,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof SupportedConfiguration)) return false;
-      final SupportedConfiguration other = (SupportedConfiguration) o;
+      if (!(o instanceof SupportedConfiguration other)) return false;
       if (!other.canEqual((Object) this)) return false;
       if (this.isSupported() != other.isSupported()) return false;
       return true;
@@ -440,8 +437,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof BulkConfiguration)) return false;
-      final BulkConfiguration other = (BulkConfiguration) o;
+      if (!(o instanceof BulkConfiguration other)) return false;
       if (!other.canEqual((Object) this)) return false;
       if (!super.equals(o)) return false;
       if (this.getMaxOperations() != other.getMaxOperations()) return false;
@@ -482,8 +478,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof FilterConfiguration)) return false;
-      final FilterConfiguration other = (FilterConfiguration) o;
+      if (!(o instanceof FilterConfiguration other)) return false;
       if (!other.canEqual((Object) this)) return false;
       if (!super.equals(o)) return false;
       if (this.getMaxResults() != other.getMaxResults()) return false;

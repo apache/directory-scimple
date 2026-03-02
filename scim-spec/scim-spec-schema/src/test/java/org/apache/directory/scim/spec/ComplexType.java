@@ -44,8 +44,7 @@ public class ComplexType {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ComplexType)) return false;
-    final ComplexType other = (ComplexType) o;
+    if (!(o instanceof ComplexType other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$firstAttribute = this.getFirstAttribute();
     final Object other$firstAttribute = other.getFirstAttribute();

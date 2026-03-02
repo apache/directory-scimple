@@ -60,8 +60,7 @@ final public class FilterWrapper {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof FilterWrapper)) return false;
-    final FilterWrapper other = (FilterWrapper) o;
+    if (!(o instanceof FilterWrapper other)) return false;
     final Object this$filter = this.getFilter();
     final Object other$filter = other.getFilter();
     if (this$filter == null ? other$filter != null : !this$filter.equals(other$filter)) return false;

@@ -53,8 +53,7 @@ public class FilterResponse<T> {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof FilterResponse)) return false;
-    final FilterResponse<?> other = (FilterResponse<?>) o;
+    if (!(o instanceof FilterResponse other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$resources = this.getResources();
     final Object other$resources = other.getResources();

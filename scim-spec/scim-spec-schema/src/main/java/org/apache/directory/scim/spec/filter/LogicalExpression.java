@@ -90,8 +90,7 @@ public class LogicalExpression implements FilterExpression, ValueFilterExpressio
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof LogicalExpression)) return false;
-    final LogicalExpression other = (LogicalExpression) o;
+    if (!(o instanceof LogicalExpression other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$left = this.getLeft();
     final Object other$left = other.getLeft();

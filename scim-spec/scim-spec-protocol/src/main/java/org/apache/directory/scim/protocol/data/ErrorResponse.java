@@ -105,8 +105,7 @@ public class ErrorResponse extends BaseResource<ErrorResponse> {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ErrorResponse)) return false;
-    final ErrorResponse other = (ErrorResponse) o;
+    if (!(o instanceof ErrorResponse other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$detail = this.getDetail();

@@ -98,8 +98,7 @@ public class EnterpriseExtension implements ScimExtension {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof EnterpriseExtension)) return false;
-    final EnterpriseExtension other = (EnterpriseExtension) o;
+    if (!(o instanceof EnterpriseExtension other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$employeeNumber = this.getEmployeeNumber();
     final Object other$employeeNumber = other.getEmployeeNumber();
@@ -198,8 +197,7 @@ public class EnterpriseExtension implements ScimExtension {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof Manager)) return false;
-      final Manager other = (Manager) o;
+      if (!(o instanceof Manager other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$value = this.getValue();
       final Object other$value = other.getValue();

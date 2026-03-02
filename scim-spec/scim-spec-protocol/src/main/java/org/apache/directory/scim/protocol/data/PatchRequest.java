@@ -64,8 +64,7 @@ public class PatchRequest extends BaseResource<PatchRequest> {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof PatchRequest)) return false;
-    final PatchRequest other = (PatchRequest) o;
+    if (!(o instanceof PatchRequest other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$patchOperationList = this.getPatchOperationList();

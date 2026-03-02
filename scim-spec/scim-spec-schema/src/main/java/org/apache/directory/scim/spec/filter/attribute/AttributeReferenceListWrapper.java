@@ -73,8 +73,7 @@ public class AttributeReferenceListWrapper {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof AttributeReferenceListWrapper)) return false;
-    final AttributeReferenceListWrapper other = (AttributeReferenceListWrapper) o;
+    if (!(o instanceof AttributeReferenceListWrapper other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$attributeReferences = this.getAttributeReferences();
     final Object other$attributeReferences = other.getAttributeReferences();

@@ -98,8 +98,7 @@ public class Photo implements Serializable, TypedAttribute {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Photo)) return false;
-    final Photo other = (Photo) o;
+    if (!(o instanceof Photo other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$value = this.getValue();
     final Object other$value = other.getValue();

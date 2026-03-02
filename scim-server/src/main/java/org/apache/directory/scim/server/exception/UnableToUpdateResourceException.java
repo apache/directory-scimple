@@ -43,8 +43,7 @@ public class UnableToUpdateResourceException extends ResourceException {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof UnableToUpdateResourceException)) return false;
-    final UnableToUpdateResourceException other = (UnableToUpdateResourceException) o;
+    if (!(o instanceof UnableToUpdateResourceException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     return true;

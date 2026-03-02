@@ -126,8 +126,7 @@ public class ValuePathExpression implements FilterExpression {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ValuePathExpression)) return false;
-    final ValuePathExpression other = (ValuePathExpression) o;
+    if (!(o instanceof ValuePathExpression other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$attributePath = this.getAttributePath();
     final Object other$attributePath = other.getAttributePath();

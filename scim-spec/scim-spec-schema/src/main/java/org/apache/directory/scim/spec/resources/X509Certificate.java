@@ -94,8 +94,7 @@ public class X509Certificate implements Serializable, TypedAttribute {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof X509Certificate)) return false;
-    final X509Certificate other = (X509Certificate) o;
+    if (!(o instanceof X509Certificate other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$type = this.getType();
     final Object other$type = other.getType();

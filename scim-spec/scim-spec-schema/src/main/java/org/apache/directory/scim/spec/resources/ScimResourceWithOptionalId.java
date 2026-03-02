@@ -59,8 +59,7 @@ public abstract class ScimResourceWithOptionalId extends ScimResource {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ScimResourceWithOptionalId)) return false;
-    final ScimResourceWithOptionalId other = (ScimResourceWithOptionalId) o;
+    if (!(o instanceof ScimResourceWithOptionalId other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$id = this.getId();

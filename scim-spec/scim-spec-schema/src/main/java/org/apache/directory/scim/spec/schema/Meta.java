@@ -119,8 +119,7 @@ public class Meta implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Meta)) return false;
-    final Meta other = (Meta) o;
+    if (!(o instanceof Meta other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$resourceType = this.getResourceType();
     final Object other$resourceType = other.getResourceType();

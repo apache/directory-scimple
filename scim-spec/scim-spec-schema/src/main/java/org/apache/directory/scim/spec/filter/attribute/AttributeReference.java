@@ -155,8 +155,7 @@ public class AttributeReference implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof AttributeReference)) return false;
-    final AttributeReference other = (AttributeReference) o;
+    if (!(o instanceof AttributeReference other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$urn = this.getUrn();
     final Object other$urn = other.getUrn();

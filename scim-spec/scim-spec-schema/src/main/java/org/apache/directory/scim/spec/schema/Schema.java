@@ -93,8 +93,7 @@ public class Schema extends ScimResource implements AttributeContainer {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Schema)) return false;
-    final Schema other = (Schema) o;
+    if (!(o instanceof Schema other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$id = this.getId();
     final Object other$id = other.getId();
@@ -315,8 +314,7 @@ public class Schema extends ScimResource implements AttributeContainer {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof Attribute)) return false;
-      final Attribute other = (Attribute) o;
+      if (!(o instanceof Attribute other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$name = this.getName();
       final Object other$name = other.getName();
@@ -659,8 +657,7 @@ public class Schema extends ScimResource implements AttributeContainer {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof FieldAttributeAccessor)) return false;
-      final FieldAttributeAccessor other = (FieldAttributeAccessor) o;
+      if (!(o instanceof FieldAttributeAccessor other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$field = this.field;
       final Object other$field = other.field;

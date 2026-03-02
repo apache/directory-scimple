@@ -98,8 +98,7 @@ public class Role implements Serializable, TypedAttribute {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof Role)) return false;
-    final Role other = (Role) o;
+    if (!(o instanceof Role other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$type = this.getType();
     final Object other$type = other.getType();

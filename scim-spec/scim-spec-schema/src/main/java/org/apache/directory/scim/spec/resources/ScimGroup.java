@@ -127,8 +127,7 @@ public class ScimGroup extends ScimResource implements Serializable {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ScimGroup)) return false;
-    final ScimGroup other = (ScimGroup) o;
+    if (!(o instanceof ScimGroup other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$displayName = this.getDisplayName();

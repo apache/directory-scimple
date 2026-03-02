@@ -80,8 +80,7 @@ public abstract class BaseResource<SELF extends BaseResource<SELF>> implements S
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof BaseResource)) return false;
-    final BaseResource<?> other = (BaseResource<?>) o;
+    if (!(o instanceof BaseResource other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$schemas = this.getSchemas();
     final Object other$schemas = other.getSchemas();

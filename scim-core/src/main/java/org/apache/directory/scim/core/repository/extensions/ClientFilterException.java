@@ -43,8 +43,7 @@ public class ClientFilterException extends Exception {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ClientFilterException)) return false;
-    final ClientFilterException other = (ClientFilterException) o;
+    if (!(o instanceof ClientFilterException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     if (this.getStatus() != other.getStatus()) return false;

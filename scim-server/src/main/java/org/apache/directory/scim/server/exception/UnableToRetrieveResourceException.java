@@ -44,8 +44,7 @@ public class UnableToRetrieveResourceException extends ResourceException {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof UnableToRetrieveResourceException)) return false;
-    final UnableToRetrieveResourceException other = (UnableToRetrieveResourceException) o;
+    if (!(o instanceof UnableToRetrieveResourceException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     return true;

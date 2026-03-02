@@ -43,8 +43,7 @@ public class PageRequest {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof PageRequest)) return false;
-    final PageRequest other = (PageRequest) o;
+    if (!(o instanceof PageRequest other)) return false;
     if (!other.canEqual((Object) this)) return false;
     final Object this$startIndex = this.getStartIndex();
     final Object other$startIndex = other.getStartIndex();

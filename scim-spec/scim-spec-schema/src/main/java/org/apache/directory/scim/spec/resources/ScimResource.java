@@ -195,8 +195,7 @@ public abstract class ScimResource extends BaseResource<ScimResource> implements
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof ScimResource)) return false;
-    final ScimResource other = (ScimResource) o;
+    if (!(o instanceof ScimResource other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     final Object this$meta = this.getMeta();

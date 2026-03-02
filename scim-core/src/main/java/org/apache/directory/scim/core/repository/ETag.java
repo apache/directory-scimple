@@ -105,11 +105,9 @@ public class ETag {
       return true;
     }
 
-    if ( !( obj instanceof ETag ) ) {
+    if ( !( obj instanceof ETag that ) ) {
       return false;
     }
-    
-    ETag that = (ETag)obj;
     
     if ( value == null ) {
       return weak = that.weak && that.value == null;

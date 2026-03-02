@@ -575,8 +575,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     public boolean equals(final Object o) {
       if (o == this) return true;
-      if (!(o instanceof PhoneNumberBuilder)) return false;
-      final PhoneNumberBuilder other = (PhoneNumberBuilder) o;
+      if (!(o instanceof PhoneNumberBuilder other)) return false;
       if (!other.canEqual((Object) this)) return false;
       final Object this$number = this.getNumber();
       final Object other$number = other.getNumber();

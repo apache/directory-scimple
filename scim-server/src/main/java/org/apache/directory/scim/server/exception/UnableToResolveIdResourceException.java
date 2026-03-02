@@ -44,8 +44,7 @@ public class UnableToResolveIdResourceException extends ResourceException {
 
   public boolean equals(final Object o) {
     if (o == this) return true;
-    if (!(o instanceof UnableToResolveIdResourceException)) return false;
-    final UnableToResolveIdResourceException other = (UnableToResolveIdResourceException) o;
+    if (!(o instanceof UnableToResolveIdResourceException other)) return false;
     if (!other.canEqual((Object) this)) return false;
     if (!super.equals(o)) return false;
     return true;
