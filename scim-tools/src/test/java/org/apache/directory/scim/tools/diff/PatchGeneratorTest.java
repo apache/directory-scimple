@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.directory.scim.spec.resources.GroupMembership;
@@ -306,7 +305,7 @@ public class PatchGeneratorTest {
                                  .stream()
                                  .filter(e -> e.getType()
                                                .equals("work"))
-                                 .collect(Collectors.toList());
+                                 .toList();
     user2.setEmails(newEmails);
 
     List<PatchOperation> result = new PatchGenerator(schemaRegistry).diff(user1, user2);
@@ -428,7 +427,7 @@ public class PatchGeneratorTest {
     Photo photo = new Photo();
     photo.setType("photo");
     photo.setValue("photo1.png");
-    user2.setPhotos(Stream.of(photo).collect(Collectors.toList()));
+    user2.setPhotos(Stream.of(photo).toList());
 
     List<PatchOperation> operations = new PatchGenerator(schemaRegistry).diff(user1, user2);
 
@@ -870,7 +869,7 @@ public class PatchGeneratorTest {
     workAddress.setCountry("USA");
     workAddress.setPostalCode("16802");
 
-    List<Address> address = Stream.of(workAddress, homeAddress).collect(Collectors.toList());
+    List<Address> address = new ArrayList<>(List.of(workAddress, homeAddress));
     user.setAddresses(address);
 
     Email workEmail = new Email();
@@ -891,7 +890,7 @@ public class PatchGeneratorTest {
     otherEmail.setValue("outside@version.net");
     otherEmail.setDisplay("outside@version.net");
 
-    List<Email> emails = Stream.of(homeEmail, workEmail).collect(Collectors.toList());
+    List<Email> emails = new ArrayList<>(List.of(homeEmail, workEmail));
     user.setEmails(emails);
 
     //"+1(814)867-5309"
@@ -904,7 +903,7 @@ public class PatchGeneratorTest {
     workPhone.setType("work");
     workPhone.setPrimary(false);
 
-    List<PhoneNumber> phones = Stream.of(homePhone, workPhone).collect(Collectors.toList());
+    List<PhoneNumber> phones = new ArrayList<>(List.of(homePhone, workPhone));
     user.setPhoneNumbers(phones);
 
     EnterpriseExtension enterpriseExtension = new EnterpriseExtension();

@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Named
 @ApplicationScoped
@@ -143,7 +142,7 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
       .skip(startIndex)
       .limit(count)
       .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimGroup.SCHEMA_URI)))
-      .collect(Collectors.toList());
+      .toList();
 
     return new FilterResponse<>(result, result.size());
   }

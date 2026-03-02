@@ -51,7 +51,6 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.stream.Collectors.toList;
 
 /**
  * The default implementation of a PatchHandler that applies PatchOperations by walking a map equivalent
@@ -370,7 +369,7 @@ public class DefaultPatchHandler implements PatchHandler {
       Collection<Map<String, Object>> items = (Collection<Map<String, Object>>) sourceAsMap.get(attributeName);
       Predicate<Object> pred = FilterExpressions.inMemoryMap(valuePathExpression.getAttributeExpression(), schema);
 
-      Collection<Object> updatedCollection = items.stream()
+      List<Map<String, Object>> updatedCollection = items.stream()
         .map(item -> {
           // find items that need to be updated
           if (pred.test(item)) {
@@ -385,7 +384,7 @@ public class DefaultPatchHandler implements PatchHandler {
             }
           }
           return item;
-        }).collect(toList());
+        }).toList();
       sourceAsMap.put(attribute.getName(), updatedCollection);
     }
   }
@@ -499,7 +498,7 @@ public class DefaultPatchHandler implements PatchHandler {
 
           return (String) itemValue;
         })
-        .collect(toList());
+        .toList();
     }
   }
 }

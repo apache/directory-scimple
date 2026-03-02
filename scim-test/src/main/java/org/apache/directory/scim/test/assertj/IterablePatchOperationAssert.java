@@ -25,7 +25,6 @@ import org.assertj.core.api.Condition;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class IterablePatchOperationAssert extends AbstractIterableAssert<IterablePatchOperationAssert, Iterable<? extends PatchOperation>, PatchOperation, PatchOperationAssert> {
 
@@ -60,7 +59,7 @@ public class IterablePatchOperationAssert extends AbstractIterableAssert<Iterabl
     @SafeVarargs
     public final IterablePatchOperationAssert containsOnly(Condition<PatchOperation>... conditions) {
       isNotNull();
-      return containsOnly(Arrays.stream(conditions).collect(Collectors.toList()));
+      return containsOnly(Arrays.stream(conditions).toList());
     }
 
   @SafeVarargs
