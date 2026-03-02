@@ -96,16 +96,13 @@ public final class Schemas {
     schema.setAttributes(createAttributes);
 
     if (!invalidAttributes.isEmpty()) {
-      StringBuilder sb = new StringBuilder();
+      String message = """
+          Scim attributes cannot be primitive types unless they are required.  \
+          The following values were found that are primitive and not required
 
-      sb.append("Scim attributes cannot be primitive types unless they are required.  The following values were found that are primitive and not required\n\n");
+          """ + String.join("\n", invalidAttributes) + "\n";
 
-      for (String s : invalidAttributes) {
-        sb.append(s);
-        sb.append("\n");
-      }
-
-      throw new ScimResourceInvalidException(sb.toString());
+      throw new ScimResourceInvalidException(message);
     }
 
     return schema;
