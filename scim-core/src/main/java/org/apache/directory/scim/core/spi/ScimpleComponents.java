@@ -30,7 +30,6 @@ import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
-import java.util.stream.Collectors;
 
 @Dependent
 public class ScimpleComponents {
@@ -45,7 +44,7 @@ public class ScimpleComponents {
   @ApplicationScoped
   public RepositoryRegistry repositoryRegistry(SchemaRegistry schemaRegistry, Instance<Repository<? extends ScimResource>> repositoryInstances) {
     RepositoryRegistry registry = new RepositoryRegistry(schemaRegistry);
-    registry.registerRepositories(repositoryInstances.stream().collect(Collectors.toList()));
+    registry.registerRepositories(repositoryInstances.stream().toList());
     return registry;
   }
 

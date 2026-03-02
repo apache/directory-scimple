@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Creates a singleton (effectively) Repository<ScimUser> with a memory-based
@@ -187,7 +186,7 @@ public class InMemoryUserService implements Repository<ScimUser> {
       .skip(startIndex)
       .limit(count)
       .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimUser.SCHEMA_URI)))
-      .collect(Collectors.toList());
+      .toList();
 
     return new FilterResponse<>(result, result.size());
   }
