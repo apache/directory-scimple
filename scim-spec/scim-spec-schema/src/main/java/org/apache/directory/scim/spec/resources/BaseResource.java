@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.resources;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,6 +41,7 @@ import org.apache.directory.scim.spec.validator.Urn;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class BaseResource<SELF extends BaseResource<SELF>> implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = -7603956873008734403L;
 
   @XmlElement(name="schemas")

@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.resources;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -36,6 +37,7 @@ import org.apache.directory.scim.spec.annotation.ScimAttribute;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Entitlement implements Serializable, TypedAttribute {
 
+  @Serial
   private static final long serialVersionUID = -5657063764529902479L;
 
   @XmlElement(nillable=true)

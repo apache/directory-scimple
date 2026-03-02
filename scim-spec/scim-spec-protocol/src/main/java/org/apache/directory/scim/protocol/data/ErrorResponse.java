@@ -26,14 +26,16 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.spec.resources.BaseResource;
+
+import java.io.Serial;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class ErrorResponse extends BaseResource<ErrorResponse> {
 
+  @Serial
   private static final long serialVersionUID = 9045421198080348116L;
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:Error";

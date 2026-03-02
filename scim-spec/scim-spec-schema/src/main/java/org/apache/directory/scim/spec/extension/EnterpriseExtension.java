@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.extension;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -36,6 +37,7 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute.Mutability;
 @ScimExtensionType(required = false, name = "EnterpriseUser", id = EnterpriseExtension.URN, description = "Attributes commonly used in representing users that belong to, or act on behalf of, a business or enterprise.")
 public class EnterpriseExtension implements ScimExtension {
 
+  @Serial
   private static final long serialVersionUID = -6850246976790442980L;
 
   public static final String URN = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User";
@@ -152,6 +154,7 @@ public class EnterpriseExtension implements ScimExtension {
   @XmlAccessorType(XmlAccessType.NONE)
   public static class Manager implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -7930518578899296192L;
 
     @ScimAttribute(description = "The \"id\" of the SCIM resource representing the user's manager.  RECOMMENDED.")

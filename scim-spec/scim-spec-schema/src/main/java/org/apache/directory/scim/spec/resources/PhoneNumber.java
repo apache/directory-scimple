@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.resources;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -57,6 +58,7 @@ import org.apache.directory.scim.spec.phonenumber.PhoneNumberParser;
 @XmlAccessorType(XmlAccessType.NONE)
 public class PhoneNumber implements Serializable, TypedAttribute {
 
+  @Serial
   private static final long serialVersionUID = 607319505715224096L;
 
   private static final String VISUAL_SEPARATORS = "[\\(\\)\\-\\.]";
@@ -407,7 +409,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     String getFormattedExtension() {
       if (this.extension != null && !this.extension.isEmpty()) {
-        return String.format(EXTENSTION_PREFIX, this.extension);
+        return EXTENSTION_PREFIX.formatted(this.extension);
       }
 
       return null;
@@ -415,7 +417,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     String getFormattedSubAddress() {
       if (this.subAddress != null && !this.subAddress.isEmpty()) {
-        return String.format(ISUB_PREFIX, this.subAddress);
+        return ISUB_PREFIX.formatted(this.subAddress);
       }
 
       return null;
@@ -423,7 +425,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
 
     String getFormattedPhoneContext() {
       if (this.phoneContext != null && !this.phoneContext.isEmpty()) {
-        return String.format(CONTEXT_PREFIX, this.phoneContext);
+        return CONTEXT_PREFIX.formatted(this.phoneContext);
       }
 
       return null;
@@ -433,7 +435,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       String paramsFormatted = "";
       if (params != null) {
         paramsFormatted = params.entrySet().stream()
-          .map(entry -> String.format(PARAMS_STRING, entry.getKey(), entry.getValue() != null ? entry.getValue() : ""))
+          .map(entry -> PARAMS_STRING.formatted(entry.getKey(), entry.getValue() != null ? entry.getValue() : ""))
           .collect(Collectors.joining());
       }
 
@@ -441,7 +443,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
     }
 
     String getFormattedValue() {
-      String valueString = String.format(PREFIX, this.number);
+      String valueString = PREFIX.formatted(this.number);
 
       String fExtension = getFormattedExtension();
       if (fExtension != null) {

@@ -32,10 +32,12 @@ import org.apache.directory.scim.spec.filter.FilterParser;
 import org.apache.directory.scim.spec.filter.FilterParseException;
 import org.apache.directory.scim.spec.filter.ValuePathExpression;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class PatchOperationPath implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 449365558879593512L;
 
   private final ValuePathExpression valuePathExpression;

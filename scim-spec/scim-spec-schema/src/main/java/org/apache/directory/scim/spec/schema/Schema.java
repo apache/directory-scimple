@@ -27,6 +27,7 @@ import org.apache.directory.scim.spec.resources.ScimResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serial;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -43,6 +44,7 @@ import java.util.*;
 public class Schema extends ScimResource implements AttributeContainer {
 
   private static final Logger LOG = LoggerFactory.getLogger(Schema.class);
+  @Serial
   private static final long serialVersionUID = 1869782412244161741L;
   
   public static final String RESOURCE_NAME = "Schema";
@@ -155,6 +157,7 @@ public class Schema extends ScimResource implements AttributeContainer {
   @XmlAccessorType(XmlAccessType.NONE)
   public static class Attribute implements AttributeContainer {
 
+    @Serial
     private static final long serialVersionUID = 1683400114899587851L;
 
     String getPath() {

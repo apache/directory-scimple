@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.filter;
 
+import java.io.Serial;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +27,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
+
 public final class AttributeComparisonExpression implements FilterExpression, ValueFilterExpression {
+  @Serial
   private static final long serialVersionUID = -2865840428089850575L;
   private final AttributeReference attributePath;
   private final CompareOperator operation;
@@ -90,12 +93,12 @@ public final class AttributeComparisonExpression implements FilterExpression, Va
       compareValueString = "null";
     } else if (this.compareValue instanceof String) {
       compareValueString = QUOTE + this.compareValue + QUOTE;
-    } else if (this.compareValue instanceof Date) {
-      compareValueString = QUOTE + toDateTimeString((Date) this.compareValue) + QUOTE;
-    } else if (this.compareValue instanceof LocalDate) {
-      compareValueString = QUOTE + toDateString((LocalDate) this.compareValue) + QUOTE;
-    } else if (this.compareValue instanceof LocalDateTime) {
-      compareValueString = QUOTE + toDateTimeString((LocalDateTime) this.compareValue) + QUOTE;
+    } else if (this.compareValue instanceof Date date1) {
+      compareValueString = QUOTE + toDateTimeString(date1) + QUOTE;
+    } else if (this.compareValue instanceof LocalDate date) {
+      compareValueString = QUOTE + toDateString(date) + QUOTE;
+    } else if (this.compareValue instanceof LocalDateTime time) {
+      compareValueString = QUOTE + toDateTimeString(time) + QUOTE;
     } else {
       compareValueString = this.compareValue.toString();
     }

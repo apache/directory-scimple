@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.schema;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -44,7 +45,8 @@ import org.apache.directory.scim.spec.schema.Schema.Attribute.Mutability;
 @XmlType(name = "meta")
 @XmlAccessorType(XmlAccessType.NONE)
 public class Meta implements Serializable {
-  
+
+  @Serial
   private static final long serialVersionUID = -9162917034280030708L;
 
   @XmlElement

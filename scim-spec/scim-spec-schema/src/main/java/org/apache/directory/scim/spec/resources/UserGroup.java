@@ -29,6 +29,7 @@ import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
@@ -40,6 +41,7 @@ public class UserGroup implements Serializable {
   public static final String TYPE_DIRECT = "direct";
   public static final String TYPE_INDIRECT = "indirect";
 
+  @Serial
   private static final long serialVersionUID = 8698508874413555857L;
 
   public String getValue() {

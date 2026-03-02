@@ -19,12 +19,14 @@
 
 package org.apache.directory.scim.spec.filter.attribute;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.directory.scim.spec.validator.Urn;
 
 public class AttributeReference implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = -3559538009692681470L;
 
   @Urn

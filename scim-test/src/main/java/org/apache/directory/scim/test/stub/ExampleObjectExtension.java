@@ -30,6 +30,7 @@ import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Mutability;
 import org.apache.directory.scim.spec.schema.Schema.Attribute.Returned;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -38,6 +39,7 @@ import java.util.List;
 @ScimExtensionType(required = false, name = "ExampleObject", id = ExampleObjectExtension.URN, description = "Example Object Extensions.")
 public class ExampleObjectExtension implements ScimExtension {
 
+  @Serial
   private static final long serialVersionUID = -5398090056271556423L;
 
   public static final String URN = "urn:ietf:params:scim:schemas:extension:example:2.0:Object";
@@ -221,6 +223,7 @@ public class ExampleObjectExtension implements ScimExtension {
   @XmlAccessorType(XmlAccessType.NONE)
   public static class ComplexObject implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2822581434679824690L;
 
     @ScimAttribute(description = "The \"id\" of the complex object.")

@@ -19,6 +19,8 @@
 
 package org.apache.directory.scim.spec.phonenumber;
 
+import java.io.Serial;
+
 /**
  * @author heidielliott
  *
@@ -28,6 +30,7 @@ public class PhoneNumberParseException extends Exception {
   /**
    * 
    */
+  @Serial
   private static final long serialVersionUID = 1L;
 
   /**

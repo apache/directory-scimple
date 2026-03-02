@@ -29,12 +29,14 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.directory.scim.spec.adapter.PatchOperationPathAdapter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @XmlType(propOrder={"operation", "path", "value"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class PatchOperation implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 7748584008639433236L;
 
   public Type getOperation() {

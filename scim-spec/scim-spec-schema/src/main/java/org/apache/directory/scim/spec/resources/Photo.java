@@ -19,14 +19,15 @@
 
 package org.apache.directory.scim.spec.resources;
 
-import java.io.Serializable;
-
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Scim core schema, <a href="https://tools.ietf.org/html/rfc7643#section-4.1.2">section 4.1.2</a>
@@ -35,7 +36,8 @@ import org.apache.directory.scim.spec.annotation.ScimAttribute;
 @XmlType
 @XmlAccessorType(XmlAccessType.NONE)
 public class Photo implements Serializable, TypedAttribute {
-  
+
+  @Serial
   private static final long serialVersionUID = 8821620834716156789L;
  
   @XmlElement

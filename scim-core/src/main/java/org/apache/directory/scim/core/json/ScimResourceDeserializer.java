@@ -28,11 +28,13 @@ import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 public class ScimResourceDeserializer extends StdDeserializer<ScimResource> {
 
+  @Serial
   private static final long serialVersionUID = -2125441391108866034L;
   private final SchemaRegistry schemaRegistry;
 

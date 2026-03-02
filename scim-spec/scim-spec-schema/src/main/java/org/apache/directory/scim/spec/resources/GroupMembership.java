@@ -29,6 +29,7 @@ import org.apache.directory.scim.spec.annotation.ScimAttribute;
 import org.apache.directory.scim.spec.annotation.ScimResourceIdReference;
 import org.apache.directory.scim.spec.schema.Schema;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
@@ -37,6 +38,7 @@ import java.util.Objects;
 @XmlAccessorType(XmlAccessType.NONE)
 public class GroupMembership implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 6418041921926482112L;
 
   public static final String TYPE_USER = "User";

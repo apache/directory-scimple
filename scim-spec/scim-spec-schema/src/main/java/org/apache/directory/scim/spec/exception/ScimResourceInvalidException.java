@@ -19,8 +19,11 @@
 
 package org.apache.directory.scim.spec.exception;
 
+import java.io.Serial;
+
 public class ScimResourceInvalidException extends RuntimeException {
-  
+
+  @Serial
   private static final long serialVersionUID = -3378968149599082798L;
 
   public ScimResourceInvalidException(String message) {

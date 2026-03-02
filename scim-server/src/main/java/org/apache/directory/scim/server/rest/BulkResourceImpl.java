@@ -211,7 +211,7 @@ public class BulkResourceImpl implements BulkResource {
 
         if (bulkIdKey != null) {
           Set<String> reverseDependencies = transitiveReverseDependencies.getOrDefault(bulkIdKey, Collections.emptySet());
-          String detail = String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkIdKey);
+          String detail = OPERATION_DEPENDS_ON_FAILED_OPERATION.formatted(bulkIdKey);
 
           for (String dependentBulkIdKey : reverseDependencies) {
             BulkOperation dependentOperation = bulkIdKeyToOperationResult.get(dependentBulkIdKey);
@@ -370,7 +370,7 @@ public class BulkResourceImpl implements BulkResource {
 
           dependentOperationResult.setData(null);
           dependentOperationResult.setLocation(null);
-          createAndSetErrorResponse(dependentOperationResult, Status.CONFLICT, String.format(OPERATION_DEPENDS_ON_FAILED_OPERATION, bulkId, dependentBulkIdKey));
+          createAndSetErrorResponse(dependentOperationResult, Status.CONFLICT, OPERATION_DEPENDS_ON_FAILED_OPERATION.formatted(bulkId, dependentBulkIdKey));
           dependentResourceRepository.delete(dependentResourceId);
         } catch (ResourceException unableToDeleteResourceException) {
           log.error("Could not delete depenedent ScimResource after failing to update dependee", unableToDeleteResourceException);
@@ -534,7 +534,7 @@ public class BulkResourceImpl implements BulkResource {
         String resolvedId = resolvedResource.getId();
         this.accessor.set(this.object, resolvedId);
       } else {
-        throw new UnresolvableOperationException(String.format(BULK_ID_REFERS_TO_FAILED_RESOURCE, this.bulkIdKey));
+        throw new UnresolvableOperationException(BULK_ID_REFERS_TO_FAILED_RESOURCE.formatted(this.bulkIdKey));
       }
     }
   }
@@ -633,7 +633,7 @@ public class BulkResourceImpl implements BulkResource {
               unresolveds.add(unresolved);
             }
           } else {
-            throw new UnresolvableOperationException(String.format(BULK_ID_DOES_NOT_EXIST, bulkIdKey));
+            throw new UnresolvableOperationException(BULK_ID_DOES_NOT_EXIST.formatted(bulkIdKey));
           }
         }
       } else if (subAttribute.getType() == Schema.Attribute.Type.COMPLEX) {
@@ -699,7 +699,7 @@ public class BulkResourceImpl implements BulkResource {
               unresolvedTopLevels.add(unresolved);
             }
           } else {
-            throw new UnresolvableOperationException(String.format(BULK_ID_DOES_NOT_EXIST, bulkIdKey));
+            throw new UnresolvableOperationException(BULK_ID_DOES_NOT_EXIST.formatted(bulkIdKey));
           }
         }
       } else if (attribute.getType() == Schema.Attribute.Type.COMPLEX) {

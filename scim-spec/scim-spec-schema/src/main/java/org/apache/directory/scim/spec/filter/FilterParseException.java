@@ -19,6 +19,8 @@
 
 package org.apache.directory.scim.spec.filter;
 
+import java.io.Serial;
+
 /**
  * @author stevemoyer
  *
@@ -28,6 +30,7 @@ public class FilterParseException extends Exception {
   /**
    * 
    */
+  @Serial
   private static final long serialVersionUID = 1L;
 
   /**

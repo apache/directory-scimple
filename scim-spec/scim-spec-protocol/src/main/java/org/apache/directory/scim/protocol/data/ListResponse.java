@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.protocol.data;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -32,6 +33,7 @@ import org.apache.directory.scim.spec.resources.BaseResource;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ListResponse<T> extends BaseResource<ListResponse<T>> {
 
+  @Serial
   private static final long serialVersionUID = -2381780997440673136L;
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:ListResponse";

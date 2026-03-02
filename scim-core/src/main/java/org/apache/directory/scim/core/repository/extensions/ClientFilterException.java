@@ -19,8 +19,11 @@
 
 package org.apache.directory.scim.core.repository.extensions;
 
+import java.io.Serial;
+
 public class ClientFilterException extends Exception {
 
+  @Serial
   private static final long serialVersionUID = 3308947684934769952L;
 
   private final int status;
