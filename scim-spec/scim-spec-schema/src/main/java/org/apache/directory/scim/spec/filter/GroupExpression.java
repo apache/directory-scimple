@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.filter;
 
-public class GroupExpression implements FilterExpression, ValueFilterExpression {
+public final class GroupExpression implements FilterExpression, ValueFilterExpression {
 
   boolean not;
   FilterExpression filterExpression;

@@ -22,7 +22,8 @@ package org.apache.directory.scim.spec.filter;
 import java.io.Serializable;
 import java.util.function.Function;
 
-public interface FilterExpression extends Serializable {
+public sealed interface FilterExpression extends Serializable
+  permits AttributeComparisonExpression, AttributePresentExpression, GroupExpression, LogicalExpression, ValuePathExpression {
   
   String toFilter();
 

@@ -19,7 +19,7 @@
 
 package org.apache.directory.scim.spec.filter;
 
-public class LogicalExpression implements FilterExpression, ValueFilterExpression {
+public final class LogicalExpression implements FilterExpression, ValueFilterExpression {
 
   FilterExpression left;
   LogicalOperator operator;
