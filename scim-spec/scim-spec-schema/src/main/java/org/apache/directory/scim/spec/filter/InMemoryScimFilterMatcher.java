@@ -206,8 +206,7 @@ class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<
           && actualValue.toString().contains(compareValue.toString());
       }
 
-      if (actualValue instanceof Comparable) {
-        Comparable actual = (Comparable) actualValue;
+      if (actualValue instanceof Comparable actual) {
         Comparable compare = (Comparable) compareValue;
         return CompareOperatorPredicate.naturalOrder(op, compare).test(actual);
       }

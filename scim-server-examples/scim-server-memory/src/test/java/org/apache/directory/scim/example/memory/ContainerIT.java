@@ -34,7 +34,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
@@ -49,7 +48,7 @@ public class ContainerIT {
   static Stream<Arguments> containers() {
 
     // this project's war file to test
-    Path warFile = Paths.get("target/scim-server-memory.war");
+    Path warFile = Path.of("target/scim-server-memory.war");
 
     Map<String, Function<ContainerConfiguration, WebAppContainer<?>>> containers = Map.of(
       "payara", config -> new PayaraContainer(config.imageName, warFile, config.timeout),

@@ -23,8 +23,11 @@ package org.apache.directory.scim.server.exception;
 import jakarta.ws.rs.core.Response.Status;
 import org.apache.directory.scim.spec.exception.ResourceException;
 
+import java.io.Serial;
+
 public class UnableToResolveIdResourceException extends ResourceException {
 
+  @Serial
   private static final long serialVersionUID = -7401709416973728017L;
 
   public UnableToResolveIdResourceException(Status status, String message) {

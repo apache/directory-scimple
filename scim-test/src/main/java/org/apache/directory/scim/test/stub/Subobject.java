@@ -22,6 +22,7 @@ package org.apache.directory.scim.test.stub;
 import jakarta.xml.bind.annotation.XmlElement;
 import org.apache.directory.scim.spec.annotation.ScimAttribute;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Objects;
 
 public class Subobject implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = -8081556701833520316L;
 
   @ScimAttribute

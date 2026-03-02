@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.spec.schema;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   public static final String RESOURCE_NAME = "ServiceProviderConfig";
   public static final String SCHEMA_URI = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
   public static final Schema SCHEMA = Schemas.schemaFor(ServiceProviderConfiguration.class, SCHEMA_URI, "Service Provider Configuration", "Specifies the schema that describes a SCIM schema");
+  @Serial
   private static final long serialVersionUID = -6526116522184446474L;
 
   public String getDocumentationUrl() {
@@ -186,6 +188,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   @XmlAccessorType(XmlAccessType.NONE)
   public static class AuthenticationSchema implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1286852277186580002L;
 
     public Type getType() {
@@ -369,6 +372,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   }
 
   public static class SupportedConfiguration implements Serializable {
+    @Serial
     private static final long serialVersionUID = 3646886915978382920L;
     boolean supported;
 
@@ -407,6 +411,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   }
 
   public static class BulkConfiguration extends SupportedConfiguration {
+    @Serial
     private static final long serialVersionUID = 8312025367100671778L;
     int maxOperations;
     int maxPayloadSize;
@@ -458,6 +463,7 @@ public class ServiceProviderConfiguration extends ScimResourceWithOptionalId {
   }
 
   public static class FilterConfiguration extends SupportedConfiguration {
+    @Serial
     private static final long serialVersionUID = 1887771731291732875L;
     int maxResults;
 

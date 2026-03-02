@@ -30,12 +30,14 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @XmlType(propOrder = {"method","path","bulkId","data"})
 @XmlAccessorType(XmlAccessType.NONE)
 public class BulkOperation implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 6528874816710788132L;
 
   public enum Method {
@@ -48,6 +50,7 @@ public class BulkOperation implements Serializable {
   @XmlAccessorType(XmlAccessType.NONE)
   public static class StatusWrapper implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1544738718748608248L;
 
     public StatusWrapper(Status code) {

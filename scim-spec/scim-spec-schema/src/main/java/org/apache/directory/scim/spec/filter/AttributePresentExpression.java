@@ -21,7 +21,10 @@ package org.apache.directory.scim.spec.filter;
 
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 
+import java.io.Serial;
+
 public final class AttributePresentExpression implements FilterExpression, ValueFilterExpression {
+  @Serial
   private static final long serialVersionUID = -4491412651236977273L;
   private final AttributeReference attributePath;
 

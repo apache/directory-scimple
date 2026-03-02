@@ -297,7 +297,7 @@ public class PatchGenerator {
   }
 
   private static boolean isEmpty(Object obj) {
-    return obj == null || (obj instanceof Collection && ((Collection<?>) obj).isEmpty());
+    return obj == null || (obj instanceof Collection<?> c && c.isEmpty());
   }
 
   private static boolean isNotEmpty(Object obj) {

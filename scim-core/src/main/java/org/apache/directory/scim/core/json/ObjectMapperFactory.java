@@ -107,8 +107,7 @@ public class ObjectMapperFactory {
     @Override
     public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
 
-      if (beanOrClass instanceof ScimResource) {
-        ScimResource scimResource = (ScimResource) beanOrClass;
+      if (beanOrClass instanceof ScimResource scimResource) {
         Class<? extends ScimResource> resourceClass = scimResource.getClass();
         Class<? extends ScimExtension> extensionClass = schemaRegistry.getExtensionClass(resourceClass, propertyName);
 

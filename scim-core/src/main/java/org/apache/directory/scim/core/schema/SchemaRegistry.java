@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.core.schema;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -39,6 +40,7 @@ public class SchemaRegistry implements Serializable {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(SchemaRegistry.class);
 
+  @Serial
   private static final long serialVersionUID = 2644269305703474835L;
   private final Map<String, Schema> schemaMap = new HashMap<>();
   

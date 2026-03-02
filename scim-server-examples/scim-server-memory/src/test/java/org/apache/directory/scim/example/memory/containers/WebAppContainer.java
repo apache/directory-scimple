@@ -26,6 +26,6 @@ import org.testcontainers.lifecycle.Startable;
 public interface WebAppContainer<SELF extends WebAppContainer<SELF>> extends Container<SELF>, AutoCloseable, Startable {
 
   default String getAppUrl() {
-    return String.format("http://%s:%s", getHost(), getMappedPort(8080));
+    return "http://%s:%s".formatted(getHost(), getMappedPort(8080));
   }
 }

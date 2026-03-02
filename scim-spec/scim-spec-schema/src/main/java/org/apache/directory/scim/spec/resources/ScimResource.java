@@ -35,6 +35,8 @@ import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -48,6 +50,7 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResource extends BaseResource<ScimResource> implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 3673404125396687366L;
 
   private static final Logger LOG = LoggerFactory.getLogger(ScimResource.class);

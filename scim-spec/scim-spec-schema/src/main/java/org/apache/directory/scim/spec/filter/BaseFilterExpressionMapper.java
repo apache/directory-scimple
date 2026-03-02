@@ -41,24 +41,24 @@ public abstract class BaseFilterExpressionMapper<R> implements BiFunction<Filter
   public R apply(FilterExpression expression, AttributeContainer attributeContainer) {
 
     // attribute EQ "something"
-    if (expression instanceof AttributeComparisonExpression) {
-      return apply((AttributeComparisonExpression) expression, attributeContainer);
+    if (expression instanceof AttributeComparisonExpression comparisonExpression) {
+      return apply(comparisonExpression, attributeContainer);
     }
     // (attribute EQ "something") AND (otherAttribute EQ "something else")
-    else if (expression instanceof LogicalExpression) {
-      return apply((LogicalExpression) expression, attributeContainer);
+    else if (expression instanceof LogicalExpression logicalExpression) {
+      return apply(logicalExpression, attributeContainer);
     }
     // NOT (attribute EQ "something")
-    else if (expression instanceof GroupExpression) {
-      return apply((GroupExpression) expression, attributeContainer);
+    else if (expression instanceof GroupExpression groupExpression) {
+      return apply(groupExpression, attributeContainer);
     }
     // attribute PR
-    else if (expression instanceof AttributePresentExpression) {
-      return apply((AttributePresentExpression) expression, attributeContainer);
+    else if (expression instanceof AttributePresentExpression presentExpression) {
+      return apply(presentExpression, attributeContainer);
     }
     // addresses[type EQ "work"]
-    else if (expression instanceof ValuePathExpression) {
-      return apply((ValuePathExpression) expression, attributeContainer);
+    else if (expression instanceof ValuePathExpression pathExpression) {
+      return apply(pathExpression, attributeContainer);
     }
     return unhandledExpression(expression, attributeContainer);
   }

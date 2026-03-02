@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.protocol.data;
 
+import java.io.Serial;
 import java.util.Set;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -46,6 +47,7 @@ import org.apache.directory.scim.spec.resources.BaseResource;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SearchRequest extends BaseResource<SearchRequest> {
 
+  @Serial
   private static final long serialVersionUID = 8217513543318598565L;
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:SearchRequest";

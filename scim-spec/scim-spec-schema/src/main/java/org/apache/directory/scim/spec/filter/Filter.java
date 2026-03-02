@@ -25,6 +25,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -39,6 +40,7 @@ public class Filter implements Serializable {
     /** A logger for this class */
     private static final Logger log = LoggerFactory.getLogger(Filter.class);
 
+  @Serial
   private static final long serialVersionUID = -363511683199922297L;
 
   private FilterExpression expression;

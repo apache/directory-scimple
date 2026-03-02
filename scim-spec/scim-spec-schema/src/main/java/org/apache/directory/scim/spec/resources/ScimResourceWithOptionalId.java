@@ -19,6 +19,8 @@
 
 package org.apache.directory.scim.spec.resources;
 
+import java.io.Serial;
+
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -31,7 +33,8 @@ import jakarta.xml.bind.annotation.XmlElement;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class ScimResourceWithOptionalId extends ScimResource {
-  
+
+  @Serial
   private static final long serialVersionUID = -379538554565387791L;
 
   @XmlElement

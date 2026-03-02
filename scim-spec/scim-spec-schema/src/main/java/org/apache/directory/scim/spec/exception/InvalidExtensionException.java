@@ -19,8 +19,11 @@
 
 package org.apache.directory.scim.spec.exception;
 
+import java.io.Serial;
+
 public class InvalidExtensionException extends RuntimeException {
-  
+
+  @Serial
   private static final long serialVersionUID = -4113730866775103565L;
 
   public InvalidExtensionException(String what) {

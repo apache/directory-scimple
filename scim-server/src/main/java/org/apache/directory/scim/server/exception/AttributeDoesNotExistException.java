@@ -19,8 +19,11 @@
 
 package org.apache.directory.scim.server.exception;
 
+import java.io.Serial;
+
 public class AttributeDoesNotExistException extends AttributeException {
 
+  @Serial
   private static final long serialVersionUID = 547510233114396694L;
 
   public AttributeDoesNotExistException() {

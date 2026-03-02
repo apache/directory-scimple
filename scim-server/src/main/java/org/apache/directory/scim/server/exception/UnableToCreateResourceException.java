@@ -20,11 +20,13 @@
 package org.apache.directory.scim.server.exception;
 
 import jakarta.ws.rs.core.Response.Status;
-
 import org.apache.directory.scim.spec.exception.ResourceException;
+
+import java.io.Serial;
 
 public class UnableToCreateResourceException extends ResourceException {
 
+  @Serial
   private static final long serialVersionUID = -3872700870424005641L;
 
   public UnableToCreateResourceException(Status status, String message) {
