@@ -24,7 +24,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
+import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;
 
 @SpringBootApplication
 public class ScimpleSpringBootApplication {
@@ -35,12 +35,11 @@ public class ScimpleSpringBootApplication {
 
   @Bean
   ServerConfiguration serverConfiguration() {
-    // Set any unique configuration bits
     return new ServerConfiguration()
-      .setId("scimple-spring-boot-example")
+      .setId("scimple-spring-boot-4-example")
       .setDocumentationUri("https://github.com/apache/directory-scimple")
-
-     // set the auth scheme
-     .addAuthenticationSchema(httpBasic());
+      // Informational only, returned by /ServiceProviderConfig.
+      // This does not enforce authentication. Use oauthBearer() or httpBasic() as appropriate.
+      .addAuthenticationSchema(oauthBearer());
   }
 }

@@ -44,7 +44,7 @@ import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration
 public class JerseyApplication extends Application {
 
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(JerseyApplication.class);
-  
+
   @Override
   public Set<Class<?>> getClasses() {
     return ScimResourceHelper.scimpleFeatureAndResourceClasses();
@@ -53,11 +53,11 @@ public class JerseyApplication extends Application {
   @Produces
   ServerConfiguration serverConfiguration() {
     return new ServerConfiguration()
-      // Set any unique configuration bits
       .setId("scimple-jersey-example")
       .setDocumentationUri("https://github.com/apache/directory-scimple")
-    // set the auth scheme too
-     .addAuthenticationSchema(oauthBearer());
+      // Informational only, returned by /ServiceProviderConfig.
+      // This does not enforce authentication. Use oauthBearer() or httpBasic() as appropriate.
+      .addAuthenticationSchema(oauthBearer());
   }
 
   public static void main(String[] args) {

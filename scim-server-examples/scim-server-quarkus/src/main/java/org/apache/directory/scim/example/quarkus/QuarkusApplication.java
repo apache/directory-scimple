@@ -43,11 +43,11 @@ public class QuarkusApplication extends Application {
   @Produces
   ServerConfiguration serverConfiguration() {
     return new ServerConfiguration()
-      // Set any unique configuration bits
       .setId("scimple-quarkus-example")
       .setDocumentationUri("https://github.com/apache/directory-scimple")
-      // set the auth scheme too
-     .addAuthenticationSchema(oauthBearer());
+      // Informational only, returned by /ServiceProviderConfig.
+      // This does not enforce authentication. Use oauthBearer() or httpBasic() as appropriate.
+      .addAuthenticationSchema(oauthBearer());
   }
 
 }

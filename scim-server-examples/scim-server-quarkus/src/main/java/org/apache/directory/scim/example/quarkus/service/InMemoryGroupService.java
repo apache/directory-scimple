@@ -120,7 +120,7 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   }
 
   @Override
-  public ScimGroup get(String id, ScimRequestContext requestContext) throws ResourceException {
+  public ScimGroup get(String id, ScimRequestContext requestContext) {
     return groups.get(id);
   }
 

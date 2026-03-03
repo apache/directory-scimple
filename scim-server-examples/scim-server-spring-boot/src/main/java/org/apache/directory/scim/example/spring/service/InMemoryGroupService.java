@@ -39,15 +39,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class InMemoryGroupService implements Repository<ScimGroup> {
 
-  private final Map<String, ScimGroup> groups = new HashMap<>();
+  private final Map<String, ScimGroup> groups = new ConcurrentHashMap<>();
 
   private final SchemaRegistry schemaRegistry;
 
@@ -99,7 +99,6 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     if (!groups.containsKey(id)) {
       throw new ResourceNotFoundException(id);
     }
-
     groups.put(id, resource);
     return resource;
   }
@@ -109,7 +108,6 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     if (!groups.containsKey(id)) {
       throw new ResourceNotFoundException(id);
     }
-
     ScimGroup resource = patchHandler.apply(get(id, requestContext), patchOperations);
     groups.put(id, resource);
     return resource;
@@ -121,7 +119,7 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
   }
 
   @Override
-  public void delete(String id) throws ResourceNotFoundException {
+  public void delete(String id) throws ResourceException {
     if (groups.remove(id) == null) {
       throw new ResourceNotFoundException(id);
     }

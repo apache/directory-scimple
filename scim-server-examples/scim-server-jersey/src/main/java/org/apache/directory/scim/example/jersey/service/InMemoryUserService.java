@@ -50,7 +50,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Creates a singleton (effectively) Repository<ScimUser> with a memory-based
+ * Creates a singleton (effectively) {@code Repository<ScimUser>} with a memory-based
  * persistence layer.
  *
  * @author Chris Harm &lt;crh5255@psu.edu&gt;
@@ -155,7 +155,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
     users.put(id, resource);
     return resource;
   }
-
 
   /**
    * @see Repository#get(java.lang.String, ScimRequestContext)
