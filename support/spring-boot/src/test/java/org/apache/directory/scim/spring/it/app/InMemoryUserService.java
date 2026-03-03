@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Creates a singleton (effectively) Provider<User> with a memory-based
+ * Creates a singleton (effectively) {@code Repository<ScimUser>} with a memory-based
  * persistence layer.
  * 
  * @author Chris Harm &lt;crh5255@psu.edu&gt;

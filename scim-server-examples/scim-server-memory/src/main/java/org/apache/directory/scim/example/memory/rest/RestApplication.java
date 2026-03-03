@@ -28,7 +28,7 @@ import org.apache.directory.scim.server.rest.ScimResourceHelper;
 
 import java.util.Set;
 
-import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.httpBasic;
+import static org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.AuthenticationSchema.oauthBearer;
 
 @ApplicationPath("v2")
 public class RestApplication extends Application {
@@ -37,7 +37,10 @@ public class RestApplication extends Application {
   ServerConfiguration serverConfiguration() {
     return new ServerConfiguration()
       .setId("scimple-in-memory-example")
-      .addAuthenticationSchema(httpBasic());
+      .setDocumentationUri("https://github.com/apache/directory-scimple")
+      // Informational only, returned by /ServiceProviderConfig.
+      // This does not enforce authentication. Use oauthBearer() or httpBasic() as appropriate.
+      .addAuthenticationSchema(oauthBearer());
   }
 
   @Override

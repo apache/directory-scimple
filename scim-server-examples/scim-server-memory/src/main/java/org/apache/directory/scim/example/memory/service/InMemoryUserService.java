@@ -50,9 +50,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Creates a singleton (effectively) Repository<ScimUser> with a memory-based
+ * Creates a singleton (effectively) {@code Repository<ScimUser>} with a memory-based
  * persistence layer.
- * 
+ *
  * @author Chris Harm &lt;crh5255@psu.edu&gt;
  */
 @Named
@@ -88,18 +88,18 @@ public class InMemoryUserService implements Repository<ScimUser> {
     user.setUserName(DEFAULT_USER_EXTERNAL_ID);
     user.setDisplayName(DEFAULT_USER_DISPLAY_NAME);
     user.setName(new Name()
-        .setGivenName("Tester")
-        .setFamilyName("McTest"));
+      .setGivenName("Tester")
+      .setFamilyName("McTest"));
     Email email = new Email();
     email.setDisplay(DEFAULT_USER_EMAIL_VALUE);
     email.setValue(DEFAULT_USER_EMAIL_VALUE);
     email.setType(DEFAULT_USER_EMAIL_TYPE);
     email.setPrimary(true);
     user.setEmails(List.of(email));
-    
+
     LuckyNumberExtension luckyNumberExtension = new LuckyNumberExtension();
     luckyNumberExtension.setLuckyNumber(DEFAULT_USER_LUCKY_NUMBER);
-    
+
     user.addExtension(luckyNumberExtension);
 
     EnterpriseExtension enterpriseExtension = new EnterpriseExtension();
