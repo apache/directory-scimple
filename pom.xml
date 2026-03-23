@@ -635,7 +635,7 @@
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.17</version>
+          <version>0.18</version>
           <configuration>
             <inputExcludeStd>ECLIPSE</inputExcludeStd>
             <inputExcludeStd>IDEA</inputExcludeStd>
