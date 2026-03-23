@@ -118,8 +118,26 @@ public class AttributeReference implements Serializable {
     return subAttributeName != null;
   }
 
-  public boolean hasUrn() {
+  /**
+   * Returns {@code true} if this reference includes a schema URN prefix,
+   * making it unambiguous across schemas.
+   *
+   * <p>Extension attributes are always fully qualified since their names
+   * are only meaningful with the schema URN. Core attributes may or may
+   * not be, depending on how the client sent them.</p>
+   *
+   * @return {@code true} if the URN is present
+   */
+  public boolean isFullyQualified() {
     return urn != null;
+  }
+
+  /**
+   * @deprecated Use {@link #isFullyQualified()} instead.
+   */
+  @Deprecated
+  public boolean hasUrn() {
+    return isFullyQualified();
   }
 
   public String toString() {

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.ws.rs.core.*;
@@ -57,6 +58,8 @@ import org.apache.directory.scim.protocol.data.PatchRequest;
 import org.apache.directory.scim.protocol.data.SearchRequest;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.Filter;
+import org.apache.directory.scim.spec.schema.ResourceType;
+import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.filter.SortOrder;
 import org.apache.directory.scim.core.repository.ScimRequestContext;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -66,6 +69,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   private static final Logger log = LoggerFactory.getLogger(BaseResourceTypeResourceImpl.class);
 
   private final RepositoryRegistry repositoryRegistry;
+
+  private final SchemaRegistry schemaRegistry;
 
   private final AttributeUtil attributeUtil;
 
@@ -83,6 +88,7 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   HttpHeaders headers;
 
   public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, Class<T> resourceClass) {
+    this.schemaRegistry = schemaRegistry;
     this.repositoryRegistry = repositoryRegistry;
     this.resourceClass = resourceClass;
     this.attributeUtil = new AttributeUtil(schemaRegistry);
@@ -109,6 +115,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
+    attributeReferences = qualifyReferences(attributeReferences);
+    excludedAttributeReferences = qualifyReferences(excludedAttributeReferences);
 
     Repository<T> repository = getRepositoryInternal();
 
@@ -172,6 +180,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
+    attributeReferences = qualifyReferences(attributeReferences);
+    excludedAttributeReferences = qualifyReferences(excludedAttributeReferences);
 
     T created = repository.create(resource, new ScimRequestContext(attributeReferences, excludedAttributeReferences, null, null, null));
 
@@ -207,6 +217,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> excludedAttributeReferences = Optional.ofNullable(request.getExcludedAttributes())
                                                                   .orElse(Collections.emptySet());
     validateAttributes(attributeReferences, excludedAttributeReferences);
+    attributeReferences = qualifyReferences(attributeReferences);
+    excludedAttributeReferences = qualifyReferences(excludedAttributeReferences);
 
     Filter filter = request.getFilter();
     ScimRequestContext requestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences, request.getPageRequest(),  request.getSortRequest(), null);
@@ -273,6 +285,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     Set<AttributeReference> attributeReferences = AttributeReferenceListWrapper.getAttributeReferences(attributes);
     Set<AttributeReference> excludedAttributeReferences = AttributeReferenceListWrapper.getAttributeReferences(excludedAttributes);
     validateAttributes(attributeReferences, excludedAttributeReferences);
+    attributeReferences = qualifyReferences(attributeReferences);
+    excludedAttributeReferences = qualifyReferences(excludedAttributeReferences);
 
     String requestEtag = headers.getHeaderString("If-Match");
     Set<ETag> etags = EtagParser.parseETag(requestEtag);
@@ -366,6 +380,55 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
       }
     }
     return null;
+  }
+
+  /**
+   * Normalizes {@link AttributeReference} objects to their fully qualified form by
+   * resolving unqualified attribute names against the base schema and extension schemas
+   * for this resource type. References that already have a URN are returned as-is.
+   */
+  private Set<AttributeReference> qualifyReferences(Set<AttributeReference> refs) {
+    if (refs == null || refs.isEmpty()) {
+      return refs;
+    }
+
+    org.apache.directory.scim.spec.annotation.ScimResourceType annotation =
+      resourceClass.getAnnotation(org.apache.directory.scim.spec.annotation.ScimResourceType.class);
+    if (annotation == null) {
+      return refs;
+    }
+
+    ResourceType resourceType = schemaRegistry.getResourceType(annotation.name());
+    if (resourceType == null) {
+      return refs;
+    }
+
+    Schema baseSchema = schemaRegistry.getSchema(resourceType.getSchemaUrn());
+
+    return refs.stream()
+      .map(ref -> {
+        if (ref.isFullyQualified()) {
+          return ref;
+        }
+
+        // Try base schema first
+        if (baseSchema != null && baseSchema.getAttribute(ref.getAttributeName()) != null) {
+          return new AttributeReference(baseSchema.getId(), ref.getFullAttributeName());
+        }
+
+        // Try extension schemas
+        if (resourceType.getSchemaExtensions() != null) {
+          for (ResourceType.SchemaExtensionConfiguration ext : resourceType.getSchemaExtensions()) {
+            Schema extSchema = schemaRegistry.getSchema(ext.getSchemaUrn());
+            if (extSchema != null && extSchema.getAttribute(ref.getAttributeName()) != null) {
+              return new AttributeReference(extSchema.getId(), ref.getFullAttributeName());
+            }
+          }
+        }
+
+        return ref; // best-effort: leave unresolved
+      })
+      .collect(Collectors.toUnmodifiableSet());
   }
 
   @FunctionalInterface
