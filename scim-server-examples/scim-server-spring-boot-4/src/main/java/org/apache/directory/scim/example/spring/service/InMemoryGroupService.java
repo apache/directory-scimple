@@ -21,8 +21,8 @@ package org.apache.directory.scim.example.spring.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
+import org.apache.directory.scim.core.repository.BaseRepository;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.ScimRequestContext;
@@ -32,7 +32,6 @@ import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.PageRequest;
-import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.springframework.stereotype.Service;
@@ -45,17 +44,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class InMemoryGroupService implements Repository<ScimGroup> {
+public class InMemoryGroupService extends BaseRepository<ScimGroup> {
 
   private final Map<String, ScimGroup> groups = new ConcurrentHashMap<>();
 
   private final SchemaRegistry schemaRegistry;
 
-  private final PatchHandler patchHandler;
-
   public InMemoryGroupService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
+    super(ScimGroup.class, patchHandler);
     this.schemaRegistry = schemaRegistry;
-    this.patchHandler = patchHandler;
   }
 
   @PostConstruct
@@ -65,11 +62,6 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     group.setDisplayName("example-group");
     group.setExternalId("example-group");
     groups.put(group.getId(), group);
-  }
-
-  @Override
-  public Class<ScimGroup> getResourceClass() {
-    return ScimGroup.class;
   }
 
   @Override
@@ -99,16 +91,6 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
     if (!groups.containsKey(id)) {
       throw new ResourceNotFoundException(id);
     }
-    groups.put(id, resource);
-    return resource;
-  }
-
-  @Override
-  public ScimGroup patch(String id, List<PatchOperation> patchOperations, ScimRequestContext requestContext) throws ResourceException {
-    if (!groups.containsKey(id)) {
-      throw new ResourceNotFoundException(id);
-    }
-    ScimGroup resource = patchHandler.apply(get(id, requestContext), patchOperations);
     groups.put(id, resource);
     return resource;
   }
