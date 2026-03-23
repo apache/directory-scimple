@@ -34,4 +34,21 @@ public sealed interface FilterExpression extends Serializable
   default <U> U map(Function<? super FilterExpression, U> mapper) {
     return mapper.apply(this);
   }
+
+  /**
+   * Dispatches to the appropriate {@link FilterExpressionVisitor} method based on
+   * this expression's concrete type.
+   *
+   * @param visitor the visitor to dispatch to
+   * @param <R>     the result type
+   * @return the result of visiting this expression
+   */
+  default <R> R accept(FilterExpressionVisitor<R> visitor) {
+    if (this instanceof AttributeComparisonExpression e) return visitor.visit(e);
+    if (this instanceof AttributePresentExpression e) return visitor.visit(e);
+    if (this instanceof LogicalExpression e) return visitor.visit(e);
+    if (this instanceof GroupExpression e) return visitor.visit(e);
+    if (this instanceof ValuePathExpression e) return visitor.visit(e);
+    throw new IllegalStateException("Unknown FilterExpression type: " + getClass().getName());
+  }
 }
