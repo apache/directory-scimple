@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ScimRequestContext {
 
@@ -162,5 +163,56 @@ public class ScimRequestContext {
 
   public static ScimRequestContext empty() {
     return new ScimRequestContext();
+  }
+
+  /**
+   * Returns the fully qualified SCIM attribute names the client explicitly requested
+   * via the {@code attributes} query parameter, or an empty set if no specific
+   * attributes were requested (meaning all attributes should be returned).
+   *
+   * <p>All attribute names are returned in their fully qualified form
+   * (e.g., {@code urn:ietf:params:scim:schemas:core:2.0:User:userName}).
+   * The server layer normalizes unqualified attribute references before they
+   * reach the repository, so all references in this context carry their schema URN.</p>
+   *
+   * <p>Repository implementations MAY use this to optimize backend queries
+   * (e.g., selecting specific LDAP attributes or database columns). The SCIM server
+   * layer always applies attribute filtering post-retrieval as a safety net, so
+   * repositories that ignore this hint will still produce correct results.</p>
+   *
+   * @return set of fully qualified SCIM attribute names, or empty for "all"
+   * @see #getIncludedAttributes()
+   */
+  public Set<String> getIncludedAttributeNames() {
+    if (includedAttributes == null) {
+      return Set.of();
+    }
+    return includedAttributes.stream()
+      .map(AttributeReference::getFullyQualifiedAttributeName)
+      .collect(Collectors.toUnmodifiableSet());
+  }
+
+  /**
+   * Returns the fully qualified SCIM attribute names the client explicitly excluded
+   * via the {@code excludedAttributes} query parameter, or an empty set if none
+   * were excluded.
+   *
+   * <p>Attribute names follow the same fully qualified rules as
+   * {@link #getIncludedAttributeNames()}.</p>
+   *
+   * <p>Repository implementations MAY use this to optimize backend queries by
+   * omitting excluded attributes from the fetch. The SCIM server layer always
+   * applies attribute filtering post-retrieval as a safety net.</p>
+   *
+   * @return set of fully qualified excluded SCIM attribute names, or empty for "none excluded"
+   * @see #getExcludedAttributes()
+   */
+  public Set<String> getExcludedAttributeNames() {
+    if (excludedAttributes == null) {
+      return Set.of();
+    }
+    return excludedAttributes.stream()
+      .map(AttributeReference::getFullyQualifiedAttributeName)
+      .collect(Collectors.toUnmodifiableSet());
   }
 }
