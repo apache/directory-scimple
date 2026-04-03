@@ -63,7 +63,7 @@ jobs:
 
       - name: Maven Build
         run: |
-          ./mvnw verify pmd:aggregate-pmd -Pci \
+          ./mvnw compile test-compile pmd:aggregate-pmd -Pci \
             -Ddevelocity.cache.local.enabled=false \
             -Ddevelocity.cache.remote.enabled=false
 
