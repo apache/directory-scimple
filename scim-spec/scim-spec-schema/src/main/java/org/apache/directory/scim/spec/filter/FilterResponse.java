@@ -19,7 +19,10 @@
 
 package org.apache.directory.scim.spec.filter;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collector;
 
 /**
  * Holds the result of a {@link org.apache.directory.scim.core.repository.Repository#find Repository.find()}
@@ -36,6 +39,37 @@ import java.util.Collection;
  * @param <T> the resource type
  */
 public class FilterResponse<T> {
+
+  /**
+   * Returns a {@link Collector} that accumulates stream elements and applies pagination,
+   * producing a {@link FilterResponse} whose {@code totalResults} reflects the pre-pagination
+   * count.
+   *
+   * <p>This is intended for in-memory or demo implementations. Production repositories
+   * should push pagination into the data store's query language.</p>
+   *
+   * <p>Usage:</p>
+   * <pre>{@code
+   * return items.stream()
+   *     .filter(FilterExpressions.inMemory(filter, schema))
+   *     .sorted(SortExpressions.comparator(sortRequest, schema))
+   *     .collect(FilterResponse.paginate(pageRequest));
+   * }</pre>
+   *
+   * @param pageRequest the pagination parameters (startIndex and count)
+   * @param <T>         the resource type
+   * @return a collector that produces a paginated {@code FilterResponse}
+   * @see PageRequest#paginate(List)
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.4">RFC 7644 §3.4.2.4</a>
+   */
+  public static <T> Collector<T, ?, FilterResponse<T>> paginate(PageRequest pageRequest) {
+    return Collector.<T, List<T>, FilterResponse<T>>of(
+      ArrayList::new,
+      List::add,
+      (a, b) -> { a.addAll(b); return a; },
+      list -> new FilterResponse<>(pageRequest.paginate(list), list.size())
+    );
+  }
 
   private Collection<T> resources;
 

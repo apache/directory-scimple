@@ -35,7 +35,8 @@ import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
-import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortExpressions;
+import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
@@ -133,12 +134,11 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public FilterResponse<ScimGroup> find(Filter filter, ScimRequestContext requestContext) {
-    List<ScimGroup> filtered = groups.values().stream()
-      .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimGroup.SCHEMA_URI)))
-      .toList();
-
-    PageRequest pageRequest = requestContext.getPageRequestOrDefault();
-    return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
+    Schema schema = schemaRegistry.getSchema(ScimGroup.SCHEMA_URI);
+    return groups.values().stream()
+      .filter(FilterExpressions.inMemory(filter, schema))
+      .sorted(SortExpressions.comparator(requestContext.getSortRequest(), schema))
+      .collect(FilterResponse.paginate(requestContext.getPageRequestOrDefault()));
   }
 
   @Override
