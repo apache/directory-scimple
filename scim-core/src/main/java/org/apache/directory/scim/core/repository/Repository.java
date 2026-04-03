@@ -104,7 +104,14 @@ public interface Repository<T extends ScimResource> {
    * may be truncated by the scope specified by the passed PageRequest and
    * the order of the returned resources may be controlled by the passed
    * SortRequest.
-   * 
+   *
+   * <p><b>Sorting:</b> If the request context contains a {@link org.apache.directory.scim.spec.filter.SortRequest},
+   * the repository is responsible for applying it if the backend supports server-side
+   * sorting. The SCIM server layer does NOT apply post-retrieval sorting as a fallback.
+   * If the requested sort attribute is not supported, the repository should silently ignore
+   * the sort request and return results in the backend's natural order, per
+   * <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.3">RFC 7644 §3.4.2.3</a>.</p>
+   *
    * @param filter The filter that determines the ScimResources that will be
    *        part of the ResultList.
    * @param requestContext the context object holding additional information about the request.

@@ -33,7 +33,8 @@ import org.apache.directory.scim.spec.extension.EnterpriseExtension;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
-import org.apache.directory.scim.spec.filter.PageRequest;
+import org.apache.directory.scim.spec.filter.SortExpressions;
+import org.apache.directory.scim.spec.schema.Schema;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
 import org.apache.directory.scim.spec.resources.ScimExtension;
@@ -142,12 +143,11 @@ public class InMemoryUserService extends BaseRepository<ScimUser> {
 
   @Override
   public FilterResponse<ScimUser> find(Filter filter, ScimRequestContext requestContext) {
-    List<ScimUser> filtered = users.values().stream()
-      .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimUser.SCHEMA_URI)))
-      .toList();
-
-    PageRequest pageRequest = requestContext.getPageRequestOrDefault();
-    return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
+    Schema schema = schemaRegistry.getSchema(ScimUser.SCHEMA_URI);
+    return users.values().stream()
+      .filter(FilterExpressions.inMemory(filter, schema))
+      .sorted(SortExpressions.comparator(requestContext.getSortRequest(), schema))
+      .collect(FilterResponse.paginate(requestContext.getPageRequestOrDefault()));
   }
 
   @Override
