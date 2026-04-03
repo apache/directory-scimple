@@ -21,13 +21,39 @@ package org.apache.directory.scim.spec.filter;
 
 import java.util.Collection;
 
+/**
+ * Holds the result of a {@link org.apache.directory.scim.core.repository.Repository#find Repository.find()}
+ * query, including the paginated resources and the total count of matching resources.
+ *
+ * <p><b>Important:</b> {@code totalResults} must be the total number of resources matching
+ * the query <em>before</em> pagination is applied, not the number of resources in this page.
+ * This allows SCIM clients to calculate how many pages exist. See
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.4">RFC 7644 §3.4.2.4</a>.</p>
+ *
+ * <p>Example: if 50 users match a filter and the client requests {@code startIndex=11&count=10},
+ * then {@code resources} contains 10 users and {@code totalResults} is 50.</p>
+ *
+ * @param <T> the resource type
+ */
 public class FilterResponse<T> {
-  
+
   private Collection<T> resources;
+
+  /**
+   * The total number of resources matching the query, before pagination.
+   * This is NOT the size of the {@link #resources} collection (which is the page size).
+   */
   private int totalResults;
-  
+
   public FilterResponse() {}
-  
+
+  /**
+   * Creates a filter response with the given page of resources and total count.
+   *
+   * @param resources    the resources in this page (may be a subset of all matching resources)
+   * @param totalResults the total number of matching resources <em>before</em> pagination —
+   *                     must be {@code >= resources.size()}
+   */
   public FilterResponse(Collection<T> resources, int totalResults) {
     this.resources = resources;
     this.totalResults = totalResults;
