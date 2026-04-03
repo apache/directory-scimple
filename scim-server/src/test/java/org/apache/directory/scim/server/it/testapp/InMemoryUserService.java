@@ -25,7 +25,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.repository.BaseRepository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.ScimRequestContext;
@@ -35,11 +35,8 @@ import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.PageRequest;
-import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
-import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 
 import java.util.List;
@@ -54,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Named
 @ApplicationScoped
-public class InMemoryUserService implements Repository<ScimUser> {
+public class InMemoryUserService extends BaseRepository<ScimUser> {
 
   static final String DEFAULT_USER_ID = "1";
   static final String DEFAULT_USER_EXTERNAL_ID = "e" + DEFAULT_USER_ID;
@@ -67,12 +64,10 @@ public class InMemoryUserService implements Repository<ScimUser> {
 
   private SchemaRegistry schemaRegistry;
 
-  private PatchHandler patchHandler;
-
   @Inject
   public InMemoryUserService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
+    super(ScimUser.class, patchHandler, LuckyNumberExtension.class);
     this.schemaRegistry = schemaRegistry;
-    this.patchHandler = patchHandler;
   }
 
   protected InMemoryUserService() {}
@@ -97,11 +92,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
     user.addExtension(new LuckyNumberExtension().setLuckyNumber(DEFAULT_USER_LUCKY_NUMBER));
 
     users.put(user.getId(), user);
-  }
-
-  @Override
-  public Class<ScimUser> getResourceClass() {
-    return ScimUser.class;
   }
 
   @Override
@@ -138,16 +128,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   @Override
-  public ScimUser patch(String id, List<PatchOperation> patchOperations, ScimRequestContext requestContext) throws ResourceException {
-    if (!users.containsKey(id)) {
-      throw new ResourceNotFoundException(id);
-    }
-    ScimUser resource = patchHandler.apply(get(id, requestContext), patchOperations);
-    users.put(id, resource);
-    return resource;
-  }
-
-  @Override
   public ScimUser get(String id, ScimRequestContext requestContext) {
     return users.get(id);
   }
@@ -169,8 +149,4 @@ public class InMemoryUserService implements Repository<ScimUser> {
     return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
   }
 
-  @Override
-  public List<Class<? extends ScimExtension>> getExtensionList() {
-    return List.of(LuckyNumberExtension.class);
-  }
 }

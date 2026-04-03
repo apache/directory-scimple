@@ -22,6 +22,7 @@ package org.apache.directory.scim.core.repository;
 import org.apache.directory.scim.spec.exception.ResourceException;
 import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
 import org.apache.directory.scim.spec.patch.PatchOperation;
+import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimResource;
 
 import java.util.List;
@@ -34,6 +35,7 @@ import java.util.List;
  * {@link #find}, and {@link #delete}. The following are provided automatically:</p>
  * <ul>
  *   <li>{@link #getResourceClass()} — returns the class passed to the constructor</li>
+ *   <li>{@link #getExtensionList()} — returns the extension classes passed to the constructor</li>
  *   <li>{@link #patch(String, List, ScimRequestContext)} — fetches the current resource
  *       via {@link #get}, applies patch operations via {@link PatchHandler}, and persists
  *       via {@link #update}</li>
@@ -46,7 +48,7 @@ import java.util.List;
  * public class MyUserRepository extends BaseRepository&lt;ScimUser&gt; {
  *   &#64;Inject
  *   public MyUserRepository(PatchHandler patchHandler) {
- *     super(ScimUser.class, patchHandler);
+ *     super(ScimUser.class, patchHandler, MyExtension.class);
  *   }
  *   // implement create, update, get, find, delete
  * }
@@ -58,16 +60,21 @@ public abstract class BaseRepository<T extends ScimResource> implements Reposito
 
   private final Class<T> resourceClass;
   private final PatchHandler patchHandler;
+  private final List<Class<? extends ScimExtension>> extensionList;
 
   /**
    * Creates a new base repository.
    *
    * @param resourceClass the SCIM resource class this repository manages
    * @param patchHandler  the handler used to apply SCIM PATCH operations
+   * @param extensions    SCIM extension classes supported by this repository (may be empty)
    */
-  protected BaseRepository(Class<T> resourceClass, PatchHandler patchHandler) {
+  @SafeVarargs
+  protected BaseRepository(Class<T> resourceClass, PatchHandler patchHandler,
+      Class<? extends ScimExtension>... extensions) {
     this.resourceClass = resourceClass;
     this.patchHandler = patchHandler;
+    this.extensionList = extensions != null ? List.of(extensions) : List.of();
   }
 
   /**
@@ -77,11 +84,17 @@ public abstract class BaseRepository<T extends ScimResource> implements Reposito
   protected BaseRepository() {
     this.resourceClass = null;
     this.patchHandler = null;
+    this.extensionList = List.of();
   }
 
   @Override
   public Class<T> getResourceClass() {
     return resourceClass;
+  }
+
+  @Override
+  public List<Class<? extends ScimExtension>> getExtensionList() {
+    return extensionList;
   }
 
   /**

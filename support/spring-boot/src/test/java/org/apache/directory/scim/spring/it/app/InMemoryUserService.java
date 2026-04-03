@@ -22,7 +22,7 @@ package org.apache.directory.scim.spring.it.app;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
 import org.apache.directory.scim.core.repository.PatchHandler;
-import org.apache.directory.scim.core.repository.Repository;
+import org.apache.directory.scim.core.repository.BaseRepository;
 import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.ScimRequestContext;
@@ -32,15 +32,11 @@ import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.PageRequest;
-import org.apache.directory.scim.spec.patch.PatchOperation;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
-import org.apache.directory.scim.spec.resources.ScimExtension;
-import org.apache.directory.scim.spec.resources.ScimResource;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Chris Harm &lt;crh5255@psu.edu&gt;
  */
 @Service
-public class InMemoryUserService implements Repository<ScimUser> {
+public class InMemoryUserService extends BaseRepository<ScimUser> {
 
   static final String DEFAULT_USER_ID = "1";
   static final String DEFAULT_USER_EXTERNAL_ID = "e" + DEFAULT_USER_ID;
@@ -65,11 +61,9 @@ public class InMemoryUserService implements Repository<ScimUser> {
 
   private final SchemaRegistry schemaRegistry;
 
-  private final PatchHandler patchHandler;
-
   public InMemoryUserService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
+    super(ScimUser.class, patchHandler);
     this.schemaRegistry = schemaRegistry;
-    this.patchHandler = patchHandler;
   }
 
   @PostConstruct
@@ -95,11 +89,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
 //    user.addExtension(luckyNumberExtension);
     
     users.put(user.getId(), user);
-  }
-
-  @Override
-  public Class<ScimUser> getResourceClass() {
-    return ScimUser.class;
   }
 
   @Override
@@ -136,16 +125,6 @@ public class InMemoryUserService implements Repository<ScimUser> {
   }
 
   @Override
-  public ScimUser patch(String id, List<PatchOperation> patchOperations, ScimRequestContext requestContext) throws ResourceException {
-    if (!users.containsKey(id)) {
-      throw new ResourceNotFoundException(id);
-    }
-    ScimUser resource = patchHandler.apply(get(id, requestContext), patchOperations);
-    users.put(id, resource);
-    return resource;
-  }
-
-  @Override
   public ScimUser get(String id, ScimRequestContext requestContext) {
     return users.get(id);
   }
@@ -167,8 +146,4 @@ public class InMemoryUserService implements Repository<ScimUser> {
     return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
   }
 
-  @Override
-  public List<Class<? extends ScimExtension>> getExtensionList() {
-    return Collections.emptyList();
-  }
 }

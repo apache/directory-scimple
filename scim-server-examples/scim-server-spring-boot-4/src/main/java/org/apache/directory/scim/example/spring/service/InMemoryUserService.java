@@ -36,7 +36,6 @@ import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.resources.Email;
 import org.apache.directory.scim.spec.resources.Name;
-import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +65,7 @@ public class InMemoryUserService extends BaseRepository<ScimUser> {
   private final SchemaRegistry schemaRegistry;
 
   public InMemoryUserService(SchemaRegistry schemaRegistry, PatchHandler patchHandler) {
-    super(ScimUser.class, patchHandler);
+    super(ScimUser.class, patchHandler, LuckyNumberExtension.class, EnterpriseExtension.class);
     this.schemaRegistry = schemaRegistry;
   }
 
@@ -150,8 +149,4 @@ public class InMemoryUserService extends BaseRepository<ScimUser> {
     return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
   }
 
-  @Override
-  public List<Class<? extends ScimExtension>> getExtensionList() {
-    return List.of(LuckyNumberExtension.class, EnterpriseExtension.class);
-  }
 }

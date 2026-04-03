@@ -32,12 +32,10 @@ import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterExpressions;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.filter.PageRequest;
-import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -115,11 +113,6 @@ public class InMemoryGroupService extends BaseRepository<ScimGroup> {
 
     PageRequest pageRequest = requestContext.getPageRequestOrDefault();
     return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
-  }
-
-  @Override
-  public List<Class<? extends ScimExtension>> getExtensionList() {
-    return Collections.emptyList();
   }
 
 }

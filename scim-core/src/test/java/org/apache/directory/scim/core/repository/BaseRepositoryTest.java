@@ -24,6 +24,7 @@ import org.apache.directory.scim.spec.exception.ResourceNotFoundException;
 import org.apache.directory.scim.spec.filter.Filter;
 import org.apache.directory.scim.spec.filter.FilterResponse;
 import org.apache.directory.scim.spec.patch.PatchOperation;
+import org.apache.directory.scim.spec.resources.ScimExtension;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -46,6 +47,11 @@ class BaseRepositoryTest {
 
     TestRepository(PatchHandler patchHandler) {
       super(ScimUser.class, patchHandler);
+    }
+
+    @SafeVarargs
+    TestRepository(PatchHandler patchHandler, Class<? extends ScimExtension>... extensions) {
+      super(ScimUser.class, patchHandler, extensions);
     }
 
     /** No-arg constructor to verify CDI proxy path. */
@@ -237,4 +243,32 @@ class BaseRepositoryTest {
       .isInstanceOf(RuntimeException.class)
       .hasMessage("patch failed");
   }
+
+  @Test
+  void getExtensionList_defaultsToEmptyList() {
+    PatchHandler patchHandler = Mockito.mock(PatchHandler.class);
+    TestRepository repository = new TestRepository(patchHandler);
+
+    assertThat(repository.getExtensionList()).isEmpty();
+  }
+
+  @Test
+  void getExtensionList_returnsProvidedExtensions() {
+    PatchHandler patchHandler = Mockito.mock(PatchHandler.class);
+    TestRepository repository = new TestRepository(patchHandler, ExtensionA.class, ExtensionB.class);
+
+    assertThat(repository.getExtensionList())
+      .containsExactly(ExtensionA.class, ExtensionB.class);
+  }
+
+  @Test
+  void getExtensionList_noArgConstructor_returnsEmptyList() {
+    TestRepository repository = new TestRepository();
+
+    assertThat(repository.getExtensionList()).isEmpty();
+  }
+
+  /** Stub extension types for testing. */
+  static abstract class ExtensionA implements ScimExtension {}
+  static abstract class ExtensionB implements ScimExtension {}
 }
