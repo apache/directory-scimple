@@ -108,9 +108,6 @@ public class InMemoryUserService extends BaseRepository<ScimUser> {
     users.put(user.getId(), user);
   }
 
-  /**
-   * @see Repository#create(ScimResource, ScimRequestContext)
-   */
   @Override
   public ScimUser create(ScimUser resource, ScimRequestContext requestContext) throws UnableToCreateResourceException {
     String id = UUID.randomUUID().toString();
@@ -137,17 +134,11 @@ public class InMemoryUserService extends BaseRepository<ScimUser> {
     return resource;
   }
 
-  /**
-   * @see Repository#get(java.lang.String, ScimRequestContext)
-   */
   @Override
   public ScimUser get(String id, ScimRequestContext requestContext) {
     return users.get(id);
   }
 
-  /**
-   * @see Repository#delete(java.lang.String)
-   */
   @Override
   public void delete(String id) throws ResourceException {
     if (users.remove(id) == null) {
@@ -155,26 +146,16 @@ public class InMemoryUserService extends BaseRepository<ScimUser> {
     }
   }
 
-  /**
-   * @see Repository#find(Filter, ScimRequestContext)
-   */
   @Override
   public FilterResponse<ScimUser> find(Filter filter, ScimRequestContext requestContext) {
-    long count = requestContext.getPageRequest().map(PageRequest::getCount).orElse(users.size());
-    long startIndex = requestContext.getPageRequest().map(PageRequest::getStartIndex).map(it -> it - 1).orElse(0);
-
-    List<ScimUser> result = users.values().stream()
-      .skip(startIndex)
-      .limit(count)
+    List<ScimUser> filtered = users.values().stream()
       .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimUser.SCHEMA_URI)))
       .toList();
 
-    return new FilterResponse<>(result, result.size());
+    PageRequest pageRequest = requestContext.getPageRequestOrDefault();
+    return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
   }
 
-  /**
-   * @see Repository#getExtensionList()
-   */
   @Override
   public List<Class<? extends ScimExtension>> getExtensionList() {
     return List.of(LuckyNumberExtension.class, EnterpriseExtension.class);

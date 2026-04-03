@@ -99,6 +99,15 @@ public class ScimRequestContext {
     return Optional.ofNullable(pageRequest);
   }
 
+  /**
+   * Returns the page request, defaulting to an unbounded request if none was specified.
+   *
+   * @return the page request; never null
+   */
+  public PageRequest getPageRequestOrDefault() {
+    return pageRequest != null ? pageRequest : new PageRequest();
+  }
+
   public ScimRequestContext setPageRequest(PageRequest pageRequest) {
     this.pageRequest = pageRequest;
     return this;

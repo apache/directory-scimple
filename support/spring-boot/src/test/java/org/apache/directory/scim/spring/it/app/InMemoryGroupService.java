@@ -127,16 +127,12 @@ public class InMemoryGroupService implements Repository<ScimGroup> {
 
   @Override
   public FilterResponse<ScimGroup> find(Filter filter, ScimRequestContext requestContext) {
-    long count = requestContext.getPageRequest().map(PageRequest::getCount).orElse(groups.size());
-    long startIndex = requestContext.getPageRequest().map(PageRequest::getStartIndex).map(it -> it - 1).orElse(0);
-
-    List<ScimGroup> result = groups.values().stream()
-      .skip(startIndex)
-      .limit(count)
+    List<ScimGroup> filtered = groups.values().stream()
       .filter(FilterExpressions.inMemory(filter, schemaRegistry.getSchema(ScimGroup.SCHEMA_URI)))
       .toList();
 
-    return new FilterResponse<>(result, result.size());
+    PageRequest pageRequest = requestContext.getPageRequestOrDefault();
+    return new FilterResponse<>(pageRequest.paginate(filtered), filtered.size());
   }
 
   @Override
