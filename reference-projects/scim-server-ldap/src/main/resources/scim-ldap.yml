@@ -1,0 +1,79 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# SCIMple LDAP Server Configuration
+#
+# This file configures the LDAP-backed SCIM server reference implementation.
+# LDAP connection settings can be overridden with system properties:
+#   -Dldap.host=myserver -Dldap.port=636 -Dldap.bind.dn=cn=scim,dc=corp ...
+#
+# WARNING: The default values below are for development only.
+# Do NOT use them in production. Override bind credentials and enable TLS.
+
+# LDAP server connection settings
+# Override with system properties: -Dldap.host=..., -Dldap.port=..., etc.
+ldap:
+  embedded: false        # Set to true (or -Dldap.embedded=true) to start an in-memory ApacheDS
+                         # on an ephemeral port; host/port/bind settings below are for external LDAP only
+  host: localhost        # LDAP server hostname
+  port: 389              # Use 636 for LDAPS
+  bindDn: cn=admin,dc=example,dc=com
+  bindPassword: secret   # WARNING: development only — use -Dldap.bind.password for production
+  useTls: false          # Set to true for production; credentials are sent in plaintext without TLS
+  userBaseDn: ou=users,dc=example,dc=com    # Base DN for SCIM User searches
+  groupBaseDn: ou=groups,dc=example,dc=com  # Base DN for SCIM Group searches
+
+# SCIM User <-> LDAP inetOrgPerson attribute mapping
+# Maps SCIM User attributes (left) to LDAP attributes (right).
+# The "objectClasses" list defines which LDAP object classes are used when creating entries.
+user:
+  objectClasses:         # LDAP object classes applied to new user entries
+    - inetOrgPerson
+    - organizationalPerson
+    - person
+    - extensibleObject    # Allows custom SCIM attributes (scimActive, scimPhoneTypes) without schema changes
+    - top
+  rdnAttribute: uid      # LDAP attribute used as the RDN (Relative Distinguished Name)
+  attributes:
+    # SCIM attribute path  : LDAP attribute name
+    userName: uid
+    "name.givenName": givenName
+    "name.familyName": sn
+    "name.formatted": cn
+    displayName: displayName
+    "emails.value": mail
+    "phoneNumbers.value": telephoneNumber
+    "addresses.streetAddress": street
+    "addresses.locality": l           # LDAP "l" = locality (city)
+    "addresses.postalCode": postalCode
+    title: title
+    userType: employeeType
+    password: userPassword            # Stored as an LDAP hashed password
+
+# SCIM Group <-> LDAP groupOfNames attribute mapping
+# Maps SCIM Group attributes (left) to LDAP attributes (right).
+group:
+  objectClasses:         # LDAP object classes applied to new group entries
+    - groupOfNames
+    - top
+  rdnAttribute: cn       # Groups are identified by their common name
+  attributes:
+    # SCIM attribute path  : LDAP attribute name
+    displayName: cn
+    "members.value": member           # Each member value is a full DN of the user entry
