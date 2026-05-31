@@ -37,17 +37,18 @@ import org.apache.directory.scim.spec.schema.ServiceProviderConfiguration.Suppor
 public class ServerConfiguration {
   
   static final int BULK_MAXIMUM_OPERATIONS = 100;
-  static final int BULK_MAXIMUM_PAYLOAD_SIZE = 1024;
-  
+  // Maximum bulk request payload in bytes (2 MB); see RFC 7644 §3.7.
+  static final int BULK_MAXIMUM_PAYLOAD_SIZE = 2_097_152;
+
   static final int FILTER_MAXIMUM_RESULTS = 100;
 
   String id = "spc";
-  
+
   boolean supportsChangePassword = false;
-  
+
   boolean supportsBulk = true;
   int bulkMaxOperations = BULK_MAXIMUM_OPERATIONS;
-  int bulkMaxPayloadSize = BULK_MAXIMUM_PAYLOAD_SIZE;  //TODO what should this be?
+  int bulkMaxPayloadSize = BULK_MAXIMUM_PAYLOAD_SIZE;
   
   boolean supportsETag = true;
   

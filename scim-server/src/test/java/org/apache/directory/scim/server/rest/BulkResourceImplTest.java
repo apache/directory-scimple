@@ -23,9 +23,11 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.server.exception.UnableToCreateResourceException;
 import org.apache.directory.scim.core.repository.Repository;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
+import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.protocol.data.BulkOperation;
 import org.apache.directory.scim.protocol.data.BulkRequest;
 import org.apache.directory.scim.protocol.data.BulkResponse;
@@ -49,6 +51,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class BulkResourceImplTest {
@@ -223,5 +227,115 @@ public class BulkResourceImplTest {
         .setBulkId("bulk-id-bob")
         .setResponse(new ErrorResponse(Response.Status.BAD_REQUEST, "Expected Test Exception when bob is created"))
         .setStatus(new BulkOperation.StatusWrapper(Response.Status.BAD_REQUEST)));
+  }
+
+  // ---------------------------------------------------------------------------
+  // bulkMaxOperations enforcement
+  // ---------------------------------------------------------------------------
+
+  @Test
+  public void testBulkMaxOperationsExceeded() throws Exception {
+    // limit=2, 3 ops -> 413; repository must not be called
+    SchemaRegistry schemaRegistry = new SchemaRegistry();
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry);
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    repositoryRegistry.registerRepository(ScimUser.class, userRepository);
+
+    ServerConfiguration config = new ServerConfiguration();
+    config.setBulkMaxOperations(2);
+
+    BulkRequest bulkRequest = new BulkRequest()
+      .setOperations(List.of(
+        new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("a")),
+        new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("b")),
+        new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("c"))
+      ));
+
+    BulkResourceImpl impl = new BulkResourceImpl(schemaRegistry, repositoryRegistry, config);
+    UriInfo uriInfo = mock(UriInfo.class);
+
+    Response response = impl.doBulk(bulkRequest, uriInfo);
+
+    assertThat(response.getStatus()).isEqualTo(Response.Status.REQUEST_ENTITY_TOO_LARGE.getStatusCode());
+    assertThat(response.getEntity()).isInstanceOf(ErrorResponse.class);
+    // RFC 7644 §3.7.4: 413 states the maximum operation count and uses scimType "tooMany".
+    ErrorResponse error = (ErrorResponse) response.getEntity();
+    assertThat(error.getScimType()).isEqualTo(ErrorMessageType.TOO_MANY);
+    assertThat(error.getDetail()).contains("2");
+    verify(userRepository, never()).create(any(), any());
+    verify(userRepository, never()).update(any(), any(), any());
+    verify(userRepository, never()).delete(any());
+  }
+
+  @Test
+  public void testBulkMaxOperationsAtLimit() throws Exception {
+    // limit=2, 2 ops -> success
+    SchemaRegistry schemaRegistry = new SchemaRegistry();
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry);
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    repositoryRegistry.registerRepository(ScimUser.class, userRepository);
+
+    ScimUser createdA = new ScimUser();
+    createdA.setId("id-a");
+    ScimUser createdB = new ScimUser();
+    createdB.setId("id-b");
+    when(userRepository.create(any(), any()))
+      .thenReturn(createdA)
+      .thenReturn(createdB);
+
+    ServerConfiguration config = new ServerConfiguration();
+    config.setBulkMaxOperations(2);
+
+    BulkRequest bulkRequest = new BulkRequest()
+      .setOperations(List.of(
+        new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setBulkId("bulk-a").setData(new ScimUser().setUserName("a")),
+        new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setBulkId("bulk-b").setData(new ScimUser().setUserName("b"))
+      ));
+
+    BulkResourceImpl impl = new BulkResourceImpl(schemaRegistry, repositoryRegistry, config);
+    UriInfo uriInfo = mock(UriInfo.class);
+    UriBuilder uriBuilder = mock(UriBuilder.class);
+    when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
+    when(uriBuilder.path(any(String.class))).thenReturn(uriBuilder);
+    when(uriBuilder.build())
+      .thenReturn(URI.create("https://scim.example.com/Users/id-a"))
+      .thenReturn(URI.create("https://scim.example.com/Users/id-b"));
+
+    Response response = impl.doBulk(bulkRequest, uriInfo);
+
+    assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+  }
+
+  @Test
+  public void testBulkMaxOperationsNonDefaultConfig() throws Exception {
+    // limit=5, 6 ops -> 413
+    SchemaRegistry schemaRegistry = new SchemaRegistry();
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry);
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    repositoryRegistry.registerRepository(ScimUser.class, userRepository);
+
+    ServerConfiguration config = new ServerConfiguration();
+    config.setBulkMaxOperations(5);
+
+    List<BulkOperation> ops = List.of(
+      new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("u1")),
+      new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("u2")),
+      new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("u3")),
+      new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("u4")),
+      new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("u5")),
+      new BulkOperation().setMethod(BulkOperation.Method.POST).setPath("/Users").setData(new ScimUser().setUserName("u6"))
+    );
+
+    BulkRequest bulkRequest = new BulkRequest().setOperations(ops);
+    BulkResourceImpl impl = new BulkResourceImpl(schemaRegistry, repositoryRegistry, config);
+    UriInfo uriInfo = mock(UriInfo.class);
+
+    Response response = impl.doBulk(bulkRequest, uriInfo);
+
+    assertThat(response.getStatus()).isEqualTo(Response.Status.REQUEST_ENTITY_TOO_LARGE.getStatusCode());
+    ErrorResponse error = (ErrorResponse) response.getEntity();
+    assertThat(error.getScimType()).isEqualTo(ErrorMessageType.TOO_MANY);
+    assertThat(error.getDetail()).contains("5");
+    verify(userRepository, never()).create(any(), any());
   }
 }

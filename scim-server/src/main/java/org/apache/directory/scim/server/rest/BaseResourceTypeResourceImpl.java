@@ -51,6 +51,8 @@ import org.apache.directory.scim.core.repository.extensions.ProcessingExtension;
 import org.apache.directory.scim.core.repository.extensions.ClientFilterException;
 import org.apache.directory.scim.protocol.adapter.FilterWrapper;
 import org.apache.directory.scim.protocol.BaseResourceTypeResource;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
+import org.apache.directory.scim.spec.filter.PageRequest;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReference;
 import org.apache.directory.scim.spec.filter.attribute.AttributeReferenceListWrapper;
 import org.apache.directory.scim.protocol.data.ListResponse;
@@ -76,6 +78,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
 
   private final Class<T> resourceClass;
 
+  private final ServerConfiguration serverConfiguration;
+
   // TODO: Field injection of UriInfo, Request should work with all implementations
   // CDI can be used directly in Jakarta WS 4
   @Context
@@ -88,10 +92,23 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
   HttpHeaders headers;
 
   public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, Class<T> resourceClass) {
+    this(schemaRegistry, repositoryRegistry, resourceClass, new ServerConfiguration());
+  }
+
+  /**
+   * Creates a new instance with an explicit {@link ServerConfiguration}.
+   *
+   * @param schemaRegistry      the schema registry
+   * @param repositoryRegistry  the repository registry
+   * @param resourceClass       the SCIM resource class managed by this endpoint
+   * @param serverConfiguration the server configuration, used to enforce limits
+   */
+  public BaseResourceTypeResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, Class<T> resourceClass, ServerConfiguration serverConfiguration) {
     this.schemaRegistry = schemaRegistry;
     this.repositoryRegistry = repositoryRegistry;
     this.resourceClass = resourceClass;
     this.attributeUtil = new AttributeUtil(schemaRegistry);
+    this.serverConfiguration = serverConfiguration;
   }
 
   public Repository<T> getRepository() {
@@ -221,7 +238,8 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
     excludedAttributeReferences = qualifyReferences(excludedAttributeReferences);
 
     Filter filter = request.getFilter();
-    ScimRequestContext requestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences, request.getPageRequest(),  request.getSortRequest(), null);
+    PageRequest pageRequest = clampPageRequest(request.getPageRequest());
+    ScimRequestContext requestContext = new ScimRequestContext(attributeReferences, excludedAttributeReferences, pageRequest, request.getSortRequest(), null);
 
     ListResponse<T> listResponse = new ListResponse<>();
 
@@ -429,6 +447,34 @@ public abstract class BaseResourceTypeResourceImpl<T extends ScimResource> imple
         return ref; // best-effort: leave unresolved
       })
       .collect(Collectors.toUnmodifiableSet());
+  }
+
+  /**
+   * Returns a {@link PageRequest} whose {@code count} is capped at
+   * {@link ServerConfiguration#getFilterMaxResults()} when that ceiling is
+   * positive (i.e. enabled). A null or negative {@code count} is treated as
+   * "no limit / invalid" and is replaced by the ceiling. A count of 0 is
+   * preserved (RFC 7644: zero means return no resources, only totalResults).
+   * If {@code original} is null it is returned as-is.
+   */
+  private PageRequest clampPageRequest(PageRequest original) {
+    if (original == null) {
+      return null;
+    }
+    int ceiling = serverConfiguration.getFilterMaxResults();
+    if (ceiling <= 0) {
+      return original;
+    }
+    Integer count = original.getCount();
+    if (count != null && count == 0) {
+      return original;
+    }
+    if (count == null || count < 0 || count > ceiling) {
+      return new PageRequest()
+        .setStartIndex(original.getStartIndex())
+        .setCount(ceiling);
+    }
+    return original;
   }
 
   @FunctionalInterface

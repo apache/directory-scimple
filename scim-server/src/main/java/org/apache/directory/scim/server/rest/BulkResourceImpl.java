@@ -43,6 +43,7 @@ import org.apache.directory.scim.protocol.data.BulkOperation.Method;
 import org.apache.directory.scim.protocol.data.BulkOperation.StatusWrapper;
 import org.apache.directory.scim.protocol.data.BulkRequest;
 import org.apache.directory.scim.protocol.data.BulkResponse;
+import org.apache.directory.scim.protocol.ErrorMessageType;
 import org.apache.directory.scim.protocol.data.ErrorResponse;
 import org.apache.directory.scim.spec.resources.BaseResource;
 import org.apache.directory.scim.spec.resources.ScimResource;
@@ -51,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.directory.scim.core.schema.SchemaRegistry;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 
 @ApplicationScoped
 public class BulkResourceImpl implements BulkResource {
@@ -96,19 +98,37 @@ public class BulkResourceImpl implements BulkResource {
 
   private final RepositoryRegistry repositoryRegistry;
 
+  private final ServerConfiguration serverConfiguration;
+
   @Inject
-  public BulkResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
+  public BulkResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, ServerConfiguration serverConfiguration) {
     this.schemaRegistry = schemaRegistry;
     this.repositoryRegistry = repositoryRegistry;
+    this.serverConfiguration = serverConfiguration;
   }
 
   public BulkResourceImpl() {
     // CDI
-    this(null, null);
+    this(null, null, null);
+  }
+
+  /** Package-visible constructor for tests that don't need limit enforcement. */
+  BulkResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
+    this(schemaRegistry, repositoryRegistry, new ServerConfiguration());
   }
 
   @Override
   public Response doBulk(BulkRequest request, UriInfo uriInfo) {
+    int maxOperations = serverConfiguration.getBulkMaxOperations();
+    if (maxOperations > 0 && request.getOperations().size() > maxOperations) {
+      // RFC 7644 §3.7.4: return 413 with scimType "tooMany", stating the maximum.
+      ErrorResponse error = new ErrorResponse(
+        Status.REQUEST_ENTITY_TOO_LARGE,
+        "Bulk request exceeds the maximum allowed number of operations (" + maxOperations + ")");
+      error.setScimType(ErrorMessageType.TOO_MANY);
+      return Response.status(Status.REQUEST_ENTITY_TOO_LARGE).entity(error).build();
+    }
+
     BulkResponse response;
     int errorCount = 0;
     Integer requestFailOnErrors = request.getFailOnErrors();
