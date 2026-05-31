@@ -67,12 +67,7 @@
     <module>scim-client</module>
     <module>scim-core</module>
     <module>scim-server</module>
-    <module>scim-server-examples/scim-server-memory</module>
-    <module>scim-server-examples/scim-server-jersey</module>
-    <module>scim-server-examples/scim-server-jersey-4</module>
-    <module>scim-server-examples/scim-server-quarkus</module>
-    <module>scim-server-examples/scim-server-spring-boot</module>
-    <module>scim-server-examples/scim-server-spring-boot-4</module>
+    <module>scim-server-examples</module>
     <module>support/spring-boot</module>
     <module>scim-tools</module>
     <module>scim-compliance-tests</module>
