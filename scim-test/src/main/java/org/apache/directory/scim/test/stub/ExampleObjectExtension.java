@@ -215,7 +215,9 @@ public class ExampleObjectExtension implements ScimExtension {
   }
 
   public String toString() {
-    return "ExampleObjectExtension(valueAlways=" + this.getValueAlways() + ", valueDefault=" + this.getValueDefault() + ", valueNever=" + this.getValueNever() + ", valueRequest=" + this.getValueRequest() + ", valueComplex=" + this.getValueComplex() + ", list=" + this.getList() + ", enumList=" + this.getEnumList() + ", subobject=" + this.getSubobject() + ")";
+    // valueNever is Returned.NEVER and is omitted here; Returned.NEVER fields should
+    // generally be kept out of toString() to avoid leaking them into logs.
+    return "ExampleObjectExtension(valueAlways=" + this.getValueAlways() + ", valueDefault=" + this.getValueDefault() + ", valueRequest=" + this.getValueRequest() + ", valueComplex=" + this.getValueComplex() + ", list=" + this.getList() + ", enumList=" + this.getEnumList() + ", subobject=" + this.getSubobject() + ")";
   }
 
   @XmlType
