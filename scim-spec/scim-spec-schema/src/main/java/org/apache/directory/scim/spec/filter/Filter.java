@@ -19,9 +19,6 @@
 
 package org.apache.directory.scim.spec.filter;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,26 +67,9 @@ public class Filter implements Serializable {
   }
 
   protected FilterExpression parseFilter(String filter) throws FilterParseException {
-    FilterLexer l = new FilterLexer(CharStreams.fromString(filter));
-    FilterParser p = new FilterParser(new CommonTokenStream(l));
-    p.setBuildParseTree(true);
-
-    p.addErrorListener(new BaseErrorListener() {
-      @Override
-      public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        throw new IllegalStateException("failed to parse at line " + line + ":" + charPositionInLine + " due to " + msg, e);
-      }
-    });
-
-    try {
-      ParseTree tree = p.filter();
-      ExpressionBuildingListener expListener = new ExpressionBuildingListener();
-      ParseTreeWalker.DEFAULT.walk(expListener, tree);
-      
-      return expListener.getFilterExpression();
-    } catch (IllegalStateException e) {
-      throw new FilterParseException("Failed to parse filter: " + filter, e);
-    }
+    ExpressionBuildingListener expListener = new ExpressionBuildingListener();
+    FilterParsers.parseFilter(filter, expListener);
+    return expListener.getFilterExpression();
   }
   
   @Override
