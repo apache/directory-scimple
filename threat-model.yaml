@@ -1,0 +1,255 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# Machine-readable companion to THREAT_MODEL.md (§15).
+#
+# DERIVED INDEX — the prose THREAT_MODEL.md is canonical. Do not hand-edit for
+# meaning; regenerate this file whenever the prose changes. It carries only the
+# triage-relevant facts so a scanner / CI check / AI triage bot can route a finding
+# to a §13 disposition mechanically, and so §11a can be fed back as a suppression list.
+#
+# Field conventions:
+#   attacker_controlled: true  -> value can be chosen by the untrusted adversary
+#                                 (SCIM client, or a malicious remote peer for the client lib)
+#   attacker_controlled: false -> supplied only by trusted code (integrator/operator);
+#                                 a finding requiring it -> OUT-OF-MODEL: trusted-input
+#   enforced: false            -> a "known gap": intended behavior not yet implemented (a VALID bug)
+
+meta:
+  project: Apache Directory SCIMple
+  spec: SCIM 2.0 (RFC 7642 / 7643 / 7644)
+  # No version is pinned here on purpose: this file is committed alongside THREAT_MODEL.md,
+  # so the release git tag binds the version of both. The copy at the <release> tag IS the
+  # index for <release>. A report against version N is triaged against the model at N's tag,
+  # not HEAD. (model_commit below is a non-load-bearing provenance breadcrumb only.)
+  canonical: THREAT_MODEL.md
+  status: draft-by-pmc
+  version_binding: per-release-git-tag
+  model_commit: "56966734"
+
+# ---------------------------------------------------------------------------
+# §7 — who the model defends against
+# ---------------------------------------------------------------------------
+adversaries:
+  - id: untrusted-http-client
+    trust: untrusted
+    description: An untrusted HTTP client calling the scim-server endpoints; supplies bodies, filters, PATCH paths, headers. (NOT the scim-client library.)
+not_in_model:
+  - control of the embedding process
+  - the integrator's Repository implementation
+  - registered schemas / extensions
+  - the JAX-RS Client configuration (TLS, credentials, timeouts)
+  - a malicious or compromised remote SCIM server (scim-client trusts the integrator-chosen server it calls)
+  - local readers of DEBUG logs
+
+# ---------------------------------------------------------------------------
+# §2 / §3 — component families and scope
+# ---------------------------------------------------------------------------
+component_families:
+  scim-spec-schema:     { in_scope: true,  note: "SCIM models, ANTLR filter grammar, PATCH path parser, URN validator" }
+  scim-spec-protocol:   { in_scope: true,  note: "REST protocol models" }
+  scim-core:            { in_scope: true,  note: "Repository SPI boundary in scope; integrator impls out" }
+  scim-server:          { in_scope: true,  note: "JAX-RS endpoint implementations" }
+  scim-client:          { in_scope: true,  note: "outbound wrapper; transport config is the caller's" }
+  support/spring-boot:  { in_scope: true,  note: "auto-configuration wiring" }
+  scim-server-examples: { in_scope: false, reason: unsupported-component, note: "demo apps; not published; plaintext passwords" }
+  reference-projects/scim-server-ldap: { in_scope: false, reason: unsupported-component }
+  scim-test:            { in_scope: false, reason: unsupported-component, note: "test tooling" }
+  scim-tools:           { in_scope: false, reason: unsupported-component }
+  scim-compliance-tests:{ in_scope: false, reason: unsupported-component }
+  scim-coverage:        { in_scope: false, reason: unsupported-component }
+
+# ---------------------------------------------------------------------------
+# §6 — entry points and per-parameter trust
+# ---------------------------------------------------------------------------
+entry_points:
+  server:
+    - route: "GET /Users, /Groups"
+      params:
+        filter:             { attacker_controlled: true }
+        startIndex:         { attacker_controlled: true }
+        count:              { attacker_controlled: true }
+        attributes:         { attacker_controlled: true }
+        excludedAttributes: { attacker_controlled: true }
+    - route: "POST /Users, /Groups, /Me"
+      params:
+        body:               { attacker_controlled: true }
+    - route: "PUT /Users/{id}, /Me"
+      params:
+        id:                 { attacker_controlled: true }
+        body:               { attacker_controlled: true }
+        If-Match:           { attacker_controlled: true }
+    - route: "PATCH /Users/{id}, /Me"
+      params:
+        id:                 { attacker_controlled: true }
+        patch_body:         { attacker_controlled: true }
+        patch_path:         { attacker_controlled: true, note: "parsed by the recursive ANTLR grammar" }
+        If-Match:           { attacker_controlled: true }
+    - route: "POST /Bulk"
+      params:
+        operations:         { attacker_controlled: true }
+        failOnErrors:       { attacker_controlled: true }
+    - route: "POST /Users/.search, /Groups/.search"
+      params:
+        search_request:     { attacker_controlled: true }
+    - route: "GET /Me, DELETE /Me"
+      params:
+        principal:          { attacker_controlled: false, note: "supplied by container SecurityContext; integrator must authenticate" }
+    - route: "GET /Schemas, /ResourceTypes, /ServiceProviderConfig"
+      params:
+        filter:             { attacker_controlled: true, note: "returns 403 if present, per RFC" }
+  client:
+    - call: outbound-request
+      params:
+        baseUrl:            { attacker_controlled: false, note: "caller-configured target; SSRF is integrator's concern" }
+        jaxrs_client:       { attacker_controlled: false, note: "TLS/creds/timeouts/redirects are the caller's" }
+    - call: inbound-response
+      params:
+        response_body:      { attacker_controlled: false, note: "remote server is trusted by the integrator; out of model (§3, §7)" }
+
+input_defaults:
+  json_parser: jackson-2.21.3
+  json_limits: stream-read-constraints-defaults   # nesting/string/number bounds; not overridden
+  filter_depth_cap: 40                              # FilterParsers.MAX_NESTING_DEPTH (filter + PATCH path)
+  request_size_cap: none                            # proportional cost is integrator/container responsibility (§9)
+
+# ---------------------------------------------------------------------------
+# §5a — configuration knobs
+# ---------------------------------------------------------------------------
+config_knobs:
+  bulkMaxOperations:       { default: 100,  security_relevant: true,  enforced: true, note: "BulkResourceImpl rejects with HTTP 413 tooMany" }
+  bulkMaxPayloadSize:      { default: 1024, security_relevant: true,  enforced: true, note: "BulkPayloadSizeFilter" }
+  filterMaxResults:        { default: 100,  security_relevant: true,  enforced: true, note: "BaseResourceTypeResourceImpl caps results" }
+  supportsBulk:            { security_relevant: false, note: "capability advertisement only" }
+  supportsFilter:          { security_relevant: false, note: "capability advertisement only" }
+  supportsPatch:           { security_relevant: false, note: "capability advertisement only" }
+  supportsSort:            { security_relevant: false, note: "capability advertisement only" }
+  supportsETag:            { security_relevant: false, note: "capability advertisement only" }
+  supportsChangePassword:  { security_relevant: false, note: "capability advertisement only" }
+  authenticationSchemas:   { security_relevant: false, note: "advertised; SCIMple enforces no auth" }
+
+# ---------------------------------------------------------------------------
+# §8 — properties the project provides
+# ---------------------------------------------------------------------------
+properties_provided:
+  - id: never-attribute-redaction
+    severity: security-critical
+    conditions: "response via AttributeUtil.setAttributesForDisplay; password is Returned.NEVER"
+    violation_symptom: "a Returned.NEVER attribute (password) appears in a response body or in toString()/logs"
+    provenance: documented
+    provided_by: "AttributeUtilTest (responses) + ScimUserTest (toString(), schema-driven); merged in develop"
+  - id: parse-before-repository
+    severity: correctness-only
+    violation_symptom: "a raw unparsed attacker string is handed to a Repository method"
+    provenance: documented
+  - id: no-unsafe-jackson-typing
+    severity: security-critical
+    violation_symptom: "gadget-chain deserialization (RCE) via attacker-chosen types"
+    provenance: documented
+  - id: no-untrusted-class-loading
+    severity: security-critical
+    violation_symptom: "class loading driven by request data"
+    provenance: documented
+  - id: no-xxe
+    severity: security-critical
+    violation_symptom: "external-entity expansion / SSRF via XML"
+    provenance: documented
+  - id: filter-patch-round-trip
+    severity: correctness-only
+    violation_symptom: "a built/parsed filter or path does not round-trip"
+    provenance: documented
+    caveat: "JSON string values are not unescaped (ExpressionBuildingListener.parseJsonType)"
+  - id: catastrophic-input-resistance
+    severity: security-critical
+    conditions: "small input causing a crash, OR super-linear/exponential cost in input size"
+    violation_symptom: "small/cheap request -> StackOverflowError, hang, or exponential CPU/allocation"
+    provenance: documented
+    provided_by: "FilterParsers.MAX_NESTING_DEPTH=40 (DepthCountingListener); filter + PATCH path; merged in develop"
+    note: "proportional cost to large well-formed input is NOT covered (see disclaimed: proportional-resource-cost); no input-length cap"
+  - id: enforced-request-limits
+    severity: security-critical   # filterMaxResults alone is correctness-only
+    conditions: "bulkMaxOperations / bulkMaxPayloadSize / filterMaxResults"
+    violation_symptom: "a request exceeding a configured limit is processed anyway"
+    provenance: documented
+    provided_by: "BulkResourceImpl (413 tooMany), BulkPayloadSizeFilter, BaseResourceTypeResourceImpl; merged in develop"
+
+# ---------------------------------------------------------------------------
+# §9 — properties the project does NOT provide
+# ---------------------------------------------------------------------------
+properties_disclaimed:
+  - authentication
+  - authorization
+  - transport-security
+  - proportional-resource-cost     # cost proportional to large well-formed input
+  - defense-against-malicious-repository-or-client
+  - password-hashing-or-at-rest-protection
+  - protection-against-operator-enabled-debug-logging  # password excluded; other attributes not
+
+false_friends:
+  - id: password-redaction-scope
+    looks_like: secret management
+    is_actually: "response/log redaction only; password is held in memory and passed cleartext to the Repository"
+  - id: service-provider-config-supports-flags
+    looks_like: enforcement switches
+    is_actually: "capability advertisements; endpoints behave identically regardless"
+    note: "the numeric LIMIT knobs are different — bulkMaxOperations/bulkMaxPayloadSize/filterMaxResults are enforced (§5a/§8.8)"
+
+attack_classes_left_to_caller:
+  - oversized-or-high-rate-input
+  - filter-to-backend-injection-sql-ldap
+  - ssrf-via-scim-client-baseurl
+  - mass-assignment-over-posting
+  - redos-on-urn-validator   # low likelihood; a genuinely super-linear case would be a bug per §8.7
+
+# ---------------------------------------------------------------------------
+# §11a — recurring false positives (suppression list / negative prompt)
+# ---------------------------------------------------------------------------
+known_non_findings:
+  - id: jackson-databind-no-default-typing
+    discharged_by: properties_provided.no-unsafe-jackson-typing
+  - id: jaxb-no-xxe
+    discharged_by: properties_provided.no-xxe
+  - id: ei-expose-rep
+    discharged_by: "spotbugs excludes for spec.filter.* / spec.phonenumber.* model packages; internal-representation exposure on value objects, not external-input"
+  - id: unencrypted-server-socket
+    discharged_by: "EmbeddedServerExtension in scim-compliance-tests (integration-test harness); out of scope §3"
+  - id: urn-validator-redos
+    discharged_by: "spotbugs excludes; regex judged non-backtracking. CAVEAT: URN can arrive in request data, so a genuinely super-linear case would be VALID per §8.7"
+  - id: owasp-false-gav-matches
+    discharged_by: "src/owasp/suppression.xml: scim JARs -> apache_http_server; junit-platform-engine -> fan_platform; commons-codec/commons-logging/jcl-over-slf4j -> commons_net"
+  - id: weld-probe-js-cves
+    discharged_by: "weld-se-core is test-scoped in the published libs (and runtime only in the Jersey demo examples); probe.js is never in a published artifact's runtime surface"
+  - id: snakeyaml-cve-2022-1471
+    discharged_by: "src/owasp/suppression.xml: transitive dependency; the unsafe Constructor path is not used"
+  - id: spotbugs-code-quality-suppressions
+    discharged_by: "RCN_REDUNDANT_NULLCHECK (Lombok), PhoneNumber builder UWF/NP findings, ObjectMapperFactory MS_EXPOSE_REP, BaseScimClient CT_CONSTRUCTOR_THROW; code-quality, not security"
+  - id: generated-antlr-source-findings
+    discharged_by: "spec.filter.* / spec.phonenumber.* packages excluded in spotbugs (generated parser/lexer + model classes)"
+
+# ---------------------------------------------------------------------------
+# §13 — closed set of triage outcomes
+# ---------------------------------------------------------------------------
+dispositions:
+  - { label: VALID,                                 licensed_by: "§8,§6,§7" }
+  - { label: VALID-HARDENING,                       licensed_by: "§11" }
+  - { label: "OUT-OF-MODEL: trusted-input",         licensed_by: "§6" }
+  - { label: "OUT-OF-MODEL: adversary-not-in-scope",licensed_by: "§7" }
+  - { label: "OUT-OF-MODEL: unsupported-component", licensed_by: "§3" }
+  - { label: "OUT-OF-MODEL: non-default-build",     licensed_by: "§5a" }
+  - { label: "BY-DESIGN: property-disclaimed",      licensed_by: "§9" }
+  - { label: KNOWN-NON-FINDING,                     licensed_by: "§11a" }
+  - { label: MODEL-GAP,                             licensed_by: "triggers §12" }
