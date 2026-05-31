@@ -16,7 +16,7 @@ Jakarta EE implementation of the [Simple Cross-domain Identity Management](http:
 
 ## Project
 
-Please fork this project and contribute Pull-Requests via this project's Github page.  Issue tracking is being transitioned to the [Apache Foundation's Jira server](http://issues.apache.org/jira/browse/SCIMPLE).
+Please fork this project and contribute Pull-Requests via this project's Github page.  Issues are tracked using [GitHub Issues](https://github.com/apache/directory-scimple/issues).
 
 Please visit our project page at https://directory.apache.org/scimple.
 
@@ -177,6 +177,6 @@ In order to build the wars, run the following command:
 | scim-client                  | A SCIM REST Client                                                                                                                                                   |
 | scim-core                    | SCIMple Repository related classes, used to provide CRUD operations to a data store (e.g. a database), see above example                                             |
 | scim-server                  | REST Endpoint implementations                                                                                                                                        |
-| scim-server-examples         | Various server examples                                                                                                                                              |
+| scim-server-examples         | Demo-only reference servers (not production-hardened)                                                                                                                |
 | scim-compliance-tests        | Integration tests that can be used to test a SCIM server                                                                                                             |
 
