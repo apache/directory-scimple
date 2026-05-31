@@ -33,7 +33,7 @@ public class ScimpleFeature implements Feature {
 
   @Override
   public boolean configure(FeatureContext context) {
-    Stream.of(EXCEPTION_MAPPER_CLASSES, MEDIA_TYPE_SUPPORT_CLASSES)
+    Stream.of(EXCEPTION_MAPPER_CLASSES, MEDIA_TYPE_SUPPORT_CLASSES, FEATURE_CLASSES)
       .flatMap(Collection::stream)
       .forEach(context::register);
     return true;

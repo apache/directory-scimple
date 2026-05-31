@@ -55,16 +55,26 @@ public final class ScimResourceHelper {
     WebApplicationExceptionMapper.class,
     UnsupportedOperationExceptionMapper.class,
     MutabilityExceptionMapper.class,
+    BulkPayloadTooLargeExceptionMapper.class,
     GenericExceptionMapper.class);
 
   static final Set<Class<?>> MEDIA_TYPE_SUPPORT_CLASSES = Set.of(
     ScimJacksonXmlBindJsonProvider.class
   );
 
+  /**
+   * JAX-RS {@code DynamicFeature}s registered by {@link ScimpleFeature}. These are
+   * not resources or exception mappers; they bind request/response filters to
+   * specific endpoints (e.g. the bulk payload-size guard on {@code POST /Bulk}).
+   */
+  static final Set<Class<?>> FEATURE_CLASSES = Set.of(
+    BulkPayloadSizeDynamicFeature.class);
+
   static final Set<Class<?>> SCIMPLE_CLASSES = Stream.of(
       RESOURCE_CLASSES,
       EXCEPTION_MAPPER_CLASSES,
-      MEDIA_TYPE_SUPPORT_CLASSES)
+      MEDIA_TYPE_SUPPORT_CLASSES,
+      FEATURE_CLASSES)
       .flatMap(Collection::stream)
       .collect(Collectors.toUnmodifiableSet());
 

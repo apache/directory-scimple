@@ -23,6 +23,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.protocol.UserResource;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.spec.resources.ScimUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,12 @@ public class UserResourceImpl extends BaseResourceTypeResourceImpl<ScimUser> imp
     private static final Logger log = LoggerFactory.getLogger(UserResourceImpl.class);
 
   @Inject
-  public UserResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
-    super(schemaRegistry, repositoryRegistry, ScimUser.class);
+  public UserResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, ServerConfiguration serverConfiguration) {
+    super(schemaRegistry, repositoryRegistry, ScimUser.class, serverConfiguration);
   }
 
   public UserResourceImpl() {
     // CDI
-    this(null, null);
+    this(null, null, new ServerConfiguration());
   }
 }

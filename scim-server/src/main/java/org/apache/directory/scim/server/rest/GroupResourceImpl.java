@@ -23,6 +23,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.directory.scim.core.repository.RepositoryRegistry;
 import org.apache.directory.scim.protocol.GroupResource;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.spec.resources.ScimGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,12 @@ public class GroupResourceImpl extends BaseResourceTypeResourceImpl<ScimGroup> i
     private static final Logger log = LoggerFactory.getLogger(GroupResourceImpl.class);
 
   @Inject
-  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry) {
-    super(schemaRegistry, repositoryRegistry, ScimGroup.class);
+  public GroupResourceImpl(SchemaRegistry schemaRegistry, RepositoryRegistry repositoryRegistry, ServerConfiguration serverConfiguration) {
+    super(schemaRegistry, repositoryRegistry, ScimGroup.class, serverConfiguration);
   }
 
   public GroupResourceImpl() {
     // CDI
-    this(null, null);
+    this(null, null, new ServerConfiguration());
   }
 }

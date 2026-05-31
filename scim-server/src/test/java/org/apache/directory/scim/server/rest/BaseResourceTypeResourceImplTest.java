@@ -19,6 +19,7 @@
 
 package org.apache.directory.scim.server.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,10 +34,17 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import jakarta.ws.rs.core.UriInfo;
+import org.apache.directory.scim.core.repository.RepositoryRegistry;
+import org.apache.directory.scim.core.repository.ScimRequestContext;
+import org.apache.directory.scim.core.schema.SchemaRegistry;
 import org.apache.directory.scim.protocol.exception.ScimException;
+import org.apache.directory.scim.server.configuration.ServerConfiguration;
 import org.apache.directory.scim.spec.exception.ResourceException;
+import org.apache.directory.scim.spec.filter.FilterResponse;
+import org.apache.directory.scim.spec.filter.PageRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import org.apache.directory.scim.core.repository.Repository;
@@ -210,6 +218,207 @@ public class BaseResourceTypeResourceImplTest {
     // then
     assertEquals(exception.getStatus(), Status.NOT_IMPLEMENTED);
     assertThat(exception.getError().getDetail(), is("Provider not defined"));
+  }
+
+  // ---------------------------------------------------------------------------
+  // filterMaxResults clamping tests
+  // ---------------------------------------------------------------------------
+
+  /** Builds a UserResourceImpl with the given ceiling and a mock repository. */
+  @SuppressWarnings("unchecked")
+  private UserResourceImpl buildUserImplWithCeiling(int ceiling, Repository<ScimUser> userRepository) throws Exception {
+    SchemaRegistry schemaRegistry = new SchemaRegistry();
+    RepositoryRegistry repositoryRegistry = new RepositoryRegistry(schemaRegistry);
+    when(userRepository.getExtensionList()).thenReturn(Collections.emptyList());
+    repositoryRegistry.registerRepository(ScimUser.class, userRepository);
+
+    ServerConfiguration config = new ServerConfiguration();
+    config.setFilterMaxResults(ceiling);
+
+    return new UserResourceImpl(schemaRegistry, repositoryRegistry, config);
+  }
+
+  /** Returns a FilterResponse with one dummy user and the given totalResults. */
+  private FilterResponse<ScimUser> singleUserResponse(int totalResults) {
+    ScimUser user = new ScimUser();
+    user.setId("test-id");
+    user.setUserName("test-user");
+    return new FilterResponse<>(List.of(user), totalResults);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_clampViaGET() throws Exception {
+    // GET with count=200, ceiling=50 -> captured PageRequest.count == 50
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(1));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setStartIndex(1);
+    searchRequest.setCount(200);
+
+    Response response = impl.find(searchRequest);
+
+    assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+    ScimRequestContext captured = ctxCaptor.getValue();
+    assertThat(captured.getPageRequest())
+      .isPresent()
+      .get()
+      .extracting(PageRequest::getCount)
+      .isEqualTo(50);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_clampViaSearchPost() throws Exception {
+    // POST .search with count=200, ceiling=50 -> clamped
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(1));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setCount(200);
+
+    impl.find(searchRequest);
+
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(50);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_nonDefaultServerConfigRead() throws Exception {
+    // count=200, ceiling=50 -> captured count==50
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(200));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setCount(200);
+
+    Response response = impl.find(searchRequest);
+
+    assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(50);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_countBelowLimitUnchanged() throws Exception {
+    // count=10, ceiling=50 -> captured count==10 (unchanged)
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(10));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setCount(10);
+
+    impl.find(searchRequest);
+
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(10);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_nullCountClamped() throws Exception {
+    // count=null (not specified), ceiling=50 -> captured count==50
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(0));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    // count deliberately not set (null)
+
+    impl.find(searchRequest);
+
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(50);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_zeroCountPreserved() throws Exception {
+    // count=0 (RFC 7644: return no resources, only totalResults) must NOT be clamped
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(0));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setCount(0);
+
+    impl.find(searchRequest);
+
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(0);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_ceilingZeroDisablesClamp() throws Exception {
+    // filterMaxResults=0 means "disabled" — any count must pass through unchanged
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(0, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(200));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setCount(200);
+
+    impl.find(searchRequest);
+
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(200);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFind_negativeCountClamped() throws Exception {
+    // count=-1 is invalid; must be normalized to the ceiling (50), not passed through
+    Repository<ScimUser> userRepository = mock(Repository.class);
+    UserResourceImpl impl = buildUserImplWithCeiling(50, userRepository);
+
+    ArgumentCaptor<ScimRequestContext> ctxCaptor = ArgumentCaptor.forClass(ScimRequestContext.class);
+    when(userRepository.find(any(), ctxCaptor.capture())).thenReturn(singleUserResponse(0));
+
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.setAttributes(Collections.emptySet());
+    searchRequest.setExcludedAttributes(Collections.emptySet());
+    searchRequest.setCount(-1);
+
+    impl.find(searchRequest);
+
+    PageRequest captured = ctxCaptor.getValue().getPageRequest().orElseThrow();
+    assertThat(captured.getCount()).isEqualTo(50);
   }
 
   private ScimUser getScimUser() throws PhoneNumberParseException {
