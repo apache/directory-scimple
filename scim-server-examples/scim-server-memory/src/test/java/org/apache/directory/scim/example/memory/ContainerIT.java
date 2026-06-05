@@ -52,7 +52,9 @@ public class ContainerIT {
 
     Map<String, Function<ContainerConfiguration, WebAppContainer<?>>> containers = Map.of(
       "payara", config -> new PayaraContainer(config.imageName, warFile, config.timeout),
-      "glassfish", config -> new GlassfishContainer(config.imageName, warFile, config.timeout),
+      // GlassFish: one matrix entry per supported major version; image resolved from container.properties
+      "glassfish-v7", config -> new GlassfishContainer(config.imageName, warFile, config.timeout),
+      "glassfish-v8", config -> new GlassfishContainer(config.imageName, warFile, config.timeout),
       "wildfly", config -> new WildflyContainer(config.imageName, warFile, config.timeout),
       "open-liberty", config -> new OpenLibertyContainer(config.imageName, warFile, config.timeout)
     );
