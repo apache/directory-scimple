@@ -5,6 +5,16 @@
   // Max 10 PRs in total, 10 per hour
   prConcurrentLimit: 10,
   prHourlyLimit: 10,
+  packageRules: [
+    {
+      // Keep the GlassFish 7.x line on the 7 series; the 8.x line still gets major bumps.
+      // matchCurrentVersion picks the 7.x line (both lines share one depName).
+      matchDatasources: ["docker"],
+      matchDepNames: ["eclipse-ee4j/embedded-glassfish"],
+      matchCurrentVersion: "< 8.0.0",
+      allowedVersions: "< 8.0.0",
+    },
+  ],
   customManagers: [
     {
       // See renovate docs https://docs.renovatebot.com/modules/manager/regex/
