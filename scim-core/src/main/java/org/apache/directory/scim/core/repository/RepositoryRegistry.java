@@ -38,6 +38,8 @@ public class RepositoryRegistry {
 
   private Map<Class<? extends ScimResource>, Repository<? extends ScimResource>> repositoryMap = new HashMap<>();
 
+  private final Object repositoryLock = new Object();
+
   public RepositoryRegistry() {
     // CDI
   }
@@ -58,12 +60,14 @@ public class RepositoryRegistry {
       });
   }
 
-  public synchronized <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException {
-    List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
+  public <T extends ScimResource> void registerRepository(Class<T> clazz, Repository<T> repository) throws InvalidRepositoryException {
+    synchronized (repositoryLock) {
+      List<Class<? extends ScimExtension>> extensionList = repository.getExtensionList();
 
-    log.debug("Calling addSchema on the base class: {}", clazz);
-    schemaRegistry.addSchema(clazz, extensionList);
-    repositoryMap.put(clazz, repository);
+      log.debug("Calling addSchema on the base class: {}", clazz);
+      schemaRegistry.addSchema(clazz, extensionList);
+      repositoryMap.put(clazz, repository);
+    }
   }
 
   @SuppressWarnings("unchecked")
