@@ -87,7 +87,7 @@
         <plugin>
           <groupId>org.wildfly.plugins</groupId>
           <artifactId>wildfly-maven-plugin</artifactId>
-          <version>6.0.0.Final</version>
+          <version>6.0.1.Final</version>
           <configuration>
             <filename>${project.artifactId}.war</filename>
             <add-user>
