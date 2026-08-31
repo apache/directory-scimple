@@ -28,7 +28,7 @@
 
   <properties>
     <module.name>org.apache.directory.scim.example.quarkus</module.name>
-    <version.quarkus>3.38.0</version.quarkus>
+    <version.quarkus>3.39.1</version.quarkus>
     <max.jdk.version>17</max.jdk.version>
     <!-- smallrye-private-key-pem-parser causes issues with the javadoc plugin due to the generated module name containing 'private' -->
     <legacyMode>true</legacyMode>
