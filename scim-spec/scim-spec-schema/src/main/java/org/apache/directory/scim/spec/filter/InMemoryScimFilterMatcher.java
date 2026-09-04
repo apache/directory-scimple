@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.function.Predicate;
 
 class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<R>> {
@@ -181,17 +182,10 @@ class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<
       Object compareValue = expression.getCompareValue();
 
       if (op == CompareOperator.EQ) {
-
-        if (isStringExpression(attribute, compareValue) && !attribute.isCaseExact()) {
-          return actualValue.toString().equalsIgnoreCase(compareValue.toString());
-        }
-        return compareValue.equals(actualValue);
+        return eq(attribute, actualValue, compareValue);
       }
       if (op == CompareOperator.NE) {
-        if (isStringExpression(attribute, compareValue) && !attribute.isCaseExact()) {
-          return !actualValue.toString().equalsIgnoreCase(compareValue.toString());
-        }
-        return !compareValue.equals(actualValue);
+        return !eq(attribute, actualValue, compareValue);
       }
       if (op == CompareOperator.SW) {
         return isStringExpression(attribute, compareValue)
@@ -212,6 +206,30 @@ class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<
       }
 
       throw new ScimResourceInvalidException("Unsupported operation in filter: " + op.name());
+    }
+
+    private boolean eq(Schema.Attribute attribute, Object actualValue, Object compareValue)
+    {
+      if (isBooleanStringComparison(attribute, compareValue) || (isStringExpression(attribute, compareValue) && !attribute.isCaseExact())) {
+        return actualValue.toString().equalsIgnoreCase(compareValue.toString());
+      }
+      return compareValue.equals(actualValue);
+    }
+
+    private boolean isBooleanStringComparison(Schema.Attribute attribute, Object compareValue)
+    {
+      // Microsoft's SCIM Validator at https://scimvalidator.microsoft.com/ has patch operations
+      // with expressions like [primary EQ "True"]...
+      if (!attribute.getType().equals(Schema.Attribute.Type.BOOLEAN)) {
+        return false;
+      }
+
+      if (compareValue instanceof String compareValueString) {
+        String lowerCaseCompareValueString = compareValueString.toLowerCase(Locale.ROOT);
+        return "true".equals(lowerCaseCompareValueString) || "false".equals(lowerCaseCompareValueString);
+      }
+
+      return false;
     }
   }
 
