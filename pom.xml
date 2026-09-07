@@ -603,7 +603,7 @@
         <plugin>
           <groupId>io.ultreia.java4all.jgitflow</groupId>
           <artifactId>jgitflow-maven-plugin</artifactId>
-          <version>1.0.0-rc-1</version>
+          <version>1.0.0-rc-3</version>
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <flowInitContext>
