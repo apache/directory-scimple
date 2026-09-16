@@ -40,7 +40,7 @@ public class ErrorResponse extends BaseResource<ErrorResponse> {
 
   public static final String SCHEMA_URI = "urn:ietf:params:scim:api:messages:2.0:Error";
 
-  @XmlElement(nillable = true)
+  @XmlElement
   private String detail;
 
   @XmlElement

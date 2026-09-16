@@ -40,7 +40,7 @@ public class Im implements Serializable, TypedAttribute {
   @Serial
   private static final long serialVersionUID = 6324188935390255346L;
 
-  @XmlElement(nillable=true)
+  @XmlElement
   @ScimAttribute(canonicalValueList={"aim", "qtalk", "icq", "xmpp", "msn", "skype", "qq", "yahoo"}, description="A label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.")
   String type;
   

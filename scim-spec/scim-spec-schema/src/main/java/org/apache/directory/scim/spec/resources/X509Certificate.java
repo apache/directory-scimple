@@ -40,7 +40,7 @@ public class X509Certificate implements Serializable, TypedAttribute {
   @Serial
   private static final long serialVersionUID = 374273508404129850L;
 
-  @XmlElement(nillable=true)
+  @XmlElement
   @ScimAttribute(description="A label indicating the attribute's function.")
   String type;
   

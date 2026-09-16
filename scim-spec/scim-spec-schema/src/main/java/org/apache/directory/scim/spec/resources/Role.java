@@ -40,7 +40,7 @@ public class Role implements Serializable, TypedAttribute {
   @Serial
   private static final long serialVersionUID = -2781839189814966670L;
 
-  @XmlElement(nillable=true)
+  @XmlElement
   @ScimAttribute(description="A label indicating the attribute's function.")
   String type;
   

@@ -44,7 +44,7 @@ public class Photo implements Serializable, TypedAttribute {
   @ScimAttribute(description="URL of a photo of the User.", referenceTypes={"external"})
   String value;
   
-  @XmlElement(nillable=true)
+  @XmlElement
   @ScimAttribute(canonicalValueList={"photo", "thumbnail"}, description="A label indicating the attribute's function; e.g., 'photo' or 'thumbnail'.")
   String type;
   
