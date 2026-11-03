@@ -66,4 +66,13 @@
     <Bug pattern="CT_CONSTRUCTOR_THROW"/>
   </Match>
 
+  <!-- False positive: "password" and "userPassword" are SCIM/LDAP attribute names and config defaults, not credentials -->
+  <Match>
+    <Or>
+      <Class name="org.apache.directory.scim.ldap.mapping.AttributeMapper"/>
+      <Class name="org.apache.directory.scim.ldap.ldap.ScimLdapConfig"/>
+    </Or>
+    <Bug pattern="HARD_CODE_PASSWORD"/>
+  </Match>
+
 </FindBugsFilter>
