@@ -53,9 +53,7 @@ import java.util.Set;
  * Autoconfigures default beans needed for Apache SCIMple.
  */
 @Configuration
-@AutoConfigureBefore(name = {
-  "org.springframework.boot.jersey.autoconfigure.JerseyAutoConfiguration", // Spring Boot 4
-  "org.springframework.boot.autoconfigure.jersey.JerseyAutoConfiguration"}) // Spring Boot 3
+@AutoConfigureBefore(name = "org.springframework.boot.jersey.autoconfigure.JerseyAutoConfiguration")
 public class ScimpleSpringConfiguration {
 
   @Bean

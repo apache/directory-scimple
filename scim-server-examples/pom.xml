@@ -39,7 +39,6 @@
     <module>scim-server-jersey-4</module>
     <module>scim-server-quarkus</module>
     <module>scim-server-spring-boot</module>
-    <module>scim-server-spring-boot-4</module>
   </modules>
 
   <build>
