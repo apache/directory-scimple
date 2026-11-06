@@ -51,9 +51,7 @@
     <version.slf4j>2.0.16</version.slf4j>
     <version.antlr4>4.13.2</version.antlr4>
     <version.resteasy>7.0.4.Final</version.resteasy>
-    <!-- build against Spring Boot 3.x, test against 3 and 4 (until 3 is end of life) -->
-    <version.spring-boot3>3.5.16</version.spring-boot3>
-    <version.spring-boot4>4.1.0</version.spring-boot4>
+    <version.spring-boot>4.1.2</version.spring-boot>
     <version.jersey3>3.1.11</version.jersey3>
     <version.jersey4>4.0.2</version.jersey4>
     <!-- default surefire/failsafe arg lines to empty-->
@@ -253,11 +251,6 @@
         <version>${version.jersey3}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>8.0.5.Final</version>
       </dependency>
       <dependency>
         <groupId>org.glassfish</groupId>
