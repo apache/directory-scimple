@@ -251,6 +251,48 @@ public class PatchHandlerTest {
   }
 
   @Test
+  public void applyPrimaryString() {
+    ScimUser user = user().setAddresses(List.of(
+      new Address()
+        .setType("work")
+        .setStreetAddress("101 Main Street")
+        .setRegion("Springfield")
+        .setPostalCode("01234")
+        .setPrimary(true),
+      new Address()
+        .setType("home")
+        .setStreetAddress("202 Maple Street")
+        .setRegion("Otherton")
+        .setPostalCode("43210")
+        .setPrimary(false)
+    ));
+
+    PatchOperation op = patchOperation(REPLACE, "addresses[primary EQ true].postalCode", "32140");
+    ScimUser updatedUser = patchHandler.apply(user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo("32140");
+    assertThat(updatedUser.getAddresses().get(1).getPostalCode()).isEqualTo("43210");
+
+    op = patchOperation(REPLACE, "addresses[primary EQ \"True\"].postalCode", "42");
+    updatedUser = patchHandler.apply(user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo("42");
+    assertThat(updatedUser.getAddresses().get(1).getPostalCode()).isEqualTo("43210");
+
+    op = patchOperation(REPLACE, "addresses[primary EQ false].postalCode", "1337");
+    updatedUser = patchHandler.apply(user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo("01234");
+    assertThat(updatedUser.getAddresses().get(1).getPostalCode()).isEqualTo("1337");
+
+    op = patchOperation(REPLACE, "addresses[primary EQ \"False\"].postalCode", "7331");
+    updatedUser = patchHandler.apply(user, List.of(op));
+    assertThat(updatedUser.getAddresses().size()).isEqualTo(2);
+    assertThat(updatedUser.getAddresses().get(0).getPostalCode()).isEqualTo("01234");
+    assertThat(updatedUser.getAddresses().get(1).getPostalCode()).isEqualTo("7331");
+ }
+
+  @Test
   public void applyRemoveAttributeWithFilter() {
     Address workAddress = new Address()
       .setType("work")
