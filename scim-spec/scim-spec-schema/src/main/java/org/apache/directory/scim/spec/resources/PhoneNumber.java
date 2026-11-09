@@ -123,6 +123,7 @@ public class PhoneNumber implements Serializable, TypedAttribute {
       PhoneNumberLexer phoneNumberLexer = new PhoneNumberLexer(new ANTLRInputStream(value));
       PhoneNumberParser p = new PhoneNumberParser(new CommonTokenStream(phoneNumberLexer));
       p.setBuildParseTree(true);
+      p.removeErrorListeners();
       p.addErrorListener(new PhoneNumberErrorListener());
   
       PhoneNumberParseTreeListener tpl = new PhoneNumberParseTreeListener();
