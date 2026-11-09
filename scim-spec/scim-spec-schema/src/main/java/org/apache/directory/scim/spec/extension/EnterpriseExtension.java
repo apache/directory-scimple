@@ -168,6 +168,14 @@ public class EnterpriseExtension implements ScimExtension {
     @XmlElement
     private String displayName;
 
+    public Manager() { }
+
+    // Work around EntraID quirk
+    // https://learn.microsoft.com/en-us/answers/questions/188003/scim-user-provisioning-setup-with-manager-attribut
+    public Manager(String manager) {
+      this.setValue(manager);
+    }
+
     public String getValue() {
       return this.value;
     }

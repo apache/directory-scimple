@@ -27,7 +27,10 @@ import jakarta.xml.bind.annotation.XmlEnumValue;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 import org.apache.directory.scim.spec.adapter.PatchOperationPathAdapter;
+import org.apache.directory.scim.spec.filter.FilterParseException;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -38,6 +41,17 @@ public class PatchOperation implements Serializable {
 
   @Serial
   private static final long serialVersionUID = 7748584008639433236L;
+
+  private static final PatchOperationPath MANAGER_PATH;
+  private static final PatchOperationPath MANAGER_VALUE_PATH;
+  static {
+    try {
+      MANAGER_PATH = PatchOperationPath.fromString("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:manager");
+      MANAGER_VALUE_PATH = PatchOperationPath.fromString("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:manager.value");
+    } catch (FilterParseException ignored) {
+      throw new RuntimeException("Manager paths are incorrect", ignored);
+    }
+  }
 
   public Type getOperation() {
     return this.operation;
@@ -52,8 +66,10 @@ public class PatchOperation implements Serializable {
     return this.path;
   }
 
+  @JsonSetter("path")
   public PatchOperation setPath(PatchOperationPath path) {
     this.path = path;
+    workAroundMSManagerQuirk();
     return this;
   }
 
@@ -61,9 +77,17 @@ public class PatchOperation implements Serializable {
     return this.value;
   }
 
+  @JsonSetter("value")
   public PatchOperation setValue(Object value) {
     this.value = value;
+    workAroundMSManagerQuirk();
     return this;
+  }
+
+  private void workAroundMSManagerQuirk() {
+    if (MANAGER_PATH.equals(this.path) && this.value instanceof String) {
+      this.path = MANAGER_VALUE_PATH;
+    }
   }
 
   public String toString() {
