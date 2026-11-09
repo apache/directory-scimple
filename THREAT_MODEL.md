@@ -107,7 +107,7 @@ the listening socket, TLS termination, and the authentication boundary.
 **Code that ships in the repo but is out of this model:**
 
 - `scim-server-examples/**` and `reference-projects/scim-server-ldap` — **example/demo applications, not published to
-  Maven Central** *(enforced: the `scim-server-examples` parent pom sets `maven.deploy.skip` / `skipNexusStagingDeployMojo`)*. They open sockets and store data (the
+  Maven Central** *(enforced: the `scim-server-examples` parent pom and the `scim-server-ldap` module each set `maven.deploy.skip` / `skipNexusStagingDeployMojo`)*. They open sockets and store data (the
   `InMemoryUserService`
   examples hold passwords in plaintext) and are **not** production-hardened. Findings here are
   `OUT-OF-MODEL: unsupported-component` (§13). The example READMEs carry a demo-only warning.

@@ -1,0 +1,64 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# Test configuration for embedded Apache DS.
+# Adds extensibleObject so custom attributes (scimActive, scimPhoneTypes)
+# are accepted without schema registration.
+
+ldap:
+  embedded: false        # Tests use LdapTestServer which manages its own embedded instance
+  host: 127.0.0.1
+  port: 10389
+  bindDn: uid=admin,ou=system
+  bindPassword: secret
+  useTls: false
+  userBaseDn: ou=users,dc=example,dc=com
+  groupBaseDn: ou=groups,dc=example,dc=com
+
+user:
+  objectClasses:
+    - inetOrgPerson
+    - organizationalPerson
+    - person
+    - extensibleObject
+    - top
+  rdnAttribute: uid
+  attributes:
+    userName: uid
+    "name.givenName": givenName
+    "name.familyName": sn
+    "name.formatted": cn
+    displayName: displayName
+    "emails.value": mail
+    "phoneNumbers.value": telephoneNumber
+    "addresses.streetAddress": street
+    "addresses.locality": l
+    "addresses.postalCode": postalCode
+    title: title
+    userType: employeeType
+    password: userPassword
+
+group:
+  objectClasses:
+    - groupOfNames
+    - top
+  rdnAttribute: cn
+  attributes:
+    displayName: cn
+    "members.value": member
