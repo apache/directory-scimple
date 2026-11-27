@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
+import static org.apache.directory.scim.spec.extension.EnterpriseExtension.Manager;
+
 class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<R>> {
 
   private static final Logger log = LoggerFactory.getLogger(InMemoryScimFilterMatcher.class);
@@ -179,6 +181,11 @@ class InMemoryScimFilterMatcher<R> extends BaseFilterExpressionMapper<Predicate<
 
       CompareOperator op = expression.getOperation();
       Object compareValue = expression.getCompareValue();
+
+      if (compareValue instanceof String && actualValue instanceof Manager m) {
+        // MS quirk
+        actualValue = m.getValue();
+      }
 
       if (op == CompareOperator.EQ) {
 
